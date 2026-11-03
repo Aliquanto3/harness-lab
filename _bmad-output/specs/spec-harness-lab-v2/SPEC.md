@@ -8,7 +8,6 @@ companions:
   - ../spec-agentic-harness-training-demo/success-metrics.md
   - ../../planning-artifacts/architecture/architecture-agentic-harness-training-demo-2026-09-23/ARCHITECTURE-SPINE.md
 sources:
-  - ../../forge/harness-lab-v2-demo-client-vente-formations/forged-idea.md
   - ../../implementation-artifacts/rapport-test-prealable-modeles-de-decision.md
 ---
 

@@ -143,10 +143,12 @@ param(
     # -- Dossier de donnees : venv, caches et modeles, jamais sous Documents/OneDrive.
     if (-not $DataDir) {
         $DataDir = (Get-EnvCompat 'DATA_DIR')
-        if (-not $DataDir) { $DataDir = Join-Path $env:LOCALAPPDATA 'HarnessLab' }
-        # 2.0.0 : l'ancien dossier par defaut est copie une fois (jamais supprime).
+        $DefaultDataDir = -not $DataDir
+        if ($DefaultDataDir) { $DataDir = Join-Path $env:LOCALAPPDATA 'HarnessLab' }
+        # 2.0.0 : l'ancien dossier par defaut est copie une fois (jamais supprime), vers le
+        # nouveau dossier par defaut seulement, comme l'application (`compat`).
         $LegacyDataDir = Join-Path $env:LOCALAPPDATA 'WaveStack'
-        if (-not $DryRun -and -not (Test-Path -LiteralPath $DataDir) -and (Test-Path -LiteralPath $LegacyDataDir -PathType Container)) {
+        if ($DefaultDataDir -and -not $DryRun -and -not (Test-Path -LiteralPath $DataDir) -and (Test-Path -LiteralPath $LegacyDataDir -PathType Container)) {
             Write-Host "Copie de l'ancien dossier de donnees $LegacyDataDir vers $DataDir (l'ancien reste en place)..."
             $staging = "$DataDir.migration"
             if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }

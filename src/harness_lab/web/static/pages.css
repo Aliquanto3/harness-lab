@@ -288,7 +288,7 @@
 .bar-log-count {
   padding: 0 var(--spacing-2);
   background: var(--color-danger);
-  color: var(--color-surface-raised);
+  color: var(--color-on-status);
   border-radius: var(--rounded-full);
   font-weight: var(--typography-label-font-weight);
 }

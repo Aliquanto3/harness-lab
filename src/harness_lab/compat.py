@@ -22,6 +22,7 @@ LEGACY_DIR_WINDOWS = "WaveStack"
 LEGACY_DIR_POSIX = "wavestack"
 
 _warned: set[str] = set()
+_migration_failed: set[tuple[str, str]] = set()
 
 
 def getenv(name: str, default: str | None = None) -> str | None:
@@ -42,7 +43,7 @@ def getenv(name: str, default: str | None = None) -> str | None:
         _warned.add(legacy)
         warnings.warn(
             f"{legacy} is deprecated, use {name} (read as a fallback for now).",
-            DeprecationWarning,
+            FutureWarning,  # shown by default, unlike DeprecationWarning: meant for the user
             stacklevel=2,
         )
     return value
@@ -51,15 +52,34 @@ def getenv(name: str, default: str | None = None) -> str | None:
 def migrate_data_dir(legacy: Path, new: Path) -> bool:
     """Copy `legacy` to `new` when `new` does not exist and `legacy` is a directory.
 
-    Returns whether a copy happened. The copy goes to a sibling first, then is renamed, so an
-    interrupted copy never leaves a half-filled `new`. `legacy` is never modified.
+    Returns whether a copy happened. The copy goes to a sibling staging directory unique to
+    this process first, then is renamed, so an interrupted copy never leaves a half-filled
+    `new` and two concurrent launches never share a staging copy. `legacy` is never modified.
+    A failed copy (locked file, full disk, a concurrent launch that renamed first) never
+    blocks the start: it is warned once and the app goes on with `new`.
     """
     if new.exists() or not legacy.is_dir():
         return False
-    staging = new.with_name(new.name + ".migration")
-    if staging.exists():
-        shutil.rmtree(staging)  # a previous attempt cut short: only our own staging copy
-    new.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(legacy, staging, symlinks=True)
-    os.replace(staging, new)
+    key = (str(legacy), str(new))
+    if key in _migration_failed:
+        return False
+    staging = new.with_name(f"{new.name}.migration-{os.getpid()}")
+    try:
+        if staging.exists():
+            shutil.rmtree(staging)  # a previous attempt cut short: only our own staging copy
+        new.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(legacy, staging, symlinks=True)
+        os.replace(staging, new)
+    except OSError as exc:
+        _migration_failed.add(key)
+        shutil.rmtree(staging, ignore_errors=True)
+        if new.exists():  # a concurrent launch migrated first: nothing lost
+            return False
+        warnings.warn(
+            f"Could not copy the former data directory {legacy} to {new} ({exc}); "
+            f"starting with an empty {new}. {legacy} is left untouched: copy it by hand.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return False
     return True

@@ -28,3 +28,21 @@ Objectif : rendre la version publique générique. Le dépôt, le paquet, la CLI
 - Pictogramme : pas de valeur de repli `#hex` dans les `var()`, car `test_static_files_write_no_color_outside_the_tokens` interdit tout hexadécimal hors de `tokens.css`, et toutes les pages chargent `tokens.css` en premier.
 - Variables internes des tests et des E2E (`HARNESS_LAB_TEST_*`, `HARNESS_LAB_E2E_*`) : renommées sans repli.
 - Mentions historiques de « violet » et d'Aptos dans les revues et les memlogs datés de `_bmad-output` : laissées telles quelles, car ce sont des archives.
+
+## Revue
+
+### Passe 1 (2026-11-03, SHA revu 10abd831)
+
+- Important, medium, second avis 1 : `compat.getenv` émettait un `DeprecationWarning`, masqué par défaut. Corrigé : `FutureWarning`, test en sous-processus sans filtre.
+- Important, medium, second avis 2 : l'E2E attendait `--color-on-vivid` sur le rouge, le CSS pose `--color-on-status`. Corrigé (trois contrôles et l'aide `_on_status_both_themes`), E2E non relancé.
+- Important, medium, second avis 3 : DESIGN.md rattachait le texte sur rouge et sur les pastilles d'état à `on-vivid`. Corrigé (liaisons `confirmed-foreground`, `overflow-foreground`, `badge-foreground`, prose et tableau « à faire / à éviter »). Ligne 514 (`hosting-tag-network`, fond jaune) laissée en `on-vivid` : c'est un fond vif.
+- Important, medium, second avis 4 : cahiers de recette en accent violet (#4B2BD6, sombre #A594FF). Corrigé : primaire #0B6B78 et #4FC1CF.
+- Important, medium, second avis 5 : un échec de copie de l'ancien dossier bloquait le démarrage, et le staging `.migration` était partagé. Corrigé : staging `.migration-<pid>`, `OSError` attrapée, `RuntimeWarning` une fois par processus, pas de nouvel essai, ancien dossier intact ; lancement concurrent qui a migré le premier toléré. Trois tests (verrou, disque plein via `data_dir`, concurrence).
+- Nit, low, second avis 6 : liens vers la forge supprimée. Corrigé (source retirée de SPEC v2, déclencheur neutre).
+- Nit, low, second avis 7 : pictogrammes MCP maison en #33257A. Corrigé : encre #141A1F pour `_default`, `local`, `datagouv` et `mslearn`, qui sont des pictogrammes maison, pas des logos d'éditeurs.
+- Nit, low, second avis 8 : `.bar-log-count` en `surface-raised` sur le rouge. Corrigé : `--color-on-status`.
+- Nit, low, second avis 9 : test de migration des installeurs. Reporté : `test_installers.py` ne lance les installeurs qu'en `-DryRun` ou dans la branche idempotente, et la migration est sautée en `-DryRun`. À vérifier à la main : lancer `install.ps1` avec un `%LOCALAPPDATA%\WaveStack` existant et sans `HarnessLab`.
+- Nit, low, second avis 10 : recopie après suppression du nouveau dossier. Rejeté : conforme à la règle (copie au premier lancement, jamais de suppression).
+- Nit, low, second avis 11 : « PC d'un collègue » dans deux archives de nuit. Corrigé : « un autre PC ».
+- Important, low, reviewer : `install.ps1` copiait l'ancien dossier par défaut vers un `HARNESS_LAB_DATA_DIR` choisi, contrairement à l'application et à `install.sh`. Corrigé : copie vers le dossier par défaut seulement.
+- Complexité : 0 constat (`data_dir()` ne teste que l'existence du nouveau dossier à chaque appel).

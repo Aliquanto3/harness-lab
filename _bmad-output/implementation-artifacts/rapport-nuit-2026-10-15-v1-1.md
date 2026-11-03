@@ -114,7 +114,7 @@ Fichiers dans `_bmad-output/planning-artifacts/research/`.
    officielles) ; le « 15× » multi-agents d'Anthropic n'a pas de source primaire retrouvée.
 
 ## Recette d'Anaël
-- Installer depuis un compte Windows sans droits admin, ou le PC d'un collègue :
+- Installer depuis un compte Windows sans droits admin, ou un autre PC :
   - `install.bat` en double-clic, puis `install.ps1` via `irm | iex` ;
   - relancer l'appli ensuite, sans repasser par l'installeur ;
   - vérifier qu'aucun gros fichier n'arrive dans OneDrive.

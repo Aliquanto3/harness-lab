@@ -2015,28 +2015,28 @@ def s_malformed(r: Run) -> None:
     )
 
 
-def _on_vivid_both_themes(r: Run, locator, prop: str = "color") -> list[str]:
-    """Story 31: `prop` of `locator` against --color-on-vivid, in light then in dark (the
+def _on_status_both_themes(r: Run, locator, prop: str = "color") -> list[str]:
+    """Story 31: `prop` of `locator` against --color-on-status, in light then in dark (the
     attribute set by hand, then removed): the text on red, explicit in both themes."""
     seen = []
     for theme in (None, "dark"):
         if theme:
             r.page.evaluate("() => document.documentElement.setAttribute('data-theme', 'dark')")
-        seen.append((theme or "clair", r.css(locator, prop), r.token_color("--color-on-vivid")))
+        seen.append((theme or "clair", r.css(locator, prop), r.token_color("--color-on-status")))
         r.page.evaluate("() => document.documentElement.removeAttribute('data-theme')")
     return [f"{theme} : {got} ≠ {want}" for theme, got, want in seen if got != want]
 
 
-def _error_tile_on_vivid(r: Run) -> None:
-    """Story 31: a model call that ended in error: its tile red, its letter in on-vivid."""
+def _error_tile_on_status(r: Run) -> None:
+    """Story 31: a model call that ended in error: its tile red, its letter in on-status."""
     step = r.page.locator(
         "#orch-scroll .turn-step.tone-error",
         has=r.page.locator(".turn-step-title", has_text="Appelle le modèle"),
     ).last
     expect(step).to_be_attached(timeout=5000)
-    wrong = _on_vivid_both_themes(r, step.locator(".turn-step-tile"))
+    wrong = _on_status_both_themes(r, step.locator(".turn-step-tile"))
     r.check(
-        not wrong, "appel au modèle en erreur : lettre de la tuile en --color-on-vivid", str(wrong)
+        not wrong, "appel au modèle en erreur : lettre de la tuile en --color-on-status", str(wrong)
     )
 
 
@@ -2069,7 +2069,7 @@ def s_provider_errors(r: Run) -> None:
         if trigger == "[erreur429]":
             r.shot("07-erreur-fournisseur-429")
         if trigger == "[erreur500]":
-            _error_tile_on_vivid(r)
+            _error_tile_on_status(r)
     _quota0_refusal(r)
     ended = r.send("Bonjour")
     r.check(ended["payload"]["status"] == "completed", "HarnessLab reste utilisable ensuite")
@@ -6241,8 +6241,10 @@ def s_global_memory(r: Run) -> None:
         "« Oui, tout effacer » : bouton danger, fond de la couleur danger",
         f"{look} · danger {danger}",
     )
-    wrong = _on_vivid_both_themes(r, confirm)
-    r.check(not wrong, "« Oui, tout effacer » : texte en --color-on-vivid sur le rouge", str(wrong))
+    wrong = _on_status_both_themes(r, confirm)
+    r.check(
+        not wrong, "« Oui, tout effacer » : texte en --color-on-status sur le rouge", str(wrong)
+    )
     r.check(len(_memory_file(r)) == 5, "« Tout effacer » demande d'abord confirmation")
     seq = r.ev.mark()
     drawer.get_by_role("button", name="Oui, tout effacer").click()
@@ -8231,12 +8233,14 @@ def s_busy_and_stop(r: Run) -> None:
         "« Aucun appel : contexte dépassé. »",
         f"{ended['payload']['status']} · {calls[-1]['head'] if calls else '—'}",
     )
-    # Story 31: the overflow's red pill: its text in on-vivid (formerly white, 3.7:1).
+    # Story 31: the overflow's red pill: its text in on-status (formerly white, 3.7:1).
     figures = r.page.locator("#gauge.is-overflow #gauge-figures")
     expect(figures).to_be_visible(timeout=5000)
-    wrong = _on_vivid_both_themes(r, figures)
+    wrong = _on_status_both_themes(r, figures)
     r.check(
-        not wrong, "dépassement : chiffres de la jauge en --color-on-vivid sur le rouge", str(wrong)
+        not wrong,
+        "dépassement : chiffres de la jauge en --color-on-status sur le rouge",
+        str(wrong),
     )
 
 

@@ -694,7 +694,7 @@ def test_mcp_server_logo_is_its_own_svg_file_offline(server):
 
 def test_every_server_has_a_white_dark_theme_logo():
     """CAP-8: GitHub's own white file for the dark theme (never a CSS recolouring); story 17.3:
-    the navy neutral pictograms get a white copy too (unreadable on the dark background)."""
+    the ink neutral pictograms get a white copy too (unreadable on the dark background)."""
     from harness_lab.web.app import STATIC_DIR
 
     darks = {s.id: s.logo_dark for s in mcp_servers(config.Config()).values()}
@@ -707,7 +707,7 @@ def test_every_server_has_a_white_dark_theme_logo():
     assert 'fill="white"' in (STATIC_DIR / "logos" / darks["github"]).read_text(encoding="utf-8")
     for server in ("local", "datagouv", "mslearn"):
         svg = (STATIC_DIR / "logos" / darks[server]).read_text(encoding="utf-8")
-        assert "#33257A" not in svg and 'stroke="white"' in svg, server
+        assert "#141A1F" not in svg and 'stroke="white"' in svg, server
 
 
 def test_mcp_server_logo_falls_back_to_the_neutral_default_for_an_unknown_id():

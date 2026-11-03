@@ -2,7 +2,7 @@
 title: Sprint Change Proposal — dépôt privé et règle des modèles génératifs
 date: 2026-09-25
 author: Anaël (avec Claude, workflow bmad-correct-course)
-trigger: forge de l'idée V2 (`_bmad-output/forge/harness-lab-v2-demo-client-vente-formations/forged-idea.md`)
+trigger: idée V2 (document de cadrage hors dépôt, retiré en 2.0.0)
 scope: mineur
 status: approuvée et appliquée le 2026-09-25 (avec P13, voir sprint-change-proposal-2026-09-25-story-9b.md)
 ---
