@@ -4489,20 +4489,21 @@ class AppSession:
     def _reasoning_item(
         item: dict[str, Any], content: Part, markers: list[str] | tuple[str, ...]
     ) -> dict[str, Any]:
-        """A `reasoning` item sent back verbatim (native providers 4/5): each `summary_text`
-        of its `summary` attributed like the reasoning when step 2 leaves it whole, else to
-        `template`; everything else (`id`, `encrypted_content`) to `template`."""
-        summary = item.get("summary")
-        if not isinstance(summary, list):
-            return dict(item)
-        return item | {
-            "summary": [
-                part | {"text": verbatim(content._replace(text=part["text"]), markers)}
-                if isinstance(part, dict) and isinstance(part.get("text"), str) and part["text"]
-                else part
-                for part in summary
-            ]
-        }
+        """A `reasoning` item sent back verbatim (native providers 4/5): each text of its
+        `summary` (OpenAI's `summary_text`) and of its `content` (Mistral's reasoning in
+        clear, `reasoning_text`) attributed like the reasoning when step 2 leaves it whole,
+        else to `template`; everything else (`id`, `encrypted_content`) to `template`."""
+        sent = dict(item)
+        for key in ("summary", "content"):
+            parts = item.get(key)
+            if isinstance(parts, list):
+                sent[key] = [
+                    part | {"text": verbatim(content._replace(text=part["text"]), markers)}
+                    if isinstance(part, dict) and isinstance(part.get("text"), str) and part["text"]
+                    else part
+                    for part in parts
+                ]
+        return sent
 
     @staticmethod
     def _as_produced(content: Part, reasoning: str, wrap: tuple[str, str]) -> dict[str, Any]:

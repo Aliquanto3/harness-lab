@@ -124,7 +124,7 @@ class OpenAIResponsesEngine(CloudEngine):
         items: dict[Any, dict[str, Any]] = {}  # output_index (or item id) → the item
         keys: dict[str, Any] = {}  # item id → its key in `items`
         raw: list[str] = []
-        summary: tuple[Any, Any] | None = None  # the summary part being received
+        summary: tuple[Any, ...] | None = None  # the summary part being received
         said = False  # a reasoning fragment already went out (parts are separated)
         failure: Any = None  # an `error` event's error, raised once the stream says no more
         stop = None

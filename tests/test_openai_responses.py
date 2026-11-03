@@ -696,17 +696,21 @@ def test_two_summary_parts_are_separated_on_the_reasoning_channel():
     assert [s["text"] for s in sent["summary"]] == ["Premier point.", "Second point."]
 
 
-def clear_reasoning(index: int, item_id: str, *texts: str, content: bool = True):
-    """Mistral's reasoning in clear: `response.reasoning_text.delta`, no `encrypted_content`."""
+def clear_reasoning(index: int, item_id: str, *parts: str | tuple[str, ...], content: bool = True):
+    """Mistral's reasoning in clear: `response.reasoning_text.delta`, no `encrypted_content`.
+    Each part is one content part, streamed as the given pieces (one delta each): a secret is
+    masked per delta, so a test never cuts it between two pieces."""
     where = {"item_id": item_id, "output_index": index}
     added = {"id": item_id, "type": "reasoning", "summary": [], "content": []}
     events: list[dict[str, Any]] = [
         {"type": "response.output_item.added", "output_index": index, "item": added}
     ]
-    for n, text in enumerate(texts):
+    pieces_of = [(p,) if isinstance(p, str) else p for p in parts]
+    texts = ["".join(pieces) for pieces in pieces_of]
+    for n, pieces in enumerate(pieces_of):
         events += [
             {"type": "response.reasoning_text.delta", **where, "content_index": n, "delta": d}
-            for d in (text[: len(text) // 2], text[len(text) // 2 :])
+            for d in pieces
         ]
         events.append({"type": "response.reasoning_text.done", **where, "content_index": n})
     item = added | {
@@ -721,7 +725,7 @@ def clear_reasoning(index: int, item_id: str, *texts: str, content: bool = True)
 def test_a_clear_reasoning_stream_goes_to_the_reasoning_channel_masked():
     stream = sse(
         created(),
-        *clear_reasoning(0, "rs_m", f"Premier {SENTINEL}.", "Second."),
+        *clear_reasoning(0, "rs_m", ("Premier ", f"{SENTINEL}."), ("Sec", "ond.")),
         *message(1, "Fait."),
         completed(100, 20),
     )
@@ -730,7 +734,7 @@ def test_a_clear_reasoning_stream_goes_to_the_reasoning_channel_masked():
     assert SENTINEL not in ended["reasoning"]
     assert ended["reasoning"].startswith("Premier ") and ended["reasoning"].endswith(".\n\nSecond.")
     assert {d.payload["channel"] for d in _of(events, "model_delta")} == {"reasoning", "text"}
-    _no_sentinel(events)
+    _no_sentinel(*(e.model_dump_json() for e in events), _journal_text())
 
 
 def test_a_summary_and_a_content_part_of_the_same_index_are_not_confused():
@@ -761,9 +765,13 @@ def test_a_clear_reasoning_item_goes_back_before_the_call_it_preceded():
     provider = Provider(stream, PLAIN_TEXT)
     session = _session(provider, bricks=("tools", "reasoning"))
     try:
-        _turn(session, "Calcule")
+        events = _turn(session, "Calcule")
     finally:
         session.close()
+    # AD-4: the clear text is attributed like the reasoning, as a summary text is.
+    segments = _of(events, "context_rendered")[1].payload["segments"]
+    owner = next(s for s in segments if s["text"] == "Il faut calculer.")
+    assert owner["kind"] != "template"
     items = provider.body(1)["input"]
     assert items[1] == {
         "id": "rs_m",
@@ -775,6 +783,26 @@ def test_a_clear_reasoning_item_goes_back_before_the_call_it_preceded():
     }
     assert items[2]["type"] == "function_call"
     assert "_follows" not in provider.requests[1].content.decode()
+
+
+def test_a_clear_reasoning_item_goes_back_before_the_message_it_preceded():
+    stream = sse(
+        created(),
+        *clear_reasoning(0, "rs_m", "Je réponds."),
+        *message(1, "Bonjour."),
+        completed(100, 20),
+    )
+    provider = Provider(stream, PLAIN_TEXT)
+    session = _session(provider, bricks=("short_memory", "reasoning"))
+    try:
+        _turn(session, "Bonjour")
+        _turn(session, "Encore")
+    finally:
+        session.close()
+    items = provider.body(1)["input"]
+    assert [i["type"] for i in items] == ["message", "reasoning", "message", "message"]
+    assert items[1]["content"] == [{"type": "reasoning_text", "text": "Je réponds."}]
+    assert items[2] == {"type": "message", "role": "assistant", "content": "Bonjour."}
 
 
 def test_a_reasoning_item_without_encrypted_content_nor_content_is_not_sent_back():
