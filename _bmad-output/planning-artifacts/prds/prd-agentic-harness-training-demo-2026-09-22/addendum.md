@@ -3,7 +3,7 @@
 Contenu destiné à `bmad-ux` et `bmad-architecture`. Rien ici n'engage le périmètre, qui est fixé par `prd.md`.
 
 Les pistes techniques déjà recensées sont dans l'addendum du brief, à lire en complément :
-- le repo de référence wavelocalai ;
+- le repo de référence Frugal AI Workbench ;
 - les patterns à réutiliser ;
 - NiceGUI ou Streamlit : tranché le 2026-09-23 (architecture) — FastAPI, SSE et JS natif ;
 - ChromaDB ou sqlite-vec : tranché le 2026-09-23 (architecture) — sqlite-vec.

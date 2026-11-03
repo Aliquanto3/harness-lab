@@ -1,6 +1,6 @@
 # Littérature pour les fiches (CAP-17)
 
-Ce document reprend le tableau des hypothèses du cadrage « WaveLibrarian » (doc Claude Docs `9e18cbd9-aafa-4344-bf0e-832dcdd2da31`, rev 73, lu le 2026-10-17).
+Ce document reprend le tableau des hypothèses du cadrage « LibrarianBench » (doc Claude Docs `9e18cbd9-aafa-4344-bf0e-832dcdd2da31`, rev 73, lu le 2026-10-17).
 
 Chaque fiche cite les hypothèses qui la concernent, avec leurs liens. Elle dit « soutenue », « partiellement » ou « non étudiée » comme le cadrage. La liste complète des sources (47 lignes, plus les sources complémentaires) reste dans le cadrage.
 

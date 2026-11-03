@@ -2,9 +2,9 @@
 
 Contenu complémentaire au brief : détails techniques, options envisagées, et points ouverts à trancher lors des étapes suivantes (UX, architecture). Rien ici n'est un engagement de scope — voir `brief.md` pour le périmètre validé.
 
-## Repo de référence : wavelocalai
+## Repo de référence : Frugal AI Workbench
 
-`https://github.com/Aliquanto3/wavelocalai` — proof-of-concept sur l'IA locale responsable (perf vs cloud, souveraineté, impact carbone), Streamlit, 4 modules (Hardware/Green IT, Inference Arena, RAG Knowledge, Agent Lab).
+`https://github.com/Aliquanto3/frugal-ai-workbench` — proof-of-concept sur l'IA locale responsable (perf vs cloud, souveraineté, impact carbone), Streamlit, 4 modules (Hardware/Green IT, Inference Arena, RAG Knowledge, Agent Lab).
 
 **Exécution SLM locale** : Ollama (SDK `ollama` + `langchain-ollama`), modèles type `qwen2.5:1.5b`, CPU-friendly par défaut, GPU détecté mais optionnel (`GPUtil`, `py-cpuinfo`).
 
@@ -32,9 +32,9 @@ Confirme que l'angle "UI à toggles progressifs" du projet est différenciant pl
 
 ## Pistes techniques (état de l'art 2026, non engageantes — à trancher en architecture)
 
-- **SLM CPU-friendly** : Qwen3.5 (0.8B–9B, variantes 1.5B/4B), Phi-4-mini (3.8B), Llama 3.2 (1B/3B), et les modèles **IBM Granite** (suggestion utilisateur — petites tailles CPU-friendly, disponibles via Ollama) ; format GGUF, servis via `llama-cpp-python` ou Ollama (Ollama = plus simple à opérer, cohérent avec l'approche déjà validée dans wavelocalai).
-- **Frontend/backend Python sans droits admin** : Streamlit (simplicité, familier via wavelocalai) vs NiceGUI (plus de contrôle d'état, potentiellement mieux adapté à une UI en volets synchronisés avec activation/désactivation dynamique de composants).
-- **RAG local sans serveur** : ChromaDB (mode embarqué, déjà utilisé dans wavelocalai) vs sqlite-vec (empreinte minimale, cohérent avec l'objectif "installable sans droits admin").
+- **SLM CPU-friendly** : Qwen3.5 (0.8B–9B, variantes 1.5B/4B), Phi-4-mini (3.8B), Llama 3.2 (1B/3B), et les modèles **IBM Granite** (suggestion utilisateur — petites tailles CPU-friendly, disponibles via Ollama) ; format GGUF, servis via `llama-cpp-python` ou Ollama (Ollama = plus simple à opérer, cohérent avec l'approche déjà validée dans Frugal AI Workbench).
+- **Frontend/backend Python sans droits admin** : Streamlit (simplicité, familier via Frugal AI Workbench) vs NiceGUI (plus de contrôle d'état, potentiellement mieux adapté à une UI en volets synchronisés avec activation/désactivation dynamique de composants).
+- **RAG local sans serveur** : ChromaDB (mode embarqué, déjà utilisé dans Frugal AI Workbench) vs sqlite-vec (empreinte minimale, cohérent avec l'objectif "installable sans droits admin").
 - **`uv` et MCP sans droits admin sur Windows** : confirmé faisable — `uv` s'installe et fonctionne entièrement en espace utilisateur (`%LOCALAPPDATA%`) ; un serveur MCP Python lancé via `uv run` (stdio) ne nécessite pas de droits admin ni WSL (contrainte qui concerne surtout les serveurs MCP Node/npx).
 
 ## Points ouverts (à trancher hors de ce brief)

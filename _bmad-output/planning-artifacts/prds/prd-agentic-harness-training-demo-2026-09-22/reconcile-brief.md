@@ -51,10 +51,10 @@ Règle appliquée : ce que le PRD tranche explicitement (11 briques avec sous-ag
 - **PRD** : FR-23 exige « au moins deux skills », mais seul Caveman est nommé et l'intention ludique n'apparaît plus.
 - **Correction** : proposer en FR-23 un second skill (`[ASSUMPTION]`) et garder l'intention d'un skill ludique et mémorable.
 
-### E10. Filiation wavelocalai et ADN « IA locale responsable » (basse)
-- **Source** (brief, Vision) : « cohérent avec l'ADN "IA locale responsable" déjà porté par des initiatives internes comme wavelocalai ».
+### E10. Filiation Frugal AI Workbench et ADN « IA locale responsable » (basse)
+- **Source** (brief, Vision) : « cohérent avec l'ADN "IA locale responsable" déjà porté par des initiatives internes comme Frugal AI Workbench ».
 - **PRD** : mentionné seulement dans l'addendum, comme repo technique. La Vision du PRD parle de numérique responsable sans cette filiation, qui sert pourtant d'argument interne et client.
-- **Correction** : ajouter en §1 (Trajectoire) une phrase qui situe HarnessLab dans la lignée de wavelocalai.
+- **Correction** : ajouter en §1 (Trajectoire) une phrase qui situe HarnessLab dans la lignée de Frugal AI Workbench.
 
 ### E11. Risque « conception entièrement nouvelle » absent (basse)
 - **Source** (addendum du brief) : « Aucun MCP, skill ou hook dans le repo : ces briques n'ont pas de précédent réutilisable, conception entièrement nouvelle. »
