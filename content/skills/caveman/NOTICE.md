@@ -2,11 +2,11 @@
 
 Ce fichier n'est jamais chargé dans le contexte du modèle : seul `SKILL.md` l'est.
 
-Le skill `caveman` de WaveStack est une version française simplifiée, à un seul niveau,
+Le skill `caveman` de HarnessLab est une version française simplifiée, à un seul niveau,
 du skill Caveman de Julius Brussee : https://github.com/JuliusBrussee/caveman
 (fichier `skills/caveman/SKILL.md`, sous licence MIT).
 
-Seul ce skill, sous licence MIT, a servi de modèle. WaveStack n'utilise ni n'intègre
+Seul ce skill, sous licence MIT, a servi de modèle. HarnessLab n'utilise ni n'intègre
 aucun des répertoires du dépôt placés sous Business Source License 1.1 (proxy, moteur,
 etc.).
 

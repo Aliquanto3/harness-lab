@@ -6,7 +6,7 @@ Laya, decision encoders served on the same endpoint by a portable llama-server b
 the bench starts on the loopback and stops in any case; the binary is never downloaded by the
 bench, the GGUF once with `--download`, pinned to a commit and a sha256).
 
-Measures each candidate of `decision-model-candidates.md` (spec-wavestack-v2) on the six
+Measures each candidate of `decision-model-candidates.md` (spec-harness-lab-v2) on the six
 criteria of the prior test, next to the default SLM, on twenty fixed prompts drawn from the
 V1 scenarios. Never adds a dependency to the project: measurement packages come from
 `uv run --with ...`. Run from the repository root (exact commands in the report
@@ -38,6 +38,7 @@ import statistics
 import subprocess
 import sys
 import time
+import warnings
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -386,7 +387,8 @@ LLAMA_ZIP_SHA256 = "11bcb3aea659bce73f62305e3812764f935d90f44de1e70cd2b68aa3c9f4
 LLAMA_EXE_SHA256 = "6d2e001e3e366dd64f24578bad2ff461bcfdea4a0c86b134c280a952401eee20"
 LLAMA_IMPL_SHA256 = "68f82bb0491f057728f5c4b1f0036b0b4e50113a1fd2bb16eda14fd4a41bd62e"
 LLAMA_RELEASE_URL = f"https://github.com/ggml-org/llama.cpp/releases/tag/{LLAMA_RELEASE}"
-LLAMA_SERVER_ENV = "WAVESTACK_LLAMA_SERVER"
+LLAMA_SERVER_ENV = "HARNESS_LAB_LLAMA_SERVER"
+LEGACY_LLAMA_SERVER_ENV = "WAVESTACK_LLAMA_SERVER"
 LLAMA_START_TIMEOUT_S = 120
 LLAMA_STOP_TIMEOUT_S = 15
 LLAMA_SYSTEMONE_API = {
@@ -969,17 +971,24 @@ def default_llama_server(environ=None) -> Path:
     """Where the release archive is unzipped (outside the repository, no admin rights)."""
     environ = os.environ if environ is None else environ
     base = environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
-    return Path(base) / "WaveStack" / "bench" / f"llama-{LLAMA_RELEASE}" / "llama-server.exe"
+    return Path(base) / "HarnessLab" / "bench" / f"llama-{LLAMA_RELEASE}" / "llama-server.exe"
 
 
 def resolve_llama_server(arg: str | None, environ=None) -> tuple[Path, str]:
-    """`llama-server.exe`: `--llama-server`, else `WAVESTACK_LLAMA_SERVER`, else the default
+    """`llama-server.exe`: `--llama-server`, else `HARNESS_LAB_LLAMA_SERVER`, else the default
     folder; with where the path came from."""
     environ = os.environ if environ is None else environ
     if arg:
         return Path(arg), "--llama-server"
     if environ.get(LLAMA_SERVER_ENV):
         return Path(environ[LLAMA_SERVER_ENV]), LLAMA_SERVER_ENV
+    if environ.get(LEGACY_LLAMA_SERVER_ENV):  # 2.0.0: the former name, read as a fallback
+        warnings.warn(
+            f"{LEGACY_LLAMA_SERVER_ENV} is deprecated, use {LLAMA_SERVER_ENV}.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return Path(environ[LEGACY_LLAMA_SERVER_ENV]), LEGACY_LLAMA_SERVER_ENV
     return default_llama_server(environ), "dossier par défaut"
 
 
@@ -1656,11 +1665,11 @@ def other_snapshots(models_dir: Path, repo: str, revision: str) -> list[str]:
     return sorted(p.name for p in snapshots.iterdir() if p.is_dir() and p.name != revision)
 
 
-def wavestack_settings(root: Path | None = None) -> dict:
-    """`wavestack.toml` of the repository (standard library only), or {} when unreadable."""
+def harness_lab_settings(root: Path | None = None) -> dict:
+    """`harness-lab.toml` of the repository (standard library only), or {} when unreadable."""
     import tomllib
 
-    path = (root or Path(__file__).resolve().parents[2]) / "wavestack.toml"
+    path = (root or Path(__file__).resolve().parents[2]) / "harness-lab.toml"
     try:
         return tomllib.loads(path.read_text("utf-8"))
     except (OSError, tomllib.TOMLDecodeError):
@@ -1676,7 +1685,7 @@ def v1_rag_rss_mb(settings: dict) -> int | None:
 
 
 def slm_n_ctx(settings: dict) -> int:
-    """WaveStack's default context window (`[context] window`), as the engine loads the SLM."""
+    """HarnessLab's default context window (`[context] window`), as the engine loads the SLM."""
     window = (settings.get("context") or {}).get("window")
     return window if isinstance(window, int) and window > 0 else SLM_N_CTX
 
@@ -2541,14 +2550,14 @@ def _measure(
     candidate_id: str, models_dir: Path, slm: Path, attempts: list, guard: str, server=None
 ) -> dict:
     c = candidate(candidate_id)
-    n_ctx = slm_n_ctx(wavestack_settings())
+    n_ctx = slm_n_ctx(harness_lab_settings())
     out: dict = {"id": c.id, "guard": guard, "slm": str(slm), "slm_n_ctx": n_ctx}
     try:
         import llama_cpp
 
         out["llama_cpp_version"] = getattr(llama_cpp, "__version__", None)
         t0 = time.monotonic()
-        # Same parameters as WaveStack's engine (`models/engine.py`): the window, default threads.
+        # Same parameters as HarnessLab's engine (`models/engine.py`): the window, default threads.
         slm_llm = llama_cpp.Llama(model_path=str(slm), n_ctx=n_ctx, verbose=False)
         slm_llm.create_completion("Bonjour", max_tokens=1)  # weights resident, as in a turn
         out["slm_load_s"] = round(time.monotonic() - t0, 2)
@@ -2596,7 +2605,7 @@ def _measure(
 
 def download_candidate(c: Candidate, models_dir: Path) -> dict:
     """Fetch the candidate's files under the guard (HF hosts only), proxy and system trust
-    store kept, as WaveStack does (AD-15). Follows `main`, or the reviewed commit of a
+    store kept, as HarnessLab does (AD-15). Follows `main`, or the reviewed commit of a
     candidate that pins one; the commit is recorded."""
     os.environ["HF_HUB_DISABLE_XET"] = "1"
     os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
@@ -2664,7 +2673,7 @@ def package_rows(roots: tuple[str, ...]) -> list[dict]:
     for root in roots:
         for d in s12.dependency_closure(root):
             rows[_norm(d["name"])] = d
-    project = {d["name"] for d in s12.dependency_closure("wavestack")}
+    project = {d["name"] for d in s12.dependency_closure("harness-lab")}
     return added_packages(sorted(rows.values(), key=lambda d: _norm(d["name"])), project)
 
 
@@ -2770,16 +2779,16 @@ def run_measure(
     elif slm is None:
         report["status"] = "non mesuré (SLM par défaut introuvable : --slm)"
     elif c.server == "ollama":
-        report["v1_rag_rss_mb"] = v1_rag_rss_mb(wavestack_settings())
+        report["v1_rag_rss_mb"] = v1_rag_rss_mb(harness_lab_settings())
         _measure_served(c, models_dir, slm, download, runner, server_ops, report)
         report["packages"] = packages(c.roots)
     elif c.server == "llama_server":
-        report["v1_rag_rss_mb"] = v1_rag_rss_mb(wavestack_settings())
+        report["v1_rag_rss_mb"] = v1_rag_rss_mb(harness_lab_settings())
         ops = server_ops or LlamaServerOps(*resolve_llama_server(llama_server))
         _measure_llama(c, models_dir, slm, download, runner, downloader, ops, report)
         report["packages"] = packages(c.roots)
     else:
-        report["v1_rag_rss_mb"] = v1_rag_rss_mb(wavestack_settings())
+        report["v1_rag_rss_mb"] = v1_rag_rss_mb(harness_lab_settings())
         if download and c.repos:
             _download_into(c, models_dir, downloader, report)
         absent = [
@@ -3242,12 +3251,12 @@ def print_measure(report: dict) -> None:
 
 
 def _default_models_dir() -> str:
-    return str(Path.home() / ".cache" / "wavestack-bench")
+    return str(Path.home() / ".cache" / "harness-lab-bench")
 
 
 def _slm_search_dir() -> Path:
     try:
-        from wavestack.config import models_dir
+        from harness_lab.config import models_dir
 
         return models_dir()
     except ImportError:

@@ -20,9 +20,9 @@ Conséquences observées, toutes expliquées par ce décalage :
 - « undefined » dans « Changer de modèle » : le JS récent lit `m.label_text`, l'ancien Python envoie `label_fr`.
 - titres de scénarios invisibles : `s.title_text` vaut `undefined`, l'option est vide (ce n'est pas une couleur).
 - `/rag` en « Not Found » : la route n'existe pas dans l'ancien processus.
-- pas de Google AI Studio : l'ancien `wavestack.toml` chargé ne le déclarait pas.
+- pas de Google AI Studio : l'ancien `harness-lab.toml` chargé ne le déclarait pas.
 
-Piège : `wavestack` (cli.py) ne relance rien si une instance saine occupe déjà le port ; il
+Piège : `harness-lab` (cli.py) ne relance rien si une instance saine occupe déjà le port ; il
 ouvre le navigateur sur l'ancienne. Deux working trees doivent donc tourner sur deux ports.
 
 ## 2. Ce qui reste vrai après relance
@@ -39,8 +39,8 @@ ouvre le navigateur sur l'ancienne. Deux working trees doivent donc tourner sur 
 
 ### Lot 0 — Relancer le bon serveur (5 min, sans code)
 1. `taskkill /PID 13156 /F` (processus périmé de l'autre working tree).
-2. Depuis ce working tree : `uv run wavestack`.
-3. Convention : l'autre working tree se lance avec `uv run wavestack --port 8421`.
+2. Depuis ce working tree : `uv run harness-lab`.
+3. Convention : l'autre working tree se lance avec `uv run harness-lab --port 8421`.
 4. Recette : `/rag` s'ouvre, « Changer de modèle » nomme les modèles, les scénarios ont leur
    titre, Google AI Studio apparaît dans les modèles réseau.
 5. Quick win facultatif (R0) : `GET /api/health` renvoie aussi le dossier du projet et le
@@ -55,13 +55,13 @@ ouvre le navigateur sur l'ancienne. Deux working trees doivent donc tourner sur 
   `training = "yes"` (ou `opt_out`), `trial = true` et un `notes_fr` explicite, pour que
   l'avertissement « Ce modèle tourne hors de votre poste » dise la vérité ; c'est la
   pédagogie recherchée.
-- Changements : `[[cloud.models]] id = "gemma"` dans `wavestack.toml` (`base_url` identique
+- Changements : `[[cloud.models]] id = "gemma"` dans `harness-lab.toml` (`base_url` identique
   à Gemini, `key_env = "GEMINI_API_KEY"`, `pricing` à 0 ou absent, `impacts` si EcoLogits
   connaît le modèle, sinon pas d'empreinte) ; README « Modèle cloud » ; `tests/test_cloud.py`.
 - Recette réelle avec la clé (budget déjà fixé : 3 € au plus).
 
 ### Lot 2 — Navigation commune et barre de l'atelier
-- Une barre de navigation identique en tête des cinq pages : logo WaveStack, Atelier, LLM nu,
+- Une barre de navigation identique en tête des cinq pages : logo HarnessLab, Atelier, LLM nu,
   Atelier RAG, Diagnostic, Modèles, thème, langue. Elle remplace `.page-tabs` des pages
   annexes et absorbe `#llm-link`, `#rag-link` et le titre de la barre de l'atelier.
 - Atelier : barre actuelle déplacée en bas (`.top-bar` → barre basse), titres de volets

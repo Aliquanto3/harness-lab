@@ -40,18 +40,18 @@ context:
 
 ## Code Map
 
-- `src/wavestack/rag/lab.py` -- `STEPS` (clé, phase, étape de la chaîne, usages) près de `KINDS` ; `RagLabContent` : `steps`, `components`, `groups`, `phases`, textes de page nouveaux, champs A/B retirés ; `Catalog.payload()` rend `steps`, `components`, `groups`, `phases`.
+- `src/harness_lab/rag/lab.py` -- `STEPS` (clé, phase, étape de la chaîne, usages) près de `KINDS` ; `RagLabContent` : `steps`, `components`, `groups`, `phases`, textes de page nouveaux, champs A/B retirés ; `Catalog.payload()` rend `steps`, `components`, `groups`, `phases`.
 - `content/rag_lab.yaml` + `content/i18n/{en,de}/rag_lab.yaml` -- noms anglais, textes nouveaux.
-- `src/wavestack/web/static/rag.html` -- section unique, `#rag-views` (`#rag-seq`, `#rag-arch`, `#rag-focus`), `#rag-details`.
-- `src/wavestack/web/static/rag.js` -- `renderChains` → `renderViews` ; éditeur dans les lignes ; A/B retirée ; flèches par `wireLayer`.
-- `src/wavestack/web/static/rag.css` -- règles `rag-seq-*`, `rag-arch-*`, `rag-focus-*`, `rag-phase-*`, `rag-modes`.
+- `src/harness_lab/web/static/rag.html` -- section unique, `#rag-views` (`#rag-seq`, `#rag-arch`, `#rag-focus`), `#rag-details`.
+- `src/harness_lab/web/static/rag.js` -- `renderChains` → `renderViews` ; éditeur dans les lignes ; A/B retirée ; flèches par `wireLayer`.
+- `src/harness_lab/web/static/rag.css` -- règles `rag-seq-*`, `rag-arch-*`, `rag-focus-*`, `rag-phase-*`, `rag-modes`.
 - `tests/test_rag_lab.py`, `tests/test_i18n.py` -- contenu, payload, traductions.
 - `tools/e2e/run_e2e.py` -- `_rag_lab`, `_rag_lab_compare` (→ une voie), `_rag_lab_alt`, `_rag_lab_hybrid`, `RAG_LAB_STAGES`.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/rag/lab.py` -- STEPS, contenu validé, payload -- AD-1.
+- [x] `src/harness_lab/rag/lab.py` -- STEPS, contenu validé, payload -- AD-1.
 - [x] contenus fr/en/de -- vocabulaire et textes.
 - [x] `rag.html`, `rag.js`, `rag.css` -- trois vues, Composer, A/B retirée.
 - [x] tests pytest et E2E.
@@ -64,7 +64,7 @@ context:
 
 - `rag/lab.py` : `PHASES`, `GROUPS`, `COMPONENTS` (groupe, icône, étape dont l'option donne le sous-titre), `STEPS` (`SequenceStep` : phase, étape de la chaîne, `own`, lu/écrit/appelé). `RagLabContent` valide `steps`, `components`, `groups`, `phases` et les textes de page nouveaux ; champs A/B et `results_title_text` retirés. `Catalog.payload()` rend `steps` (explication à défaut celle de l'étape), `components`, `groups`, `phases`.
 - `stages.*.label_text` en anglais dans les trois langues (les refus de la session les citent : « BM25 », « Fusion (RRF) »…). En allemand, l'étape et la tuile `question` disent « Frage » : « Question » est aussi le mot français du catalogue, signalé par le balayage E2E des pages annexes.
-- `rag.js` : `renderChains` → `renderViews` (séquence, architecture, focus, flèches par `wireLayer`, `light` en Dérouler) ; éditeur dans les lignes (Composer) ; mode mémorisé (`wavestack.ragLab.mode`, défaut Dérouler) ; une seule chaîne, une chaîne B enregistrée est ignorée. Les raisons d'indisponibilité d'une option ne s'affichent que sur la ligne sélectionnée (séquence compacte).
+- `rag.js` : `renderChains` → `renderViews` (séquence, architecture, focus, flèches par `wireLayer`, `light` en Dérouler) ; éditeur dans les lignes (Composer) ; mode mémorisé (`harness_lab.ragLab.mode`, défaut Dérouler) ; une seule chaîne, une chaîne B enregistrée est ignorée. Les raisons d'indisponibilité d'une option ne s'affichent que sur la ligne sélectionnée (séquence compacte).
 - Dérouler, dans cette story : toutes les étapes visibles, pastilles d'état et focus avec les chiffres du dernier run ; l'apparition progressive, le pas-à-pas et « Lancer passe en Dérouler » restent à 5a-2.
 - E2E : `_rag_lab` (trois vues, focus de chaque ligne, flèches, Dérouler), `_rag_lab_compare` sur une voie (et relecture d'une chaîne A + B enregistrée), `_rag_lab_alt` FAISS sur la voie A, `_rag_lab_hybrid` avec les noms anglais. Capture `57-atelier-rag-comparaison` remplacée par `57-atelier-rag-composer`.
 

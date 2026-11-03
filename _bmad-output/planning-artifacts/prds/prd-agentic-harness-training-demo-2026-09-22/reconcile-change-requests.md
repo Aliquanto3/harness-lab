@@ -47,10 +47,10 @@ Les « Notes sans modification du PRD » n'exigent rien.
 | | Précision « blobs Ollama, identifiables par le manifeste » | **Partiel** | Absente du PRD (niveau acceptable) mais aussi de l'addendum, qui est le bon support |
 | | Serveur local déjà lancé (Ollama, llama-server) | Couvert | FR-34 : « un modèle servi sur le poste par Ollama ou llama.cpp (palier 2) » |
 | | … via l'adaptateur compatible OpenAI de FR-32 | **Manquant** | FR-32 ne mentionne aucun adaptateur ; l'addendum l. 18 y renvoie quand même (voir écart M1) |
-| | Schéma : modèle en processus local distinct | Couvert | FR-34 : « Le schéma d'architecture montre alors le modèle comme un processus local distinct de WaveStack » |
+| | Schéma : modèle en processus local distinct | Couvert | FR-34 : « Le schéma d'architecture montre alors le modèle comme un processus local distinct de HarnessLab » |
 | | À arbitrer en architecture : détection Ollama, mémoire du serveur externe dans NFR-2 | **Manquant** | Ni §11, ni NFR-2, ni l'addendum. Trace seulement dans `.memlog.md` (voir écart M3) |
 | | Paliers (décision de session) | Couvert | §7.1 palier 1 : « modèle depuis un fichier local ou déjà présent sur le poste » ; palier 2 : « modèle servi par un serveur local déjà lancé (FR-34) » |
-| **CR-7** | Entre deux tours, sans redémarrer, indicateur de chargement | Couvert | FR-32 : « Le changement se fait entre deux tours, sans redémarrer WaveStack, avec un indicateur de chargement » |
+| **CR-7** | Entre deux tours, sans redémarrer, indicateur de chargement | Couvert | FR-32 : « Le changement se fait entre deux tours, sans redémarrer HarnessLab, avec un indicateur de chargement » |
 | | Conversation conservée | Couvert | FR-32 : « La conversation est conservée : le harnais reconstruit le contexte à chaque tour » |
 | | Registre des capacités, gabarit, plafond de fenêtre | Couvert | FR-33 : « appel d'outils, raisonnement, taille de contexte, gabarit de conversation » + « réévaluées à chaque changement de modèle (FR-32) » |
 | | Palier 2 | Couvert | §7.1 palier 2 : « Changement de modèle en cours de session » |

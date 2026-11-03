@@ -6,7 +6,7 @@ updated: 2026-10-05
 sources:
   - ../../../implementation-artifacts/plan-corrections-2026-10-04.md
   - ../ux-agentic-harness-training-demo-2026-09-22/DESIGN.md
-name: WaveStack — Atelier LLM, lot 6
+name: HarnessLab — Atelier LLM, lot 6
 description: >-
   Delta visuel du lot 6 sur le DESIGN.md principal : la boucle du modèle en trois étapes
   empilées (INPUT, TRANSFORMATION, OUTPUT) en tête de /llm, à la place des sections 1 et 2,

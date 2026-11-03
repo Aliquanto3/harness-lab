@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from wavestack import config
-from wavestack.models import discovery, probe
+from harness_lab import config
+from harness_lab.models import discovery, probe
 
 
 def test_reason_message_recognises_the_architecture_named_after_a_round_trip_as_a_plain_str():
@@ -37,7 +37,7 @@ def test_explicit_existing_path_is_found(tmp_path):
 
 
 def test_models_dir_candidate_is_found(monkeypatch, tmp_path):
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path))
     models_dir = config.models_dir()
     models_dir.mkdir(parents=True)
     (models_dir / "local.gguf").write_bytes(b"fake")
@@ -51,7 +51,7 @@ def test_models_dir_candidate_is_found(monkeypatch, tmp_path):
 
 def test_file_candidates_carry_their_size(monkeypatch, tmp_path):
     """Story 25: the model table sorts by the file's bytes when no size label says it."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path))
     config.models_dir().mkdir(parents=True)
     (config.models_dir() / "local.gguf").write_bytes(b"12345")
 
@@ -65,7 +65,7 @@ def test_file_candidates_carry_their_size(monkeypatch, tmp_path):
 def test_launch_skips_hf_cache_and_lm_studio(monkeypatch, tmp_path):
     """CAP-4: at launch (no `extended`), the Hugging Face cache and LM Studio's folders are
     never read, so a testing machine with many GGUF files elsewhere is not scanned."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path))
     hf_cache = tmp_path / "hf-cache"
     hf_cache.mkdir()
     (hf_cache / "other.gguf").write_bytes(b"fake")
@@ -84,7 +84,7 @@ def test_launch_skips_hf_cache_and_lm_studio(monkeypatch, tmp_path):
 
 def test_extended_search_reads_hf_cache_and_lm_studio(monkeypatch, tmp_path):
     """CAP-4: `extended=True` (the « Ajouter d'autres modèles » button) reads them."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path))
     hf_cache = tmp_path / "hf-cache"
     hf_cache.mkdir()
     (hf_cache / "other.gguf").write_bytes(b"fake")
@@ -102,7 +102,7 @@ def test_extended_search_reads_hf_cache_and_lm_studio(monkeypatch, tmp_path):
 
 
 def test_no_candidates_when_nothing_present(monkeypatch, tmp_path):
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path))
     monkeypatch.setenv("HF_HUB_CACHE", str(tmp_path / "hf-empty"))
     monkeypatch.setenv("OLLAMA_MODELS", str(tmp_path / "ollama-empty"))
     monkeypatch.setattr(discovery, "_lm_studio_dirs", lambda: [tmp_path / "lmstudio-empty"])

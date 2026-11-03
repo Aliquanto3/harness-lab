@@ -23,7 +23,7 @@ context:
 
 **Always:**
 - Spine du 2026-09-24 : AD-4 (mode chat), AD-5 (`openai_chat`), AD-6, AD-9, AD-15, AD-16, AD-20, AD-21, AD-23. Aucune nouvelle dépendance.
-- Déclaration `CloudModel` (AD-20, `extra = "forbid"`, aucun champ de clé) ; `[[cloud.models]]` de `wavestack.toml` et de `settings.json` fusionnent par `id` ; entrée invalide écartée avec un `diagnostic_check` d'avertissement. L'hôte de chaque entrée `enabled` rejoint la liste d'adresses autorisées (garde et `net`).
+- Déclaration `CloudModel` (AD-20, `extra = "forbid"`, aucun champ de clé) ; `[[cloud.models]]` de `harness-lab.toml` et de `settings.json` fusionnent par `id` ; entrée invalide écartée avec un `diagnostic_check` d'avertissement. L'hôte de chaque entrée `enabled` rejoint la liste d'adresses autorisées (garde et `net`).
 - Préréglages : `groq` = `openai/gpt-oss-120b`, `https://api.groq.com/openai/v1`, `context` 131 072, `tpm` 8 000 (fenêtre 4 000, `usable` 2 464), `stream_usage`, raisonnement `format = field`, `always = true`, `on = {reasoning_effort = "low"}`, `resend = false` ; `mistral` = `mistral-small-latest` (décision du 2026-09-25), `https://api.mistral.ai/v1`, `context` 131 072, sans `tpm`, `stream_usage = false`, raisonnement `content_blocks`, `on = {reasoning_effort = "high"}`, `off = {reasoning_effort = "none"}`, `training = opt_out`. Mentions (`hosting_fr`, `training`, `trial`, `notes_fr`) tirées de la recherche du 2026-09-24.
 - Clé : `config.cloud_key(entry) → SecretStr | None` (seul lecteur, `None` si l'hôte a changé), `config.write_api_key` (seul écrivain, atomique), `api_keys.json` `{id: {host, key}}`. `SecretStr` de l'intention à l'adaptateur ; absente du journal, des logs, de `settings.json`, des réponses `/api/*` et d'intention ; toute chaîne du fournisseur passe par un masque (clé, 4 premiers, 4 derniers caractères). En-tête posé par requête, jamais sur le client partagé.
 - Diagnostic : une ligne par modèle cloud déclaré à côté des candidats locaux (tag RÉSEAU, fournisseur, modèle, infobulle des mentions), champ de clé masqué (`set_api_key`), « Tester » (`test_cloud_model` : invite et outil fixes de `content/`, au plus deux appels, portée `diag`, `origin = model`, n'entraîne pas le ratio), « Choisir » qui ouvre l'avertissement `cloud-warning` dans la page puis envoie `select_model{kind: cloud, ref, acknowledged: true}` (refusé sans `acknowledged` ni clé, avec la raison). Boutons désactivés sans clé, avec la raison. Jamais choisi d'office ; choix mémorisé `selected_model = {kind, ref}` (chaîne héritée = `file`) repris au lancement sans avertissement ni requête. Après chargement, le choix vaut pour le prochain lancement.
@@ -57,38 +57,38 @@ context:
 
 ## Code Map
 
-- `wavestack.toml` -- `[cloud]` (`chars_per_token = 4`, `estimate_ratio = 1.0`, `connect_timeout_s`, `read_timeout_s`, liste de marqueurs à neutraliser) et `[[cloud.models]]` : deux préréglages, trois exemples commentés avec leur avertissement (clause EEE de Google, `trial` NVIDIA, catalogue instable d'OpenRouter).
-- `src/wavestack/config.py` -- `CloudModel`, `cloud_models() → (valides, erreurs)` ; fusion par `id` dans `load_config` (146) avant `_deep_merge` (37, qui remplace les listes) ; `allowed_hosts` (68) ajoute les hôtes `enabled` ; `selected_model` (139) → `{kind, ref}` ; `api_keys_path`, `cloud_key`, `write_api_key` (`os.replace`), `cloud_window(entry, configured) → (window, source)`.
-- `src/wavestack/trace/scope.py:30` -- `Origin` accepte `model`. `trace/catalog.py` -- `context_reconciled`, champs `body`, `window_source`, `estimated`, `usage_source`, `output_tps`, `active_model`, `http_status`/`retry_after_s`/`quota_scope`.
-- `src/wavestack/net/factory.py:55` -- `create_client` accepte un `httpx.Timeout` et passe `follow_redirects=False` explicitement ; le hook trace déjà méthode, URL et corps, sans en-têtes (29-44).
-- `src/wavestack/models/openai_chat.py` (nouveau) -- `ChatBody{body: bytes}`, `OpenAIChatEngine(entry, key, transport=None)` : `complete(ChatBody, cancel)` produit des fragments `(channel, text)` et une fin `{stop_reason, tool_calls, usage, raw_output, provider_error}` ; SSE, `usage` / `x_groq.usage`, `reasoning` / `reasoning_content` / blocs, accumulation par `index`, fin (AD-5), `ProviderError` pour la liste d'AD-16, `mask_key`. Le port local (`engine.py:56`) garde sa signature par ids.
-- `src/wavestack/context/render.py` -- extraire de `render_context` (210) la préparation par sentinelles et le découpage (étapes 2 à 5) dans une fonction qui prend un rendu `(messages, tools) → str` ; `render_chat_body(...)` s'en sert avec `json.dumps(ensure_ascii=False, separators=(",", ":"))`, puis estime et ajoute le segment « chez le fournisseur ». `distribute(segments, total)` (plus forts restes) sert avant et après l'appel. `segments.py` -- `Segment.estimated`, `Segment.label_fr` facultatif. `window.py` -- `gauge` reçoit `window_source` et la somme brute qui décide du dépassement.
-- `src/wavestack/session/app_session.py` :
+- `harness-lab.toml` -- `[cloud]` (`chars_per_token = 4`, `estimate_ratio = 1.0`, `connect_timeout_s`, `read_timeout_s`, liste de marqueurs à neutraliser) et `[[cloud.models]]` : deux préréglages, trois exemples commentés avec leur avertissement (clause EEE de Google, `trial` NVIDIA, catalogue instable d'OpenRouter).
+- `src/harness_lab/config.py` -- `CloudModel`, `cloud_models() → (valides, erreurs)` ; fusion par `id` dans `load_config` (146) avant `_deep_merge` (37, qui remplace les listes) ; `allowed_hosts` (68) ajoute les hôtes `enabled` ; `selected_model` (139) → `{kind, ref}` ; `api_keys_path`, `cloud_key`, `write_api_key` (`os.replace`), `cloud_window(entry, configured) → (window, source)`.
+- `src/harness_lab/trace/scope.py:30` -- `Origin` accepte `model`. `trace/catalog.py` -- `context_reconciled`, champs `body`, `window_source`, `estimated`, `usage_source`, `output_tps`, `active_model`, `http_status`/`retry_after_s`/`quota_scope`.
+- `src/harness_lab/net/factory.py:55` -- `create_client` accepte un `httpx.Timeout` et passe `follow_redirects=False` explicitement ; le hook trace déjà méthode, URL et corps, sans en-têtes (29-44).
+- `src/harness_lab/models/openai_chat.py` (nouveau) -- `ChatBody{body: bytes}`, `OpenAIChatEngine(entry, key, transport=None)` : `complete(ChatBody, cancel)` produit des fragments `(channel, text)` et une fin `{stop_reason, tool_calls, usage, raw_output, provider_error}` ; SSE, `usage` / `x_groq.usage`, `reasoning` / `reasoning_content` / blocs, accumulation par `index`, fin (AD-5), `ProviderError` pour la liste d'AD-16, `mask_key`. Le port local (`engine.py:56`) garde sa signature par ids.
+- `src/harness_lab/context/render.py` -- extraire de `render_context` (210) la préparation par sentinelles et le découpage (étapes 2 à 5) dans une fonction qui prend un rendu `(messages, tools) → str` ; `render_chat_body(...)` s'en sert avec `json.dumps(ensure_ascii=False, separators=(",", ":"))`, puis estime et ajoute le segment « chez le fournisseur ». `distribute(segments, total)` (plus forts restes) sert avant et après l'appel. `segments.py` -- `Segment.estimated`, `Segment.label_fr` facultatif. `window.py` -- `gauge` reçoit `window_source` et la somme brute qui décide du dépassement.
+- `src/harness_lab/session/app_session.py` :
   - `boot` 740 / `_boot` 744 : `boot_cloud(entry)` crée l'adaptateur (fabrique injectable pour les tests), `Capabilities` déclarées (`tool_call_parser = "openai_chat"` si `tools`), fenêtre et réserve cloud, `_model_name`.
   - `_set_state` 392 : `active_model` ; `_emit_architecture` 459-541 : `core.model` en `network_service` avec le fournisseur (`_CORE_MODEL` 95).
   - `_availability` 879 : raisons d'indisponibilité cloud (outils sans `tools`).
   - `_messages` 1042 / `_step_messages` 953 : `id` des appels et `tool_call_id` des réponses ; en mode chat, réponse d'outil sans `name`, `content` omis si vide, appel mal formé en `assistant` brut + `user` d'erreur.
   - `_render` 1120 / `_emit_preview` 1153 : branche chat. `_turn` 1868-1998 : `context_reconciled`, avertissement d'estimation incertaine, pas de `_check_prefix` en mode chat. Attribution du `tool_call_id` à la création du pas assistant (1940) et des actions forcées (2054-2122).
   - `_call_model` 2398 : branche `_call_model_chat` sous `scoped(origin="model")` ; `output_tps` dans les deux branches ; `ProviderError` → `harness_error` + `_ModelOutput("error")`.
-- `src/wavestack/session/effects.py` -- `SettingWrite`, `ApiKeySet` et leur applicateur (écrit par `config`, émet `effect_applied`).
-- `src/wavestack/session/diagnostic.py` -- `selected_model` en `{kind, ref}` (`_check_model_locked` 262, `_select_model_locked` 330) ; `set_api_key`, `test_cloud_model` (verrou, état `model_load` « Test de {modèle} », deux appels, `diagnostic_check{check: cloud_test}`) ; `DiagnosticResult.cloud_model` ; avertissement pour une entrée invalide ou un choix mémorisé inutilisable.
-- `src/wavestack/cli.py:111-116` et `web/app.py:201-215` -- démarrer `boot_cloud` quand le résultat le demande.
-- `src/wavestack/web/app.py` -- `SelectModelIntention{kind, ref, acknowledged}` (30), `SetApiKeyIntention{id, key: SecretStr}`, `TestCloudModelIntention{id}` ; refus 409 si `app_session` n'est pas `idle` ; gestionnaire `RequestValidationError` (`loc`, `type`, message français) ; `/api/diagnostic` liste `cloud_models` avec `key_set`, disponibilité, mentions ; `/api/state` porte `active_model`.
+- `src/harness_lab/session/effects.py` -- `SettingWrite`, `ApiKeySet` et leur applicateur (écrit par `config`, émet `effect_applied`).
+- `src/harness_lab/session/diagnostic.py` -- `selected_model` en `{kind, ref}` (`_check_model_locked` 262, `_select_model_locked` 330) ; `set_api_key`, `test_cloud_model` (verrou, état `model_load` « Test de {modèle} », deux appels, `diagnostic_check{check: cloud_test}`) ; `DiagnosticResult.cloud_model` ; avertissement pour une entrée invalide ou un choix mémorisé inutilisable.
+- `src/harness_lab/cli.py:111-116` et `web/app.py:201-215` -- démarrer `boot_cloud` quand le résultat le demande.
+- `src/harness_lab/web/app.py` -- `SelectModelIntention{kind, ref, acknowledged}` (30), `SetApiKeyIntention{id, key: SecretStr}`, `TestCloudModelIntention{id}` ; refus 409 si `app_session` n'est pas `idle` ; gestionnaire `RequestValidationError` (`loc`, `type`, message français) ; `/api/diagnostic` liste `cloud_models` avec `key_set`, disponibilité, mentions ; `/api/state` porte `active_model`.
 - `content/cloud.yaml` (nouveau) -- texte commun de l'avertissement et de l'infobulle, raison « désactivé sans clé », texte sous « Tester », invite, outil et réponse fixes du test, libellé du bandeau.
-- `src/wavestack/web/static/diagnostic.html` -- lignes cloud, champ de clé, Tester, `<dialog>` `cloud-warning`, `select_model` au nouveau format.
-- `src/wavestack/web/static/index.html`, `app.js`, `app.css` -- indicateur de modèle (barre haute 12-30) ; `context_reconciled` remplace `turn.context` et `store.gauge` (217-222) ; `renderContext` 1369 : bandeau et « ≈ » ; `renderGauge` 1032 : « ≈ » ; tag `hosting-tag-network` de DESIGN.md.
+- `src/harness_lab/web/static/diagnostic.html` -- lignes cloud, champ de clé, Tester, `<dialog>` `cloud-warning`, `select_model` au nouveau format.
+- `src/harness_lab/web/static/index.html`, `app.js`, `app.css` -- indicateur de modèle (barre haute 12-30) ; `context_reconciled` remplace `turn.context` et `store.gauge` (217-222) ; `renderContext` 1369 : bandeau et « ≈ » ; `renderGauge` 1032 : « ≈ » ; tag `hosting-tag-network` de DESIGN.md.
 - Tests : `tests/fake_engine.py` (`booted_session` 85) pour le mode local ; conftest garde réseau en boucle locale seule, donc tout passe par `httpx.MockTransport`.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `wavestack.toml`, `content/cloud.yaml` -- préréglages, exemples commentés, textes.
-- [x] `src/wavestack/config.py` -- déclaration, fusion, clés, fenêtre, liste autorisée, `selected_model`.
-- [x] `src/wavestack/trace/scope.py`, `trace/catalog.py`, `net/factory.py` -- origine `model`, événements, client sans redirection.
-- [x] `src/wavestack/models/openai_chat.py` -- adaptateur, erreurs, masque.
-- [x] `src/wavestack/context/render.py`, `segments.py`, `window.py` -- corps chat, estimation, répartition, jauge.
-- [x] `src/wavestack/session/effects.py`, `diagnostic.py`, `app_session.py`, `cli.py` -- effets, diagnostic cloud, tour en mode chat, `tool_call_id`, `active_model`, schéma.
-- [x] `src/wavestack/web/app.py`, `static/diagnostic.html`, `index.html`, `app.js`, `app.css` -- intentions, validation, lignes cloud, avertissement, indicateur, bandeau, « ≈ ».
+- [x] `harness-lab.toml`, `content/cloud.yaml` -- préréglages, exemples commentés, textes.
+- [x] `src/harness_lab/config.py` -- déclaration, fusion, clés, fenêtre, liste autorisée, `selected_model`.
+- [x] `src/harness_lab/trace/scope.py`, `trace/catalog.py`, `net/factory.py` -- origine `model`, événements, client sans redirection.
+- [x] `src/harness_lab/models/openai_chat.py` -- adaptateur, erreurs, masque.
+- [x] `src/harness_lab/context/render.py`, `segments.py`, `window.py` -- corps chat, estimation, répartition, jauge.
+- [x] `src/harness_lab/session/effects.py`, `diagnostic.py`, `app_session.py`, `cli.py` -- effets, diagnostic cloud, tour en mode chat, `tool_call_id`, `active_model`, schéma.
+- [x] `src/harness_lab/web/app.py`, `static/diagnostic.html`, `index.html`, `app.js`, `app.css` -- intentions, validation, lignes cloud, avertissement, indicateur, bandeau, « ≈ ».
 - [x] `README.md` -- section modèle cloud.
 - [x] `tests/test_cloud.py` (nouveau) -- une ligne de la matrice par test, flux SSE Groq et Mistral, corps envoyé = `context_rendered.body` = corps tracé, fusion par `id`, fenêtre, test à deux appels, clé sentinelle (invalide `set_api_key` compris) ; le rendu de référence Qwen3.5 reste identique.
 
@@ -118,7 +118,7 @@ Itération 0 (trois couches : aveugle B, cas limites E, trous de vérification V
 | B9 | Arrêt attend la ligne suivante du flux | low | latence avant premier token < 1 s en pratique ; correctif = mécanisme nouveau | rejeté |
 | B10 | Avertissement non modal (`show()`), Échap inopérant, boutons cliquables derrière | low | `diagnostic.html` `warningEl.show()` ; correction directe `showModal()` | patch |
 | B11 | Raisons doublement préfixées (« Test refusé : Désactivé : … ») | low | boutons déjà désactivés avec la raison : rarement vu | rejeté |
-| B12 | Exemples Google/NVIDIA/OpenRouter en TOML alors que le README dit de les recopier dans `settings.json` | low | README et commentaire de `wavestack.toml` ; correction de doc directe | patch |
+| B12 | Exemples Google/NVIDIA/OpenRouter en TOML alors que le README dit de les recopier dans `settings.json` | low | README et commentaire de `harness-lab.toml` ; correction de doc directe | patch |
 | B13 | README muet sur les 2 464 tokens utilisables de Groq et le retour au modèle local | low | README section cloud ; correction de doc directe | patch |
 | B14 + V1–V8 | Branches nouvelles sans test : ratio appris et borné, dépassement brut et `uncertain_fr`, action forcée en mode chat, relance CLI cloud, choix cloud après chargement, refus classe (b) occupé, avertissements `cloud` du diagnostic, `context_reconciled` dans `/api/state` | medium | recherches des relecteurs dans `tests/` ; `cli._run_diagnostic_then_boot` non testable en l'état | patch |
 | B15 / E14 | `select_model` sans `ref` ni `path` accepté, chemin vide sondé | low | `SelectModelIntention` a tout facultatif ; correction directe (422) | patch |
@@ -149,7 +149,7 @@ Le port local garde `complete(ids, stop, max_tokens, cancel)` : introduire `Rend
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur
 - `uv run python -m pytest` -- expected: tout passe
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks:**
-- `uv run wavestack` avec une vraie clé Groq puis Mistral : saisir la clé, Tester, Choisir (avertissement), relancer, tour avec `get_datetime` ; vérifier l'indicateur, le schéma, le corps tracé sans clé, les « ≈ » puis la réconciliation, et une erreur 401 avec une clé fausse.
+- `uv run harness-lab` avec une vraie clé Groq puis Mistral : saisir la clé, Tester, Choisir (avertissement), relancer, tour avec `get_datetime` ; vérifier l'indicateur, le schéma, le corps tracé sans clé, les « ≈ » puis la réconciliation, et une erreur 401 avec une clé fausse.

@@ -40,19 +40,19 @@ deferred: []
 
 ## Code Map
 
-- `src/wavestack/web/app.py` -- `_sse_stream` (~l. 590-622) : `yield` de `server_instance`, boucle sur `journal.events_since(since_seq)`, puis `journal.subscribe(_on_event)` ; `_on_event` pousse dans une `asyncio.Queue` via `loop.call_soon_threadsafe`.
-- `src/wavestack/trace/journal.py` -- `Journal.subscribe/events_since/emit` : `emit` notifie hors verrou, dans l'ordre des `seq` (lecture seule ici).
+- `src/harness_lab/web/app.py` -- `_sse_stream` (~l. 590-622) : `yield` de `server_instance`, boucle sur `journal.events_since(since_seq)`, puis `journal.subscribe(_on_event)` ; `_on_event` pousse dans une `asyncio.Queue` via `loop.call_soon_threadsafe`.
+- `src/harness_lab/trace/journal.py` -- `Journal.subscribe/events_since/emit` : `emit` notifie hors verrou, dans l'ordre des `seq` (lecture seule ici).
 - `tests/test_web_app.py` -- `_FakeRequest` et `test_stream_resumes_from_last_event_id_without_duplicates` : modèle de test direct de `_sse_stream` via `response.body_iterator`.
-- `src/wavestack/web/static/app.js` -- `store.liveFrom` (l. 28, posé l. ~5105 depuis `/api/state.seq`) ; `applyEnvelope` (l. ~194) : `session_state` (l. ~207), `architecture_changed`, `context_preview`, `bricks_changed`, `memory_changed`, `armed_actions_changed`, `scenario_changed`, `harness_reset` (`topStatus`), `context_rendered`/`context_reconciled` (jauge) ; `model_load_ended` montre déjà le motif `envelope.seq > store.liveFrom` (l. ~271) ; `renderComposer` (l. ~2149) ; `sendMessage` (l. ~2302) ; `boot()` (fin de fichier) appelle `streamEvents(0, applyEnvelope)`. `app.js` est un module : `store` n'est pas visible depuis Playwright.
-- `src/wavestack/web/static/diagnostic.html` -- `historyUpTo` (l. ~488) posé depuis `/api/diagnostic.seq` avant l'ouverture de `EventSource` ; le rejeu est déjà traité sans effets de bord ; seule la perte serveur pouvait bloquer « Chargement de … » (repli de 5 min).
+- `src/harness_lab/web/static/app.js` -- `store.liveFrom` (l. 28, posé l. ~5105 depuis `/api/state.seq`) ; `applyEnvelope` (l. ~194) : `session_state` (l. ~207), `architecture_changed`, `context_preview`, `bricks_changed`, `memory_changed`, `armed_actions_changed`, `scenario_changed`, `harness_reset` (`topStatus`), `context_rendered`/`context_reconciled` (jauge) ; `model_load_ended` montre déjà le motif `envelope.seq > store.liveFrom` (l. ~271) ; `renderComposer` (l. ~2149) ; `sendMessage` (l. ~2302) ; `boot()` (fin de fichier) appelle `streamEvents(0, applyEnvelope)`. `app.js` est un module : `store` n'est pas visible depuis Playwright.
+- `src/harness_lab/web/static/diagnostic.html` -- `historyUpTo` (l. ~488) posé depuis `/api/diagnostic.seq` avant l'ouverture de `EventSource` ; le rejeu est déjà traité sans effets de bord ; seule la perte serveur pouvait bloquer « Chargement de … » (repli de 5 min).
 - `tools/e2e/run_e2e.py` -- `Run.send` (l. ~160), `Run.replay`, `Run.wait_idle` (l. ~141), `s_local_server` (l. ~2236), `s_relaunch` (l. ~2388).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/web/app.py` -- dans `_sse_stream`, s'abonner avant `events_since`, retenir le `seq` du dernier envoyé et ignorer dans la file toute enveloppe de `seq` ≤ ce repère ; abonnement et désabonnement dans le même `try/finally` -- plus aucune fenêtre de perte.
+- `src/harness_lab/web/app.py` -- dans `_sse_stream`, s'abonner avant `events_since`, retenir le `seq` du dernier envoyé et ignorer dans la file toute enveloppe de `seq` ≤ ce repère ; abonnement et désabonnement dans le même `try/finally` -- plus aucune fenêtre de perte.
 - `tests/test_web_app.py` -- deux tests : émission pendant le rejeu (arrive une fois, dans l'ordre) ; émission entre abonnement et instantané (pas de doublon) -- couvre la matrice serveur.
-- `src/wavestack/web/static/app.js` -- n'appliquer les états « dernier connu » rejoués que si `envelope.seq > store.liveFrom` (`session_state` et `activeModel`, `architecture_changed`, `bricks_changed`, `armed_actions_changed` (les libellés restent tous retenus), `scenario_changed`, `memory_changed`, jauge de `context_preview/rendered/reconciled`, message de `harness_reset`) sans toucher aux projections des tours ; marquer `document.body.dataset.journalReplayed` quand le rejeu atteint `liveFrom` ; `sendMessage` affiche une raison au lieu d'ignorer (entrée désactivée ou vide).
+- `src/harness_lab/web/static/app.js` -- n'appliquer les états « dernier connu » rejoués que si `envelope.seq > store.liveFrom` (`session_state` et `activeModel`, `architecture_changed`, `bricks_changed`, `armed_actions_changed` (les libellés restent tous retenus), `scenario_changed`, `memory_changed`, jauge de `context_preview/rendered/reconciled`, message de `harness_reset`) sans toucher aux projections des tours ; marquer `document.body.dataset.journalReplayed` quand le rejeu atteint `liveFrom` ; `sendMessage` affiche une raison au lieu d'ignorer (entrée désactivée ou vide).
 - `tools/e2e/run_e2e.py` -- `send`/`replay` attendent `turn_started` (5 s) et, sinon, lèvent une erreur qui dit l'état du compositeur et `#composer-reason` ; barrière « rejeu rattrapé » (`body[data-journal-replayed]`) dans `wait_idle` et après les `goto`/`reload` de la page principale de `s_local_server` et `s_relaunch`.
 
 **Acceptance Criteria:**
@@ -87,7 +87,7 @@ Côté page, `/api/state` donne déjà le dernier de chaque état ; une envelopp
 **Commands:**
 - `uv run ruff check . && uv run ruff format --check .` -- expected: aucun écart
 - `uv run pytest -q` -- expected: tout vert
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` (×3) -- expected: code 0 à chaque passage
 
 ## Auto Run Result
@@ -99,9 +99,9 @@ Status: done
 **Intégration.** Pendant le travail, l'intégration a reçu un correctif serveur parallèle (story 16, 2974307). À la fusion, une seule implémentation est gardée : celle-ci (abonnement avant `server_instance`, repère initial 0, désabonnement garanti) ; le test de la story 16 (`test_an_event_emitted_during_the_replay_is_never_lost_nor_repeated`) est retiré car couvert par `test_stream_keeps_an_event_emitted_during_the_replay` et `test_stream_drops_the_overlap_between_subscription_and_snapshot`.
 
 **Fichiers.**
-- `src/wavestack/web/app.py` — abonnement avant l'instantané, dédoublonnage par `seq`.
+- `src/harness_lab/web/app.py` — abonnement avant l'instantané, dédoublonnage par `seq`.
 - `tests/test_web_app.py` — 4 tests : émission pendant le rejeu, recouvrement abonnement/instantané, `Last-Event-ID` d'une autre instance, désabonnement au départ du client.
-- `src/wavestack/web/static/app.js` — `isLive`, refus visible dans `sendMessage`, marqueur de fin de rejeu.
+- `src/harness_lab/web/static/app.js` — `isLive`, refus visible dans `sendMessage`, marqueur de fin de rejeu.
 - `tools/e2e/run_e2e.py` — `wait_turn_started` (5 s, puis état du champ, du bouton et de `#composer-reason`) dans `send` et `replay` ; `wait_replayed`, `goto_app`, `reload_app` ; barrière dans `wait_idle`, `s_local_server`, `s_relaunch` ; vérifications ajoutées (champ jamais désactivé au rejeu, envoi pendant un tour, message vide). Aucune vérification retirée.
 
 **Revue.** Revue brève par l'agent lui-même (pas d'outil de sous-agent ; voir le journal de tri) : 3 correctifs appliqués (2 medium, 1 low), 0 différé, 3 rejetés (1 low jugé voulu, 2 réfutés).

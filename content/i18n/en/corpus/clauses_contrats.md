@@ -1,6 +1,6 @@
 # Security clauses for Exemplia supplier contracts
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this model of clauses describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this model of clauses describes no real company. -->
 
 This model completes the supplier security policy: it lists the clauses the supplier unit inserts into every supply contract, according to the supplier's tier.
 

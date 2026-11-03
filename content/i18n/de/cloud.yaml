@@ -39,7 +39,7 @@ uncertain_text: "Unsichere Schätzung: Der Anbieter entscheidet."
 # Cloud model test (the diagnostic's "Tester" button): fixed prompt, tool and reply, no user data.
 test:
   prompt: >-
-    Verbindungstest von WaveStack. Rufe das Tool get_datetime auf und antworte dann in einem
+    Verbindungstest von HarnessLab. Rufe das Tool get_datetime auf und antworte dann in einem
     kurzen Satz mit dem erhaltenen Datum.
   tool:
     name: get_datetime

@@ -49,25 +49,25 @@ baseline_commit: '8c3e99c6a1627b04da344d4c52cda3949053ed00'
 
 ## Code Map
 
-- `src/wavestack/net/factory.py` -- `create_client(*, timeout, transport=None)` : `transport` pour les tests ; `_trace_request` vérifie `is_host_allowed(host, load_config().allowed_hosts)` (lève `NetworkBlocked`) puis trace avec `body` (`request.content` décodé, `""` si vide). Utilisé aussi par `session/diagnostic.py` et `models/discovery.py` (hôtes déjà autorisés ou boucle locale : comportement inchangé).
-- `src/wavestack/net/guard.py` -- réutiliser `is_host_allowed`, `NetworkBlocked` ; ne pas modifier.
-- `src/wavestack/trace/catalog.py` -- `OutboundRequestPayload` + `body: str = ""` ; `ArchitectureNode` + `contact: Literal["not_contacted", "available", "unavailable"] | None = None`.
-- `src/wavestack/tools/registry.py` -- `ToolSpec` + `preview: Callable[..., dict] | None = None` ; `class Unreachable(ToolError)`.
-- `src/wavestack/tools/network.py` (nouveau) -- `network_tools(cfg) -> list[ToolSpec]` (fermetures sur la config) ; `send(preview)` : `create_client()` puis `request(..., follow_redirects=True)` (le hook httpx s'exécute à chaque saut, ce qui revérifie les redirections) ; `httpx.TransportError`/`NetworkBlocked` → `Unreachable` ; statut HTTP ≥ 400 → `ToolError`. HTML → texte par `html.parser.HTMLParser` (ignorer `script`/`style`).
-- `src/wavestack/tools/executor.py` -- `run` : pour un outil réseau, `spec.preview(**args)` d'abord (une `ToolError` = refus avant envoi) ; puis `self.contact[name] = ("unavailable", msg)` sur `Unreachable`, `("available", None)` sinon.
-- `src/wavestack/session/app_session.py` -- `ToolRegistry(NATIVE_TOOLS + network_tools(self.cfg), …)` (L205) ; L207-208 déjà : réseau éteint par défaut ; `_emit_architecture` (L236) : `contact` et raison pour les nœuds d'outils réseau ; ré-émettre l'architecture après l'exécution d'un outil réseau dans `_turn` (L863).
-- `src/wavestack/bricks/registry.py` -- trois `Component` `tools.{name}`, `hosting="network_service"`, `edges_to=["core.harness"]` ; brique `network=True`.
-- `src/wavestack/config.py`, `wavestack.toml` -- `[net] allowed_hosts` + `fr.wikipedia.org`, `calendrier.api.gouv.fr` ; `[tools] fetch_page_hosts`, `fetch_page_max_chars = 4000` (propriétés comme `tool_max_calls`).
+- `src/harness_lab/net/factory.py` -- `create_client(*, timeout, transport=None)` : `transport` pour les tests ; `_trace_request` vérifie `is_host_allowed(host, load_config().allowed_hosts)` (lève `NetworkBlocked`) puis trace avec `body` (`request.content` décodé, `""` si vide). Utilisé aussi par `session/diagnostic.py` et `models/discovery.py` (hôtes déjà autorisés ou boucle locale : comportement inchangé).
+- `src/harness_lab/net/guard.py` -- réutiliser `is_host_allowed`, `NetworkBlocked` ; ne pas modifier.
+- `src/harness_lab/trace/catalog.py` -- `OutboundRequestPayload` + `body: str = ""` ; `ArchitectureNode` + `contact: Literal["not_contacted", "available", "unavailable"] | None = None`.
+- `src/harness_lab/tools/registry.py` -- `ToolSpec` + `preview: Callable[..., dict] | None = None` ; `class Unreachable(ToolError)`.
+- `src/harness_lab/tools/network.py` (nouveau) -- `network_tools(cfg) -> list[ToolSpec]` (fermetures sur la config) ; `send(preview)` : `create_client()` puis `request(..., follow_redirects=True)` (le hook httpx s'exécute à chaque saut, ce qui revérifie les redirections) ; `httpx.TransportError`/`NetworkBlocked` → `Unreachable` ; statut HTTP ≥ 400 → `ToolError`. HTML → texte par `html.parser.HTMLParser` (ignorer `script`/`style`).
+- `src/harness_lab/tools/executor.py` -- `run` : pour un outil réseau, `spec.preview(**args)` d'abord (une `ToolError` = refus avant envoi) ; puis `self.contact[name] = ("unavailable", msg)` sur `Unreachable`, `("available", None)` sinon.
+- `src/harness_lab/session/app_session.py` -- `ToolRegistry(NATIVE_TOOLS + network_tools(self.cfg), …)` (L205) ; L207-208 déjà : réseau éteint par défaut ; `_emit_architecture` (L236) : `contact` et raison pour les nœuds d'outils réseau ; ré-émettre l'architecture après l'exécution d'un outil réseau dans `_turn` (L863).
+- `src/harness_lab/bricks/registry.py` -- trois `Component` `tools.{name}`, `hosting="network_service"`, `edges_to=["core.harness"]` ; brique `network=True`.
+- `src/harness_lab/config.py`, `harness-lab.toml` -- `[net] allowed_hosts` + `fr.wikipedia.org`, `calendrier.api.gouv.fr` ; `[tools] fetch_page_hosts`, `fetch_page_max_chars = 4000` (propriétés comme `tool_max_calls`).
 - `content/tools.yaml` -- libellés et descriptions des trois outils (vus par le modèle).
-- `src/wavestack/web/static/app.js` -- réduire `outbound_request` sur la dernière étape `tool` du tour (L181-194) ; `toolCard` (L775) : bloc `outbound-payload` (corps vide : « Aucun corps : seule l'adresse sort du poste ») ; `renderSchema` (L983) : classe `is-not-contacted` + « non contacté » dans le `title`.
-- `src/wavestack/web/static/app.css` -- `.hosting-tag-network` (absente aujourd'hui, DESIGN.md L220), `.outbound-payload`, `.arch-node.is-not-contacted`.
+- `src/harness_lab/web/static/app.js` -- réduire `outbound_request` sur la dernière étape `tool` du tour (L181-194) ; `toolCard` (L775) : bloc `outbound-payload` (corps vide : « Aucun corps : seule l'adresse sort du poste ») ; `renderSchema` (L983) : classe `is-not-contacted` + « non contacté » dans le `title`.
+- `src/harness_lab/web/static/app.css` -- `.hosting-tag-network` (absente aujourd'hui, DESIGN.md L220), `.outbound-payload`, `.arch-node.is-not-contacted`.
 - `tests/test_net_factory.py`, `tests/test_tools.py` -- `create_client` monkeypatché avec `MockTransport` ; motifs de session existants (L415).
 
 ## Tasks & Acceptance
 
 **Execution:**
 - [x] `net/factory.py`, `trace/catalog.py`, `tests/test_net_factory.py` -- refus hors liste, `body`, `transport`, redirection revérifiée -- AD-15
-- [x] `tools/registry.py`, `tools/network.py`, `tools/executor.py`, `content/tools.yaml`, `config.py`, `wavestack.toml` -- trois outils, aperçu, état de contact -- AD-14, AD-19
+- [x] `tools/registry.py`, `tools/network.py`, `tools/executor.py`, `content/tools.yaml`, `config.py`, `harness-lab.toml` -- trois outils, aperçu, état de contact -- AD-14, AD-19
 - [x] `bricks/registry.py`, `session/app_session.py` -- composants réseau, nœuds et `contact`, ré-émission -- AD-12
 - [x] `web/static/app.js`, `app.css` -- étiquette RÉSEAU, données sortantes, « non contacté » -- AD-1, DESIGN
 - [x] `tests/test_tools.py` -- les 8 lignes de la matrice ; aperçu = requête envoyée (méthode, URL, corps) ; conversion HTML et coupe
@@ -124,7 +124,7 @@ Groupes routés en `patch` : P1 à P9 ; `defer` : VG3 ; aucun `intent_gap` ni `b
 
 ## Design Notes
 
-`public_holidays` : zone métropole seule (paramètre unique `year`, entier). `wikipedia_summary` : `title` encodé (`quote`, espaces → `_`), résultat = titre + `extract`. User-Agent explicite (« WaveStack/0.1 (démonstrateur pédagogique) ») dans la fabrique : Wikimedia refuse les agents génériques.
+`public_holidays` : zone métropole seule (paramètre unique `year`, entier). `wikipedia_summary` : `title` encodé (`quote`, espaces → `_`), résultat = titre + `extract`. User-Agent explicite (« HarnessLab/0.1 (démonstrateur pédagogique) ») dans la fabrique : Wikimedia refuse les agents génériques.
 
 ## Verification
 
@@ -133,4 +133,4 @@ Groupes routés en `patch` : P1 à P9 ; `defer` : VG3 ; aucun `intent_gap` ni `b
 - `uv run pytest` -- expected: tous les tests passent (tests `model` exclus)
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` : activer `public_holidays` et `get_datetime`, demander « quel est le prochain jour férié ? » ; vérifier le bloc données sortantes, le nœud réseau passé de « non contacté » à disponible ; couper le réseau et vérifier l'état indisponible.
+- `uv run harness-lab` : activer `public_holidays` et `get_datetime`, demander « quel est le prochain jour férié ? » ; vérifier le bloc données sortantes, le nœud réseau passé de « non contacté » à disponible ; couper le réseau et vérifier l'état indisponible.

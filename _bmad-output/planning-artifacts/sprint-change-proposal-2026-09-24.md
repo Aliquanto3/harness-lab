@@ -21,7 +21,7 @@ sources:
 - montrer que **le même harnais** fonctionne avec des modèles beaucoup plus gros ;
 - montrer qu'un modèle cloud produit du texte **bien plus vite** qu'un SLM sur un PC sans GPU : 170 à 900 tokens/s, contre environ 10 tokens/s visés en local (recherche, « Enseignements croisés »).
 
-**À terme :** un point d'accès interne Wavestone, sur Azure ou GCP, ajouté **par simple configuration**.
+**À terme :** un point d'accès interne, sur Azure ou GCP, ajouté **par simple configuration**.
 
 **Catégorie :** nouvelle exigence (changement de périmètre). Elle contredit deux non-objectifs actuels : « aucun fournisseur de modèle cloud » et « pas de format chat compatible OpenAI ».
 
@@ -61,7 +61,7 @@ Un appel au format chat (`/chat/completions`) envoie des **messages structurés*
 | 3.1 PRD | [!] | Deux non-objectifs levés, NFR-4 élargie : voir §4 |
 | 3.2 Architecture | [!] | 12 AD amendées le 2026-09-24 (AD-3 compris), puis une passe Update après validation (§6) ; aucune nouvelle AD, aucune nouvelle dépendance |
 | 3.3 UX | [!] | Diagnostic et états : changement léger, comme demandé |
-| 3.4 Autres | [!] | README (clé API, test avant séance), `wavestack.toml` : relèvent de la story 11 |
+| 3.4 Autres | [!] | README (clé API, test avant séance), `harness-lab.toml` : relèvent de la story 11 |
 | 4.1 Ajustement direct | Viable | Effort moyen, risque moyen (réseau et secrets) |
 | 4.2 Retour arrière | Non viable | Rien à annuler |
 | 4.3 Revue du MVP | Non nécessaire | Le cloud reste une option : le produit tient sans elle |
@@ -76,7 +76,7 @@ Une story 11 et des amendements aux documents. Aucune reprise de code livré.
 |---|---|
 | D1 | Le modèle cloud est une **option explicite, jamais un défaut**. Aucun modèle cloud n'est chargé d'office, et les scénarios fournis restent jouables sans clé, en local. |
 | D2 | **Un seul adaptateur `openai_chat`** : adresse de base, clé, modèle, streaming, `tools`. Il ouvre ses connexions par la fabrique `net` (httpx) : pas de SDK OpenAI, **aucune nouvelle dépendance** (*prop.*). |
-| D3 | **Modèles cloud déclarés en configuration** : `[[cloud.models]]` dans `wavestack.toml` pour les préréglages publics, ajouts dans `settings.json` pour tout point d'accès qui ne doit pas figurer dans le dépôt public (Wavestone interne, NFR-11). L'en-tête d'authentification est configurable : `Authorization: Bearer` par défaut, y compris pour Azure par son API v1 ; un autre nom d'en-tête reste possible pour une passerelle interne (*prop.*). Les entrées fusionnent par `id` : un ajout dans `settings.json` n'efface pas les préréglages. *Précisée après validation (C3, H9).* |
+| D3 | **Modèles cloud déclarés en configuration** : `[[cloud.models]]` dans `harness-lab.toml` pour les préréglages publics, ajouts dans `settings.json` pour tout point d'accès qui ne doit pas figurer dans le dépôt public (point d'accès interne, NFR-11). L'en-tête d'authentification est configurable : `Authorization: Bearer` par défaut, y compris pour Azure par son API v1 ; un autre nom d'en-tête reste possible pour une passerelle interne (*prop.*). Les entrées fusionnent par `id` : un ajout dans `settings.json` n'efface pas les préréglages. *Précisée après validation (C3, H9).* |
 | D4 | **Préréglages actifs : Groq et Mistral.** En commentaire, avec leur avertissement : Google (clause EEE, entraînement sans opt-out), NVIDIA (offre d'essai, réutilisation des contenus), OpenRouter (50 requêtes/jour, catalogue instable). Cloudflare, retenu comme exemple par la recherche, est écarté (décision d'Anaël, 2026-09-24). |
 | D5 | **Capacités déclarées** par modèle (AD-6) : appel d'outils, raisonnement, contexte natif. Les appels d'outils arrivent déjà structurés par l'API : pas de parseur. Des arguments JSON invalides, et le refus `tool_use_failed` du fournisseur, suivent la voie de l'appel mal formé (CAP-16). |
 | D6 | **Tokens en mode chat** : une estimation par segment, et le total fourni par l'API (`usage.prompt_tokens`). L'écart entre les deux va au segment `template`, libellé « Gabarit appliqué chez le fournisseur (estimé) ». Les valeurs estimées sont affichées avec « ≈ » ; le total ne l'est pas quand il vient de l'API (CAP-31). Pas de nouveau `SegmentKind`. |
@@ -134,7 +134,7 @@ Une story 11 et des amendements aux documents. Aucune reprise de code livré.
 - ANCIEN : « Aucun fournisseur de modèle cloud. »
 - NOUVEAU : « Aucun fournisseur de modèle cloud par défaut ni requis : le cloud reste une option explicite. »
 - ANCIEN : « Pas de serveur local au format chat compatible OpenAI — texte brut natif seulement en V1, V2 pour le format chat. »
-- NOUVEAU : « Le format chat compatible OpenAI sert aux modèles cloud et aux points d'accès déclarés. Pour un serveur local, WaveStack garde le texte brut natif, qui montre le gabarit : pointer l'adaptateur chat vers un serveur local reste possible par configuration, sans être visé. »
+- NOUVEAU : « Le format chat compatible OpenAI sert aux modèles cloud et aux points d'accès déclarés. Pour un serveur local, HarnessLab garde le texte brut natif, qui montre le gabarit : pointer l'adaptateur chat vers un serveur local reste possible par configuration, sans être visé. »
 
 ### 4.2 glossary.md, risks.md
 
@@ -176,7 +176,7 @@ Les modifications reprennent celles de SPEC.md :
 **AD-4**, nouveau paragraphe après « Attribution des tokens » :
 > **Mode chat (moteur `openai_chat`).**
 > - Les segments sont assemblés par la même table d'emplacements. Au lieu du rendu Jinja, `context` construit le corps JSON (`messages`, `tools`), et `context_rendered` le porte tel qu'envoyé.
-> - Les tokens de chaque segment sont **estimés** (octets UTF-8 / `chars_per_token`, réglable dans `wavestack.toml`).
+> - Les tokens de chaque segment sont **estimés** (octets UTF-8 / `chars_per_token`, réglable dans `harness-lab.toml`).
 > - Après l'appel, `usage.prompt_tokens` fait foi pour le total. L'écart va à un unique segment `template`, « gabarit appliqué chez le fournisseur ». S'il est négatif, les estimations sont réduites en proportion et `template` vaut 0. La somme reste égale au total.
 > - Avant l'envoi, la jauge et le contrôle de dépassement (AD-9) utilisent l'estimation, plus l'écart du dernier appel.
 > - Le contrôle d'ajout seul ne s'applique pas.
@@ -225,7 +225,7 @@ Les modifications reprennent celles de SPEC.md :
 
 **Reports**
 - Ligne V2 : « adaptateur de serveur au format chat » devient « serveur local au format chat, comme voie visée ».
-- Ajout : « **GCP Vertex** : son point d'accès compatible OpenAI exige un jeton OAuth de courte durée, pas une clé statique. Il est hors de la story 11. Un point d'accès interne Wavestone derrière une passerelle à clé fonctionne par simple configuration. »
+- Ajout : « **GCP Vertex** : son point d'accès compatible OpenAI exige un jeton OAuth de courte durée, pas une clé statique. Il est hors de la story 11. Un point d'accès interne derrière une passerelle à clé fonctionne par simple configuration. »
 
 ### 4.5 EXPERIENCE.md
 

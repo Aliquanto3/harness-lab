@@ -19,7 +19,7 @@ context:
 
 **Problem:** La page `/mcp` (story 6) empile cinq sections statiques : elle ne montre ni qui parle à qui, ni ressources et prompts, ni le modèle qui choisit un outil. Le lot 4 veut un diagramme de séquence progressif, une architecture et « Ce que le modèle voit », dans quatre volets comme l'Atelier Harnais.
 
-**Approach:** Dans cet ordre : (1) backend et contrat d'AD-27 (`mcp/lab.py`, `local_server.py`, session, catalogue, routes) ; (2) modules communs d'AD-28 (`panes.js` extrait d'`app.js`/`app.css`, retouches et `reveal()` de `diagram.js`, sans changement visible pour l'Atelier Harnais hors anneau et fil) ; (3) réécriture de `mcp.html`/`mcp.js`/`mcp.css` (découverte progressive des trois volets, gouttières, barre WaveStack fixe). Préséance : AD-27/AD-28 > EXPERIENCE.md « Atelier MCP en séquence » > maquette.
+**Approach:** Dans cet ordre : (1) backend et contrat d'AD-27 (`mcp/lab.py`, `local_server.py`, session, catalogue, routes) ; (2) modules communs d'AD-28 (`panes.js` extrait d'`app.js`/`app.css`, retouches et `reveal()` de `diagram.js`, sans changement visible pour l'Atelier Harnais hors anneau et fil) ; (3) réécriture de `mcp.html`/`mcp.js`/`mcp.css` (découverte progressive des trois volets, gouttières, barre HarnessLab fixe). Préséance : AD-27/AD-28 > EXPERIENCE.md « Atelier MCP en séquence » > maquette.
 
 ## Boundaries & Constraints
 
@@ -57,31 +57,31 @@ context:
 
 ## Code Map
 
-- `src/wavestack/mcp/lab.py` -- `Capture` (pas courant, appariement, `seq` des requêtes, `summary_text`), `LabConnection` (remplace `_serve` : `start()` → `Handshake`, file `call_tool|read_resource|get_prompt`), `KINDS`, `step_number`, `last_session`, `McpLabContent` (8 méthodes, nouveaux textes), `METHODS`.
-- `src/wavestack/mcp/local_server.py` -- ajouter ressource `glossary://terms` et prompt `explain_term(term)` ; textes dans `content/mcp_local/*.yaml` (fr/en/de).
-- `src/wavestack/mcp/connection.py` -- `describe_error` réutilisé ; `McpConnection` inchangée.
-- `src/wavestack/trace/catalog.py:52,649,1320-1444` -- `OutboundRequestPayload.message_seq`, `PrefixCause += "mcp_lab"`, nouveaux payloads mcp_lab, `PAYLOAD_MODELS`.
-- `src/wavestack/session/app_session.py:9387-9764` -- réécriture de la partie atelier MCP : intentions `mcp_lab_read`, `mcp_lab_prompt`, `mcp_lab_ask`, `mcp_lab_state().ask`, fermetures (`reset` ajouté). Réutiliser `_run_lab` (rendu local/cloud, `render_context`, `render_chat_body`, `output_reserve`), `_call_model(..., registry=)` (paramètre facultatif pour les schémas de `parse_tool_calls`), `_tool_definitions`/`_doc_catalog` (registre en paramètre facultatif), `ToolExecutor(registry).check`, `_bound_result`, `_count_tokens`, `_save_main_state`, `_lab_restore(saved, cause)`, `_PREFIX_CAUSES:324`.
-- `src/wavestack/web/app.py:237-540,557` -- routes `mcp_lab_read|prompt|ask`, filtre de jauge `/api/state` excluant `mcp_lab`.
+- `src/harness_lab/mcp/lab.py` -- `Capture` (pas courant, appariement, `seq` des requêtes, `summary_text`), `LabConnection` (remplace `_serve` : `start()` → `Handshake`, file `call_tool|read_resource|get_prompt`), `KINDS`, `step_number`, `last_session`, `McpLabContent` (8 méthodes, nouveaux textes), `METHODS`.
+- `src/harness_lab/mcp/local_server.py` -- ajouter ressource `glossary://terms` et prompt `explain_term(term)` ; textes dans `content/mcp_local/*.yaml` (fr/en/de).
+- `src/harness_lab/mcp/connection.py` -- `describe_error` réutilisé ; `McpConnection` inchangée.
+- `src/harness_lab/trace/catalog.py:52,649,1320-1444` -- `OutboundRequestPayload.message_seq`, `PrefixCause += "mcp_lab"`, nouveaux payloads mcp_lab, `PAYLOAD_MODELS`.
+- `src/harness_lab/session/app_session.py:9387-9764` -- réécriture de la partie atelier MCP : intentions `mcp_lab_read`, `mcp_lab_prompt`, `mcp_lab_ask`, `mcp_lab_state().ask`, fermetures (`reset` ajouté). Réutiliser `_run_lab` (rendu local/cloud, `render_context`, `render_chat_body`, `output_reserve`), `_call_model(..., registry=)` (paramètre facultatif pour les schémas de `parse_tool_calls`), `_tool_definitions`/`_doc_catalog` (registre en paramètre facultatif), `ToolExecutor(registry).check`, `_bound_result`, `_count_tokens`, `_save_main_state`, `_lab_restore(saved, cause)`, `_PREFIX_CAUSES:324`.
+- `src/harness_lab/web/app.py:237-540,557` -- routes `mcp_lab_read|prompt|ask`, filtre de jauge `/api/state` excluant `mcp_lab`.
 - `content/mcp_lab.yaml` (+en/de), `content/ui.yaml` (`mcp`, `common.diagram`, `common.panes`, `main.log.kinds`, `main.orch.prefix_causes`), `content/messages.yaml` (`session.mcp_lab.*`, `session.prefix.causes.mcp_lab`).
-- `src/wavestack/web/static/diagram.js` -- `reveal`, options `describe/onLive`, `load`, `refresh`, `aria-disabled`, nœud `status`, `explain()` focusout.
-- `src/wavestack/web/static/app.js:901-924,6083-6418,7413-7511` + `app.css:200-537,2249-2289,4636-4653` -- mécanique des volets et projection → `static/panes.js` + `pages.css` (`pane-*`, `:root.projection`).
-- `src/wavestack/web/static/mcp.{html,js,css}` -- réécriture complète d'après la maquette.
+- `src/harness_lab/web/static/diagram.js` -- `reveal`, options `describe/onLive`, `load`, `refresh`, `aria-disabled`, nœud `status`, `explain()` focusout.
+- `src/harness_lab/web/static/app.js:901-924,6083-6418,7413-7511` + `app.css:200-537,2249-2289,4636-4653` -- mécanique des volets et projection → `static/panes.js` + `pages.css` (`pane-*`, `:root.projection`).
+- `src/harness_lab/web/static/mcp.{html,js,css}` -- réécriture complète d'après la maquette.
 - `tokens.css` -- `--spacing-stroke-path: 3px`.
 - Tests : `tests/test_mcp_lab.py` (fixtures `test_mcp.loop/web/McpWeb`, ajouter ressources/prompts au faux serveur HTTP si besoin), `tests/test_ui_texts.py:30-33`, `tests/test_web_tokens.py:537,616-628`, `tests/test_i18n.py:254`, `tools/e2e/run_e2e.py` (`s_mcp_lab:6700`, `s_mcp_lab_page:6848`, `_mcp_fake_session:7148`, `_diagram_module:1040`, `s_panes:3345`), faux modèle cloud `tools/e2e/fake_openai.py` (`_plan`).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/mcp/lab.py`, `local_server.py`, `content/mcp_local/*` -- capture, `LabConnection`, ressource et prompt -- socle AD-27.
-- [x] `src/wavestack/trace/catalog.py` -- payloads et `message_seq`, cause `mcp_lab` -- contrat validé.
-- [x] `src/wavestack/session/app_session.py` -- échanges `connect|call|read|prompt|ask`, fins, fermetures, `ask`, état -- AD-27.
-- [x] `src/wavestack/web/app.py` -- routes et filtre de jauge.
+- [x] `src/harness_lab/mcp/lab.py`, `local_server.py`, `content/mcp_local/*` -- capture, `LabConnection`, ressource et prompt -- socle AD-27.
+- [x] `src/harness_lab/trace/catalog.py` -- payloads et `message_seq`, cause `mcp_lab` -- contrat validé.
+- [x] `src/harness_lab/session/app_session.py` -- échanges `connect|call|read|prompt|ask`, fins, fermetures, `ask`, état -- AD-27.
+- [x] `src/harness_lab/web/app.py` -- routes et filtre de jauge.
 - [x] `content/*.yaml` (fr/en/de) -- textes du contrat et de la page.
 - [x] `tests/test_mcp_lab.py` -- couvrir la matrice côté session (dont `ask` avec `FakeEngine` à appel d'outil, `last_session`, `open_server` = dernière `connection`).
-- [x] `src/wavestack/web/static/panes.js`, `pages.css`, `app.js`, `app.css`, `index.html` -- extraction sans changement visible.
-- [x] `src/wavestack/web/static/diagram.js`, `pages.css`, `tokens.css` -- retouches et `reveal()` d'AD-28 ; test pytest « aucun `.diagram-` hors de `pages.css` ».
-- [x] `src/wavestack/web/static/mcp.{html,js,css}` -- quatre volets, Séquence progressive, Ce que le modèle voit, Architecture (Avant/Avec MCP), barre fixe, projection.
+- [x] `src/harness_lab/web/static/panes.js`, `pages.css`, `app.js`, `app.css`, `index.html` -- extraction sans changement visible.
+- [x] `src/harness_lab/web/static/diagram.js`, `pages.css`, `tokens.css` -- retouches et `reveal()` d'AD-28 ; test pytest « aucun `.diagram-` hors de `pages.css` ».
+- [x] `src/harness_lab/web/static/mcp.{html,js,css}` -- quatre volets, Séquence progressive, Ce que le modèle voit, Architecture (Avant/Avec MCP), barre fixe, projection.
 - [x] `tools/e2e/run_e2e.py` -- réécrire `s_mcp_lab`/`s_mcp_lab_page` (poignée de main, appel, ressource, prompt, ask par le faux modèle cloud, stepper, restitution, volets) ; étendre `_diagram_module` (reveal, aria-disabled, status, load/refresh).
 
 **Acceptance Criteria:**

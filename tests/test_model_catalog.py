@@ -20,17 +20,17 @@ from test_reasoning import TEXT, _card, _cloud, _preset
 from test_tools import QWEN
 from test_web_app import _build, _client
 
-from wavestack import config
-from wavestack.context.window import window_for
-from wavestack.models import catalog, gguf_meta
-from wavestack.models.capabilities import (
+from harness_lab import config
+from harness_lab.context.window import window_for
+from harness_lab.models import catalog, gguf_meta
+from harness_lab.models.capabilities import (
     capabilities_for,
     cloud_capabilities,
     reasoning_mode,
     tools_summary,
 )
-from wavestack.models.discovery import ModelCandidate
-from wavestack.models.engine import EngineMetadata
+from harness_lab.models.discovery import ModelCandidate
+from harness_lab.models.engine import EngineMetadata
 
 QWEN_TEMPLATE = QWEN.decode("utf-8")
 # ChatML with `<tool_call>` and `enable_thinking`, without `<function=`: the hermes parser.
@@ -39,7 +39,7 @@ HERMES_THINKING = (
 )
 THINK_ONLY = CHATML + "<think>"  # `<think>` without a reasoning variable
 INTROUVABLE = (
-    "Fichier GGUF du modèle introuvable dans le dossier d'Ollama (/x) : WaveStack ne peut pas "
+    "Fichier GGUF du modèle introuvable dans le dossier d'Ollama (/x) : HarnessLab ne peut pas "
     "lire son tokenizer."
 )
 
@@ -266,7 +266,7 @@ def test_think_tags_without_a_variable_is_unknown(tmp_path):
     entry = _entry(_file(path))
     assert entry.reasoning == "unknown"
     assert entry.reason_text == (
-        "raisonne peut-être de lui-même, WaveStack ne sait ni l'allumer ni l'éteindre"
+        "raisonne peut-être de lui-même, HarnessLab ne sait ni l'allumer ni l'éteindre"
     )
     assert (entry.tools, entry.tools_text) == (False, "non")
     assert entry.tools_reason_text == "aucun format d'appel connu pour cette famille de modèle"
@@ -474,7 +474,7 @@ def test_size_text():
         ([], ["MiniCPM4-0.5B"], "minicpm"),
         ([], ["llama3.2:3b"], "llama"),
         ([], ["faux-llama-server.gguf"], "other"),  # the server, never Llama
-        ([], ["wavestack-fake"], "other"),
+        ([], ["harness-lab-fake"], "other"),
         # Native providers 4/5: OpenAI's GPT by its name's start only, not GPT-like names.
         ([], ["gpt-6-luna"], "gpt"),
         ([], ["GPT-6.1-Sol"], "gpt"),
@@ -500,7 +500,7 @@ def test_lfm3_served_without_header_is_lfm_in_every_language(lang):
 
 def test_unknown_publisher_is_last_of_its_hosting():
     mistral = _preset("mistral").model_dump(exclude_none=True)
-    fake = {**mistral, "id": "fake", "model": "wavestack-fake"}
+    fake = {**mistral, "id": "fake", "model": "harness-lab-fake"}
     cfg = config.Config(values={"cloud": {"models": [fake, mistral]}})
     groups = catalog.group_models(catalog.cloud_entries(cfg) + [_entry(_ollama_missing())])
     assert [g.label_text for g in groups] == [

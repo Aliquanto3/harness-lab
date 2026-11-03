@@ -31,16 +31,16 @@ from test_rag_lab import ended, ready, wait_idle
 from test_rag_lab import run as page_run
 from test_rag_rerank import Rerankers
 
-from wavestack import config
-from wavestack.mcp import architecture_server, policy
-from wavestack.rag import exposed, workcopy
-from wavestack.rag import index as rag_index
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import load_rag_content, load_rag_questions
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.mcp import architecture_server, policy
+from harness_lab.rag import exposed, workcopy
+from harness_lab.rag import index as rag_index
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import load_rag_content, load_rag_questions
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 PORT = 8425
 BASE = f"http://127.0.0.1:{PORT}"
@@ -870,7 +870,7 @@ def test_without_a_loop_the_start_is_refused(index):
 
 # ---------- the card (criterion 14) ----------
 
-STATIC = Path(__file__).resolve().parents[1] / "src" / "wavestack" / "web" / "static"
+STATIC = Path(__file__).resolve().parents[1] / "src" / "harness_lab" / "web" / "static"
 
 
 def test_the_card_is_in_the_build_tab_and_draws_text_only():

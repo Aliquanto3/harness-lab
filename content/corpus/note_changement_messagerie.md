@@ -1,6 +1,6 @@
 # Note de changement de messagerie chez Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette note ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette note ne décrit aucune entreprise réelle. -->
 
 Cette note explique le passage de la version 1 à la version 2 de la charte de messagerie, effectif depuis le 1er janvier 2026.
 

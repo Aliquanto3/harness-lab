@@ -2,7 +2,7 @@
 # tool names in `call_presets`, same argument names.
 servers:
   local:
-    label_text: WaveStack-Glossar
+    label_text: HarnessLab-Glossar
   datagouv:
     label_text: data.gouv.fr
     sends_text: die Suche und ihre Argumente

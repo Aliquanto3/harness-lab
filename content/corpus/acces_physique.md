@@ -1,6 +1,6 @@
 # Politique d'accès physique aux locaux d'Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette politique ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette politique ne décrit aucune entreprise réelle. -->
 
 Chaque site d'Exemplia est divisé en 3 zones : normale (accueil, open space), restreinte (salles de réunion sensibles, locaux techniques) et sécurisée (salle serveurs, salle de crise). Un badge personnel, remis à chaque collaborateur dès son arrivée, donne accès aux zones nécessaires à son poste.
 

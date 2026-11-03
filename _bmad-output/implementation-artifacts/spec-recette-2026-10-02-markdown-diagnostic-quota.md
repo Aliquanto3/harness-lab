@@ -37,7 +37,7 @@ context:
   - Une clé `diagnostic.loading` en fr, en et de, affichée dans les trois listes jusqu'à leur premier rendu.
   - Dans Contrôles, le texte disparaît à la première ligne de contrôle reçue par le flux.
   - Côté serveur, chaque appel journalise en `debug` sa durée totale et celle de chaque étape (`active_choice`, `cloud_rows`, `_models`, `shown`), plus l'attente avant le gestionnaire (mesurée par un middleware limité à cette route), le numéro de l'appel et le temps écoulé depuis la création de l'application.
-  - La même ligne passe en `warning` (visible dans la console de `uv run wavestack`) quand le total atteint `SLOW_DIAGNOSTIC_S = 1.0`.
+  - La même ligne passe en `warning` (visible dans la console de `uv run harness-lab`) quand le total atteint `SLOW_DIAGNOSTIC_S = 1.0`.
 - **`outbound_response`.**
   - Il est émis par un crochet `response` des deux clients de `net/factory.py` (synchrone et asynchrone), pour tout statut ≥ 400 d'un hôte hors de la boucle locale.
   - Charge utile : `origin`, `method`, `url`, `status`, `headers` (liste de `{name, value, masked}`, dans l'ordre reçu).
@@ -70,40 +70,40 @@ context:
 
 ## Code Map
 
-- `src/wavestack/web/static/app.js:3044` -- `renderChat` : seule ligne à changer (`el("div","bubble-text", turn.text)`). Le rendu, déclenché par `scheduleRender` (rAF), reconstruit les bulles ; mémoire à purger comme `approvalCards` (:3001). `el()` (:1088) et `reasoningBlock` (:2954) restent intacts.
-- `src/wavestack/web/static/app.js:679` (`SUB_KINDS`), `:6398` (`eventSummary`, branche `outbound_request` vers :6503), `:6372` (`KIND_LABELS`).
-- `src/wavestack/web/static/app.css:729` -- `.bubble` en `pre-wrap` ; il faut `white-space: normal` sur le rendu, `pre` pour les blocs de code. `:2172` : règles du mode focus.
-- `src/wavestack/web/static/diagnostic.html:173/185/199` -- `#checks`, `#candidates`, `#cloud-models`. `patchList` (:290) remplace un `<li>` initial ; `renderCheck` (:302) ajoute à `checksEl`. `t()` vient de `i18n.js`.
-- `src/wavestack/web/app.py:581` -- `diagnostic_state` (gestionnaire imbriqué de `create_app`), `_models` (:639), `log` (:41), middlewares (:329).
-- `src/wavestack/net/factory.py:54` -- `_check_and_trace`, `_headers` (:73), `create_client` (:157), `create_async_client` (:205). `is_loopback` vient de `guard`.
-- `src/wavestack/config.py:99` -- `PUBLIC_HEADERS` ; ajouter `PUBLIC_RESPONSE_HEADERS` et les préfixes de quota à côté.
-- `src/wavestack/trace/catalog.py:43/52/1345` -- `OutboundHeader`, `OutboundRequestPayload`, `PAYLOAD_MODELS`.
-- `src/wavestack/models/openai_chat.py:435/464/498` -- statut ≠ 200, `_refused`, `_no_quota` : ne pas modifier.
+- `src/harness_lab/web/static/app.js:3044` -- `renderChat` : seule ligne à changer (`el("div","bubble-text", turn.text)`). Le rendu, déclenché par `scheduleRender` (rAF), reconstruit les bulles ; mémoire à purger comme `approvalCards` (:3001). `el()` (:1088) et `reasoningBlock` (:2954) restent intacts.
+- `src/harness_lab/web/static/app.js:679` (`SUB_KINDS`), `:6398` (`eventSummary`, branche `outbound_request` vers :6503), `:6372` (`KIND_LABELS`).
+- `src/harness_lab/web/static/app.css:729` -- `.bubble` en `pre-wrap` ; il faut `white-space: normal` sur le rendu, `pre` pour les blocs de code. `:2172` : règles du mode focus.
+- `src/harness_lab/web/static/diagnostic.html:173/185/199` -- `#checks`, `#candidates`, `#cloud-models`. `patchList` (:290) remplace un `<li>` initial ; `renderCheck` (:302) ajoute à `checksEl`. `t()` vient de `i18n.js`.
+- `src/harness_lab/web/app.py:581` -- `diagnostic_state` (gestionnaire imbriqué de `create_app`), `_models` (:639), `log` (:41), middlewares (:329).
+- `src/harness_lab/net/factory.py:54` -- `_check_and_trace`, `_headers` (:73), `create_client` (:157), `create_async_client` (:205). `is_loopback` vient de `guard`.
+- `src/harness_lab/config.py:99` -- `PUBLIC_HEADERS` ; ajouter `PUBLIC_RESPONSE_HEADERS` et les préfixes de quota à côté.
+- `src/harness_lab/trace/catalog.py:43/52/1345` -- `OutboundHeader`, `OutboundRequestPayload`, `PAYLOAD_MODELS`.
+- `src/harness_lab/models/openai_chat.py:435/464/498` -- statut ≠ 200, `_refused`, `_no_quota` : ne pas modifier.
 - `content/ui.yaml:1009` (`diagnostic:`) et `:659` (`main.log.kinds`), avec les surcouches `content/i18n/{en,de}/ui.yaml` (environ :998 et :650). Le test de parité est `tests/test_ui_texts.py:95`, et l'allemand doit employer la forme de politesse.
 - `tools/e2e/fake_openai.py:397` -- `_script` : déclencheurs entre crochets (`[erreur429]` avec `headers`).
-- `tools/e2e/wavestack_e2e.py` -- greffes réservées au parcours E2E.
+- `tools/e2e/harness_lab_e2e.py` -- greffes réservées au parcours E2E.
 - `tools/e2e/run_e2e.py` -- `s_provider_errors` (:1246), `s_panes` (:2638), `_bar_under_panes` (:2017), `SCENARIOS` (vers :11075), `_log_catalog` (:1138).
 - Tests existants à étendre : `tests/test_net_factory.py` (:41, :257), `tests/test_cloud.py` (:877-920, D6), `tests/test_web_app.py` (:18-33, :125), `tests/test_e2e_fake_openai.py` (:128).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/web/static/markdown.js` -- nouveau module : `export function renderMarkdown(text)`, qui renvoie un `DocumentFragment` selon le sous-ensemble et les règles de lien ci-dessus -- rendu sûr sans dépendance.
-- [x] `src/wavestack/web/static/app.js` -- importer `renderMarkdown` ; à :3044, `div.bubble-text.is-markdown`, dont l'enfant est mémorisé par tour (`Map`, purgée à chaque rendu) ; ajouter `outbound_response` à `SUB_KINDS` et à `eventSummary` -- Markdown dans la Vue humain seulement, et résumé du journal.
-- [x] `src/wavestack/web/static/app.css` -- styles de `.bubble-text.is-markdown` (`white-space: normal`, marges des `p`, listes et titres, `code`, `pre` défilant) avec les jetons de `tokens.css`. Ajouter `body.focus-mode .right { min-height: 0; }` -- lisibilité, et barre basse en place.
-- [x] `src/wavestack/web/static/diagnostic.html` -- `<li class="loading-note" data-i18n="diagnostic.loading">` dans les trois listes, retiré de `#checks` au premier `renderCheck` -- R1.
+- [x] `src/harness_lab/web/static/markdown.js` -- nouveau module : `export function renderMarkdown(text)`, qui renvoie un `DocumentFragment` selon le sous-ensemble et les règles de lien ci-dessus -- rendu sûr sans dépendance.
+- [x] `src/harness_lab/web/static/app.js` -- importer `renderMarkdown` ; à :3044, `div.bubble-text.is-markdown`, dont l'enfant est mémorisé par tour (`Map`, purgée à chaque rendu) ; ajouter `outbound_response` à `SUB_KINDS` et à `eventSummary` -- Markdown dans la Vue humain seulement, et résumé du journal.
+- [x] `src/harness_lab/web/static/app.css` -- styles de `.bubble-text.is-markdown` (`white-space: normal`, marges des `p`, listes et titres, `code`, `pre` défilant) avec les jetons de `tokens.css`. Ajouter `body.focus-mode .right { min-height: 0; }` -- lisibilité, et barre basse en place.
+- [x] `src/harness_lab/web/static/diagnostic.html` -- `<li class="loading-note" data-i18n="diagnostic.loading">` dans les trois listes, retiré de `#checks` au premier `renderCheck` -- R1.
 - [x] `content/ui.yaml`, `content/i18n/en/ui.yaml`, `content/i18n/de/ui.yaml` -- clés `diagnostic.loading` et `main.log.kinds.outbound_response` -- i18n.
-- [x] `src/wavestack/web/app.py` -- un middleware horodate l'arrivée de `/api/diagnostic` ; `diagnostic_state` mesure ses étapes avec `time.perf_counter` et journalise (debug, warning au-delà de `SLOW_DIAGNOSTIC_S`) -- R1, instrumenter sans deviner.
-- [x] `src/wavestack/config.py`, `src/wavestack/trace/catalog.py`, `src/wavestack/net/factory.py` -- liste blanche des en-têtes de réponse, `OutboundResponsePayload` enregistré, crochet `response` des deux clients. Le prédicat « tracé ou non » est factorisé dans `_traced(request)`, utilisé par les deux crochets -- R2.
+- [x] `src/harness_lab/web/app.py` -- un middleware horodate l'arrivée de `/api/diagnostic` ; `diagnostic_state` mesure ses étapes avec `time.perf_counter` et journalise (debug, warning au-delà de `SLOW_DIAGNOSTIC_S`) -- R1, instrumenter sans deviner.
+- [x] `src/harness_lab/config.py`, `src/harness_lab/trace/catalog.py`, `src/harness_lab/net/factory.py` -- liste blanche des en-têtes de réponse, `OutboundResponsePayload` enregistré, crochet `response` des deux clients. Le prédicat « tracé ou non » est factorisé dans `_traced(request)`, utilisé par les deux crochets -- R2.
 - [x] `tools/e2e/fake_openai.py` -- déclencheurs `[markdown]` (échantillon couvrant la matrice, injections comprises) et `[quota0]` (429, `x-ratelimit-limit-req-minute: 0`, `x-ratelimit-remaining-req-minute: 0`, `x-request-id`, corps `Rate limit exceeded`) -- faux modèle.
-- [x] `tools/e2e/wavestack_e2e.py` -- greffe de `factory._traced` : une requête dont le corps contient `[quota0]` est tracée malgré la boucle locale -- seul moyen de faire passer `outbound_response` par le faux modèle.
+- [x] `tools/e2e/harness_lab_e2e.py` -- greffe de `factory._traced` : une requête dont le corps contient `[quota0]` est tracée malgré la boucle locale -- seul moyen de faire passer `outbound_response` par le faux modèle.
 - [x] `tools/e2e/run_e2e.py` -- nouveau scénario `markdown` (rendu, injections, liens, autres vues brutes, `MutationObserver` sans perte de `.bubble-text` pendant le flux, rechargement) ; `diagnostic_wait` (`page.route` retarde `/api/diagnostic` de 1,5 s) ; `[quota0]` dans `s_provider_errors` (journal : libellé, résumé, masquage ; message D6), avec la conversation vidée après ; mode focus de chaque volet dans `s_panes` à 1280×672 et 1440×900 (défilement d'Orchestration, molette, Fin : page non défilante, barre sous les volets) -- E2E.
 - [x] `tests/test_net_factory.py`, `tests/test_cloud.py`, `tests/test_web_app.py`, `tests/test_e2e_fake_openai.py` -- tests pytest de la matrice côté Python : événement et masquage (synchrone et asynchrone), absence pour 200 et pour la boucle locale, ordre dans un tour Mistral avec D6 inchangé ; journaux du diagnostic (`caplog`) ; déclencheurs du faux modèle ; garde statique : `markdown.js` sans API HTML, et `app.js` qui l'utilise pour `.bubble-text`.
 - [x] `tools/e2e/README.md`, `_bmad-output/implementation-artifacts/resultats-test-pc-2026-10-02.md` (défauts fermés) et `deferred-work.md` si une entrée se ferme -- documentation.
 
 **Acceptance Criteria:**
 - Étant donné une réponse en Markdown, quand le tour se termine puis que la page est rechargée, alors la Vue humain montre le même rendu, tandis que Contexte LLM, Orchestration et le journal montrent `**` en clair.
-- Étant donné le premier appel lent à `/api/diagnostic`, quand il dure plus d'1 s, alors la console de `uv run wavestack` affiche une ligne avec le total, l'attente et chaque étape en ms.
+- Étant donné le premier appel lent à `/api/diagnostic`, quand il dure plus d'1 s, alors la console de `uv run harness-lab` affiche une ligne avec le total, l'attente et chaque étape en ms.
 - Étant donné Orchestration agrandie à 1280×672, quand on fait défiler vers le bloc des données sortantes, alors `document.scrollingElement.scrollTop` reste à 0 et la barre basse reste sous les volets.
 
 ## Spec Change Log

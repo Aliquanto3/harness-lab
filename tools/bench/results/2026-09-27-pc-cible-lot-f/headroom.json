@@ -17,7 +17,7 @@
   "strace": false,
   "naive": {
     "variant": "naive",
-    "guard": "wavestack.net.guard",
+    "guard": "harness_lab.net.guard",
     "python": "3.13.5",
     "counting_model": "gpt-4",
     "import_s": 0.184,
@@ -83,7 +83,7 @@
   },
   "configured": {
     "variant": "configured",
-    "guard": "wavestack.net.guard",
+    "guard": "harness_lab.net.guard",
     "python": "3.13.5",
     "counting_model": "gpt-4",
     "import_s": 0.199,

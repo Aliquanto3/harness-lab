@@ -39,7 +39,7 @@ uncertain_text: "Uncertain estimate: the provider will decide."
 # Test of a cloud model (“Test”): fixed prompt, tool and reply, without any user data.
 test:
   prompt: >-
-    WaveStack connection test. Call the get_datetime tool, then answer in one short
+    HarnessLab connection test. Call the get_datetime tool, then answer in one short
     sentence with the date obtained.
   tool:
     name: get_datetime

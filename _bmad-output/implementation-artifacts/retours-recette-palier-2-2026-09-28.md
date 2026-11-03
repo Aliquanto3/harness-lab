@@ -2,7 +2,7 @@
 
 Source : cahier de recette interactif (`cahier-recette-palier-2.html`, version en ligne), rempli
 par Anaël sur le PC cible (Windows 11, CPU, 16 Go), branche `claude/dreamy-cerf-gdjtee` au commit
-`6664df9`. Edge ouvert pendant la séance (lecture du cahier et interface WaveStack). Chaque
+`6664df9`. Edge ouvert pendant la séance (lecture du cahier et interface HarnessLab). Chaque
 retour renvoie à la story qui le traite (`stories.yaml`, ids 22 à 34). Décisions prises le
 2026-09-28 : fenêtre de contexte réglable (4 096 par défaut, 8 192, 16 384) ; budget mémoire
 dynamique plafonné ; écran RAG avec FAISS et LanceDB ; tout est implémenté par Claude Code dans
@@ -16,8 +16,8 @@ le cloud.
 | C1 Mémoire globale (N1) | KO (interface) | Lot A tenu : pas de relecture au 2e tour, 1,3 s (574 tokens en entrée). Mais : consigne du scénario trop longue dans la Vue humain (elle cache le prompt et la réponse) ; tiroir de la mémoire sans croix de fermeture, boutons « Tout effacer » et « Fermer » en bas, hors de vue, et trop semblables à « Enregistrer » et « Supprimer ». Question : les numéros de tour continuent après « Réinitialiser » (t4) ; est-ce voulu ? | 22 |
 | C2 Raisonnement | OK | 134,3 s dans l'interface avec le budget 768 (111 s par script, Edge fermé) ; réponse juste. Délai accepté : on voit la réflexion s'afficher en direct. | — |
 | C3 User-Agent | KO | « Données sortantes » (`outbound_request`) ne montre que `method`, `url`, `body` : aucun en-tête, donc pas d'User-Agent visible. | 23 |
-| C4 Arrêter pendant un chargement | KO | Arrêt effectif après ≈ 25 s (fin de la sonde). Second essai : « WaveStack occupe 0 Mo sans le modèle actif » (faux ; le script mesurait 118 Mo après libération). Suggestion : budget mémoire calculé selon la RAM du poste. | 24 |
-| C5 Briques indisponibles | OK | Mais llama3.2:3b (Ollama) est refusé : « demande environ 4,0 Go ; WaveStack occupe 149 Mo », alors qu'il tournait le 2026-09-27. L'encadré s'affiche avec minicpm5:1b-q4_k_m. | 24 |
+| C4 Arrêter pendant un chargement | KO | Arrêt effectif après ≈ 25 s (fin de la sonde). Second essai : « HarnessLab occupe 0 Mo sans le modèle actif » (faux ; le script mesurait 118 Mo après libération). Suggestion : budget mémoire calculé selon la RAM du poste. | 24 |
+| C5 Briques indisponibles | OK | Mais llama3.2:3b (Ollama) est refusé : « demande environ 4,0 Go ; HarnessLab occupe 149 Mo », alors qu'il tournait le 2026-09-27. L'encadré s'affiche avec minicpm5:1b-q4_k_m. | 24 |
 | C6 Fichier incompatible | OK | Raison en français, mais avec un texte mal décodé : « abÃ®mÃ© », « modÃ¨le » (UTF-8 lu en cp1252). | 24 |
 | C7 Compression | OK | 2 004 → 496 tokens ; un premier appel à Headroom rend 525 → 525 (texte non compressible, attendu). | — |
 | C8 Script de l'index | OK | Message attendu, code 1. | — |

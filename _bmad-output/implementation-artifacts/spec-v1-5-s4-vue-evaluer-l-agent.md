@@ -5,7 +5,7 @@ created: '2026-10-25'
 status: 'review'
 route: ''
 review_loop_iteration: 0
-context: ['_bmad-output/specs/spec-wavestack-evaluer-l-agent/SPEC.md', '_bmad-output/specs/spec-wavestack-evaluer-l-agent/vues.md', '_bmad-output/specs/spec-wavestack-evaluer-l-agent/brownfield.md', '_bmad-output/specs/spec-wavestack-evaluer-l-agent/contrat-des-cas.md']
+context: ['_bmad-output/specs/spec-harness-lab-evaluer-l-agent/SPEC.md', '_bmad-output/specs/spec-harness-lab-evaluer-l-agent/vues.md', '_bmad-output/specs/spec-harness-lab-evaluer-l-agent/brownfield.md', '_bmad-output/specs/spec-harness-lab-evaluer-l-agent/contrat-des-cas.md']
 ---
 
 ## Intent
@@ -55,8 +55,8 @@ Précisions du point de contrôle :
 
 ### Fichiers et responsabilités
 
-- `src/wavestack/agent_eval/runs.py` : **pur**, sans I/O, sans session ni horloge. Contient les modèles des exécutions, le classement d'un essai, les agrégats (pass@k et pass^k), la comparaison et la trace (`trace_items`).
-- `src/wavestack/session/agent_eval_runner.py` : classe `AgentEvalRunner(session)`, attribut `session.agent_eval` créé dans `AppSession.__init__`. Elle porte le fil de l'exécution, les exécutions en mémoire, les enveloppes de chaque essai et le chargement des cas (fournis dans la langue de la session, cas de séance par `store.read_session_cases()`).
+- `src/harness_lab/agent_eval/runs.py` : **pur**, sans I/O, sans session ni horloge. Contient les modèles des exécutions, le classement d'un essai, les agrégats (pass@k et pass^k), la comparaison et la trace (`trace_items`).
+- `src/harness_lab/session/agent_eval_runner.py` : classe `AgentEvalRunner(session)`, attribut `session.agent_eval` créé dans `AppSession.__init__`. Elle porte le fil de l'exécution, les exécutions en mémoire, les enveloppes de chaque essai et le chargement des cas (fournis dans la langue de la session, cas de séance par `store.read_session_cases()`).
 - `app_session.py` : seulement les points d'accroche listés plus bas. Pas de logique d'évaluation.
 
 ### API de l'exécuteur
@@ -82,13 +82,13 @@ class AgentEvalRunner:
 - `k=3` exige exactement un cas (`ValueError` → 422 `refused.k_suite`). Un `k` autre que 1 ou 3 est rejeté par la validation de la route.
 - Un id inconnu lève `KeyError`. Une liste vide lève `SendRefused(refused.no_case)`.
 - Refus hors de `idle` : `SendRefused` avec `_refusal_reason()`.
-- Sous `session._lock`, `start` vérifie `idle` (et l'absence de `reason_text`, comme `_start`), fixe `session._eval_run` et passe l'état à `agent_eval` (raison `session.state.agent_eval`), sans émettre. Hors du verrou, `_lock` n'étant pas réentrant : `_emit_state()`, puis `snapshot = session.case_config_snapshot()`, puis un `threading.Thread(daemon=True, name="wavestack-agent-eval")`. Aucune intention de classe (a) ne peut passer entre les deux, puisque le garde HTTP voit déjà `running`. Le fil n'utilise pas `session._executor`, le seul fil de travail des tours : il attend des tours, il ne peut donc pas tourner sur ce fil.
+- Sous `session._lock`, `start` vérifie `idle` (et l'absence de `reason_text`, comme `_start`), fixe `session._eval_run` et passe l'état à `agent_eval` (raison `session.state.agent_eval`), sans émettre. Hors du verrou, `_lock` n'étant pas réentrant : `_emit_state()`, puis `snapshot = session.case_config_snapshot()`, puis un `threading.Thread(daemon=True, name="harness-lab-agent-eval")`. Aucune intention de classe (a) ne peut passer entre les deux, puisque le garde HTTP voit déjà `running`. Le fil n'utilise pas `session._executor`, le seul fil de travail des tours : il attend des tours, il ne peut donc pas tourner sur ce fil.
 - `case_ids` explicites : c'est la voie des tests et de l'outil de mesure. La route ne propose que la suite ou un cas.
 - **`check_window=False` : pour les tests seulement.** Le faux moteur compte 1 token par octet, un vrai petit modèle environ 3,5 caractères par token. Une session de test de 16 384 tokens joue donc le rôle d'une vraie fenêtre de 4 096. Avec `check_window=False`, l'étape 3 (fenêtre) est sautée et `Run.window_checked` vaut `False`. Garde-fous, pour qu'elle ne serve jamais en formation :
   - argument nommé seul ;
   - absent du modèle de `POST /runs` (`extra="forbid"`) ;
   - `measure_cases.py` ne le passe jamais : il mesure sur la fenêtre réelle ;
-  - un test lit les sources de `src/wavestack/web/`, `src/wavestack/web/static/` et `tools/`, et vérifie que `check_window` n'y apparaît pas.
+  - un test lit les sources de `src/harness_lab/web/`, `src/harness_lab/web/static/` et `tools/`, et vérifie que `check_window` n'y apparaît pas.
 
   Mesure du point de contrôle (story 2, commit `74b431a7`, `case_player`) : `code_talvane_apres_compaction` joué sur une session de 4 096 finit en `overflow` au tour du message, puis à celui de la compaction (le résumé lui-même déborde), et échoue. Sur 16 384, il réussit avec 3 tours et 2 appels au modèle. Démarrer la session de test sur `case.window` ne marche donc pas avec le faux moteur.
 
@@ -278,7 +278,7 @@ Une liste d'éléments `{seq, context_id, text, fault: bool}`, dans l'ordre des 
 
 **Faute** : l'élément dont le `seq` est le plus grand ≤ `failing.seq`. Si `failing.seq` vaut `None` (témoin absent), c'est le dernier élément. Aucun élément n'est marqué pour un essai réussi. Les libellés de statut, de décision et de limite réutilisent ceux du journal qui existent déjà dans `messages.yaml`. Le dev les cherche avant d'en créer.
 
-## Routes (`src/wavestack/web/agent_eval_api.py`)
+## Routes (`src/harness_lab/web/agent_eval_api.py`)
 
 `register_agent_eval_routes(app, app_session)` installe les routes et le garde. Préfixe `/api/agent_eval/`, partagé avec la story 3, qui a `GET /draft`, `POST /verdict` et `POST /cases`. Erreurs : `{"detail": <texte dans la langue de la session>}` (`render(...)`), comme les autres intentions.
 
@@ -463,7 +463,7 @@ Fichiers : `content/ui.yaml`, `content/i18n/en/ui.yaml`, `content/i18n/de/ui.yam
 | `clear_confirm.other` | Effacer les {count} cas de séance ? Les cas fournis restent. | Clear the {count} session cases? The provided cases stay. | Die {count} Sitzungsfälle löschen? Die mitgelieferten Fälle bleiben. |
 | `clear_confirm.yes` | Effacer | Clear | Löschen |
 | `clear_confirm.no` | Annuler | Cancel | Abbrechen |
-| `error.no_answer` | WaveStack ne répond pas : la vue n'a pas pu être mise à jour. | WaveStack is not responding: the view could not be updated. | WaveStack antwortet nicht: Die Ansicht konnte nicht aktualisiert werden. |
+| `error.no_answer` | HarnessLab ne répond pas : la vue n'a pas pu être mise à jour. | HarnessLab is not responding: the view could not be updated. | HarnessLab antwortet nicht: Die Ansicht konnte nicht aktualisiert werden. |
 
 ### Backend : `messages.yaml`
 
@@ -512,7 +512,7 @@ Les libellés `{status}`, `{decision}`, `{limit}`, `{strategy}` et `{point}` ré
 
 ## Tests
 
-Les tests utilisent le faux moteur (`booted_session`, `FakeEngine`) et `WAVESTACK_DATA_DIR` sous `tmp_path`. Les cas de séance sont écrits par `store.write_session_cases` dans ce dossier : un vrai fichier, aucun mock. Les cas sont lancés par `start([ids], k)` pour une liste exacte. Le registre de dépense (`cloud_base._spend`) est remis à zéro entre les tests par la fixture existante (sinon, une fixture `autouse` du module la crée).
+Les tests utilisent le faux moteur (`booted_session`, `FakeEngine`) et `HARNESS_LAB_DATA_DIR` sous `tmp_path`. Les cas de séance sont écrits par `store.write_session_cases` dans ce dossier : un vrai fichier, aucun mock. Les cas sont lancés par `start([ids], k)` pour une liste exacte. Le registre de dépense (`cloud_base._spend`) est remis à zéro entre les tests par la fixture existante (sinon, une fixture `autouse` du module la crée).
 
 ### `tests/test_agent_eval_runner.py` (session)
 
@@ -556,9 +556,9 @@ Les tests utilisent le faux moteur (`booted_session`, `FakeEngine`) et `WAVESTAC
 12. **k = 3.** Les trois essais partagent le même moteur : on lui donne des sorties enchaînées qui font réussir l'essai 1, échouer le 2 et réussir le 3. `successes == 2`, `ran == 3`, `pass_at_k is True`, `pass_pow_k is False`, statut `passed`.
 13. **Bornes de boucle.** `values={"tools": {"max_calls": 2}}` et un moteur qui rappelle l'outil sans fin. Le cas 1 est `failed`, raison « tour incomplet (fini en « limit ») ». Le cas 2 est lancé ensuite et réussit.
 14. **Exception dans l'exécuteur** : seule injection de faute de la suite, faute d'un chemin réel qui lève. `monkeypatch.setattr(session, "apply_case", ...)` lève `RuntimeError` au deuxième cas, en appelant la vraie méthode au premier. On attend : `run.status == "error"` avec `error_text`, le cas 1 avec son verdict, les cas restants `not_run` (`cancelled`), un `harness_error` dans le journal, l'état final `idle` et la configuration rétablie. Les ids inconnus, eux, ne lèvent pas (test 16).
-15. **Pas d'accès privé** : un test de garde lit les sources de `tools/eval/`, `src/wavestack/session/agent_eval_runner.py` et `tests/test_agent_cases_provided.py`, et vérifie qu'aucun ne contient `session._bricks`, `_tools_enabled`, `_skills_enabled`, `_hooks_enabled`, `_mcp_enabled` ni `_history` (expression `session\._(bricks|tools_enabled|skills_enabled|hooks_enabled|mcp_enabled|history)`).
+15. **Pas d'accès privé** : un test de garde lit les sources de `tools/eval/`, `src/harness_lab/session/agent_eval_runner.py` et `tests/test_agent_cases_provided.py`, et vérifie qu'aucun ne contient `session._bricks`, `_tools_enabled`, `_skills_enabled`, `_hooks_enabled`, `_mcp_enabled` ni `_history` (expression `session\._(bricks|tools_enabled|skills_enabled|hooks_enabled|mcp_enabled|history)`).
 16. **Ids inconnus ignorés.** Un cas de séance avec `skills: [competence_supprimee]` et `mcp_servers: [serveur_retire]` se joue. Son `CaseResult.ignored_ids` vaut `["competence_supprimee", "serveur_retire"]` (ordre : outils, hooks, compétences, serveurs MCP), et son statut vient de ses vérifications.
-17. **Option de fenêtre bornée** : le test de sources décrit sous `start` (`check_window` absent de `src/wavestack/web/` et de `tools/`). `Run.window_checked` vaut `True` par défaut et `False` avec l'option.
+17. **Option de fenêtre bornée** : le test de sources décrit sous `start` (`check_window` absent de `src/harness_lab/web/` et de `tools/`). `Run.window_checked` vaut `True` par défaut et `False` avec l'option.
 18. **Mémoire globale figée.** Un cas avec `global_memory`, et un moteur qui appelle `remember` (arguments selon le schéma réel du méta-outil, lu par le dev), suivi d'un deuxième cas. Le deuxième cas lit la mémoire de l'instantané. Après l'exécution, la mémoire est égale à celle d'avant, et aucune entrée de démonstration n'a été ajoutée.
 
 ### `tests/test_agent_eval_runs.py` (pur, journaux construits)
@@ -623,18 +623,18 @@ Le scénario `agent_eval` s'ajoute **en dernier** dans `SCENARIOS` de `tools/e2e
 ## Fichiers
 
 Nouveaux :
-- `src/wavestack/agent_eval/runs.py`
-- `src/wavestack/session/agent_eval_runner.py`
-- `src/wavestack/web/agent_eval_api.py`
-- `src/wavestack/web/static/agent-eval.js`
-- `src/wavestack/web/static/agent-eval.css`
+- `src/harness_lab/agent_eval/runs.py`
+- `src/harness_lab/session/agent_eval_runner.py`
+- `src/harness_lab/web/agent_eval_api.py`
+- `src/harness_lab/web/static/agent-eval.js`
+- `src/harness_lab/web/static/agent-eval.css`
 - `tests/test_agent_eval_runner.py`, `tests/test_agent_eval_runs.py`, `tests/test_agent_eval_api.py`
 
 Supprimé : `tools/eval/case_player.py`.
 
 Modifiés. Les fichiers partagés avec la story 3 sont en **gras**, avec leur point d'insertion :
-- **`src/wavestack/web/app.py`** : l'import, et la ligne `register_agent_eval_routes(app, app_session)` **juste après** la ligne `register_agent_case_routes(...)` de la story 3 (elle-même après `/api/intentions/compact`). Rien d'autre : le garde est installé par cette fonction.
-- **`src/wavestack/web/static/app.js`**, une dizaine de lignes :
+- **`src/harness_lab/web/app.py`** : l'import, et la ligne `register_agent_eval_routes(app, app_session)` **juste après** la ligne `register_agent_case_routes(...)` de la story 3 (elle-même après `/api/intentions/compact`). Rien d'autre : le garde est installé par cette fonction.
+- **`src/harness_lab/web/static/app.js`**, une dizaine de lignes :
   - l'import d'`./agent-eval.js` **juste après** celui d'`./agent-case-form.js` ;
   - `sessionStateChanged(state)` dans le traitement de `session_state` ;
   - `state?.state !== "agent_eval"` dans la condition `stop.hidden` (vers la l. 3804) ;
@@ -644,9 +644,9 @@ Modifiés. Les fichiers partagés avec la story 3 sont en **gras**, avec leur po
   - les clés de la story 4 **à la fin** du bloc `agent_eval:`, après `turn_completed` (la story 3 met `agent_case:` avant `agent_eval:`) ;
   - `session.state.agent_eval`, après `session.state.mcp_lab`.
 - **`tools/e2e/run_e2e.py`** : le scénario en dernier dans `SCENARIOS` et la fonction en fin de fichier ; une ligne dans `tools/e2e/README.md`.
-- `src/wavestack/web/static/index.html` : le bouton `#agent-eval-toggle` (`data-i18n="main.agent_eval.toggle"`) dans `header.top-bar`, juste avant `#pane-chips`. La story 3 ne touche pas ce fichier.
-- `src/wavestack/session/app_session.py` : les onze points d'accroche ci-dessus, et l'extraction de `_finops_capped()`.
-- `src/wavestack/trace/catalog.py` : `SessionState` (`"agent_eval"`) et `TurnStartedPayload` (`case_id`, `run_id`).
+- `src/harness_lab/web/static/index.html` : le bouton `#agent-eval-toggle` (`data-i18n="main.agent_eval.toggle"`) dans `header.top-bar`, juste avant `#pane-chips`. La story 3 ne touche pas ce fichier.
+- `src/harness_lab/session/app_session.py` : les onze points d'accroche ci-dessus, et l'extraction de `_finops_capped()`.
+- `src/harness_lab/trace/catalog.py` : `SessionState` (`"agent_eval"`) et `TurnStartedPayload` (`case_id`, `run_id`).
 - `tools/eval/measure_cases.py`, `tools/eval/README.md`, `tests/test_agent_cases_provided.py` (passage par l'exécuteur).
 
 Non modifiés : `agent_eval/cases.py`, `checks.py`, `store.py`, `draft.py`, `agent_case_api.py`, `agent-case-form.js` et `.css`, `contrat-des-cas.md`.

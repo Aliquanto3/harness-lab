@@ -1,6 +1,6 @@
 # E-Mail-Richtlinie von Exemplia, Version 1 (2024)
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
 
 Diese Version der E-Mail-Richtlinie, gültig seit Januar 2024, wird durch Version 2 ersetzt: Sie wird hier als Archiv aufbewahrt, um frühere Entscheidungen nachvollziehen zu können.
 

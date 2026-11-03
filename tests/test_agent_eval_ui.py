@@ -8,9 +8,9 @@ import re
 import pytest
 import yaml
 
-from wavestack import config
+from harness_lab import config
 
-STATIC = config.repo_root() / "src" / "wavestack" / "web" / "static"
+STATIC = config.repo_root() / "src" / "harness_lab" / "web" / "static"
 SCRIPT = (STATIC / "agent-eval.js").read_text(encoding="utf-8")
 LANGS = ("fr", "en", "de")
 _VARIABLE = re.compile(r"\{(\w+)\}")

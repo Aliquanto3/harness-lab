@@ -1,6 +1,6 @@
 # Rapport du run V1.5 « Évaluer l'agent » (incrément 1)
 
-Run du 2026-10-25 20:50 au 2026-10-26 04:57, journal complet dans [run-autonome.md](run-autonome.md). Spec : `_bmad-output/specs/spec-wavestack-evaluer-l-agent/`. Version publiée : **1.6.0**.
+Run du 2026-10-25 20:50 au 2026-10-26 04:57, journal complet dans [run-autonome.md](run-autonome.md). Spec : `_bmad-output/specs/spec-harness-lab-evaluer-l-agent/`. Version publiée : **1.6.0**.
 
 ## Fusionné
 

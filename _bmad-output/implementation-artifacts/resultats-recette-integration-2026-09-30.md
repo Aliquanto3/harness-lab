@@ -6,7 +6,7 @@
 - **Poste :** le PC cible (Windows 11, sans droits administrateur).
 - **Environnement :** le `.venv` de la démo (extra `compression`, sans `greenops`).
 - **Modèle :** Gemini réel, clé lue hors du dépôt.
-- **Lancement :** WaveStack réel sur un dossier de données jetable, piloté par Playwright et par l'API.
+- **Lancement :** HarnessLab réel sur un dossier de données jetable, piloté par Playwright et par l'API.
 
 ## Résultat : 14 vérifications sur 14
 
@@ -25,6 +25,6 @@
   - Vider la conversation, puis passer à l'anglais : 200.
   - Le tour « What time is it? » envoie le prompt système anglais, et la réponse est « It is 2:41 AM on Wednesday, September 30, 2026. ».
   - Retour au français ensuite.
-- **Clé :** absente du journal complet et de `wavestack.log`.
+- **Clé :** absente du journal complet et de `harness_lab.log`.
 
 Coût de cette recette : environ 0,0005 $. L'ensemble des appels réels de la nuit reste sous 0,05 $.

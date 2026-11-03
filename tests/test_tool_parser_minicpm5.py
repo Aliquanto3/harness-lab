@@ -8,10 +8,10 @@ import pytest
 from fake_engine import FakeEngine, booted_session
 from test_turn import _run
 
-from wavestack.context.render import render_template
-from wavestack.models.capabilities import ChannelSplitter, capabilities_for, tool_call_tags
-from wavestack.models.engine import EngineMetadata
-from wavestack.tools.parser import ToolCall, parse_tool_calls
+from harness_lab.context.render import render_template
+from harness_lab.models.capabilities import ChannelSplitter, capabilities_for, tool_call_tags
+from harness_lab.models.engine import EngineMetadata
+from harness_lab.tools.parser import ToolCall, parse_tool_calls
 
 FIXTURES = Path(__file__).parent / "fixtures"
 MINICPM5 = (FIXTURES / "minicpm5_chat_template.jinja").read_bytes().decode("utf-8")

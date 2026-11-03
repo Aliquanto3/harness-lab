@@ -1,5 +1,5 @@
 ---
-title: Revue adverse des amendements « modèles cloud » (FR-43) du spine WaveStack
+title: Revue adverse des amendements « modèles cloud » (FR-43) du spine HarnessLab
 target: ../ARCHITECTURE-SPINE.md
 scope: "Amendements du 2026-09-24 : AD-2, AD-3, AD-4 (mode chat), AD-5 (openai_chat), AD-6, AD-8, AD-9, AD-12, AD-15, AD-16, AD-20, AD-21 ; interactions avec AD-1, AD-10, AD-11, AD-14, AD-17, AD-23, AD-25 et la table des identifiants"
 lens: "Deux unités conformes à la lettre de chaque AD, qui se construisent pourtant de façon incompatible (forme de données, propriétaire, chemin de mutation, fuite de secret)"
@@ -8,7 +8,7 @@ sources:
   - ../ARCHITECTURE-SPINE.md (git diff du 2026-09-24)
   - ../../../sprint-change-proposal-2026-09-24.md
   - ../../../ux-designs/ux-agentic-harness-training-demo-2026-09-22/EXPERIENCE.md
-  - src/wavestack/config.py, net/factory.py, tools/network.py, session/diagnostic.py, trace/catalog.py (code livré, pour vérifier les points d'ancrage)
+  - src/harness_lab/config.py, net/factory.py, tools/network.py, session/diagnostic.py, trace/catalog.py (code livré, pour vérifier les points d'ancrage)
 ---
 
 # Revue adverse : amendements « modèles cloud »
@@ -85,7 +85,7 @@ La session reçoit les `tool_calls` de l'API avec leur `id` fournisseur (`call_a
 **AD à resserrer :** AD-15, AD-20, schéma `[[cloud.models]]` (voir P7).
 
 **Règle proposée.**
-> - L'`id` d'un modèle cloud est un identifiant WaveStack unique (`{provider}.{slug}`), distinct du champ `model` envoyé à l'API. Son unicité est vérifiée après la fusion de `wavestack.toml` et de `settings.json`.
+> - L'`id` d'un modèle cloud est un identifiant HarnessLab unique (`{provider}.{slug}`), distinct du champ `model` envoyé à l'API. Son unicité est vérifiée après la fusion de `harness-lab.toml` et de `settings.json`.
 > - `api_keys.json` devient `{id: {host, key}}`. L'hôte est enregistré à la saisie. Si l'hôte déclaré diffère de l'hôte enregistré, `key_set = false` et la clé n'est pas envoyée : il faut la ressaisir.
 > - Le client d'un modèle cloud **ne suit aucune redirection** : `follow_redirects=False`, et un 3xx devient `harness_error`. C'est `net` qui applique la règle, sur `origin = model`.
 > - La clé ne passe que par l'en-tête déclaré. Un `base_url` qui contient des paramètres de requête est refusé au chargement de la configuration.
@@ -165,16 +165,16 @@ AD-20 dit seulement que `api_keys.json` « n'est jamais lu par `trace` ni renvoy
 
 ---
 
-## P7 — Schéma de `[[cloud.models]]` et fusion `wavestack.toml` / `settings.json` — **Majeur**
+## P7 — Schéma de `[[cloud.models]]` et fusion `harness-lab.toml` / `settings.json` — **Majeur**
 
 **Unité A : `config.load_config()`.** C'est le code livré : `_deep_merge` fusionne les dictionnaires, mais **remplace les listes en bloc**.
 
 **Unité B : story 11.** D3 prévoit d'ajouter un point d'accès interne dans `settings.json`, sous `cloud.models`, « en plus » des préréglages.
 
 **Où ça casse.**
-- Déclarer `cloud.models = [ {wavestone…} ]` dans `settings.json` **efface Groq et Mistral**. Pour garder les deux, une autre unité ajoute les listes : un même `id` présent des deux côtés apparaît alors deux fois (voir P3a pour la conséquence sur la clé).
+- Déclarer `cloud.models = [ {interne…} ]` dans `settings.json` **efface Groq et Mistral**. Pour garder les deux, une autre unité ajoute les listes : un même `id` présent des deux côtés apparaît alors deux fois (voir P3a pour la conséquence sur la clé).
 - Aucune AD ne possède le schéma. Ses champs sont éparpillés : capacités `tools`, `reasoning` et `context` (AD-6), `window` et `max_window` (AD-9), en-tête d'authentification (AD-5), nom du fournisseur (AD-12), hébergement, entraînement, offre d'essai et clause EEE (EXPERIENCE, D15). Une unité lit `context`, une autre `native_context`. Avec `extra = allow`, une clé écrite par erreur dans l'entrée (`api_key = …`) repart par `/api/diagnostic`.
-- Les textes de l'infobulle et de l'avertissement sont en français, alors qu'AD-19 veut tout contenu pédagogique dans `content/`. Une unité les met dans `wavestack.toml`, l'autre dans `content/providers/`.
+- Les textes de l'infobulle et de l'avertissement sont en français, alors qu'AD-19 veut tout contenu pédagogique dans `content/`. Une unité les met dans `harness-lab.toml`, l'autre dans `content/providers/`.
 - `window` par modèle contre le réglage de fenêtre de l'interface (AD-9, classe b) : quand le modèle cloud a un `window`, modifier la fenêtre dans l'interface ne change rien, et aucune raison n'est affichée.
 
 **AD à resserrer :** nouvelle clause dans AD-6 (ou AD-20), convention « Configuration ».
@@ -266,7 +266,7 @@ AD-20 dit seulement que `api_keys.json` « n'est jamais lu par `trace` ni renvoy
 **Règle proposée.**
 > - `reasoning_in_history: none | in_turn | all` est déclaré par modèle cloud (défaut `none`). Les segments non envoyés ne sont pas comptés.
 > - Pour un modèle cloud sans `tools`, `forced` est rendu en `injection` (texte dans le message utilisateur), avec sa raison.
-> - En mode chat, l'étape 2 neutralise une liste fixe de marqueurs de gabarit courants (`<|…|>`, `[INST]`, `<s>`), déclarée dans `wavestack.toml`.
+> - En mode chat, l'étape 2 neutralise une liste fixe de marqueurs de gabarit courants (`<|…|>`, `[INST]`, `<s>`), déclarée dans `harness-lab.toml`.
 
 ---
 

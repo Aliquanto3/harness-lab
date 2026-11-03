@@ -4,7 +4,7 @@
     "deterministic": true,
     "max_gap": 0.0
   },
-  "guard": "wavestack.net.guard",
+  "guard": "harness_lab.net.guard",
   "id": "reranker_livre",
   "peak_before_load_mb": 1934,
   "probabilistic": false,

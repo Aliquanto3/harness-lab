@@ -26,7 +26,7 @@ context: []
 |---|---|---|
 | 21 en-têtes, isolé (`gguf_meta.read_metadata`) | 5 086 ms | 1 753 ms (saut par blocs, résultats identiques) |
 | `models_payload` isolé, froid / chaud | 5 417 ms / 6 ms | — |
-| Vrai serveur (`uv run wavestack` sans navigateur), 1er `/api/diagnostic` après la recherche | 21 009 ms, dont `_models` 20 988 ms et en-têtes 20 893 ms (0,3 à 2,2 s par fichier) | 1 753 ms, dont `_models` 1 368 ms et en-têtes 1 186 ms ; appel suivant 54 ms |
+| Vrai serveur (`uv run harness-lab` sans navigateur), 1er `/api/diagnostic` après la recherche | 21 009 ms, dont `_models` 20 988 ms et en-têtes 20 893 ms (0,3 à 2,2 s par fichier) | 1 753 ms, dont `_models` 1 368 ms et en-têtes 1 186 ms ; appel suivant 54 ms |
 
 - Avant correctif, deux requêtes concurrentes (n° 16 et 17, dont un onglet Edge resté ouvert sur 8420) relisaient chacune les 21 en-têtes en même temps : chaque fichier coûtait deux fois plus (GIL). C'est l'écart avec les 5,4 s en isolé, et sans doute la raison des 14,7 s de la recette.
 - Le reste après correctif (1,2 s) : toutes les sondes étaient en cache, la recherche s'est donc terminée juste après `discover`, et la requête a attendu la fin du préchauffage, sans relire de fichier. Quand des sondes tournent, le préchauffage finit avant elles. La ligne reste en `warning` (≥ `SLOW_DIAGNOSTIC_S`). Un cache des en-têtes sur disque supprimerait ce reste aux lancements suivants : écarté par l'intention, à proposer si besoin.

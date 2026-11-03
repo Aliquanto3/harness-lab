@@ -1,6 +1,6 @@
 # Revue des habilitations chez Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
 
 Une habilitation est un droit d'accès à une application, un dossier partagé ou une zone physique, décrit dans la politique d'accès physique pour les locaux. Ce document fixe les règles de leur revue régulière.
 

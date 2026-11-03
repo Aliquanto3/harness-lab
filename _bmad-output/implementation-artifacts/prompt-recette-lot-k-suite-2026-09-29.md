@@ -6,7 +6,7 @@ la contre-vérification de `resultats-lot-k-2026-09-29.md`), et rien d'autre.
 
 ---
 
-Tu vas vérifier sur ce poste la suite du lot K de WaveStack. Travaille en français.
+Tu vas vérifier sur ce poste la suite du lot K de HarnessLab. Travaille en français.
 
 ## Contexte
 
@@ -20,8 +20,8 @@ Tu vas vérifier sur ce poste la suite du lot K de WaveStack. Travaille en fran�
 
 ## Règles
 
-1. Ne modifie rien du dépôt ni du dossier de données réel : tout lancement de WaveStack passe
-   par `WAVESTACK_DATA_DIR` vers un dossier jetable (celui de la séance précédente convient).
+1. Ne modifie rien du dépôt ni du dossier de données réel : tout lancement de HarnessLab passe
+   par `HARNESS_LAB_DATA_DIR` vers un dossier jetable (celui de la séance précédente convient).
 2. Outlook et Teams fermés pendant les tours du 2B.
 3. Consigne au fil de l'eau dans
    `_bmad-output/implementation-artifacts/resultats-lot-k-suite-2026-09-29.md` (ce fichier seul,

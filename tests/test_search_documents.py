@@ -6,9 +6,9 @@ import pytest
 from test_tools import _segments, call, tool_session
 from test_turn import _run
 
-from wavestack.hooks import HookContext, guard
-from wavestack.rag.corpus import load_rag_content
-from wavestack.tools.native import (
+from harness_lab.hooks import HookContext, guard
+from harness_lab.rag.corpus import load_rag_content
+from harness_lab.tools.native import (
     MAX_LINE,
     MAX_RESULTS,
     NATIVE_TOOLS,
@@ -17,8 +17,8 @@ from wavestack.tools.native import (
     resolve_demo_path,
     search_documents,
 )
-from wavestack.tools.parser import ToolCall
-from wavestack.tools.registry import ToolError
+from harness_lab.tools.parser import ToolCall
+from harness_lab.tools.registry import ToolError
 
 INACTIVE = [d.file for d in load_rag_content("fr").documents if not d.active]
 
@@ -70,7 +70,7 @@ def test_a_query_without_a_word_or_without_a_result_is_refused():
 
 def test_the_query_is_checked_before_any_document_is_read(monkeypatch):
     # V1.2 story 11 extracted `match_lines`: the empty query still refused before any reading.
-    from wavestack.tools import native
+    from harness_lab.tools import native
 
     def unreadable(*_args):  # noqa: ANN002, ANN202
         raise OSError("disk")

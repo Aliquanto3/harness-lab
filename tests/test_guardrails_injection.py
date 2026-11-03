@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import pytest
 
-from wavestack.guardrails.contract import Classification, Entity, NotInstalled
-from wavestack.guardrails.manager import GuardrailsManager
+from harness_lab.guardrails.contract import Classification, Entity, NotInstalled
+from harness_lab.guardrails.manager import GuardrailsManager
 
 
 class FakeInjection:
@@ -151,7 +151,7 @@ def test_injection_ready_from_files_on_disk_after_unload() -> None:
 
 
 def test_malicious_score_is_stable_and_never_fails_open_on_nan() -> None:
-    from wavestack.guardrails.injection import malicious_score
+    from harness_lab.guardrails.injection import malicious_score
 
     assert malicious_score([0.0, 0.0]) == pytest.approx(0.5)
     assert malicious_score([1000.0, 1001.0]) == pytest.approx(0.7310586)  # no overflow
@@ -173,8 +173,8 @@ def _hub(status: int | None, seen: list):
 
 
 def test_licence_check_accepted_asks_the_official_repo_without_weights() -> None:
-    from wavestack.guardrails.injection import check_licence
-    from wavestack.trace.journal import get_journal
+    from harness_lab.guardrails.injection import check_licence
+    from harness_lab.trace.journal import get_journal
 
     seen: list = []
     mark = get_journal().last_seq()
@@ -191,8 +191,8 @@ def test_licence_check_accepted_asks_the_official_repo_without_weights() -> None
 
 @pytest.mark.parametrize("status", [401, 403])
 def test_licence_check_refused_says_to_accept_the_licence(status: int) -> None:
-    from wavestack.guardrails.injection import LICENCE_PAGE, check_licence
-    from wavestack.models.download import DownloadError
+    from harness_lab.guardrails.injection import LICENCE_PAGE, check_licence
+    from harness_lab.models.download import DownloadError
 
     with pytest.raises(DownloadError) as caught:
         check_licence("hf_x", transport=_hub(status, []))
@@ -201,8 +201,8 @@ def test_licence_check_refused_says_to_accept_the_licence(status: int) -> None:
 
 
 def test_licence_check_network_failure_is_a_download_error() -> None:
-    from wavestack.guardrails.injection import check_licence
-    from wavestack.models.download import DownloadError
+    from harness_lab.guardrails.injection import check_licence
+    from harness_lab.models.download import DownloadError
 
     with pytest.raises(DownloadError) as caught:
         check_licence("hf_x", transport=_hub(None, []))
@@ -215,8 +215,8 @@ def test_ensure_loaded_downloads_nothing_when_the_licence_is_refused(monkeypatch
 
     from pydantic import SecretStr
 
-    from wavestack.guardrails import injection
-    from wavestack.models.download import DownloadError
+    from harness_lab.guardrails import injection
+    from harness_lab.models.download import DownloadError
 
     # No real onnxruntime/tokenizers needed: the refusal comes before they are used.
     monkeypatch.setitem(sys.modules, "onnxruntime", types.ModuleType("onnxruntime"))

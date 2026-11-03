@@ -16,7 +16,7 @@ deferred:
     evidence: |-
       Le dépôt n'a pas de banc de test JS ; seul le champ `truncated` de `tool_ended` est testé. À voir au test sur le PC cible.
     location: >-
-      src/wavestack/web/static/app.js:toolBody
+      src/harness_lab/web/static/app.js:toolBody
     severity: low
   - summary: >-
       Le second prompt de `mcp_lazy` (après le premier tour et les extraits RAG) n'est pas couvert par le test `fits`.
@@ -59,34 +59,34 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/tools/executor.py:95-162` -- `ToolExecutor.run` : émet `tool_started` puis `tool_ended{status, result, error_fr, duration_ms}` ; paramètre `apply=` existant (modèle pour un `bound=` appliqué au résultat réussi avant `tool_ended`).
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/tools/executor.py:95-162` -- `ToolExecutor.run` : émet `tool_started` puis `tool_ended{status, result, error_fr, duration_ms}` ; paramètre `apply=` existant (modèle pour un `bound=` appliqué au résultat réussi avant `tool_ended`).
+- `src/harness_lab/session/app_session.py` :
   - `_run_tool` (l.~5188) : chemin unique (tour, sous-agent, action forcée), appel `self._tool_executor.run(..., apply=self._apply_now)` ; `spec.network or spec.is_mcp` y est déjà testé.
   - `_count_tokens(text) -> (tokens, estimated)` (l.~3560) : tokenizer local ou estimation en mode chat, ne lève jamais.
   - `_transform_context` / `_compressible` / `_compress_one` : compression après l'exécution, donc après la borne.
   - `_OVERFLOW_CAUSES_FR` (l.~245), `_TOOL_CATALOG_FULL_FR` (l.~269), `_OVERFLOW_STRATEGIES_FR` (l.~301), `_emit_overflow` (l.~5687 : ne somme que les genres de `_OVERFLOW_CAUSES_FR`).
   - Disponibilité et état effectif de la brique `compression` (`_effective()`, raisons de disponibilité) pour la piste « allumez la compression ».
-- `src/wavestack/tools/registry.py:16,44-68` -- `ToolSpec` (`source`, `network`, `is_mcp`) ; natifs `tools/native.py:113-128`, réseau `tools/network.py:150-165` (`fetch_page` garde sa coupe en caractères, l.145-147).
-- `src/wavestack/config.py` -- `_int` (l.~440), `tool_max_calls`, `fetch_page_max_chars` (l.~477) : modèle pour `tool_result_max_tokens`.
-- `wavestack.toml:103-111` -- section `[tools]` commentée en français.
-- `src/wavestack/trace/catalog.py` -- `ToolEndedPayload` (l.~376).
-- `src/wavestack/web/static/app.js` -- `toolBody` (l.~2748, « Résultat » l.~2771), résumé de la ligne d'outil (l.~3293), `overflowCard` (l.~2805).
+- `src/harness_lab/tools/registry.py:16,44-68` -- `ToolSpec` (`source`, `network`, `is_mcp`) ; natifs `tools/native.py:113-128`, réseau `tools/network.py:150-165` (`fetch_page` garde sa coupe en caractères, l.145-147).
+- `src/harness_lab/config.py` -- `_int` (l.~440), `tool_max_calls`, `fetch_page_max_chars` (l.~477) : modèle pour `tool_result_max_tokens`.
+- `harness-lab.toml:103-111` -- section `[tools]` commentée en français.
+- `src/harness_lab/trace/catalog.py` -- `ToolEndedPayload` (l.~376).
+- `src/harness_lab/web/static/app.js` -- `toolBody` (l.~2748, « Résultat » l.~2771), résumé de la ligne d'outil (l.~3293), `overflowCard` (l.~2805).
 - `content/scenarios.yaml` -- `data_flows` (l.~300 : briques `short_memory, system_prompt, tools`, MCP activé à la main), `mcp_full`, `mcp_lazy`, `iam`, `sovereignty`.
-- `tests/test_program.py` -- `CHARS_PER_TOKEN = 4`, `SAFETY = 1.3` (l.~52), `_verdict` (l.~279), `test_every_scenario_fits_the_default_window_with_its_first_prompt` (l.~300 : session cloud `mistral`, aperçu `context_preview`). `VocabTokenizer(model_path)` (`models/engine.py`) ouvre un GGUF sans poids ; `WAVESTACK_TEST_GGUF` déjà lu par `tests/test_render_reference.py`.
+- `tests/test_program.py` -- `CHARS_PER_TOKEN = 4`, `SAFETY = 1.3` (l.~52), `_verdict` (l.~279), `test_every_scenario_fits_the_default_window_with_its_first_prompt` (l.~300 : session cloud `mistral`, aperçu `context_preview`). `VocabTokenizer(model_path)` (`models/engine.py`) ouvre un GGUF sans poids ; `HARNESS_LAB_TEST_GGUF` déjà lu par `tests/test_render_reference.py`.
 - `tests/test_mcp.py`, `tests/test_tools.py`, `tests/test_compression.py` -- sessions et faux serveurs MCP / réseau à réutiliser.
 - `_bmad-output/implementation-artifacts/deferred-work.md` -- trois entrées du 2026-09-27 du lot B (résultats non bornés, message de débordement, test `fits`), à fermer.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- `wavestack.toml`, `src/wavestack/config.py` -- `[tools] result_max_tokens = 1200` commenté (outils MCP et réseau, avant la compression) ; propriété `tool_result_max_tokens` (défaut 1 200, plancher 200).
-- `src/wavestack/tools/executor.py` -- paramètre `bound` (appelable `texte -> (texte borné, infos | None)`) appliqué au seul résultat réussi, avant `tool_ended` ; `truncated` dans `tool_ended` quand il coupe.
-- `src/wavestack/session/app_session.py` -- dans `_run_tool`, `bound` pour `spec.network or spec.is_mcp` (hors `delegate`) : compte avec `_count_tokens`, coupe au plus grand préfixe qui tient avec la mention (recherche par dichotomie sur les caractères), recule au dernier saut de ligne s'il est dans la seconde moitié du préfixe, ajoute « [Résultat tronqué par le harnais : {gardés} tokens sur {total}. Posez une question plus précise pour obtenir la suite.] ». `_emit_overflow` : somme de tous les genres de segments hors `template`, `user_message` gardant la priorité à égalité ; textes ajoutés pour `tool_result`, `global_memory`, `skill_catalog`/`skill_body`, `subagent_result` ; `tool_result` propose la compression seulement si la brique est disponible et éteinte.
-- `src/wavestack/trace/catalog.py` -- `ToolEndedPayload.truncated: ToolResultTruncated | None` (`tokens`, `total_tokens`, `estimated`).
-- `src/wavestack/web/static/app.js` -- `toolBody` : ligne « Résultat tronqué par le harnais : N tokens sur M » (« ≈ » si estimé) au-dessus du résultat ; « tronqué » dans le résumé de la ligne d'outil.
+- `harness-lab.toml`, `src/harness_lab/config.py` -- `[tools] result_max_tokens = 1200` commenté (outils MCP et réseau, avant la compression) ; propriété `tool_result_max_tokens` (défaut 1 200, plancher 200).
+- `src/harness_lab/tools/executor.py` -- paramètre `bound` (appelable `texte -> (texte borné, infos | None)`) appliqué au seul résultat réussi, avant `tool_ended` ; `truncated` dans `tool_ended` quand il coupe.
+- `src/harness_lab/session/app_session.py` -- dans `_run_tool`, `bound` pour `spec.network or spec.is_mcp` (hors `delegate`) : compte avec `_count_tokens`, coupe au plus grand préfixe qui tient avec la mention (recherche par dichotomie sur les caractères), recule au dernier saut de ligne s'il est dans la seconde moitié du préfixe, ajoute « [Résultat tronqué par le harnais : {gardés} tokens sur {total}. Posez une question plus précise pour obtenir la suite.] ». `_emit_overflow` : somme de tous les genres de segments hors `template`, `user_message` gardant la priorité à égalité ; textes ajoutés pour `tool_result`, `global_memory`, `skill_catalog`/`skill_body`, `subagent_result` ; `tool_result` propose la compression seulement si la brique est disponible et éteinte.
+- `src/harness_lab/trace/catalog.py` -- `ToolEndedPayload.truncated: ToolResultTruncated | None` (`tokens`, `total_tokens`, `estimated`).
+- `src/harness_lab/web/static/app.js` -- `toolBody` : ligne « Résultat tronqué par le harnais : N tokens sur M » (« ≈ » si estimé) au-dessus du résultat ; « tronqué » dans le résumé de la ligne d'outil.
 - `content/scenarios.yaml` -- `data_flows` en lazy loading (`mcp_lazy: true`) et description qui le dit : sans cela, la documentation complète de data.gouv plus un résultat borné dépasse encore la fenêtre (≈ 3 100 + 1 200 > 3 584).
 - `tests/test_tool_result_bound.py` (nouveau) -- une ligne par cas de la matrice (MCP long, court, sans saut de ligne, `read_file` non borné, erreur non bornée, mode chat estimé, borne invalide), réinjection et `tool_ended` ; causes de débordement (`tool_result`, `global_memory`, skills) et piste compression conditionnelle.
-- `tests/test_program.py` -- tokenizer réaliste : `VocabTokenizer(WAVESTACK_TEST_GGUF)` quand la variable est posée (compte du texte des segments de l'aperçu), sinon `[cloud] chars_per_token = 2` dans les valeurs de la session de test et facteur de sécurité recalibré (≈ 1,1) ; place du premier résultat borné (`used × sécurité + prompt + result_max_tokens ≤ usable`) pour les scénarios dont le premier prompt vise un serveur MCP public ou un outil réseau (`data_flows` avec les serveurs `local` et `datagouv` activés comme le dit sa description, `iam`, `sovereignty`, `network_tools`) ; `mcp_full` en reste exempté (son premier prompt vise le serveur local, écrit dans le test).
+- `tests/test_program.py` -- tokenizer réaliste : `VocabTokenizer(HARNESS_LAB_TEST_GGUF)` quand la variable est posée (compte du texte des segments de l'aperçu), sinon `[cloud] chars_per_token = 2` dans les valeurs de la session de test et facteur de sécurité recalibré (≈ 1,1) ; place du premier résultat borné (`used × sécurité + prompt + result_max_tokens ≤ usable`) pour les scénarios dont le premier prompt vise un serveur MCP public ou un outil réseau (`data_flows` avec les serveurs `local` et `datagouv` activés comme le dit sa description, `iam`, `sovereignty`, `network_tools`) ; `mcp_full` en reste exempté (son premier prompt vise le serveur local, écrit dans le test).
 - `_bmad-output/implementation-artifacts/deferred-work.md` -- fermer les trois entrées du lot B, avec « à vérifier sur PC » pour les scénarios réels.
 
 **Acceptance Criteria:**
@@ -106,7 +106,7 @@ deferred:
   - `[medium]` `[patch]` Groupements `hook_injection`→message et `assistant_turn`→historique non testés ; H3 dominant renvoie à « raccourcissez le message » (verification-gap, edge) — cause propre à H3, deux tests.
   - `[low]` `[patch]` Texte `tool_result` au singulier alors qu'il somme tous les résultats, `read_file` compris (blind) — reformulé.
   - `[low]` `[patch]` Seconde boucle de raccourcissement jamais exercée (verification-gap) — test avec compteur simulé.
-  - `[low]` `[patch]` Commentaire de `wavestack.toml` inexact sur la coupe (blind) — réécrit.
+  - `[low]` `[patch]` Commentaire de `harness-lab.toml` inexact sur la coupe (blind) — réécrit.
   - `[low]` `[patch]` `tool_result_max_tokens` hors du modèle `_int`, défaut répété (blind) — constante nommée.
   - `[low]` `[patch]` Ligne « Résultat tronqué » sans la raison (blind) — nom du réglage ajouté.
   - `[low]` `[patch]` Sous-agent, action forcée, MCP local et exclusion de `delegate` non testés (blind, intent) — tests ajoutés.
@@ -133,15 +133,15 @@ deferred:
 - `uv run ruff check .` -- expected: aucun problème
 - `uv run ruff format --check .` -- expected: aucun fichier à reformater
 - `uv run pytest -q` -- expected: tout vert
-- `node --check src/wavestack/web/static/app.js` -- expected: pas d'erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: pas d'erreur
 
 ## Auto Run Result
 
 Status: done
 
-**Résumé.** Les résultats réussis des outils réseau et MCP (locaux compris) sont bornés à `[tools] result_max_tokens` (1 200 par défaut, N3) avant la compression, dans le tour, le sous-agent et les actions forcées : coupe près de la borne (au dernier saut de ligne s'il est dans la seconde moitié), mention adressée au modèle, champ `truncated` dans `tool_ended` et ligne « Résultat tronqué par le harnais : N tokens sur M » dans Orchestration. En mode chat, la borne tient compte du ratio réel du fournisseur. La cause d'un débordement vient de tous les genres de segments (résultats d'outils, sous-agent, mémoire, skills, H3 ajoutés) et ne cite plus à tort les descriptions d'outils ; la compression n'est proposée que si la brique est disponible et éteinte. Le test `fits` compte à 2 caractères par token (ou avec le vrai tokenizer via `WAVESTACK_TEST_GGUF`) et réserve la place du premier résultat borné. `data_flows` démarre en lazy loading (décision par défaut : sans elle, documentation complète + résultat borné dépassent la fenêtre).
+**Résumé.** Les résultats réussis des outils réseau et MCP (locaux compris) sont bornés à `[tools] result_max_tokens` (1 200 par défaut, N3) avant la compression, dans le tour, le sous-agent et les actions forcées : coupe près de la borne (au dernier saut de ligne s'il est dans la seconde moitié), mention adressée au modèle, champ `truncated` dans `tool_ended` et ligne « Résultat tronqué par le harnais : N tokens sur M » dans Orchestration. En mode chat, la borne tient compte du ratio réel du fournisseur. La cause d'un débordement vient de tous les genres de segments (résultats d'outils, sous-agent, mémoire, skills, H3 ajoutés) et ne cite plus à tort les descriptions d'outils ; la compression n'est proposée que si la brique est disponible et éteinte. Le test `fits` compte à 2 caractères par token (ou avec le vrai tokenizer via `HARNESS_LAB_TEST_GGUF`) et réserve la place du premier résultat borné. `data_flows` démarre en lazy loading (décision par défaut : sans elle, documentation complète + résultat borné dépassent la fenêtre).
 
-**Fichiers.** `wavestack.toml`, `src/wavestack/config.py` (borne), `src/wavestack/tools/executor.py` (`bound`), `src/wavestack/session/app_session.py` (`_bound_result`, causes de débordement), `src/wavestack/trace/catalog.py` (`truncated`), `src/wavestack/web/static/app.js` (affichage), `content/scenarios.yaml` (`data_flows`), `tests/test_tool_result_bound.py` (nouveau), `tests/test_program.py`, `tests/test_tools.py`, `tests/test_compression.py`, `tests/fake_engine.py`, `deferred-work.md` (trois entrées fermées).
+**Fichiers.** `harness-lab.toml`, `src/harness_lab/config.py` (borne), `src/harness_lab/tools/executor.py` (`bound`), `src/harness_lab/session/app_session.py` (`_bound_result`, causes de débordement), `src/harness_lab/trace/catalog.py` (`truncated`), `src/harness_lab/web/static/app.js` (affichage), `content/scenarios.yaml` (`data_flows`), `tests/test_tool_result_bound.py` (nouveau), `tests/test_program.py`, `tests/test_tools.py`, `tests/test_compression.py`, `tests/fake_engine.py`, `deferred-work.md` (trois entrées fermées).
 
 **Revue.** 12 patchs (3 medium, 9 low), 2 différés (rendu JS non testé ; second prompt de `mcp_lazy`, medium si vrai), 6 rejetés (voir le journal). `followup_review_recommended: false` : aucun high, les trois medium sont corrigés et testés.
 

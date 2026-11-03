@@ -20,14 +20,14 @@ deferred:
     evidence: |-
       markParentOff pose disabled, qui sort l'interrupteur de l'ordre de tabulation ; aria-description mal pris en charge par Narrateur.
     location: >-
-      src/wavestack/web/static/app.js (markParentOff)
+      src/harness_lab/web/static/app.js (markParentOff)
     severity: low
   - summary: >-
       Onglets du Contexte LLM sans navigation aux flèches (motif ARIA tablist incomplet).
     evidence: |-
       Décision par défaut de la spec ; les lecteurs d'écran annoncent « onglet » et les flèches ne font rien.
     location: >-
-      src/wavestack/web/static/app.js (ctxViewSwitch)
+      src/harness_lab/web/static/app.js (ctxViewSwitch)
     severity: low
   - summary: >-
       Identifiant de journal t{n} lisible seulement au survol du titre de tour.
@@ -95,40 +95,40 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/bricks/registry.py:33-228` -- `BRICKS` ; `reasoning` en 4e (l. 72-85, commentaire compris). L'ordre ne sert qu'à l'affichage : `bricks_changed` (`app_session.py:1234`), nœuds de `architecture_changed` (l. 954-960), ordre de chargement du contenu (l. 1782). Le contexte ne parcourt pas `BRICKS` ; les scénarios (FR-38) portent leurs propres listes (`content/scenarios.yaml`, `tests/test_program.py:171-173`).
-- `src/wavestack/session/app_session.py:669, 3266-3267, 4316, 4427-4467` -- `self._turns` et `turn_id = f"t{n}"`, jamais remis à zéro par `clear_conversation` ni `reset`/`_reconfigure` : à garder.
-- `src/wavestack/session/app_session.py:2266-2295, 2303-2324` -- `_rerank_availability` (vrai quand RAG non voulu) et `_rerank_card` : à ne pas changer, l'interface combine avec l'état de la carte.
-- `src/wavestack/web/static/app.js:809-833` -- `renderedForceUi`, `forceUiChanged` (met `null`), garde de `renderBricks` : `null === null` quand `store.forceForm` redevient `null`, donc pas de reconstruction. Sites : bouton Forcer l. 1209-1211, `cardForce` l. 1228-1231, « Annuler » l. 1343-1348, préréglage l. 1301-1306.
-- `src/wavestack/web/static/app.js:862-932` -- boucle des cartes (`always`, `is-active`) ; appels de `rerankParts` (l. 887) et `brickOptions` (l. 897).
-- `src/wavestack/web/static/app.js:1008-1044` -- `rerankParts` (désactivé seulement si `!available && !enabled`).
-- `src/wavestack/web/static/app.js:1060-1114` -- `brickOptions` : résumé (l. 1070-1075), interrupteurs (l. 1078-1097), Lazy loading (l. 1102-1113).
-- `src/wavestack/web/static/app.js:1473-1515, 5204-5210` -- tiroir du prompt système : `drawerAlert`, `openDrawer`, `closeDrawer`, `saveSystemPrompt`, liaisons.
-- `src/wavestack/web/static/app.js:1545-1690, 5213-5223` -- mémoire globale : `memoryAlert`, `askClearMemory`, `openMemoryDrawer`, `closeMemoryDrawer`, `renderMemoryDrawer` (boutons d'entrée l. 1649-1665), liaisons.
-- `src/wavestack/web/static/app.js:2228-2282` -- `renderScenarioControls` : consigne (`guide.replaceChildren(strong, description)` l. 2269-2270), `renderedGuide`.
-- `src/wavestack/web/static/app.js:66-68, 286-288, 2417-2432, 2518-2539, 3650-3657` -- `store.ctxView`, `turn_started`, `renderContextBody`, `ctxViewSwitch` (boutons `aria-pressed`), `showSubContext`.
-- `src/wavestack/web/static/app.js:804, 2571, 3940-3960` -- `shownTurns`, `turnName` (« Tour » + rang depuis le lancement), titre des groupes d'Orchestration (`Tour ${index + 1}`, `index = store.chatFrom + i`).
-- `src/wavestack/web/static/index.html:48-81, 108` -- tiroirs `#edit-drawer`, `#memory-drawer` ; `<p id="scenario-guide">`.
-- `src/wavestack/web/static/app.css:30-70, 1588-1628, 1694-1725, 1849-1985, 2705-2724, 2916-2945` -- relief des boutons, `.brick-toggle`, options, tiroirs et mémoire, consigne, `.ctx-view-*`.
+- `src/harness_lab/bricks/registry.py:33-228` -- `BRICKS` ; `reasoning` en 4e (l. 72-85, commentaire compris). L'ordre ne sert qu'à l'affichage : `bricks_changed` (`app_session.py:1234`), nœuds de `architecture_changed` (l. 954-960), ordre de chargement du contenu (l. 1782). Le contexte ne parcourt pas `BRICKS` ; les scénarios (FR-38) portent leurs propres listes (`content/scenarios.yaml`, `tests/test_program.py:171-173`).
+- `src/harness_lab/session/app_session.py:669, 3266-3267, 4316, 4427-4467` -- `self._turns` et `turn_id = f"t{n}"`, jamais remis à zéro par `clear_conversation` ni `reset`/`_reconfigure` : à garder.
+- `src/harness_lab/session/app_session.py:2266-2295, 2303-2324` -- `_rerank_availability` (vrai quand RAG non voulu) et `_rerank_card` : à ne pas changer, l'interface combine avec l'état de la carte.
+- `src/harness_lab/web/static/app.js:809-833` -- `renderedForceUi`, `forceUiChanged` (met `null`), garde de `renderBricks` : `null === null` quand `store.forceForm` redevient `null`, donc pas de reconstruction. Sites : bouton Forcer l. 1209-1211, `cardForce` l. 1228-1231, « Annuler » l. 1343-1348, préréglage l. 1301-1306.
+- `src/harness_lab/web/static/app.js:862-932` -- boucle des cartes (`always`, `is-active`) ; appels de `rerankParts` (l. 887) et `brickOptions` (l. 897).
+- `src/harness_lab/web/static/app.js:1008-1044` -- `rerankParts` (désactivé seulement si `!available && !enabled`).
+- `src/harness_lab/web/static/app.js:1060-1114` -- `brickOptions` : résumé (l. 1070-1075), interrupteurs (l. 1078-1097), Lazy loading (l. 1102-1113).
+- `src/harness_lab/web/static/app.js:1473-1515, 5204-5210` -- tiroir du prompt système : `drawerAlert`, `openDrawer`, `closeDrawer`, `saveSystemPrompt`, liaisons.
+- `src/harness_lab/web/static/app.js:1545-1690, 5213-5223` -- mémoire globale : `memoryAlert`, `askClearMemory`, `openMemoryDrawer`, `closeMemoryDrawer`, `renderMemoryDrawer` (boutons d'entrée l. 1649-1665), liaisons.
+- `src/harness_lab/web/static/app.js:2228-2282` -- `renderScenarioControls` : consigne (`guide.replaceChildren(strong, description)` l. 2269-2270), `renderedGuide`.
+- `src/harness_lab/web/static/app.js:66-68, 286-288, 2417-2432, 2518-2539, 3650-3657` -- `store.ctxView`, `turn_started`, `renderContextBody`, `ctxViewSwitch` (boutons `aria-pressed`), `showSubContext`.
+- `src/harness_lab/web/static/app.js:804, 2571, 3940-3960` -- `shownTurns`, `turnName` (« Tour » + rang depuis le lancement), titre des groupes d'Orchestration (`Tour ${index + 1}`, `index = store.chatFrom + i`).
+- `src/harness_lab/web/static/index.html:48-81, 108` -- tiroirs `#edit-drawer`, `#memory-drawer` ; `<p id="scenario-guide">`.
+- `src/harness_lab/web/static/app.css:30-70, 1588-1628, 1694-1725, 1849-1985, 2705-2724, 2916-2945` -- relief des boutons, `.brick-toggle`, options, tiroirs et mémoire, consigne, `.ctx-view-*`.
 - `tools/e2e/run_e2e.py` -- `Run.set_option` (l. 236-247 : attend un interrupteur cliquable), `s_bare_llm` (l. 315), `s_system_prompt` (l. 383), `s_subagent` (l. 900-920 : `role=button` et `aria-pressed` à migrer), `s_global_memory` (l. 1310), `s_rag_rerank` (l. 1690), `s_reload_and_reset` (l. 2084), `s_programme`.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/bricks/registry.py` -- déplacer la déclaration `reasoning` (et son commentaire) en tête de `BRICKS` -- demande 2 de la recette.
+- `src/harness_lab/bricks/registry.py` -- déplacer la déclaration `reasoning` (et son commentaire) en tête de `BRICKS` -- demande 2 de la recette.
 - `tests/test_bricks.py` -- ajouter : premier élément de `bricks_changed.bricks` = `reasoning`, ensemble des ids inchangé ; et `turn_id` strictement croissant (`t1`, `t2`, puis `t3` après `clear_conversation`, `t4` après `reset`) avec le faux moteur -- verrouille l'ordre et l'invariant du journal.
-- `src/wavestack/web/static/app.js` (bug Annuler) -- `forceUiChanged` affecte une sentinelle unique (ex. `const STALE = Symbol("stale")`) au lieu de `null` -- `null === null` court-circuitait la reconstruction.
-- `src/wavestack/web/static/app.js` (sous-options) -- calculer `parentOff` par carte ; le passer à `rerankParts` et `brickOptions` : interrupteurs (options, Reranking, Lazy loading) `disabled`, classe `is-parent-off` sur la ligne, `title` et `aria-description` = `reason_fr` de la brique si indisponible, sinon « Activez la brique {label_fr} pour régler cette option. » ; résumé `· brique éteinte` à la place du mode -- M3, X1.
-- `src/wavestack/web/static/app.js` + `index.html` + `app.css` (consigne) -- `#scenario-guide` devient un `div` : texte limité à 3 lignes (`-webkit-line-clamp: 3`), bouton « Afficher plus » / « Réduire » (`aria-expanded`, `aria-controls`) affiché seulement si le texte déborde (mesure après rendu et au redimensionnement du volet) ; repli à chaque changement de scénario -- C1.
+- `src/harness_lab/web/static/app.js` (bug Annuler) -- `forceUiChanged` affecte une sentinelle unique (ex. `const STALE = Symbol("stale")`) au lieu de `null` -- `null === null` court-circuitait la reconstruction.
+- `src/harness_lab/web/static/app.js` (sous-options) -- calculer `parentOff` par carte ; le passer à `rerankParts` et `brickOptions` : interrupteurs (options, Reranking, Lazy loading) `disabled`, classe `is-parent-off` sur la ligne, `title` et `aria-description` = `reason_fr` de la brique si indisponible, sinon « Activez la brique {label_fr} pour régler cette option. » ; résumé `· brique éteinte` à la place du mode -- M3, X1.
+- `src/harness_lab/web/static/app.js` + `index.html` + `app.css` (consigne) -- `#scenario-guide` devient un `div` : texte limité à 3 lignes (`-webkit-line-clamp: 3`), bouton « Afficher plus » / « Réduire » (`aria-expanded`, `aria-controls`) affiché seulement si le texte déborde (mesure après rendu et au redimensionnement du volet) ; repli à chaque changement de scénario -- C1.
 - `index.html` + `app.js` + `app.css` (tiroir mémoire) -- en-tête avec titre et croix « × » (`aria-label` « Fermer la mémoire globale », même chemin que `closeMemoryDrawer()`) ; zone centrale seule défilante ; pied fixe contenant alerte, choix « dirty » / « clear » et barre « Tout effacer » (classe `danger`) + « Fermer » (secondaire) ; « Oui, tout effacer » en `danger` ; « Enregistrer » et « Supprimer » d'entrée en actions compactes sans relief, distinctes -- C1.
 - `index.html` + `app.js` + `app.css` (prompt système) -- `#drawer-save` désactivé tant que le texte = `store.bricks.system_prompt.text` (ouverture, saisie, après enregistrement, à chaque `bricks_changed`) ; `<p id="drawer-status" role="status">` affiche « Prompt système enregistré. » après succès (« Prompt par défaut rétabli. » après « Rétablir »), effacé à la saisie suivante ou à la fermeture -- M1.
-- `src/wavestack/web/static/app.js` + `app.css` (Contexte LLM) -- `ctxViewSwitch` : `role="tablist"` (« Contexte affiché »), onglets `role="tab"` `aria-selected`, libellés « Agent principal » puis « Sous-agent {contextId} » (ex. « Sous-agent sub1 »), style d'onglet (soulignement `--color-primary`) ; `store.ctxView = null` à chaque `turn_started` -- M6.
-- `src/wavestack/web/static/app.js` (tours) -- `turnName` et le titre des groupes d'Orchestration utilisent le rang dans `shownTurns()` (`i + 1`) ; l'identifiant `t{n}` en infobulle du titre (« Identifiant du tour dans le journal : t4 ») -- question C1.
+- `src/harness_lab/web/static/app.js` + `app.css` (Contexte LLM) -- `ctxViewSwitch` : `role="tablist"` (« Contexte affiché »), onglets `role="tab"` `aria-selected`, libellés « Agent principal » puis « Sous-agent {contextId} » (ex. « Sous-agent sub1 »), style d'onglet (soulignement `--color-primary`) ; `store.ctxView = null` à chaque `turn_started` -- M6.
+- `src/harness_lab/web/static/app.js` (tours) -- `turnName` et le titre des groupes d'Orchestration utilisent le rang dans `shownTurns()` (`i + 1`) ; l'identifiant `t{n}` en infobulle du titre (« Identifiant du tour dans le journal : t4 ») -- question C1.
 - `_bmad-output/planning-artifacts/ux-designs/ux-agentic-harness-training-demo-2026-09-22/EXPERIENCE.md` -- mettre à jour `brick-card` (l. 130 : ordre, sous-options brique éteinte), `edit-drawer` (l. 133), `turn-rail` (l. 140 : Tour N par conversation), `suggested-prompt-chip`/consigne (l. 138), « Sous-agent au travail » (l. 181 : onglets) -- comportements décrits modifiés.
-- `.../DESIGN.md` -- ajouter le composant `button-danger` (fond `surface-raised`, bordure 2 px `danger`, texte `ink`, sans relief ; variante confirmée : fond `danger`, texte `ink`) -- blanc sur `#FF2A49` ne tient pas 4,5:1, encre oui (≈ 5,4:1).
+- `.../DESIGN.md` -- ajouter le composant `button-danger` (fond `surface-raised`, bordure 2 px `danger`, texte `ink`, sans relief ; variante confirmée : fond `danger`, texte `ink`) -- blanc sur `#B42318` ne tient pas 4,5:1, encre oui (≈ 5,4:1).
 - `tools/e2e/run_e2e.py` -- vérifications ci-dessous ; adapter `s_subagent` aux onglets et tout `set_option` appelé brique éteinte (allumer la brique d'abord) ; captures `02`, `04`, `17`, `19-sous-agent`, `20`, `21`, `25` réécrites -- preuve sur la surface la plus externe.
 
 **Acceptance Criteria:**
-- Given WaveStack lancé en LLM nu, when le panneau des briques s'affiche, then la première `article.brick-card` porte « Raisonnement ».
+- Given HarnessLab lancé en LLM nu, when le panneau des briques s'affiche, then la première `article.brick-card` porte « Raisonnement ».
 - Given la brique RAG éteinte et Reranking coché (scénario `rag_rerank` puis RAG éteint), when on lit la carte RAG, then `input[data-focus-key="option:rag:rerank"]` est désactivé, son fond calculé n'est pas `--color-primary`, et la ligne a un `title` qui contient « Activez la brique RAG » ; brique rallumée, l'interrupteur redevient actif.
 - Given la brique MCP éteinte au lancement (LLM nu) avec mode lazy, when on déplie ses options, then l'interrupteur Lazy loading et ceux des serveurs sont désactivés et le résumé contient « brique éteinte » ; idem pour une option d'outils, de skills et de hooks brique éteinte.
 - Given le scénario `soc` lancé, when on mesure `#scenario-guide`, then le texte fait au plus 3 × sa hauteur de ligne (+1 px), « Afficher plus » est visible ; clic : `aria-expanded="true"`, texte plus haut, « Réduire » ; le champ `#composer-input` et la dernière bulle restent visibles dans le volet.
@@ -211,7 +211,7 @@ Le calcul « parente éteinte » reste dans l'interface plutôt que dans `_reran
 
 ## À vérifier sur PC
 
-- **Geste** : Edge, lancer WaveStack (`uv run wavestack`), regarder le panneau des briques ; éteindre RAG avec « Reranking » coché ; déplier MCP brique éteinte ; survoler « Reranking » et « Lazy loading ». — **Attendu** : Raisonnement en tête ; interrupteurs gris, raison en infobulle. — **Critère** : infobulle visible en moins de 2 s de survol, sous Edge et Chrome. — **Moyen** : Claude in Chrome ou à la main.
+- **Geste** : Edge, lancer HarnessLab (`uv run harness-lab`), regarder le panneau des briques ; éteindre RAG avec « Reranking » coché ; déplier MCP brique éteinte ; survoler « Reranking » et « Lazy loading ». — **Attendu** : Raisonnement en tête ; interrupteurs gris, raison en infobulle. — **Critère** : infobulle visible en moins de 2 s de survol, sous Edge et Chrome. — **Moyen** : Claude in Chrome ou à la main.
 - **Geste** : lancer « Métier SOC » dans le sélecteur de scénario, texte à 125 % puis 150 % (« Aa »), cliquer « Afficher plus » puis « Réduire ». — **Attendu** : 3 lignes, bouton présent, la réponse d'un tour reste lisible. — **Critère** : au moins 2 bulles visibles au-dessus du champ sur l'écran du poste, sans défilement de la page. — **Moyen** : à la main (œil humain).
 - **Geste** : scénario « Mémoire globale », « Modifier la mémoire », ajouter des entrées jusqu'à 8 par « Écrire en mémoire ». — **Attendu** : croix en haut à droite, pied « Tout effacer » (rouge) / « Fermer » visible sans défiler. — **Critère** : les deux boutons visibles à 100 % et 150 % de taille de texte ; distinction jugée évidente par Anaël. — **Moyen** : à la main.
 - **Geste** : « Modifier le prompt », ne rien changer, puis modifier et « Enregistrer ». — **Attendu** : bouton gris puis confirmation « Prompt système enregistré. ». — **Critère** : confirmation lue par le lecteur d'écran de Windows (Narrateur) — **Moyen** : à la main.
@@ -224,7 +224,7 @@ Statut : done (2026-09-28, exécution de nuit pilotée par l'orchestrateur ; les
 
 **Changement :** les huit défauts d'interface de la recette (C1, M1, M3, M6, X1) sont corrigés côté affichage : Raisonnement en tête des briques ; sous-options grisées et désactivées brique éteinte ou indisponible, raison au survol ; consigne limitée à 3 lignes avec « Afficher plus » ; tiroir mémoire avec croix, pied fixe et « Tout effacer » destructif ; « Enregistrer » du prompt système désactivé tant que rien ne change, avec confirmation annoncée ; « Annuler » des actions forcées réparé (sentinelle `STALE`) ; onglets « Agent principal » / « Sous-agent » ; « Tour N » qui repart de 1 après vidage ou réinitialisation (`t{n}` gardé au journal, en infobulle).
 
-**Fichiers :** `src/wavestack/bricks/registry.py` (ordre), `src/wavestack/web/static/app.js`, `app.css`, `index.html` (interface), `tests/test_bricks.py` (2 tests), `tools/e2e/run_e2e.py` et `tools/e2e/README.md` (contrôles E2E), `DESIGN.md` et `EXPERIENCE.md` (comportements), captures E2E.
+**Fichiers :** `src/harness_lab/bricks/registry.py` (ordre), `src/harness_lab/web/static/app.js`, `app.css`, `index.html` (interface), `tests/test_bricks.py` (2 tests), `tools/e2e/run_e2e.py` et `tools/e2e/README.md` (contrôles E2E), `DESIGN.md` et `EXPERIENCE.md` (comportements), captures E2E.
 
 **Revue :** 27 constats — 15 corrigés (4 medium, 11 low), 6 différés (frontmatter `deferred`), 5 rejetés (1 false, 4 low peu probables ou défendables), voir le triage. Revue de suivi recommandée : false (aucun high ; les medium corrigés sont locaux et couverts par l'E2E).
 

@@ -88,7 +88,7 @@ Raisonnement abandonné : chaque entrée de `input_transformations` (`thinking_d
 
 Usage en cache : `input_tokens_details.cached_tokens`.
 
-## Entrées de `wavestack.toml`
+## Entrées de `harness-lab.toml`
 
 | id | Modèle | API | Contexte | Prix (entrée / sortie / lecture du cache, $ par million) | Raisonnement on | Raisonnement off | `sampling` |
 |---|---|---|---|---|---|---|---|

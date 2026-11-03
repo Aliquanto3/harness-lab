@@ -1,11 +1,11 @@
 ---
-title: Revue adverse du spine WaveStack
+title: Revue adverse du spine HarnessLab
 target: ../ARCHITECTURE-SPINE.md
 lens: "Deux unités conformes à la lettre de chaque AD, qui se construisent pourtant de façon incompatible"
 date: 2026-09-23
 ---
 
-# Revue adverse — ARCHITECTURE-SPINE.md (WaveStack)
+# Revue adverse — ARCHITECTURE-SPINE.md (HarnessLab)
 
 ## Verdict
 

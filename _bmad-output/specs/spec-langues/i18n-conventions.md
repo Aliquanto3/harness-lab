@@ -42,7 +42,7 @@ Règles communes aux stories 2 à 5. `SPEC.md` en porte les décisions ; ce fich
 - Le corpus traduit est dans `content/i18n/{en,de}/corpus/`, sous les mêmes noms de fichiers. Les documents gardent leur `id`, et leurs titres (`title_text`) sont traduits dans `content/i18n/{en,de}/rag.yaml`.
 - **Index.**
   - Le français garde `data/rag_index.sqlite`.
-  - L'anglais et l'allemand ont `data/rag_index.en.sqlite` et `data/rag_index.de.sqlite`. Leur chemin se déduit de `rag.index_path` (`wavestack.toml`) en insérant `.{lang}` avant l'extension.
+  - L'anglais et l'allemand ont `data/rag_index.en.sqlite` et `data/rag_index.de.sqlite`. Leur chemin se déduit de `rag.index_path` (`harness-lab.toml`) en insérant `.{lang}` avant l'extension.
 - `scripts/build_rag_index.py --lang {fr,en,de}` construit l'index d'une langue. Les trois index sont versionnés.
 - La brique RAG et l'atelier RAG ouvrent l'index de la langue de la session. S'il est absent, la carte propose de le construire, comme aujourd'hui.
 

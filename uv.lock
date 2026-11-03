@@ -2202,8 +2202,8 @@ wheels = [
 ]
 
 [[package]]
-name = "wavestack"
-version = "1.7.4"
+name = "harness-lab"
+version = "2.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },

@@ -52,13 +52,13 @@ Précision validée par Anaël :
 
 **Proposition :**
 - **fichier GGUF existant** : le diagnostic de démarrage et le choix du modèle proposent les fichiers GGUF trouvés dans les emplacements usuels : cache Hugging Face, dossier de modèles LM Studio, blobs Ollama (ce sont des fichiers GGUF, identifiables grâce au manifeste Ollama). L'utilisateur peut aussi saisir un chemin ;
-- **serveur local déjà lancé** : Ollama ou `llama-server` sur le poste, via l'adaptateur compatible OpenAI de FR-32. Le schéma d'architecture montre alors le modèle comme un processus local distinct de WaveStack.
+- **serveur local déjà lancé** : Ollama ou `llama-server` sur le poste, via l'adaptateur compatible OpenAI de FR-32. Le schéma d'architecture montre alors le modèle comme un processus local distinct de HarnessLab.
 
 À arbitrer en architecture : faisabilité de la détection dans le dossier Ollama, et place de la mémoire du serveur externe dans le budget de NFR-2.
 
 ## CR-7 : Changement de modèle en cours de session (FR-32)
 
-**Faisabilité (à confirmer en architecture).** Avec llama-cpp-python, changer de modèle revient à libérer le modèle chargé puis à charger le nouveau fichier : environ 5 à 20 s sur CPU pour 1 à 2 Go, sans redémarrer WaveStack. Trois points demandent du soin :
+**Faisabilité (à confirmer en architecture).** Avec llama-cpp-python, changer de modèle revient à libérer le modèle chargé puis à charger le nouveau fichier : environ 5 à 20 s sur CPU pour 1 à 2 Go, sans redémarrer HarnessLab. Trois points demandent du soin :
 - le registre des capacités (FR-33), qui peut rendre des briques indisponibles ;
 - le gabarit de conversation, lu dans le fichier GGUF ;
 - le plafond de la fenêtre, propre à chaque modèle.

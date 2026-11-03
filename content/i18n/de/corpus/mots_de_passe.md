@@ -1,6 +1,6 @@
 # Passwortrichtlinie von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Regeln beschreiben kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Regeln beschreiben kein reales Unternehmen. -->
 
 Bei Exemplia hat ein Passwort für ein Benutzerkonto mindestens 14 Zeichen. Die Länge zählt mehr als die Komplexität: Empfohlen wird eine Passphrase aus vier oder fünf Wörtern ohne Bezug zueinander, zum Beispiel eine Folge zufällig gewählter Wörter, getrennt durch Bindestriche. Administratorkonten verlangen dagegen mindestens 20 Zeichen, und ihr Passwort wird vom Tresor des Betriebsteams erzeugt.
 

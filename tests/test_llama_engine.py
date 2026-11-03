@@ -1,7 +1,7 @@
 """Restes différés, story 1 (E008): `LlamaCppEngine.complete` itself, never `FakeEngine`.
 
 Each behaviour runs on two engines. `gguf` (marked `model`): a real GGUF named by
-`WAVESTACK_TEST_GGUF`, greedy sampling, skipped otherwise. `stub`: the real `complete` on
+`HARNESS_LAB_TEST_GGUF`, greedy sampling, skipped otherwise. `stub`: the real `complete` on
 a scripted `llama_cpp` (token ids, pieces, end of generation), so that a mutation of
 `complete` fails pytest without any model. The tests read what the engine yields (token
 count, ids, pieces), never a text the model would have to write.
@@ -17,9 +17,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from wavestack.context.render import render_template
-from wavestack.models.capabilities import capabilities_for
-from wavestack.models.engine import CancelToken, Fragment, LlamaCppEngine, Sampling
+from harness_lab.context.render import render_template
+from harness_lab.models.capabilities import capabilities_for
+from harness_lab.models.engine import CancelToken, Fragment, LlamaCppEngine, Sampling
 
 GREEDY = Sampling(temperature=0.0, top_k=1, top_p=1.0, min_p=0.0)
 EOG = b"<|im_end|>"
@@ -101,9 +101,9 @@ def subject(request) -> Iterator[Subject]:  # noqa: ANN001
     if request.param == "stub":
         yield _stub()
         return
-    path = os.environ.get("WAVESTACK_TEST_GGUF")
+    path = os.environ.get("HARNESS_LAB_TEST_GGUF")
     if not path or not Path(path).is_file():
-        pytest.skip("WAVESTACK_TEST_GGUF does not point to a GGUF file.")
+        pytest.skip("HARNESS_LAB_TEST_GGUF does not point to a GGUF file.")
     engine = LlamaCppEngine(path, n_ctx=2048)
     try:
         prompts = {

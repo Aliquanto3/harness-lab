@@ -13,10 +13,10 @@ servers_help_text: >-
   The three servers of the MCP brick. The glossary is a Python process the host launches on this
   workstation and talks to through standard input and output (the text channels a program reads
   and writes through); the other two are public services reached over HTTP (the standard web
-  protocol), behind WaveStack's network guard (the filter that blocks any address outside the
+  protocol), behind HarnessLab's network guard (the filter that blocks any address outside the
   allowed list).
 handshake_help_text: >-
-  As in a restaurant: “Hello, I am WaveStack's waiter” (initialize); “Hello, here is what we
+  As in a restaurant: “Hello, I am HarnessLab's waiter” (initialize); “Hello, here is what we
   serve: dishes à la carte, what we put on the table, set menus” (capabilities: tools,
   resources, prompts); “Noted” (notifications/initialized); “The menu, please” (tools/list,
   resources/list, prompts/list). Only then does one order.
@@ -89,9 +89,9 @@ columns:
     name_cloud_text: "Cloud LLM"
     explain_cloud_text: "An LLM (large language model) running at a cloud provider. This model never talks to the MCP server either: it reads the tools in its context and asks the host for a call, which goes through the client."
   host:
-    name_text: "WaveStack host"
+    name_text: "HarnessLab host"
     sub_text: "the harness"
-    explain_text: "The application that hosts the model and the MCP clients: here, the WaveStack harness. It decides which tools to show the model and runs its requests."
+    explain_text: "The application that hosts the model and the MCP clients: here, the HarnessLab harness. It decides which tools to show the model and runs its requests."
   client:
     name_text: "MCP client"
     sub_text: "one per server"
@@ -110,7 +110,7 @@ phases:
     why_label_text: "Why a handshake?"
     why_text: >-
       The handshake is the opening exchange in which the client and the server introduce
-      themselves. As in a restaurant: “Hello, I am WaveStack's waiter” (initialize); “Hello, here is what we
+      themselves. As in a restaurant: “Hello, I am HarnessLab's waiter” (initialize); “Hello, here is what we
       serve: dishes à la carte, what we put on the table, set menus” (capabilities: tools,
       resources, prompts); “Noted” (notifications/initialized); “The menu, please” (tools/list,
       resources/list, prompts/list). Only then does one order.

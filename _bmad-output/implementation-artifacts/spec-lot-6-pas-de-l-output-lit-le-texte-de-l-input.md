@@ -44,15 +44,15 @@ context:
 
 ## Code Map
 
-- `src/wavestack/session/app_session.py:8728-8826` -- `_run_lab` : nouveau paramètre `raw: bool = False`. S'il est vrai, la branche locale ne passe plus par `render_context`. Elle construit `RenderedContext(prompt=bos_text + prompt + pièces ajoutées, ids=[bos] + engine.tokenize(prompt) + continuation, segments=[Segment(kind=SegmentKind.USER_MESSAGE, …)])`, avec `reasons = False`. Le bloc `continuation` actuel (`replace(rendered, …)`) ne sert plus qu'au pas : le fondre dans la branche `raw`.
-- `src/wavestack/session/app_session.py:8601-8644` -- `llm_step` : passe `raw=True` ; mettre la docstring à jour (« sans gabarit »).
-- `src/wavestack/session/app_session.py:8263-8317` -- `_lab_tokenized` : ajouter `bos_token` (texte du BOS que le pas ajoute, sinon `None`) dans la branche exacte. Une seule aide `_step_bos(engine) -> int | None` sert aux deux : `getattr(engine, "adds_bos", None)` puis `llama_vocab_bos`, et le texte vient de `engine.metadata().bos_token`.
-- `src/wavestack/models/engine.py:242-262` -- tokenizer en processus : ajouter `adds_bos() -> int | None` (id du BOS si `lib.llama_vocab_get_add_bos(self._vocab)`, sinon `None`). Le moteur en processus (l.~382) délègue comme pour `tokenize`.
-- `src/wavestack/trace/catalog.py:1120` -- `LlmTokenizedPayload` : ajouter `bos_token: str | None = None`.
-- `src/wavestack/session/llm_lab.py` -- `LabContent` (strict) : déclarer les nouvelles clés `stages.input.bos_text` et `stages.output.raw_text`.
+- `src/harness_lab/session/app_session.py:8728-8826` -- `_run_lab` : nouveau paramètre `raw: bool = False`. S'il est vrai, la branche locale ne passe plus par `render_context`. Elle construit `RenderedContext(prompt=bos_text + prompt + pièces ajoutées, ids=[bos] + engine.tokenize(prompt) + continuation, segments=[Segment(kind=SegmentKind.USER_MESSAGE, …)])`, avec `reasons = False`. Le bloc `continuation` actuel (`replace(rendered, …)`) ne sert plus qu'au pas : le fondre dans la branche `raw`.
+- `src/harness_lab/session/app_session.py:8601-8644` -- `llm_step` : passe `raw=True` ; mettre la docstring à jour (« sans gabarit »).
+- `src/harness_lab/session/app_session.py:8263-8317` -- `_lab_tokenized` : ajouter `bos_token` (texte du BOS que le pas ajoute, sinon `None`) dans la branche exacte. Une seule aide `_step_bos(engine) -> int | None` sert aux deux : `getattr(engine, "adds_bos", None)` puis `llama_vocab_bos`, et le texte vient de `engine.metadata().bos_token`.
+- `src/harness_lab/models/engine.py:242-262` -- tokenizer en processus : ajouter `adds_bos() -> int | None` (id du BOS si `lib.llama_vocab_get_add_bos(self._vocab)`, sinon `None`). Le moteur en processus (l.~382) délègue comme pour `tokenize`.
+- `src/harness_lab/trace/catalog.py:1120` -- `LlmTokenizedPayload` : ajouter `bos_token: str | None = None`.
+- `src/harness_lab/session/llm_lab.py` -- `LabContent` (strict) : déclarer les nouvelles clés `stages.input.bos_text` et `stages.output.raw_text`.
 - `content/llm_lab.yaml` (+ en, de) -- `stages.input.bos_text` : « Avant ces tokens, le moteur lit aussi {bos} : le token de début de texte que ce modèle demande. » ; `stages.output.raw_text` : « Ici, le moteur lit le texte tel quel, sans gabarit de chat : il le prolonge. « Générer » (section 4) le lit comme un message et y répond. » ; `stages.output.end_text` : « Le moteur a tiré son token de fin : pour lui, le texte s'arrête là. Rien à ajouter. »
-- `src/wavestack/web/static/llm.html` -- deux éléments ajoutés : `#token-bos` (sous les compteurs de l'INPUT) et `#llm-step-raw` (dans la carte du token tiré de l'OUTPUT).
-- `src/wavestack/web/static/llm.js` -- `renderInput` (l.294) remplit ou masque `#token-bos` d'après `store.tokenized.bos_token`, en marquant le BOS avec `visibleBlanks`. Le texte de `#llm-step-raw` vient du contenu. `logitsCaption` (l.1149) reste inchangé, car il devient vrai.
+- `src/harness_lab/web/static/llm.html` -- deux éléments ajoutés : `#token-bos` (sous les compteurs de l'INPUT) et `#llm-step-raw` (dans la carte du token tiré de l'OUTPUT).
+- `src/harness_lab/web/static/llm.js` -- `renderInput` (l.294) remplit ou masque `#token-bos` d'après `store.tokenized.bos_token`, en marquant le BOS avec `visibleBlanks`. Le texte de `#llm-step-raw` vient du contenu. `logitsCaption` (l.1149) reste inchangé, car il devient vrai.
 - `tests/test_llm_lab.py:1393-1460` -- les tests du pas. `FakeEngine` et `SpecialEngine` (l.116) servent de base à un moteur qui a `adds_bos`.
 - `tools/e2e/run_e2e.py` -- `s_llm_loop` : vérifier que `#llm-step-raw` est présent, et que `#token-bos` apparaît sur un `llm_tokenized` simulé avec `bos_token`.
 - `_bmad-output/planning-artifacts/ux-designs/ux-lot-6-atelier-llm-2026-10-04/notes-de-fusion.md` -- ajouter `engine.py`, `catalog.py` et le nouveau paramètre de `_run_lab`.
@@ -60,11 +60,11 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/models/engine.py` -- `adds_bos()` sur le tokenizer et le moteur en processus.
-- [x] `src/wavestack/trace/catalog.py` -- champ `bos_token` de `LlmTokenizedPayload`.
-- [x] `src/wavestack/session/app_session.py` -- `_step_bos`, branche `raw` de `_run_lab`, `llm_step(raw=True)`, `bos_token` dans `_lab_tokenized`.
-- [x] `src/wavestack/session/llm_lab.py` + `content/llm_lab.yaml` + en + de -- les trois textes.
-- [x] `src/wavestack/web/static/llm.html`, `llm.js` -- `#token-bos`, `#llm-step-raw`.
+- [x] `src/harness_lab/models/engine.py` -- `adds_bos()` sur le tokenizer et le moteur en processus.
+- [x] `src/harness_lab/trace/catalog.py` -- champ `bos_token` de `LlmTokenizedPayload`.
+- [x] `src/harness_lab/session/app_session.py` -- `_step_bos`, branche `raw` de `_run_lab`, `llm_step(raw=True)`, `bos_token` dans `_lab_tokenized`.
+- [x] `src/harness_lab/session/llm_lab.py` + `content/llm_lab.yaml` + en + de -- les trois textes.
+- [x] `src/harness_lab/web/static/llm.html`, `llm.js` -- `#token-bos`, `#llm-step-raw`.
 - [x] `tests/test_llm_lab.py` -- couvrir la matrice. (1) Le pas lit `tokenize(texte)` + ajouts, sans balise de gabarit : on regarde les `prompt_ids` reçus par le faux moteur. (2) Le BOS est ajouté si `adds_bos`, et `bos_token` est servi. (3) Sans `adds_bos`, pas de BOS. (4) `reasoning_always` donne un pas sans raisonnement. (5) « Générer » garde le gabarit. Adapter `…reads_the_tokens_already_added…`.
 - [x] `tools/e2e/run_e2e.py` -- assertions ajoutées à `s_llm_loop`.
 - [x] `notes-de-fusion.md` -- fichiers carrefour touchés.
@@ -113,4 +113,4 @@ context:
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py --only llm_loop llm_screen llm_live --channel msedge` -- expected: tout vert
 
 **Manual checks (if no CLI):**
-- `uv run wavestack --port 8426`, page `/llm`, sans changer le modèle choisi : « Le chat dort sur le », puis « Tirer ». Le token tiré prolonge la phrase, et la phrase « sans gabarit » est visible.
+- `uv run harness-lab --port 8426`, page `/llm`, sans changer le modèle choisi : « Le chat dort sur le », puis « Tirer ». Le token tiré prolonge la phrase, et la phrase « sans gabarit » est visible.

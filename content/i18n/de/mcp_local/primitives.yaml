@@ -2,7 +2,7 @@
 # the local MCP server's resource and prompt.
 terms:
   title: Begriffe des Glossars
-  description: Die Liste der Begriffe des Glossars des WaveStack-Demonstrators, einer pro Zeile.
+  description: Die Liste der Begriffe des Glossars des HarnessLab-Demonstrators, einer pro Zeile.
 explain_term:
   title: Einen Begriff erklären
   description: >-
@@ -14,4 +14,4 @@ explain_term:
     Agenten kennenlernen, ausgehend von dieser Definition: {definition}
   unknown_text: >-
     Erkläre den Begriff „{term}“ in drei Sätzen einer Beraterin oder einem Berater, die
-    Agenten kennenlernen. Er steht nicht im Glossar von WaveStack, dessen Begriffe sind: {known}.
+    Agenten kennenlernen. Er steht nicht im Glossar von HarnessLab, dessen Begriffe sind: {known}.

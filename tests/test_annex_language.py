@@ -20,13 +20,13 @@ from test_rag_lab import chains, lab_session, run, stage, wait_idle
 from test_rag_rerank import place_reranker, rerank_config
 from test_rag_review import _script, fake_factory
 
-from wavestack import config
-from wavestack.messages import msg
-from wavestack.rag import index as rag_index
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import chunk_corpus, load_rag_content
-from wavestack.session import llm_lab
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.messages import msg
+from harness_lab.rag import index as rag_index
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import chunk_corpus, load_rag_content
+from harness_lab.session import llm_lab
+from harness_lab.trace.journal import get_journal
 
 CONTENT = config.content_dir()
 LANGS = config.LANGUAGES

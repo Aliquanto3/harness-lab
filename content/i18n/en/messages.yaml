@@ -13,7 +13,7 @@ common:
 session:
   translation_invalid:
     message: "A translated file ({lang}) under content/i18n/{lang}/ is invalid."
-    effect: "The French text of this file replaces it; the rest of WaveStack works."
+    effect: "The French text of this file replaces it; the rest of HarnessLab works."
   rag:
     index_held: "another program is holding the index open (an antivirus, a synchronisation tool or the build script): close it, then click “Build the index” again"
     model_noun:
@@ -52,7 +52,7 @@ session:
       effect: The turn goes on without RAG excerpts.
       text: "The search failed ({kind}: {cause}). The turn goes on without RAG excerpts."
   architecture:
-    harness: WaveStack harness
+    harness: HarnessLab harness
     model: Model
     model_sub: Model (sub-agent)
     embedding: "Embedding model {model}, local process"
@@ -74,7 +74,7 @@ session:
     cloud_failed: "Sending unavailable: the cloud model could not be prepared. Choose a model on the Models page."
     no_turn: No turn possible.
     load_stopped: "Sending unavailable: the model loading was stopped and no model is loaded. Choose a model on the Models page."
-  # Story 26 (AD-9): the window panel, when the cache and the read time are not WaveStack's to measure.
+  # Story 26 (AD-9): the window panel, when the cache and the read time are not HarnessLab's to measure.
   # V1.3 story 5: Claude's prompt cache, set in the window panel.
   claude_cache:
     no_key: "Disabled: first enter the API key of a Claude model (Models page)."
@@ -96,7 +96,7 @@ session:
     saved_for_next: "{window}-token window saved: it will apply at the next model load."
     unchanged: "{window}-token window saved; the effective window of {label} stays at {effective} tokens{bound}, without reloading."
     nothing_reloaded: Nothing is released, written or reloaded.
-    cost_unknown: "{window}-token window refused: the cost of {label} with this window is unknown (model file unreadable from WaveStack). {label} stays active with {current} tokens."
+    cost_unknown: "{window}-token window refused: the cost of {label} with this window is unknown (model file unreadable from HarnessLab). {label} stays active with {current} tokens."
     kv_llama_slot: "Context cache: reserved by llama-server (-c {slot}), unchanged"
     kv_llama: "Context cache: reserved by llama-server, unchanged"
     kv: "Context cache: {size}"
@@ -210,7 +210,7 @@ session:
       restored: "{label} could not be loaded ({cause}): {previous} is active again."
     # E119: a served model whose architecture its server cannot run, seen at the first turn.
     unsupported:
-      back: "WaveStack goes back to the previous model, {label}."
+      back: "HarnessLab goes back to the previous model, {label}."
       none: "The turn is over; choose another model in the top bar."
       restored: "{label} does not run under Ollama (architecture “{architecture}”): {previous} is active again."
     stopped:
@@ -223,7 +223,7 @@ session:
       probe_ok: it loads.
       probe_incompatible: incompatible.
       ready: "Ready: {label} is active."
-      occupies: ": WaveStack occupies {size}"
+      occupies: ": HarnessLab occupies {size}"
       nothing_to_release: "No model to release{after}."
       released: "Previous model released ({label}){after}."
       budget_checked: "Budget confirmed: checked before the previous model was released."
@@ -237,7 +237,7 @@ session:
       the_provider: the provider
       cloud: "No memory on this workstation: the model runs at {provider}."
       server: "Loaded by {provider}, in its own process, in this workstation's RAM: about {cost} counted by the budget."
-      file: "Processor RAM, no graphics card: WaveStack went from {before} to {after}; the budget counts about {cost}. The weights, read with mmap, move into RAM at the first call."
+      file: "Processor RAM, no graphics card: HarnessLab went from {before} to {after}; the budget counts about {cost}. The weights, read with mmap, move into RAM at the first call."
   compaction:
     request: "Summarize our conversation so far."
     label: "Summary (compaction)"
@@ -270,18 +270,18 @@ session:
     cache_failed: "The engine's cache could not be cleared: {cause}"
   # AD-19: a content file that cannot be read makes its brick unavailable.
   content:
-    file_invalid: "The file {file} is missing or invalid: fix it, then restart WaveStack."
-    skills_file_invalid: "A skills file (content/skills.yaml or content/skills/*/SKILL.md) is missing or invalid: fix it, then restart WaveStack."
-    subagent_file_invalid: "The file content/subagent.yaml or the sub-agent's prompt (content/prompts/subagent.md) is missing or invalid: fix it, then restart WaveStack."
-    system_prompt_file_invalid: "The default system prompt (content/prompts/system.md) is missing or empty: fix it, then restart WaveStack."
+    file_invalid: "The file {file} is missing or invalid: fix it, then restart HarnessLab."
+    skills_file_invalid: "A skills file (content/skills.yaml or content/skills/*/SKILL.md) is missing or invalid: fix it, then restart HarnessLab."
+    subagent_file_invalid: "The file content/subagent.yaml or the sub-agent's prompt (content/prompts/subagent.md) is missing or invalid: fix it, then restart HarnessLab."
+    system_prompt_file_invalid: "The default system prompt (content/prompts/system.md) is missing or empty: fix it, then restart HarnessLab."
     explanation_invalid: "The explanation of the “{brick}” brick is invalid."
-    brick_unavailable: "The brick is unavailable; the rest of WaveStack works."
+    brick_unavailable: "The brick is unavailable; the rest of HarnessLab works."
     ui_invalid:
       message: The file content/ui.yaml is missing or invalid.
-      effect: "The interface stays in its page's French; the rest of WaveStack works."
+      effect: "The interface stays in its page's French; the rest of HarnessLab works."
     scenarios_invalid:
       message: The scenarios file (content/scenarios.yaml) is missing or invalid.
-      effect: "The scenario selector is empty; the rest of WaveStack works."
+      effect: "The scenario selector is empty; the rest of HarnessLab works."
     labels:
       message: The segment labels file is invalid.
       effect: The segment types are shown under their technical name.
@@ -297,18 +297,18 @@ session:
       global_memory: The global memory texts are invalid.
       rag: The RAG brick texts are invalid.
     unavailable:
-      tools: "The “Tools” brick is unavailable; the rest of WaveStack works."
-      mcp: "The “MCP” brick is unavailable; the rest of WaveStack works."
-      skills: "The “Skills” brick is unavailable; the rest of WaveStack works."
-      hooks: "The “Hooks” brick is unavailable; the rest of WaveStack works."
-      subagent: "The “Sub-agent” brick is unavailable; the rest of WaveStack works."
+      tools: "The “Tools” brick is unavailable; the rest of HarnessLab works."
+      mcp: "The “MCP” brick is unavailable; the rest of HarnessLab works."
+      skills: "The “Skills” brick is unavailable; the rest of HarnessLab works."
+      hooks: "The “Hooks” brick is unavailable; the rest of HarnessLab works."
+      subagent: "The “Sub-agent” brick is unavailable; the rest of HarnessLab works."
       compression: "The “Compression” brick is unavailable; the rest works."
       guardrails: "The “Guardrails” brick is unavailable; the rest works."
       system_prompt: "The “System prompt” brick is unavailable; the rest works."
-      global_memory: "The “Global memory” brick is unavailable; the rest of WaveStack works."
-      rag: "The “RAG” brick is unavailable; the rest of WaveStack works."
+      global_memory: "The “Global memory” brick is unavailable; the rest of HarnessLab works."
+      rag: "The “RAG” brick is unavailable; the rest of HarnessLab works."
   memory:
-    file_unreadable: "The global memory file ({path}) is unreadable or invalid: fix it, then restart WaveStack, or click “Reset” to restore the demonstration memory (the file will be replaced)."
+    file_unreadable: "The global memory file ({path}) is unreadable or invalid: fix it, then restart HarnessLab, or click “Reset” to restore the demonstration memory (the file will be replaced)."
     unreadable: Global memory is unreadable.
     unreadable_effect: "The “Global memory” brick is unavailable; the file is not modified."
     no_parser: "The active model cannot call tools: it cannot write to memory itself, and “Write to memory” does not apply. The memory is still injected into the context and can be edited from “Edit the memory”."
@@ -349,7 +349,7 @@ session:
     ignored: "These names are ignored: the sub-agent only has the known and enabled tools."
   mcp:
     connecting: "Connecting to the MCP server {server}"
-    no_loop: "Connection impossible: WaveStack's asyncio loop has not started."
+    no_loop: "Connection impossible: HarnessLab's asyncio loop has not started."
     abandoned: "Connection abandoned: the server was disabled."
     github_not_connected: "Connect to GitHub first, in the MCP workshop: the connection cannot open without a token."
     # AD-9 (E089): the live tools/list against content/mcp_snapshots/, beyond the threshold.
@@ -366,7 +366,7 @@ session:
     not_saved: "The language could not be saved in {path} ({cause}): it stays unchanged."
     both_invalid:
       message: "A translated file ({lang}) under content/i18n/{lang}/ and its French original are invalid."
-      effect: "The text read before the language change is still used; the rest of WaveStack works."
+      effect: "The text read before the language change is still used; the rest of HarnessLab works."
   # Story 15 (AD-21): the RAG's model download and index build.
   download:
     no_model: "The RAG brick has no declared {noun} model."
@@ -427,15 +427,15 @@ session:
     not_loaded: "Compressor not loaded: disable then re-enable the brick."
     refused_effect: "The “Compression” brick is unavailable; nothing is loaded. It loads by itself after a model change, or when re-enabled."
     load_failed: Headroom could not be loaded.
-    unavailable_effect: "The “Compression” brick is unavailable; the rest of WaveStack works."
-    load_failed_reason: "Unavailable: Headroom could not be loaded ({kind}: {cause}). Reinstall it with `uv sync --extra compression`, then restart WaveStack."
+    unavailable_effect: "The “Compression” brick is unavailable; the rest of HarnessLab works."
+    load_failed_reason: "Unavailable: Headroom could not be loaded ({kind}: {cause}). Reinstall it with `uv sync --extra compression`, then restart HarnessLab."
     close_failed: The compressor could not be closed.
     text_failed: "{source}: compression failed ({kind}: {cause})."
     failed:
       message: Compressing a text failed.
       effect: "The original text goes out as it is; the turn goes on."
   turn:
-    over: "The turn is over; WaveStack stays usable."
+    over: "The turn is over; HarnessLab stays usable."
     interrupted: The turn stopped on an error.
     end_hooks:
       message: The end-of-turn hooks were interrupted.
@@ -469,9 +469,9 @@ session:
     content_invalid_effect: The “LLM workshop” page is still served without its texts.
     tokenizer:
       none: "No active model: no tokenizer to show."
-      cloud: "The tokenizer of {model} is at {provider}, not on this workstation: WaveStack cannot split the text the way it does. It estimates the number of tokens from the characters, without any chip."
+      cloud: "The tokenizer of {model} is at {provider}, not on this workstation: HarnessLab cannot split the text the way it does. It estimates the number of tokens from the characters, without any chip."
       llama_server: llama-server's tokenizer (/tokenize)
-      ollama: the tokenizer of the GGUF file Ollama serves, opened by WaveStack
+      ollama: the tokenizer of the GGUF file Ollama serves, opened by HarnessLab
       exact: "Exact split, by {how}."
       exact_loaded: Exact split, by the loaded model's tokenizer.
     tokenize_failed: Splitting into tokens failed.
@@ -486,9 +486,9 @@ session:
         top_k: top-k
         top_p: top-p
         min_p: min-p
-      by_provider: "Set by {provider}: WaveStack sends no sampling setting."
+      by_provider: "Set by {provider}: HarnessLab sends no sampling setting."
       not_settable: "{names} cannot be set at {provider}."
-      with_reasoning: "{provider} refuses temperature and top-p while the model thinks: WaveStack sends no sampling setting. Turn off “Reason before answering” to set them."
+      with_reasoning: "{provider} refuses temperature and top-p while the model thinks: HarnessLab sends no sampling setting. Turn off “Reason before answering” to set them."
       local: "Sent to the engine at each generation of the screen; the workshop keeps the harness's values."
       no_api: "{label} cannot be set at {provider}: the OpenAI-compatible API does not provide for it."
       not_declared: "{label} cannot be set at {provider}: the model does not declare it (sampling) in the configuration; the provider keeps its value."
@@ -498,8 +498,8 @@ session:
     cannot_reason: the active model cannot reason.
     candidates:
       no_model: No active model.
-      cloud: "Probabilities unavailable: the model runs at {provider}, which does not send them to WaveStack in a form it can check."
-      server: "Probabilities unavailable with {provider}: WaveStack only reads them in the engine that runs in its own process (a GGUF file loaded by WaveStack)."
+      cloud: "Probabilities unavailable: the model runs at {provider}, which does not send them to HarnessLab in a form it can check."
+      server: "Probabilities unavailable with {provider}: HarnessLab only reads them in the engine that runs in its own process (a GGUF file loaded by HarnessLab)."
     # Story 5 of 2026-09-30: `POST /api/llm_lab/distribution` (404).
     distribution:
       none: "First generate a text with a local model."
@@ -518,12 +518,12 @@ session:
     still_usable: The LLM workshop and the harness workshop stay usable.
     end_untraced: The end of the LLM workshop's generation could not be traced.
     back_to_idle: "The session goes back to waiting; the workshop stays usable."
-    stops: "The screen's generation stops; WaveStack stays usable."
+    stops: "The screen's generation stops; HarnessLab stays usable."
   # Story 30: the RAG workshop.
   rag_lab:
     content_invalid: "The RAG workshop's texts cannot be read (content/rag_lab.yaml): fix the file, then reload the page."
     content_invalid_effect: The “RAG workshop” page is still served without them.
-    fastembed_missing: "Unavailable: fastembed is not installed (it is not a WaveStack dependency, only the fallback of story 12)."
+    fastembed_missing: "Unavailable: fastembed is not installed (it is not a HarnessLab dependency, only the fallback of story 12)."
     fastembed_files: "Unavailable: the fastembed model's files are not in {folder}. Copy them by hand: the RAG workshop downloads nothing."
     corpus_unreadable: "The RAG brick's corpus (content/rag.yaml) is unreadable: the RAG workshop cannot split anything."
     texts_unreadable: The RAG workshop's texts cannot be read.
@@ -532,17 +532,17 @@ session:
       effect: "It is forgotten; its memory slot is released."
     no_embedding: No embedding model is declared.
     embedding_absent: "Embedding model missing ({names} in {folder}). Download it from the workshop's RAG card. Or follow docs/installation.md, section “Modèles du RAG” (in French)."
-    lab_embedding_absent: "Unavailable: model file missing ({files} under {folder}). Click “Download” in this stage in “Compose” mode, or get it from the address declared in wavestack.toml ([[rag_lab.embeddings]]) and put it there."
+    lab_embedding_absent: "Unavailable: model file missing ({files} under {folder}). Click “Download” in this stage in “Compose” mode, or get it from the address declared in harness-lab.toml ([[rag_lab.embeddings]]) and put it there."
     lab_embedding_effect: "The workshop's other embedding models are still offered."
     # Lot 5c-2: a model of [[rag_lab.rerankers]] that cannot be chosen, and why.
-    lab_reranker_absent: "Unavailable: model file missing ({files} under {folder}). Click “Download” in this stage in “Compose” mode, or get it from the address declared in wavestack.toml ([[rag_lab.rerankers]]) and put it there."
+    lab_reranker_absent: "Unavailable: model file missing ({files} under {folder}). Click “Download” in this stage in “Compose” mode, or get it from the address declared in harness-lab.toml ([[rag_lab.rerankers]]) and put it there."
     lab_reranker_refused: "Unavailable: {reason}."
     lab_reranker_effect: "The workshop's other reranking models are still offered."
     # Lot 5c-3: the Generation stage run by the workshop's active model.
     generation_active: "The workshop's active model: {model}"
     generation_cloud: "Cloud model: {provider} · {model} (the session's model does not change)"
     generation_no_model: "No model loaded in the workshop: the Generation step will be skipped. Load a model, then run the chain again."
-    generation_stops: "The RAG workshop's generation stops; WaveStack remains usable."
+    generation_stops: "The RAG workshop's generation stops; HarnessLab remains usable."
     query_no_model: "No model loaded in the workshop: the query understanding will be skipped and the question searched as typed. Load a model, then run the chain again."
     update_too_long: "Text too long: {max} characters at most."
     update_bad_id: "Invalid identifier: lowercase letters, digits and _ only."
@@ -568,10 +568,10 @@ session:
       added: "+{size} MB"
       no_measure: no measurement
       already: "already done in this session ({said}), counted for good"
-      first: "first import: {said} in WaveStack"
+      first: "first import: {said} in HarnessLab"
       budget: "{size} MB reserved for good (a module does not unload)"
       refused: "Import refused: {label} could not be loaded ({kind}: {cause}). A security policy (AppLocker, WDAC) may be blocking its unsigned libraries; the other vector databases stay usable."
-      failed: "Import failed: {label} could not be loaded ({kind}: {cause}). Its installation may be damaged: run `{install}` again from the WaveStack folder; the other options stay usable."
+      failed: "Import failed: {label} could not be loaded ({kind}: {cause}). Its installation may be damaged: run `{install}` again from the HarnessLab folder; the other options stay usable."
     interrupted: The RAG workshop stopped on an error.
     compress_not_wanted: "The Compression card is not active: activate it for the option to compress the excerpts."
     # V1.2 story 10: the architectures without an index (long context, CAG).
@@ -583,16 +583,16 @@ session:
     cag_label: "the workshop's CAG cache"
     cag_memory: "CAG cache not kept. {reason} No state is kept for the next questions."
     cag_snapshot_failed: "Copying the model's state failed ({error})."
-    cag_rss: "After copying the state ({size}), WaveStack takes {rss}, beyond the budget of {budget}: the state is dropped at once."
+    cag_rss: "After copying the state ({size}), HarnessLab takes {rss}, beyond the budget of {budget}: the state is dropped at once."
     cag_lost: "Prefix lost: the server read only {read} tokens of its cache out of the prefix's {prefix} (another call, the chat for instance, evicted it). The request counts what it evaluated again; the server holds the prefix again."
     # V1.2 story 11: the agentic search and PageIndex ask the workshop's model.
     searchless_no_model: "Without a loaded model, the Context step is skipped: the option stays applicable, load a model for the model to search by itself."
     # V1.2 story 8 (CAP-6): System One's options.
-    decision_extra: "Unavailable: the local classifier needs the “decision” extra (onnxruntime, tokenizers). From the WaveStack folder: `uv sync --extra decision` (keep your other extras, for instance `--extra compression`), then restart WaveStack."
-    lab_decision_absent: "Unavailable: the classifier's files are missing ({files} under {folder}). Click “Download” in this stage in “Compose” mode, or get them from the addresses declared in wavestack.toml ([rag_lab.decision.classifier])."
+    decision_extra: "Unavailable: the local classifier needs the “decision” extra (onnxruntime, tokenizers). From the HarnessLab folder: `uv sync --extra decision` (keep your other extras, for instance `--extra compression`), then restart HarnessLab."
+    lab_decision_absent: "Unavailable: the classifier's files are missing ({files} under {folder}). Click “Download” in this stage in “Compose” mode, or get them from the addresses declared in harness-lab.toml ([rag_lab.decision.classifier])."
     filter_label: "Threshold on the reranker's score ({model})"
     decision_cloud_label: "Decision API (OpenRouter, {model})"
-    decision_no_key: "Unavailable without a key: set the environment variable {env} (or in the user registry), then restart WaveStack. The key is never shown nor written."
+    decision_no_key: "Unavailable without a key: set the environment variable {env} (or in the user registry), then restart HarnessLab. The key is never shown nor written."
     decision_capped: "The session's spending cap is reached ({spent} of {cap}, [finops] max_session_usd): no call is sent."
     rebuild_target: "Unknown rebuild: “{target}”. The workshop rebuilds the contexts, PageIndex's tree, GraphRAG's graph, the wiki or RAPTOR's tree."
     fallback_no_model: "Without a loaded model, the fallback cannot rewrite the question: it answers “I don't know” as soon as the filter keeps nothing."
@@ -610,7 +610,7 @@ session:
     interrupted: The MCP workshop stopped on an error.
     policy_denied: "Denied by the security policy: the rule for “{tool}” is Deny. The tool was not run."
     policy_denied_github: "Denied by the security policy: the rule for « {tool} » is Deny. Sent to GitHub: no."
-    github_refused: "Refused by GitHub ({status}): the connected account may not call “{tool}”. Sent to GitHub: yes; WaveStack had allowed it."
+    github_refused: "Refused by GitHub ({status}): the connected account may not call “{tool}”. Sent to GitHub: yes; HarnessLab had allowed it."
     policy_allowed: "Allowed by the security policy (the rule for « {tool} »)."
     policy_denied_by_user: "Denied by you: you refused the call to « {tool} ». The tool was not run."
     policy_allowed_once: "Allowed once by you: you authorized the call to « {tool} »."
@@ -801,7 +801,7 @@ memory:
   error:
     not_modified: "Global memory was not modified."
     not_written: "Global memory could not be written."
-    unchanged: "It stays unchanged; the rest of WaveStack works."
+    unchanged: "It stays unchanged; the rest of HarnessLab works."
 
 delegation:
   outside_turn: "Delegation impossible outside a turn."
@@ -882,7 +882,7 @@ mcp:
     no_detail: "The server reports an error, without detail."
 
 # `config.py`: the memory budget's calculation (the diagnostic, a load's refusal) and the
-# reasons a declaration in wavestack.toml or settings.json is left out.
+# reasons a declaration in harness-lab.toml or settings.json is left out.
 config:
   budget:
     calc:
@@ -900,34 +900,34 @@ config:
       floored: "= floor, low RAM available at launch"
       ram_limited: "= {percent} of the {available} of RAM available at launch"
       capped: "= cap [memory] budget_mb"
-  cloud_rejected: "Cloud model “{name}” left out: invalid declaration ({fields}).{reasons} Fix wavestack.toml or settings.json, then restart WaveStack."
+  cloud_rejected: "Cloud model “{name}” left out: invalid declaration ({fields}).{reasons} Fix harness-lab.toml or settings.json, then restart HarnessLab."
   cloud_quota: "Unavailable: the quota of {tpm} tokens per minute leaves no room for the context once the answer is reserved ({reserve} tokens)."
   rag_embedding:
-    absent: "The [rag.embedding] section of wavestack.toml is missing: it names the embedding model. Restore it, then restart WaveStack (the configuration is only read at launch)."
-    invalid: "The [rag.embedding] section is invalid ({fields}). Fix wavestack.toml or settings.json, then restart WaveStack (the configuration is only read at launch)."
+    absent: "The [rag.embedding] section of harness-lab.toml is missing: it names the embedding model. Restore it, then restart HarnessLab (the configuration is only read at launch)."
+    invalid: "The [rag.embedding] section is invalid ({fields}). Fix harness-lab.toml or settings.json, then restart HarnessLab (the configuration is only read at launch)."
   # V1.2 story 8 (CAP-6)
   rag_lab_decision:
-    absent: "Unavailable: the [rag_lab.decision.classifier] section of wavestack.toml is missing (it names System One's classifier). Restore it, then restart WaveStack."
-    invalid: "Unavailable: the [rag_lab.decision.classifier] section is invalid ({fields}). Fix wavestack.toml, then restart WaveStack."
+    absent: "Unavailable: the [rag_lab.decision.classifier] section of harness-lab.toml is missing (it names System One's classifier). Restore it, then restart HarnessLab."
+    invalid: "Unavailable: the [rag_lab.decision.classifier] section is invalid ({fields}). Fix harness-lab.toml, then restart HarnessLab."
   rag_reranker:
-    absent: "Unavailable: the [rag.reranker] section of wavestack.toml is missing (it names the reranking model). Restore it, then restart WaveStack."
-    invalid: "Unavailable: the [rag.reranker] section is invalid ({fields}). Fix wavestack.toml or settings.json, then restart WaveStack."
+    absent: "Unavailable: the [rag.reranker] section of harness-lab.toml is missing (it names the reranking model). Restore it, then restart HarnessLab."
+    invalid: "Unavailable: the [rag.reranker] section is invalid ({fields}). Fix harness-lab.toml or settings.json, then restart HarnessLab."
   fastembed:
-    absent: "Unavailable: no fastembed model is declared. Add a [rag_lab.fastembed] section (model_name, dims, label_text) to settings.json, with WaveStack stopped."
-    invalid: "Unavailable: the [rag_lab.fastembed] section is invalid ({fields}). Fix it, then restart WaveStack."
+    absent: "Unavailable: no fastembed model is declared. Add a [rag_lab.fastembed] section (model_name, dims, label_text) to settings.json, with HarnessLab stopped."
+    invalid: "Unavailable: the [rag_lab.fastembed] section is invalid ({fields}). Fix it, then restart HarnessLab."
   rag_lab_embeddings:
-    invalid: "Workshop embedding model “{name}” left out: invalid declaration ({fields}). Fix [[rag_lab.embeddings]] in wavestack.toml, then restart WaveStack."
-    too_long: "Workshop embedding model “{name}” left out: its id is longer than {max} characters. Shorten it in wavestack.toml, then restart WaveStack."
-    reserved: "Workshop embedding model “{name}” left out: its id is already that of an option of the Embedding step (declared, fastembed or the RAG brick's model). Rename it in wavestack.toml, then restart WaveStack."
-    duplicate: "Workshop embedding model “{name}” left out: another model of [[rag_lab.embeddings]] already has this id. Rename it in wavestack.toml, then restart WaveStack."
-    outside: "Workshop embedding model “{name}” left out: its files must be under embedding/ in the models folder (never offered as chat models). Fix load_path and files in wavestack.toml, then restart WaveStack."
+    invalid: "Workshop embedding model “{name}” left out: invalid declaration ({fields}). Fix [[rag_lab.embeddings]] in harness-lab.toml, then restart HarnessLab."
+    too_long: "Workshop embedding model “{name}” left out: its id is longer than {max} characters. Shorten it in harness-lab.toml, then restart HarnessLab."
+    reserved: "Workshop embedding model “{name}” left out: its id is already that of an option of the Embedding step (declared, fastembed or the RAG brick's model). Rename it in harness-lab.toml, then restart HarnessLab."
+    duplicate: "Workshop embedding model “{name}” left out: another model of [[rag_lab.embeddings]] already has this id. Rename it in harness-lab.toml, then restart HarnessLab."
+    outside: "Workshop embedding model “{name}” left out: its files must be under embedding/ in the models folder (never offered as chat models). Fix load_path and files in harness-lab.toml, then restart HarnessLab."
   # Lot 5c-2: an entry of [[rag_lab.rerankers]] left out (the others are kept).
   rag_lab_rerankers:
-    invalid: "Workshop reranking model “{name}” left out: invalid declaration ({fields}). Fix [[rag_lab.rerankers]] in wavestack.toml, then restart WaveStack."
-    too_long: "Workshop reranking model “{name}” left out: its id is longer than {max} characters. Shorten it in wavestack.toml, then restart WaveStack."
-    reserved: "Workshop reranking model “{name}” left out: its id is already that of an option of the Reranking step (declared or the RAG brick's model). Rename it in wavestack.toml, then restart WaveStack."
-    duplicate: "Workshop reranking model “{name}” left out: another model of [[rag_lab.rerankers]] already has this id. Rename it in wavestack.toml, then restart WaveStack."
-    outside: "Workshop reranking model “{name}” left out: its files must be under reranker/ in the models folder (never offered as chat models). Fix load_path and files in wavestack.toml, then restart WaveStack."
+    invalid: "Workshop reranking model “{name}” left out: invalid declaration ({fields}). Fix [[rag_lab.rerankers]] in harness-lab.toml, then restart HarnessLab."
+    too_long: "Workshop reranking model “{name}” left out: its id is longer than {max} characters. Shorten it in harness-lab.toml, then restart HarnessLab."
+    reserved: "Workshop reranking model “{name}” left out: its id is already that of an option of the Reranking step (declared or the RAG brick's model). Rename it in harness-lab.toml, then restart HarnessLab."
+    duplicate: "Workshop reranking model “{name}” left out: another model of [[rag_lab.rerankers]] already has this id. Rename it in harness-lab.toml, then restart HarnessLab."
+    outside: "Workshop reranking model “{name}” left out: its files must be under reranker/ in the models folder (never offered as chat models). Fix load_path and files in harness-lab.toml, then restart HarnessLab."
 
 # `greenops.py`: a call's footprint note (the method and its limits, or why there is none).
 greenops:
@@ -950,14 +950,14 @@ greenops:
     electricity_mix_pe_world: primary energy factor of the world mix by default
     electricity_mix_wue_world: water factor of the world mix by default
   local:
-    missing: "Local footprint unavailable: CodeCarbon is not installed. Install the GreenOps extra from the WaveStack folder (`{install}`, add your other extras), then restart WaveStack."
+    missing: "Local footprint unavailable: CodeCarbon is not installed. Install the GreenOps extra from the HarnessLab folder (`{install}`, add your other extras), then restart HarnessLab."
     refused: "Local footprint unavailable: {refusal}"
-    not_loaded: "Local footprint unavailable: CodeCarbon could not be loaded ({kind}: {cause}). Run `{install}` again from the WaveStack folder."
+    not_loaded: "Local footprint unavailable: CodeCarbon could not be loaded ({kind}: {cause}). Run `{install}` again from the HarnessLab folder."
     not_started: "Footprint not estimated: CodeCarbon did not start ({kind})."
     no_measure: "Footprint not estimated: CodeCarbon returned no measurement ({kind})."
     invalid_energy: "Footprint not estimated: CodeCarbon returned an invalid energy ({kwh})."
     machine: whole workstation (the model runs in another process, Ollama or llama-server)
-    process: WaveStack process only (the built-in engine)
+    process: HarnessLab process only (the built-in engine)
     note: "Offline CodeCarbon measurement: estimate (TDP × load, without administrator rights), {scope}; emissions at {intensity} g CO₂e per kWh ([greenops] local_gco2e_per_kwh), without the GPU. Electricity consumed only: without the workstation's share of manufacturing, which the cloud estimate (EcoLogits) counts for the servers.{zero}"
     zero: " CodeCarbon measured no energy for this call (too short)."
 
@@ -969,7 +969,7 @@ rag_lab:
   # V1.2 story 16 (CAP-12): the OTLP export of the run's tree.
   otel:
     missing: "OTLP export unavailable: the otel extra is not installed (uv sync --extra otel)."
-    unset: "OTLP export not set: fill in [otel] endpoint in wavestack.toml or settings.json, then restart. Nothing leaves the workstation."
+    unset: "OTLP export not set: fill in [otel] endpoint in harness-lab.toml or settings.json, then restart. Nothing leaves the workstation."
     no_run: "No finished run to export."
     blocked: "OTLP export refused by the network guard: {cause}"
     unreachable: "OTLP collector unreachable ({cause})."
@@ -1068,8 +1068,8 @@ rag_lab:
     router_before: "Step “{stage}”: it chooses the searches to run, so it must come before them. Move it before the searches."
     filter_after: "Step “{stage}”: it sorts a list of passages, so a search must come before it. Move it after the searches."
     fallback_after_filter: "Step “{stage}”: it reads the passages kept by the step “{filter}”, which must come before it. Add a passage filter, or move the fallback after it."
-  not_installed: "Unavailable: {library} is not installed. From the WaveStack folder: `{command}`, then restart WaveStack. Without `--extra compression`, Headroom would be removed."
-  folder_held: "The folder {folder} cannot be deleted ({error}: {cause}): another program may be holding it open. Close it, or delete the rag_lab folder with WaveStack stopped."
+  not_installed: "Unavailable: {library} is not installed. From the HarnessLab folder: `{command}`, then restart HarnessLab. Without `--extra compression`, Headroom would be removed."
+  folder_held: "The folder {folder} cannot be deleted ({error}: {cause}): another program may be holding it open. Close it, or delete the rag_lab folder with HarnessLab stopped."
   load_failed: "The {noun} {model} could not be loaded ({error}: {cause})."
   run:
     phase: "{running} “{question}”"
@@ -1655,7 +1655,7 @@ llm_lab:
 # The RAG index and its search (`rag/index.py`, `rag/retriever.py`).
 rag:
   index:
-    in_use: "The index is open in another program (WaveStack, an antivirus or a synchronisation tool): it cannot be replaced."
+    in_use: "The index is open in another program (HarnessLab, an antivirus or a synchronisation tool): it cannot be replaced."
     empty_corpus: "empty corpus: no excerpt to index"
     wrong_vectors: "one vector of {dims} dimensions is needed per excerpt"
     build_cancelled: "index build stopped"
@@ -1680,7 +1680,7 @@ build_rag_index:
   loading: "Loading the embedding model {model} ({path})…"
   model_unusable: "Embedding model unusable: {cause}."
   progress: "  excerpt {done} / {total}"
-  from_the_card: "Build it from the RAG card, or stop WaveStack, then run this script again."
+  from_the_card: "Build it from the RAG card, or stop HarnessLab, then run this script again."
   not_built: "Index not built: {cause}."
   written: "Index written: {path}"
   documents: "  documents: {count}"
@@ -1719,20 +1719,20 @@ context:
 # models (AD-3, AD-20, AD-21). `{notice}` is the reason a saved model was not taken back.
 diagnostic:
   starting: "Start-up diagnostics in progress."
-  port: "Port {port} reserved for WaveStack."
+  port: "Port {port} reserved for HarnessLab."
   memory:
-    figures: "WaveStack memory budget: {size} MB ({calc})."
+    figures: "HarnessLab memory budget: {size} MB ({calc})."
     not_measured: "Computer RAM not measured. {figures}"
     fixed_action: "The budget used is the fixed value: check that it fits in the computer's memory."
-    cap_action: "The budget used is the cap: restart WaveStack if the computer's memory is tight."
+    cap_action: "The budget used is the cap: restart HarnessLab if the computer's memory is tight."
     ram_total: "Computer RAM: {total} MB, of which {available} MB available at launch. "
     ram_available: "RAM available at launch: {available} MB. "
     measured: "{ram}{figures}"
     where_total: "the computer's total RAM"
     where_available: "the RAM available at launch"
-    fixed_over: "The fixed budget exceeds {where}: close some applications then restart WaveStack, or lower [memory] budget_mb."
-    ram_limited: "The available RAM limits the budget below its cap: close some applications then restart WaveStack."
-    low: "The available RAM is low: close some applications then restart WaveStack."
+    fixed_over: "The fixed budget exceeds {where}: close some applications then restart HarnessLab, or lower [memory] budget_mb."
+    ram_limited: "The available RAM limits the budget below its cap: close some applications then restart HarnessLab."
+    low: "The available RAM is low: close some applications then restart HarnessLab."
   network:
     unavailable: "Network access unavailable."
     offline_action: "The offline bricks remain usable without a network."
@@ -1766,11 +1766,11 @@ diagnostic:
     served_only:
       one: "{notice}No GGUF file, but a local server serves {count} model: choose a served model."
       other: "{notice}No GGUF file, but a local server serves {count} models: choose a served model."
-    served_only_action: "Click “Choose” next to a served model (WaveStack neither starts nor stops the server), or give the path of a GGUF file."
+    served_only_action: "Click “Choose” next to a served model (HarnessLab neither starts nor stops the server), or give the path of a GGUF file."
     # One candidate of the « none found » check: its source, its path (or URL), its reason.
     detail: "{source} ({where}): {reason}"
     no_candidate: "no candidate found in these locations"
-    searched_sources: "WaveStack models folder, Ollama, LM Studio, Hugging Face cache, local server"
+    searched_sources: "HarnessLab models folder, Ollama, LM Studio, Hugging Face cache, local server"
     none: "{notice}No usable model found. Locations searched: {sources}."
     none_action: "{details}. Give the path of a GGUF file or copy one into the models folder."
     file_missing: "File not found."
@@ -1803,7 +1803,7 @@ diagnostic:
     key_undeclared: "The cloud model “{id}” is not declared (or is disabled)."
     key_empty: "Empty key: paste the API key given by the provider's console."
     key_not_saved: "The key could not be saved ({path}): {cause}."
-    key_saved: "Key saved for {provider}; it takes effect immediately, without restarting WaveStack. Click “Test”."
+    key_saved: "Key saved for {provider}; it takes effect immediately, without restarting HarnessLab. Click “Test”."
     test_refused: "Test refused: {reason}"
     test_impossible: "Test impossible: the file content/cloud.yaml is invalid."
     test_phase: "Test of {model} at {provider}"
@@ -1815,27 +1815,27 @@ diagnostic:
 
 # `cli.py`: the terminal, always in English (`msg(key, "en")`); French kept as the reference.
 cli:
-  description: "Launches WaveStack."
+  description: "Launches HarnessLab."
   port_help: "Listening port (default: configuration)."
   port_taken: "Port {port} is already used by another program. Restart with --port <other_port>."
-  already_running: "WaveStack is already running on port {port}, from {root} ({commit}). Opening the browser."
-  already_running_no_commit: "WaveStack is already running on port {port}, from {root} (unknown commit). Opening the browser."
-  already_running_unknown: "WaveStack is already running on port {port}, from an unknown folder (an earlier version). Opening the browser."
+  already_running: "HarnessLab is already running on port {port}, from {root} ({commit}). Opening the browser."
+  already_running_no_commit: "HarnessLab is already running on port {port}, from {root} (unknown commit). Opening the browser."
+  already_running_unknown: "HarnessLab is already running on port {port}, from an unknown folder (an earlier version). Opening the browser."
   other_tree: "Warning: this instance does not come from this folder ({here}). To launch this one, stop it (Ctrl+C in its terminal) or restart with --port <other_port>."
 
 # `compression/headroom_adapter.py`: why the compression brick is unavailable.
 compression:
-  install: "Install it from the WaveStack folder with `{command}`"
-  missing: "Unavailable: the Headroom library (headroom-ai {version}), an optional dependency, is not installed. {install}, then restart WaveStack. The other bricks work without it."
+  install: "Install it from the HarnessLab folder with `{command}`"
+  missing: "Unavailable: the Headroom library (headroom-ai {version}), an optional dependency, is not installed. {install}, then restart HarnessLab. The other bricks work without it."
   unknown_version: unknown
-  wrong_version: "Unavailable: headroom-ai {version} is installed, whereas WaveStack was checked offline with version {pinned} only. {install}, then restart WaveStack."
-  tiktoken_missing: "Unavailable: Headroom's counting table (tiktoken cl100k_base), shipped with WaveStack, is missing ({path}). WaveStack does not download it: restore this file from WaveStack's repository (git checkout -- src/wavestack/compression/tiktoken) or archive, then restart WaveStack. The other bricks work without it."
-  tiktoken_altered: "Unavailable: Headroom's counting table (tiktoken cl100k_base), shipped with WaveStack, is altered (different sha256 fingerprint, often converted line endings): {path}. WaveStack does not download it: restore this file from WaveStack's repository (git checkout -- src/wavestack/compression/tiktoken) or archive, then restart WaveStack. The other bricks work without it."
+  wrong_version: "Unavailable: headroom-ai {version} is installed, whereas HarnessLab was checked offline with version {pinned} only. {install}, then restart HarnessLab."
+  tiktoken_missing: "Unavailable: Headroom's counting table (tiktoken cl100k_base), shipped with HarnessLab, is missing ({path}). HarnessLab does not download it: restore this file from HarnessLab's repository (git checkout -- src/harness_lab/compression/tiktoken) or archive, then restart HarnessLab. The other bricks work without it."
+  tiktoken_altered: "Unavailable: Headroom's counting table (tiktoken cl100k_base), shipped with HarnessLab, is altered (different sha256 fingerprint, often converted line endings): {path}. HarnessLab does not download it: restore this file from HarnessLab's repository (git checkout -- src/harness_lab/compression/tiktoken) or archive, then restart HarnessLab. The other bricks work without it."
 
 # `guardrails/availability.py` (story 4, CAP-5): why the brick cannot be used yet.
 guardrails:
-  install: "Install them from the WaveStack folder with `{command}`"
-  missing: "Not installed: the guardrails' libraries (onnxruntime, Presidio, spaCy), an optional dependency, are not installed. {install}, then restart WaveStack. The other bricks work without them."
+  install: "Install them from the HarnessLab folder with `{command}`"
+  missing: "Not installed: the guardrails' libraries (onnxruntime, Presidio, spaCy), an optional dependency, are not installed. {install}, then restart HarnessLab. The other bricks work without them."
   labels:
     toxicity: Toxicity
     pii: Personal data
@@ -1882,8 +1882,8 @@ guardrails:
   install_extra:
     installing: "Installing…"
     already_installed: "Already installed."
-    done: "Guardrails' libraries installed (onnxruntime, Presidio, spaCy); the brick is usable without restarting WaveStack."
-    restart_needed: "Libraries installed, but one of them only loads at startup: restart WaveStack to use them."
+    done: "Guardrails' libraries installed (onnxruntime, Presidio, spaCy); the brick is usable without restarting HarnessLab."
+    restart_needed: "Libraries installed, but one of them only loads at startup: restart HarnessLab to use them."
     failed_message: "Installing the guardrails failed."
     failed_effect: "Nothing is installed: the brick stays « not installed »."
   injection:
@@ -1925,7 +1925,7 @@ cloud:
 web:
   body: body
   invalid_intention: "Invalid intention: check {fields}."
-  busy: WaveStack is busy.
+  busy: HarnessLab is busy.
   refused_now: "Refused for now: {reason}"
   origin_refused: Origin refused.
   json_expected: JSON expected.
@@ -1982,7 +1982,7 @@ models:
       model_binding_mismatch: "{provider} threw away the reasoning of an earlier turn ({path}): another model produced it, and only that model can read it again. The model goes on without it."
       organization_binding_mismatch: "{provider} threw away the reasoning of an earlier turn ({path}): it was produced under another organization (another API key). The model goes on without it."
     # Native providers 2/5 (CAP-4): a priced call refused before it is sent, `[finops] max_session_usd`.
-    session_cap: "Session spending cap reached: {total} spent against a cap of {cap}. The call was not sent and costs nothing. To raise the cap, change [finops] max_session_usd in settings.json with WaveStack stopped, then restart it (the session total only goes back to zero on restart)."
+    session_cap: "Session spending cap reached: {total} spent against a cap of {cap}. The call was not sent and costs nothing. To raise the cap, change [finops] max_session_usd in settings.json with HarnessLab stopped, then restart it (the session total only goes back to zero on restart)."
     hint:
       slow_provider: "Run the turn again: a busy provider sometimes answers slowly."
       test_network: "Check the workstation's network with “Test” on the Models page."
@@ -1995,7 +1995,7 @@ models:
       reduce_context: "Reduce the context: lazy loading, fewer tools, conversation cleared."
       reduce_window: "Reduce the context window: waiting is no use."
       clear_conversation: Clear the conversation, or switch the MCP brick to lazy loading.
-      check_declaration: Check the model's declaration (wavestack.toml or settings.json).
+      check_declaration: Check the model's declaration (harness-lab.toml or settings.json).
       reenter_key: "Enter the key again on the Models page, then “Test”."
       check_model_name: Check the model's name in the provider's console.
       retry_later: Try again in a few minutes.
@@ -2028,7 +2028,7 @@ models:
     cache_used: "Ollama only reread {evaluated} of {counted} tokens: the start of the prompt came from its cache (prefix identical to the previous call)."
     not_unloaded:
       message: "Ollama did not unload the model {name}."
-      effect: "WaveStack goes on; Ollama will unload it by itself after its idle timeout."
+      effect: "HarnessLab goes on; Ollama will unload it by itself after its idle timeout."
     tokenizer_refused: "{lib} cannot read this model's tokenizer (some recent Ollama models): serve it with llama-server instead, which tokenises by itself."
     # E119: Ollama read the model's tokenizer at its choice, but cannot run its architecture.
     unsupported_architecture: "Ollama cannot run this model: its architecture “{architecture}” is unknown to this version of Ollama, which is probably too old. Update Ollama, or serve the model with llama-server."
@@ -2042,21 +2042,21 @@ models:
         context_length: native context
       served: "{names} given by llama-server (/v1/models)"
       header: "{names} read in the GGUF header of its file"
-      unreadable: "the model file, opened by llama-server, cannot be read from WaveStack"
+      unreadable: "the model file, opened by llama-server, cannot be read from HarnessLab"
       separator: "; "
       ollama: "Vocabulary read by the tokenizer of Ollama's GGUF file; dimensions read in its header."
     # Lot E (E1), lot K (A3): llama-server's context against the window chosen.
     context_warning:
       below: "llama-server was started with a context of {slot} tokens per slot, below the chosen window of {window}: the effective window stays at {slot} tokens. Stop it and restart it with `-np 1 -c {raw_window}`."
       shared: " ({slot} per slot, {slots} slots)"
-      above: "llama-server was started with a context of {whole} tokens{shared}, whereas WaveStack only uses {window}: it reserves the memory of this whole context. Stop it and restart it with `{advice}`."
+      above: "llama-server was started with a context of {whole} tokens{shared}, whereas HarnessLab only uses {window}: it reserves the memory of this whole context. Stop it and restart it with `{advice}`."
   engine:
     dimensions_source: Read in the model that llama.cpp loaded, in this process.
   # `models/capabilities.py` (AD-6, AD-9, story 25): what a model can do, and why.
   capabilities:
     no_tool_parser: "no known call format for this model family"
-    no_template: "This GGUF file contains no chat template (tokenizer.chat_template): WaveStack cannot build the prompt. Choose another model."
-    pooling: "This GGUF file is an embedding or reranking model (pooling_type key in its header), not a chat model: WaveStack does not offer it as the active model. Choose another model."
+    no_template: "This GGUF file contains no chat template (tokenizer.chat_template): HarnessLab cannot build the prompt. Choose another model."
+    pooling: "This GGUF file is an embedding or reranking model (pooling_type key in its header), not a chat model: HarnessLab does not offer it as the active model. Choose another model."
     window_too_small: "Unavailable: the context window ({window} tokens) leaves no room for the context once the {reserve} output tokens of the reasoning are reserved. Enlarge the window in the configuration."
     reasoning:
       never: never
@@ -2073,7 +2073,7 @@ models:
       always: "reasons in every answer; this model cannot switch it off"
       declared_reasoning: declared in the configuration (reasoning)
       template_variable: "template variable {name}"
-      maybe: "may reason by itself; WaveStack can neither switch it on nor off"
+      maybe: "may reason by itself; HarnessLab can neither switch it on nor off"
       undeclared_reasoning: not declared in the configuration (reasoning)
       no_variable: "the template has no reasoning variable"
       undeclared_tools: not declared in the configuration (tools)
@@ -2087,8 +2087,8 @@ models:
       network: Network
       other: Other publishers
     publishers:
-      translation_invalid: "File content/i18n/{lang}/models/publishers.yaml invalid ({cause}): the French text of this file replaces it. Fix the file, then restart WaveStack."
-      invalid: "File content/models/publishers.yaml invalid ({cause}): all models are placed under “Other publishers”. Fix the file, then restart WaveStack."
+      translation_invalid: "File content/i18n/{lang}/models/publishers.yaml invalid ({cause}): the French text of this file replaces it. Fix the file, then restart HarnessLab."
+      invalid: "File content/models/publishers.yaml invalid ({cause}): all models are placed under “Other publishers”. Fix the file, then restart HarnessLab."
     # AD-9: where the window comes from.
     window_source:
       configured: configured window
@@ -2121,16 +2121,16 @@ models:
     size_range: "{low} to {high}"
   # `models/load_registry.py` (AD-8, stories 24 and 26): a load refused by the budget.
   load_registry:
-    refused: "Change refused: {label} requires about {cost}; WaveStack occupies {without} without the active model, for a budget of {budget}.{stays} {advice}"
+    refused: "Change refused: {label} requires about {cost}; HarnessLab occupies {without} without the active model, for a budget of {budget}.{stays} {advice}"
     stays: " {label} stays active."
-    window_refused: "{window}-token window refused: {label} would require about {cost}; WaveStack occupies {without} without the active model, for a budget of {budget}. {label} stays active with {current} tokens. {advice}"
-    component_refused: "Not enough memory to load {label}: WaveStack occupies {without} and needs about {cost} more, beyond the budget of {budget}. {advice}"
+    window_refused: "{window}-token window refused: {label} would require about {cost}; HarnessLab occupies {without} without the active model, for a budget of {budget}. {label} stays active with {current} tokens. {advice}"
+    component_refused: "Not enough memory to load {label}: HarnessLab occupies {without} and needs about {cost} more, beyond the budget of {budget}. {advice}"
     advice:
-      model_ram: Choose a smaller model, or close some applications then restart WaveStack.
+      model_ram: Choose a smaller model, or close some applications then restart HarnessLab.
       model: Choose a smaller model.
-      window_ram: Choose a smaller window, or close some applications then restart WaveStack.
+      window_ram: Choose a smaller window, or close some applications then restart HarnessLab.
       window: Choose a smaller window.
-      component_ram: Disable a brick, or close some applications then restart WaveStack.
+      component_ram: Disable a brick, or close some applications then restart HarnessLab.
       component: Disable a brick or raise [memory] budget_mb in settings.json.
   # `models/download.py` (story 15): why a model file download did not complete.
   download:
@@ -2155,7 +2155,7 @@ models:
   discovery:
     ollama_tensor: Ollama tensor format, cannot be loaded in process.
     not_gguf: "The model file is not a readable GGUF."
-    blob_missing: "The model's GGUF file was not found in Ollama's folder ({root}): WaveStack cannot read its tokenizer."
+    blob_missing: "The model's GGUF file was not found in Ollama's folder ({root}): HarnessLab cannot read its tokenizer."
   # `models/embedding.py`, `models/reranker.py` (stories 15, 16, 30): a RAG model refused.
   embedding:
     wrong_dims: "the model produces vectors of {found} dimensions, whereas [rag.embedding] declares {declared}"
@@ -2167,7 +2167,7 @@ models:
     not_finite: "the model returns a non-finite score for a question-excerpt pair: it is not a usable reranking model"
     # Lot 5c-2: what the GGUF header says the adapter cannot score.
     segments: "the file declares {count} segment types (tokenizer.ggml.token_type_count): it is a BERT cross-encoder that tells the question from the excerpt by segment ids, which llama.cpp does not pass; its scores would mean nothing"
-    no_rerank_template: "the model has an LLM architecture ({arch}) and its GGUF file carries no usable reranking template (tokenizer.chat_template.rerank, with the query and document fields): WaveStack cannot present a question-excerpt pair to it"
+    no_rerank_template: "the model has an LLM architecture ({arch}) and its GGUF file carries no usable reranking template (tokenizer.chat_template.rerank, with the query and document fields): HarnessLab cannot present a question-excerpt pair to it"
 
 net:
   # `net/guard.py`, `net/factory.py` (AD-15): a destination the harness refuses, named as the
@@ -2257,11 +2257,11 @@ security:
       production: "Approved and pinned MCP servers, a review of their descriptions, a server-side log."
     github_token_scope:
       statement: "The GitHub token carries every right it was granted."
-      reason: "An OAuth App's rights are broad; WaveStack filters the tools, but the token stays valid 8h for everything it covers, with a 6-month renewal."
+      reason: "An OAuth App's rights are broad; HarnessLab filters the tools, but the token stays valid 8h for everything it covers, with a 6-month renewal."
       production: "A fine-grained GitHub App, short-lived tokens, centralized revocation."
     github_token_storage:
       statement: "The GitHub token is stored in clear text on the workstation."
-      reason: "It is written in the user profile (`github_token.json`, WaveStack's data folder), protected only by the Windows account's rights: any program run under that account can read it."
+      reason: "It is written in the user profile (`github_token.json`, HarnessLab's data folder), protected only by the Windows account's rights: any program run under that account can read it."
       production: "The system's secret vault (DPAPI, Windows Credential Manager) or a token kept in memory only."
     sandbox_not_isolated:
       statement: "The sandbox does not isolate the process."
@@ -2291,7 +2291,7 @@ security:
 # V1.5 CAP-3: the refusals and errors of « En faire un cas » (`web/agent_case_api.py`).
 agent_case:
   refused:
-    unknown_turn: "This turn is no longer in the journal (WaveStack was restarted)."
+    unknown_turn: "This turn is no longer in the journal (HarnessLab was restarted)."
     not_a_message: "Only a message turn can become a case."
     case_turn: "This turn was played by a case run."
     unfinished: "This turn is not finished yet."

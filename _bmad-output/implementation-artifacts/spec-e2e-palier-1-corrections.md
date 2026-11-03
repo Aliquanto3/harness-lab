@@ -18,7 +18,7 @@ deferred:
       noms de nœuds locaux abrégés (« H. », « C. »). Avant la correction A2, c'était la zone Réseau
       qui était coupée. Aucune vérification E2E n'échoue ; la zone Réseau reste entière.
     location: >-
-      src/wavestack/web/static/app.css (.arch-zone-local, .arch-zone-network)
+      src/harness_lab/web/static/app.css (.arch-zone-local, .arch-zone-network)
     severity: low
 ---
 
@@ -26,7 +26,7 @@ deferred:
 
 ## Intent
 
-**Problem:** Le test de bout en bout du palier 1 (`test-e2e-palier-1-cloud.md`) a relevé quatre anomalies. A1 : un onglet resté ouvert pendant une relance de WaveStack reprend le flux avec le `seq` de l'ancien processus et se bloque sur « Préparation du contexte… ». A2 : la zone Réseau du schéma est rognée de 60 px à 1 600 et 1 366 px. A3 : l'en-tête de Contexte LLM affiche « (somme des segments) (total renvoyé par le fournisseur) » et « Tour t1 ». A4 : « WaveStack réinitialisé : LLM nu. » comprime la barre haute.
+**Problem:** Le test de bout en bout du palier 1 (`test-e2e-palier-1-cloud.md`) a relevé quatre anomalies. A1 : un onglet resté ouvert pendant une relance de HarnessLab reprend le flux avec le `seq` de l'ancien processus et se bloque sur « Préparation du contexte… ». A2 : la zone Réseau du schéma est rognée de 60 px à 1 600 et 1 366 px. A3 : l'en-tête de Contexte LLM affiche « (somme des segments) (total renvoyé par le fournisseur) » et « Tour t1 ». A4 : « HarnessLab réinitialisé : LLM nu. » comprime la barre haute.
 
 **Approach:** A1 : le journal reçoit un identifiant d'instance tiré à chaque lancement du processus. `/api/state` le renvoie et chaque connexion au flux SSE commence par un événement `server_instance` qui le porte. Si le front voit un identifiant différent de celui qu'il connaît, il recharge la page, ce qui rejoue tout le journal du nouveau processus. A2 : la zone Réseau prend la largeur de son contenu, la zone locale cède la place libre. A3 : une seule précision de source et le nom de tour partagé (`turnName`). A4 : le message sort du flux de la barre haute (pastille superposée sous la barre, à droite) et s'efface seul après quelques secondes.
 
@@ -55,16 +55,16 @@ deferred:
 | `/api/state` en échec au démarrage | Pas d'`instance_id` connu | Le premier `server_instance` du flux devient la référence | Aucune |
 | En-tête cloud | `usage_source: "api"` | « Tour N · X tokens envoyés (total renvoyé par le fournisseur) · fenêtre … » | Aucune |
 | En-tête local / estimé | `usage_source` autre | « Tour N · [≈ ]X tokens envoyés (somme des segments) · fenêtre … » | Aucune |
-| Réinitialisation | Clic « ⟲ Réinitialiser » | Pastille « WaveStack réinitialisé : LLM nu. » sous la barre, voisins inchangés ; disparaît après 6 s ou au tour suivant | Aucune |
+| Réinitialisation | Clic « ⟲ Réinitialiser » | Pastille « HarnessLab réinitialisé : LLM nu. » sous la barre, voisins inchangés ; disparaît après 6 s ou au tour suivant | Aucune |
 
 </intent-contract>
 
 ## Code Map
 
-- `src/wavestack/trace/journal.py` -- `Journal.__init__` : ajouter `instance_id` (uuid4 hex), identité du journal de ce processus.
-- `src/wavestack/web/app.py` -- `api_state` (~l. 187) : ajouter `instance_id` ; `_sse_stream._generate` (~l. 468) : émettre d'abord `event: server_instance` + `data: {"instance_id": …}`, sans `id:`.
-- `src/wavestack/web/static/app.js` -- `streamEvents`/`parseSseEvent` (l. 102-145) : lire le nom d'événement, traiter `server_instance` ; `applyEnvelope` case `harness_reset` (~l. 187) : minuterie d'effacement ; `boot` (~l. 3656) : retenir `instance_id` ; `renderContext` (l. 1492-1499) : en-tête ; `turnName` (l. 1537) à réutiliser.
-- `src/wavestack/web/static/app.css` -- `.arch-zone-network` (l. 2050) ; `.top-bar` (l. 80) ; `.top-status` (~l. 2591).
+- `src/harness_lab/trace/journal.py` -- `Journal.__init__` : ajouter `instance_id` (uuid4 hex), identité du journal de ce processus.
+- `src/harness_lab/web/app.py` -- `api_state` (~l. 187) : ajouter `instance_id` ; `_sse_stream._generate` (~l. 468) : émettre d'abord `event: server_instance` + `data: {"instance_id": …}`, sans `id:`.
+- `src/harness_lab/web/static/app.js` -- `streamEvents`/`parseSseEvent` (l. 102-145) : lire le nom d'événement, traiter `server_instance` ; `applyEnvelope` case `harness_reset` (~l. 187) : minuterie d'effacement ; `boot` (~l. 3656) : retenir `instance_id` ; `renderContext` (l. 1492-1499) : en-tête ; `turnName` (l. 1537) à réutiliser.
+- `src/harness_lab/web/static/app.css` -- `.arch-zone-network` (l. 2050) ; `.top-bar` (l. 80) ; `.top-status` (~l. 2591).
 - `tools/e2e/run_e2e.py` -- `Events._run` (l. 47) : ignorer les événements non-enveloppes ; vérifications `known=` l. 295 (A3), 796 (A2), 883 (A4), 954 (A1) ; `s_network_tools` (l. 476) ; sélecteur du raisonnement l. 301 (`bubble-reasoning` renommé `reasoning-block` par la story 13).
 - `tests/test_web_app.py` -- `_FakeRequest`, `test_stream_resumes_from_last_event_id_without_duplicates` (l. 123-150) : modèle pour les tests du flux.
 - `_bmad-output/implementation-artifacts/test-e2e-palier-1-cloud.md`, `tools/e2e/README.md` -- rapport et documentation à mettre à jour.
@@ -72,16 +72,16 @@ deferred:
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/trace/journal.py` -- attribut `instance_id` tiré au constructeur -- identité de lancement.
-- `src/wavestack/web/app.py` -- `instance_id` dans `/api/state` ; événement `server_instance` en tête de chaque flux SSE -- détection immédiate à la reconnexion.
-- `src/wavestack/web/static/app.js` -- `store.serverInstance` ; `streamEvents` compare et recharge (`location.reload()`) puis cesse de lire ; `boot` initialise depuis `/api/state` ; en-tête de `renderContext` ; effacement du message de réinitialisation après 6 s -- A1, A3, A4.
-- `src/wavestack/web/static/app.css` -- `.arch-zone-network { flex: 0 0 auto; min-width: 230px }` ; `.top-bar { position: relative }` ; `.top-status` en pastille absolue sous la barre, `pointer-events: none`, sans boîte quand vide -- A2, A4.
+- `src/harness_lab/trace/journal.py` -- attribut `instance_id` tiré au constructeur -- identité de lancement.
+- `src/harness_lab/web/app.py` -- `instance_id` dans `/api/state` ; événement `server_instance` en tête de chaque flux SSE -- détection immédiate à la reconnexion.
+- `src/harness_lab/web/static/app.js` -- `store.serverInstance` ; `streamEvents` compare et recharge (`location.reload()`) puis cesse de lire ; `boot` initialise depuis `/api/state` ; en-tête de `renderContext` ; effacement du message de réinitialisation après 6 s -- A1, A3, A4.
+- `src/harness_lab/web/static/app.css` -- `.arch-zone-network { flex: 0 0 auto; min-width: 230px }` ; `.top-bar { position: relative }` ; `.top-status` en pastille absolue sous la barre, `pointer-events: none`, sans boîte quand vide -- A2, A4.
 - `tests/test_web_app.py` -- tests : `/api/state` renvoie `instance_id` ; le flux commence par `server_instance` avec le même identifiant, sans `id:`, avant les enveloppes rejouées.
 - `tools/e2e/run_e2e.py` -- lecteur d'enveloppes robuste ; retirer `known=` des quatre vérifications ; A1 : prouver le rechargement (marqueur `window` absent après relance) ; A2 : même contrôle de largeur dans `s_network_tools` ; A3 : vérifier aussi « Tour N » et la précision fournisseur ; sélecteur `details.reasoning-block`.
 - `tools/e2e/README.md`, `_bmad-output/implementation-artifacts/test-e2e-palier-1-cloud.md` -- anomalies marquées corrigées, résultat de la nouvelle séance.
 
 **Acceptance Criteria:**
-- Given un onglet ouvert et WaveStack relancé, when l'animateur envoie un message depuis cet onglet, then la page s'est rechargée d'elle-même et la réponse s'affiche dans la Vue humain.
+- Given un onglet ouvert et HarnessLab relancé, when l'animateur envoie un message depuis cet onglet, then la page s'est rechargée d'elle-même et la réponse s'affiche dans la Vue humain.
 - Given le scénario « Où vont mes données ? » ou « Outils réseau » à 1 600 × 1 000 et 1 366 × 768, when le schéma s'affiche, then `.pane-body-schema` ne défile pas horizontalement (écart ≤ 2 px) et le nœud data.gouv.fr est entier.
 - Given un tour sur le modèle cloud avec `usage`, when Contexte LLM s'affiche, then l'en-tête commence par « Tour N » et ne porte que « (total renvoyé par le fournisseur) ».
 - Given la barre haute à 1 600 px, when on clique « Réinitialiser », then « Réinitialiser », « Volets » et la jauge gardent leurs dimensions et le message est lisible dans `#top-status`.
@@ -127,7 +127,7 @@ id: 1            event: session_state
 **Commands:**
 - `uv run ruff check . && uv run ruff format --check .` -- expected: aucun écart.
 - `uv run pytest -q` -- expected: tout vert.
-- `node --check src/wavestack/web/static/app.js` -- expected: syntaxe valide.
+- `node --check src/harness_lab/web/static/app.js` -- expected: syntaxe valide.
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` -- expected: 0 échec, 0 `KNOWN`.
 
 ## Auto Run Result
@@ -137,10 +137,10 @@ Status: done
 **Résumé.** A1 : identifiant d'instance du journal (`Journal.instance_id`), renvoyé par `/api/state` et annoncé en tête de chaque flux SSE (`event: server_instance`, hors enveloppe, sans `id:`) ; le front recharge la page quand il change. A2 : zone Réseau à la largeur de son contenu. A3 : une seule précision de source et « Tour N » dans l'en-tête de Contexte LLM. A4 : message de réinitialisation en pastille hors du flux de la barre haute, effacé après 6 s.
 
 **Fichiers modifiés.**
-- `src/wavestack/trace/journal.py` : `instance_id` tiré au lancement.
-- `src/wavestack/web/app.py` : `instance_id` dans `/api/state` ; événement `server_instance` en tête de flux.
-- `src/wavestack/web/static/app.js` : `sameServerInstance`, `parseSseEvent` lit le nom d'événement, en-tête de `renderContext`, minuterie du message de réinitialisation.
-- `src/wavestack/web/static/app.css` : `.arch-zone-network`, `.top-bar`, `.top-status`.
+- `src/harness_lab/trace/journal.py` : `instance_id` tiré au lancement.
+- `src/harness_lab/web/app.py` : `instance_id` dans `/api/state` ; événement `server_instance` en tête de flux.
+- `src/harness_lab/web/static/app.js` : `sameServerInstance`, `parseSseEvent` lit le nom d'événement, en-tête de `renderContext`, minuterie du message de réinitialisation.
+- `src/harness_lab/web/static/app.css` : `.arch-zone-network`, `.top-bar`, `.top-status`.
 - `tests/test_web_app.py` : flux qui commence par l'instance, `/api/state` qui la renvoie.
 - `tools/e2e/fake_openai.py`, `tests/test_e2e_fake_openai.py`, `tools/e2e/README.md` : déclencheur `[sans-usage]`.
 - `tools/e2e/run_e2e.py` : `KNOWN` retirés, vérifications A1 à A4 renforcées, scénario `stream_resync`, `schema_fits`, lecteur d'enveloppes, sélecteur `reasoning-block` (story 13).

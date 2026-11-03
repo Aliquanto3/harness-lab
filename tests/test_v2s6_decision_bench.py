@@ -19,7 +19,7 @@ import yaml
 _ROOT = Path(__file__).resolve().parents[1]
 _PATH = _ROOT / "tools" / "bench" / "v2s6_decision_bench.py"
 _CANDIDATES_DOC = (
-    _ROOT / "_bmad-output" / "specs" / "spec-wavestack-v2" / "decision-model-candidates.md"
+    _ROOT / "_bmad-output" / "specs" / "spec-harness-lab-v2" / "decision-model-candidates.md"
 )
 _HEAVY = ("onnxruntime", "torch", "transformers", "gliformer", "fast_gliner")
 
@@ -725,7 +725,7 @@ def test_measure_child_report_feeds_the_verdict_and_the_printout(
     monkeypatch.setattr(bench, "_versions", lambda roots: {r: "1.0" for r in roots})
 
     def loader(cand, models_dir, slm_llm):
-        assert slm_llm.n_ctx == 4096  # WaveStack's default window
+        assert slm_llm.n_ctx == 4096  # HarnessLab's default window
         expected = {p.text: p for p in bench.PROMPTS}
         return (lambda text, task: expected[text].expected(task)), {
             "revisions": {cand.repos[0][0]: _SHA}
@@ -771,8 +771,8 @@ def test_write_out_survives_a_bad_path(bench, tmp_path, capsys):
     assert json.loads((tmp_path / "ok" / "r.json").read_text("utf-8")) == {"a": 1}
 
 
-def test_settings_from_wavestack_toml(bench):
-    settings = bench.wavestack_settings()
+def test_settings_from_harness_lab_toml(bench):
+    settings = bench.harness_lab_settings()
     assert bench.v1_rag_rss_mb(settings) == 1170  # story 12 on the target PC: 430 + 740
     assert bench.slm_n_ctx(settings) == 4096
     assert bench.v1_rag_rss_mb({}) is None and bench.slm_n_ctx({}) == bench.SLM_N_CTX
@@ -2205,10 +2205,10 @@ def test_list_shows_the_llama_server_and_the_pinned_gguf(bench, capsys):
 
 def test_resolve_llama_server(bench, tmp_path):
     env = {"LOCALAPPDATA": str(tmp_path)}
-    default = tmp_path / "WaveStack" / "bench" / "llama-b11378" / "llama-server.exe"
+    default = tmp_path / "HarnessLab" / "bench" / "llama-b11378" / "llama-server.exe"
     assert bench.resolve_llama_server(None, env) == (default, "dossier par défaut")
     env[bench.LLAMA_SERVER_ENV] = "D:\\ls\\llama-server.exe"
-    assert bench.resolve_llama_server(None, env)[1] == "WAVESTACK_LLAMA_SERVER"
+    assert bench.resolve_llama_server(None, env)[1] == "HARNESS_LAB_LLAMA_SERVER"
     assert bench.resolve_llama_server("E:\\x.exe", env) == (Path("E:\\x.exe"), "--llama-server")
 
 

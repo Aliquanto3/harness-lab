@@ -1,6 +1,6 @@
 # Datensicherungsrichtlinie von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
 
 Die Daten von Exemplia folgen der 3-2-1-Regel: mindestens 3 Kopien aller Daten, auf 2 verschiedenen Datenträgern, davon 1 Kopie außerhalb des Hauptstandorts. Diese Regel gilt für die Dateiserver, die Datenbanken der Anwendungen und die E-Mail.
 

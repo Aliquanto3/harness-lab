@@ -1,6 +1,6 @@
 # Verfahren der Jahresgespräche von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
 
 Dieses Dokument beschreibt das Jahresgespräch von Exemplia, das von der direkten Führungskraft jeder Person geführt wird; es ist als Personaldokument eingestuft.
 

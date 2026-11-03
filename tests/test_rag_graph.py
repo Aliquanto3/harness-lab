@@ -12,10 +12,10 @@ import importlib.util
 
 import pytest
 
-from wavestack import config
-from wavestack.rag import graph as g
-from wavestack.rag.contexts import fingerprint
-from wavestack.rag.corpus import (
+from harness_lab import config
+from harness_lab.rag import graph as g
+from harness_lab.rag.contexts import fingerprint
+from harness_lab.rag.corpus import (
     chunk_documents,
     load_rag_content,
     load_rag_questions,

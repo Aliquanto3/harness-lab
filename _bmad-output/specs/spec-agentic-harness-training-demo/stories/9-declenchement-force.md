@@ -52,13 +52,13 @@ context:
 
 ## Code Map
 
-- `src/wavestack/session/app_session.py` : `send()` (1105-1132) prend la liste armée avec `_sent` ; setters de classe (a) (`set_skill` 1171) comme modèle pour `arm`/`disarm` ; `_turn` (1585-1712) : consommer avant la boucle `for n` (1601), avec `check` (1661), `_run_tool` (1714, déjà prévu pour « the forced action »), étapes assistant et outil dans `steps`, effets via un utilitaire extrait de 1698-1702 ; envelopper la dispatch du modèle (1629) dans `scoped(trigger="model")` ; `finally` de `_run_turn` (1559-1583) : retirer les actions prises, émettre la liste. `_step_messages` (877-924) : une étape assistant peut porter `brick`/`component`. `_emit_bricks` (574-624) et `_tool_options` (505-565) : ajouter aux options d'outil leurs `parameters` (nom → description) et `presets`. Méta-outils : `_harness_tools` (1215), `_load_skill` (1279), `_load_tool_doc` (1263).
-- `content/tools.yaml` et `src/wavestack/tools/registry.py` (`ToolText` 61-63, chargement 67-75) : champ facultatif `presets: [{label_fr, args}]`, validé par pydantic (clés d'`args` = paramètres déclarés).
-- `src/wavestack/session/effects.py:32` : ajouter `ArmConsumed{armed_id}` à l'union.
-- `src/wavestack/trace/catalog.py` : `armed_actions_changed{actions: [{armed_id, kind, brick, target, args, label_fr}]}` et `action_dropped{armed_id, reason_fr}` dans `PAYLOAD_MODELS` (336-366) ; `BrickOption` (192) : `parameters`, `presets`.
-- `src/wavestack/web/app.py` : `POST /api/intentions/arm {kind: tool|skill|tool_doc, target, args}` et `/disarm {armed_id}` (modèle de 196-298, `KeyError` → 404) ; `/api/state` (137-166) : dernier `armed_actions_changed`.
-- `src/wavestack/web/static/app.js` : `applyEnvelope` (125-313) garde `trigger` sur l'étape `tool_started` (208-224) et `store.armed` ; `renderBricks`/`brickOptions` (419-530) : interrupteur « Afficher les actions forcées » en tête de `#bricks` (mémorisé en `localStorage` avec try/catch, comme `loadPaneLayout`/`savePaneLayout` 1898-1925), bouton Forcer, formulaire à préréglages, puce ; `renderComposer` (766-781) et `index.html` (73-83) : rangée de puces au-dessus de `form#composer` ; `postIntention` (783) ; `turnRows` (1271-1287), `stepNode` (1393-1462) : badge sur la ligne ; `toolBody` (939-975) : badge selon `trigger` ; ligne pour `action_dropped`.
-- `src/wavestack/web/static/app.css` : `.force-button`, `.armed-chip`, `.trigger-badge-user` (à côté de `.trigger-badge-model` 621), zone de grille de `.turn-step-line` (~929).
+- `src/harness_lab/session/app_session.py` : `send()` (1105-1132) prend la liste armée avec `_sent` ; setters de classe (a) (`set_skill` 1171) comme modèle pour `arm`/`disarm` ; `_turn` (1585-1712) : consommer avant la boucle `for n` (1601), avec `check` (1661), `_run_tool` (1714, déjà prévu pour « the forced action »), étapes assistant et outil dans `steps`, effets via un utilitaire extrait de 1698-1702 ; envelopper la dispatch du modèle (1629) dans `scoped(trigger="model")` ; `finally` de `_run_turn` (1559-1583) : retirer les actions prises, émettre la liste. `_step_messages` (877-924) : une étape assistant peut porter `brick`/`component`. `_emit_bricks` (574-624) et `_tool_options` (505-565) : ajouter aux options d'outil leurs `parameters` (nom → description) et `presets`. Méta-outils : `_harness_tools` (1215), `_load_skill` (1279), `_load_tool_doc` (1263).
+- `content/tools.yaml` et `src/harness_lab/tools/registry.py` (`ToolText` 61-63, chargement 67-75) : champ facultatif `presets: [{label_fr, args}]`, validé par pydantic (clés d'`args` = paramètres déclarés).
+- `src/harness_lab/session/effects.py:32` : ajouter `ArmConsumed{armed_id}` à l'union.
+- `src/harness_lab/trace/catalog.py` : `armed_actions_changed{actions: [{armed_id, kind, brick, target, args, label_fr}]}` et `action_dropped{armed_id, reason_fr}` dans `PAYLOAD_MODELS` (336-366) ; `BrickOption` (192) : `parameters`, `presets`.
+- `src/harness_lab/web/app.py` : `POST /api/intentions/arm {kind: tool|skill|tool_doc, target, args}` et `/disarm {armed_id}` (modèle de 196-298, `KeyError` → 404) ; `/api/state` (137-166) : dernier `armed_actions_changed`.
+- `src/harness_lab/web/static/app.js` : `applyEnvelope` (125-313) garde `trigger` sur l'étape `tool_started` (208-224) et `store.armed` ; `renderBricks`/`brickOptions` (419-530) : interrupteur « Afficher les actions forcées » en tête de `#bricks` (mémorisé en `localStorage` avec try/catch, comme `loadPaneLayout`/`savePaneLayout` 1898-1925), bouton Forcer, formulaire à préréglages, puce ; `renderComposer` (766-781) et `index.html` (73-83) : rangée de puces au-dessus de `form#composer` ; `postIntention` (783) ; `turnRows` (1271-1287), `stepNode` (1393-1462) : badge sur la ligne ; `toolBody` (939-975) : badge selon `trigger` ; ligne pour `action_dropped`.
+- `src/harness_lab/web/static/app.css` : `.force-button`, `.armed-chip`, `.trigger-badge-user` (à côté de `.trigger-badge-model` 621), zone de grille de `.turn-step-line` (~929).
 - Tests : `tests/test_tools.py` (`tool_session`, `call`, `_segments`), `tests/test_skills.py` (`skills_session`), `tests/test_mcp_lazy.py` (`lazy_session`), `tests/test_hooks.py` (`hooks_session`), `tests/test_bricks.py` (`_client`, `HEADERS`), `tests/fake_engine.py`.
 
 ## Tasks & Acceptance
@@ -120,7 +120,7 @@ Passe 1 (2026-09-25) — relecteurs : blind-hunter (BH), edge-case-hunter (EC), 
 
 **Commands:**
 - `uv run ruff check .` et `uv run python -m pytest` -- expected: tout passe
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks:**
-- `uv run wavestack` avec Qwen : armer la lecture du fichier sensible avec H1 actif, Caveman, une doc MCP en lazy loading ; recharger la page avec une action armée ; désarmer.
+- `uv run harness-lab` avec Qwen : armer la lecture du fichier sensible avec H1 actif, Caveman, une doc MCP en lazy loading ; recharger la page avec une action armée ; désarmer.

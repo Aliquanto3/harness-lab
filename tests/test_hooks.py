@@ -19,16 +19,16 @@ from test_mcp_lazy import exact
 from test_tools import QWEN, _segments, call, web  # noqa: F401 - fixture
 from test_turn import _run
 
-from wavestack import config
-from wavestack.bricks.registry import HOOKS
-from wavestack.hooks import DEMO_HOOKS, Hook, HookContext, HookResult, ask, date_fr, guard
-from wavestack.mcp import connection
-from wavestack.mcp.servers import McpServer
-from wavestack.net.factory import create_async_client
-from wavestack.session.app_session import AppSession
-from wavestack.tools.native import NATIVE_TOOLS, demo_dir
-from wavestack.tools.parser import ToolCall
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.bricks.registry import HOOKS
+from harness_lab.hooks import DEMO_HOOKS, Hook, HookContext, HookResult, ask, date_fr, guard
+from harness_lab.mcp import connection
+from harness_lab.mcp.servers import McpServer
+from harness_lab.net.factory import create_async_client
+from harness_lab.session.app_session import AppSession
+from harness_lab.tools.native import NATIVE_TOOLS, demo_dir
+from harness_lab.tools.parser import ToolCall
+from harness_lab.trace.journal import get_journal
 
 WINDOW = 16384  # the fake engine counts one token per byte
 SECRET = "confidentiel/budget_projet.txt"

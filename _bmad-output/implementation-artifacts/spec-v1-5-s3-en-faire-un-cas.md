@@ -5,7 +5,7 @@ created: '2026-10-25'
 status: 'review'
 route: ''
 review_loop_iteration: 0
-context: ['_bmad-output/specs/spec-wavestack-evaluer-l-agent/SPEC.md', '_bmad-output/specs/spec-wavestack-evaluer-l-agent/vues.md', '_bmad-output/specs/spec-wavestack-evaluer-l-agent/contrat-des-cas.md']
+context: ['_bmad-output/specs/spec-harness-lab-evaluer-l-agent/SPEC.md', '_bmad-output/specs/spec-harness-lab-evaluer-l-agent/vues.md', '_bmad-output/specs/spec-harness-lab-evaluer-l-agent/contrat-des-cas.md']
 ---
 
 ## Intent
@@ -30,7 +30,7 @@ Base : la branche part de `origin/main` **après la fusion de la story 1** (PR #
 
 ## Reconstitution du brouillon
 
-Module `src/wavestack/agent_eval/draft.py`, **pur** : aucune I/O, aucun accès au `Journal`. Il lit la liste d'enveloppes reçue, comme `verify`.
+Module `src/harness_lab/agent_eval/draft.py`, **pur** : aucune I/O, aucun accès au `Journal`. Il lit la liste d'enveloppes reçue, comme `verify`.
 
 ```
 reconstitute_draft(envelopes: Sequence[Envelope], turn_id: str) -> CaseDraft
@@ -187,7 +187,7 @@ La liste d'outils propose ceux du tour, puis ceux de la configuration. Première
 7. *Verdict à compléter* : si une vérification a un paramètre vide, `/verdict` n'est pas appelé (ou son 422 de champ est traité ainsi) et le bandeau affiche `form.verdict.incomplete`.
 8. *Verdict « échoue bien »* (`passed` faux) : bandeau `ae-verdict fails`, `role="status"`, avec « Le tour d'origine échoue bien à ce cas. » suivi du `reason_text` de `failing`.
 9. *Verdict « ne peut pas échouer »* (`passed` vrai) : bandeau `ae-verdict warns` avec « Ce cas ne peut pas échouer sur ce tour. Il ne détectera pas la défaillance que vous avez vue. » L'enregistrement reste possible.
-10. *Verdict indisponible* (réseau ou 5xx) : « WaveStack ne répond pas : le verdict n'a pas pu être calculé. » L'enregistrement reste possible.
+10. *Verdict indisponible* (réseau ou 5xx) : « HarnessLab ne répond pas : le verdict n'a pas pu être calculé. » L'enregistrement reste possible.
 11. *Invalide* : « Enregistrer » reste actif. Une tentative d'enregistrement invalide affiche l'erreur sous chaque champ fautif (`message_text` du 422, champ nommé par `field`) et place le focus sur le premier.
 12. *Enregistrement* : « Enregistrer » est désactivé et affiche « Enregistrement… ».
 13. *Enregistré* : le formulaire est remplacé par « Cas enregistré. », avec « Ouvrir Évaluer l'agent » (visible seulement si `registerOpenView` a été appelé ; ferme le tiroir puis appelle `fn(case.id)`) et « Fermer ». Les abonnés d'`onCaseSaved` sont notifiés.
@@ -257,7 +257,7 @@ Clés `main.agent_case.*` dans `content/ui.yaml` (fr), `content/i18n/en/ui.yaml`
 | `form.verdict.cannot_fail` | Ce cas ne peut pas échouer sur ce tour. Il ne détectera pas la défaillance que vous avez vue. | This case cannot fail on this turn. It will not catch the failure you saw. | Dieser Fall kann bei diesem Turn nicht fehlschlagen. Er erkennt den beobachteten Fehler nicht. |
 | `form.verdict.pending` | Calcul du verdict… | Computing the verdict… | Urteil wird berechnet … |
 | `form.verdict.incomplete` | Complétez les vérifications pour voir le verdict. | Complete the checks to see the verdict. | Vervollständigen Sie die Prüfungen, um das Urteil zu sehen. |
-| `form.verdict.unavailable` | WaveStack ne répond pas : le verdict n'a pas pu être calculé. | WaveStack is not responding: the verdict could not be computed. | WaveStack antwortet nicht: Das Urteil konnte nicht berechnet werden. |
+| `form.verdict.unavailable` | HarnessLab ne répond pas : le verdict n'a pas pu être calculé. | HarnessLab is not responding: the verdict could not be computed. | HarnessLab antwortet nicht: Das Urteil konnte nicht berechnet werden. |
 | `form.save` | Enregistrer | Save | Speichern |
 | `form.saving` | Enregistrement… | Saving… | Wird gespeichert … |
 | `form.cancel` | Annuler | Cancel | Abbrechen |
@@ -267,13 +267,13 @@ Clés `main.agent_case.*` dans `content/ui.yaml` (fr), `content/i18n/en/ui.yaml`
 | `form.saved` | Cas enregistré. | Case saved. | Fall gespeichert. |
 | `form.open_view` | Ouvrir Évaluer l'agent | Open Evaluate the agent | „Agent bewerten“ öffnen |
 | `form.close` | Fermer | Close | Schließen |
-| `form.error.no_answer` | WaveStack ne répond pas : le cas n'a pas été enregistré. | WaveStack is not responding: the case was not saved. | WaveStack antwortet nicht: Der Fall wurde nicht gespeichert. |
+| `form.error.no_answer` | HarnessLab ne répond pas : le cas n'a pas été enregistré. | HarnessLab is not responding: the case was not saved. | HarnessLab antwortet nicht: Der Fall wurde nicht gespeichert. |
 
 Messages du backend (réponses `detail`), dans `content/messages.yaml` et ses surcouches, bloc `agent_case:` placé **juste avant** le bloc `agent_eval:` de la story 1 (la story 4 complète `agent_eval:` en fin de fichier), lus par `msg(key, lang)` :
 
 | Clé | fr | en | de |
 |---|---|---|---|
-| `agent_case.refused.unknown_turn` | Ce tour n'est plus dans le journal (WaveStack a été relancé). | This turn is no longer in the journal (WaveStack was restarted). | Dieser Turn ist nicht mehr im Journal (WaveStack wurde neu gestartet). |
+| `agent_case.refused.unknown_turn` | Ce tour n'est plus dans le journal (HarnessLab a été relancé). | This turn is no longer in the journal (HarnessLab was restarted). | Dieser Turn ist nicht mehr im Journal (HarnessLab wurde neu gestartet). |
 | `agent_case.refused.not_a_message` | Seul un tour de message peut devenir un cas. | Only a message turn can become a case. | Nur ein Nachrichten-Turn kann zu einem Fall werden. |
 | `agent_case.refused.case_turn` | Ce tour a été joué par une exécution de cas. | This turn was played by a case run. | Dieser Turn wurde von einem Fall-Lauf gespielt. |
 | `agent_case.refused.unfinished` | Ce tour n'est pas terminé. | This turn is not finished yet. | Dieser Turn ist noch nicht beendet. |
@@ -316,7 +316,7 @@ Tests unitaires dans `tests/test_agent_eval_draft.py` et `tests/test_agent_case_
   - `approval` et `on_overflow` du formulaire ;
   - un cas avec seulement `tool_not_called` est valide (pas de règle positive pour la séance).
 
-Routes (`TestClient`, session `booted_session` du faux moteur, `WAVESTACK_DATA_DIR` sous `tmp_path`) :
+Routes (`TestClient`, session `booted_session` du faux moteur, `HARNESS_LAB_DATA_DIR` sous `tmp_path`) :
 - un vrai tour joué par le faux moteur (outil `get_datetime`), puis `GET /draft` : il renvoie le prompt, l'outil, les arguments exacts et `answer_text` non vide ;
 - `/verdict` :
   - avec `tool_not_called get_datetime` : `passed` faux, `failing.kind == "tool_not_called"`, `reason_text` dans la langue de la session ;
@@ -355,16 +355,16 @@ L'étape « Ouvrir Évaluer l'agent ouvre la vue, avec le cas dans Mes cas » re
 ## Fichiers
 
 Nouveaux :
-- `src/wavestack/agent_eval/draft.py` ;
-- `src/wavestack/web/agent_case_api.py` ;
-- `src/wavestack/web/static/agent-case-form.js` ;
-- `src/wavestack/web/static/agent-case-form.css` ;
+- `src/harness_lab/agent_eval/draft.py` ;
+- `src/harness_lab/web/agent_case_api.py` ;
+- `src/harness_lab/web/static/agent-case-form.js` ;
+- `src/harness_lab/web/static/agent-case-form.css` ;
 - `tests/test_agent_eval_draft.py` ;
 - `tests/test_agent_case_api.py`.
 
 Modifiés (fichiers partagés en **gras**, chacun avec un point d'insertion fixé pour éviter les conflits avec la story 4) :
-- **`src/wavestack/web/app.py`** : import et une ligne `register_agent_case_routes(app, app_session)`, placés juste après l'enregistrement des routes de compaction (`/api/intentions/compact`). La story 4 met sa ligne ailleurs, ou à la suite.
-- **`src/wavestack/web/static/app.js`** : l'import (après celui de `panes.js`) et le bouton dans `turn-actions`, après « Comparer ».
+- **`src/harness_lab/web/app.py`** : import et une ligne `register_agent_case_routes(app, app_session)`, placés juste après l'enregistrement des routes de compaction (`/api/intentions/compact`). La story 4 met sa ligne ailleurs, ou à la suite.
+- **`src/harness_lab/web/static/app.js`** : l'import (après celui de `panes.js`) et le bouton dans `turn-actions`, après « Comparer ».
 - **`content/ui.yaml`**, **`content/i18n/en/ui.yaml`**, **`content/i18n/de/ui.yaml`** : bloc `main.agent_case`, après `main.compare`.
 - **`content/messages.yaml`** et ses deux surcouches : bloc `agent_case`, avant `agent_eval`.
 - **`tools/e2e/run_e2e.py`** : une entrée après `compact_button` et la fonction ; `tools/e2e/README.md` : une ligne.

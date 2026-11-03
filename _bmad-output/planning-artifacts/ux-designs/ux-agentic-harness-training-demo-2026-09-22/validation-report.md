@@ -1,4 +1,4 @@
-# Rapport de validation — WaveStack, Atelier MCP (lot 4)
+# Rapport de validation — HarnessLab, Atelier MCP (lot 4)
 
 - **DESIGN.md :** `DESIGN.md`
 - **EXPERIENCE.md :** `EXPERIENCE.md`
@@ -63,7 +63,7 @@ Suite : Corrigé : groupes nommés, nom accessible des serveurs et clients.
 ### Moyens (19)
 
 **1. Couverture des parcours** — Flow MCP-2 : « après 10 s » et ConnectError incohérents avec le code (§ EXPERIENCE, Flow MCP-2)
-Suite : Corrigé : refus immédiat ; délai dépassé décrit à part avec le délai de wavestack.toml.
+Suite : Corrigé : refus immédiat ; délai dépassé décrit à part avec le délai de harness-lab.toml.
 
 **1. Couverture des parcours** — Persistance du ✖ non écrite (§ EXPERIENCE, Volet Architecture)
 Suite : Corrigé : dernier échec par serveur gardé par la page jusqu'à une nouvelle tentative [ASSUMPTION].

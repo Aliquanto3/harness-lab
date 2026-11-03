@@ -38,18 +38,18 @@ from test_rag import (
     turn_events,
 )
 
-from wavestack import config
-from wavestack.config import EmbeddingModel, ModelFile
-from wavestack.models import discovery
-from wavestack.models.download import DownloadError, StopToken, download_files
-from wavestack.models.embedding import LlamaCppEmbedder
-from wavestack.models.load_registry import EMBEDDING, ModelChoice
-from wavestack.net import factory
-from wavestack.rag import index as rag_index
-from wavestack.rag.corpus import load_rag_content
-from wavestack.rag.retriever import score_of
-from wavestack.session.app_session import INDEX_HELD_FR, SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.config import EmbeddingModel, ModelFile
+from harness_lab.models import discovery
+from harness_lab.models.download import DownloadError, StopToken, download_files
+from harness_lab.models.embedding import LlamaCppEmbedder
+from harness_lab.models.load_registry import EMBEDDING, ModelChoice
+from harness_lab.net import factory
+from harness_lab.rag import index as rag_index
+from harness_lab.rag.corpus import load_rag_content
+from harness_lab.rag.retriever import score_of
+from harness_lab.session.app_session import INDEX_HELD_FR, SendRefused
+from harness_lab.trace.journal import get_journal
 
 URL = "https://huggingface.co/demo/resolve/main/fake.gguf"
 
@@ -464,7 +464,7 @@ def test_an_index_in_use_is_refused_in_french_and_left_as_it_was(index, monkeypa
 
     assert isinstance(refused.value, OSError)
     assert str(refused.value) == (
-        "L'index est ouvert par un autre programme (WaveStack, un antivirus ou un outil de "
+        "L'index est ouvert par un autre programme (HarnessLab, un antivirus ou un outil de "
         "synchronisation) : il ne peut pas être remplacé."
     )
     assert isinstance(refused.value.__cause__, PermissionError)
@@ -647,7 +647,7 @@ def test_script_refuses_another_file_and_invalid_content(tmp_path, capsys, monke
     assert "content/rag.yaml is missing or invalid" in capsys.readouterr().err
 
 
-def test_script_says_in_english_that_wavestack_uses_the_index(tmp_path, capsys, monkeypatch):
+def test_script_says_in_english_that_harness_lab_uses_the_index(tmp_path, capsys, monkeypatch):
     _settings(tmp_path)
     place_model()
     target = tmp_path / "script.sqlite"
@@ -660,7 +660,7 @@ def test_script_says_in_english_that_wavestack_uses_the_index(tmp_path, capsys, 
     err = capsys.readouterr().err
     assert err.strip() == (
         f"{rag_index.INDEX_IN_USE_FR.render('en')} Build it from the RAG card, or stop "
-        "WaveStack, then run this script again."
+        "HarnessLab, then run this script again."
     )
     assert not target.with_name(target.name + ".tmp").exists()
     assert rag_index.read_meta(target) == before  # the old index, intact

@@ -376,7 +376,7 @@
   title: Serveur local déjà lancé (Ollama, llama-server)
   description: >-
     Un modèle servi par Ollama ou llama-server déjà lancé sur le poste devient
-    utilisable, WaveStack construisant lui-même le texte envoyé, gabarit compris
+    utilisable, HarnessLab construisant lui-même le texte envoyé, gabarit compris
     (seconde moitié de CAP-36).
   spec_checkpoint: true
   done_checkpoint: true
@@ -486,7 +486,7 @@
   done_checkpoint: false
   invoke_dev_with: >-
     Retours détaillés : retours-recette-palier-2-2026-09-28.md (C1, M1, M3, M6, X1). Code
-    (src/wavestack, JS = web/static/app.js) : ordre des briques = liste BRICKS de
+    (src/harness_lab, JS = web/static/app.js) : ordre des briques = liste BRICKS de
     bricks/registry.py:33-228 (reasoning en 4e, l. 73-86 ; à placer en tête ; vérifier que
     FR-38 et tests/test_program.py ne dépendent pas de cet ordre d'affichage) ; sous-options :
     rerankParts JS:1008-1044, lazy loading JS:1102-1113, interrupteurs JS:1078-1085,
@@ -536,7 +536,7 @@
   title: "Modèles : mémoire comptée juste, budget dynamique, sonde interruptible"
   description: >-
     Corriger les défauts de la gestion des modèles vus à la recette (C4, C5, C6) et appliquer
-    la décision du 2026-09-28 sur le budget. (1) Le refus « WaveStack occupe … sans le
+    la décision du 2026-09-28 sur le budget. (1) Le refus « HarnessLab occupe … sans le
     modèle actif » ne donne plus jamais 0 Mo : la mémoire de base est mesurée avant le
     chargement du modèle actif (ou après sa libération), pas déduite par soustraction d'une
     estimation. (2) Budget mémoire dynamique plafonné : par défaut, le budget est le minimum
@@ -549,7 +549,7 @@
     sonde. (4) Coût d'un modèle servi par Ollama : llama3.2:3b (blob de 2 Go) est estimé à
     ≈ 4,0 Go et refusé alors qu'il tournait la veille ; le coût d'un modèle servi par Ollama
     doit refléter ce qu'Ollama occupera (poids, cache à la fenêtre utilisée), et le budget
-    de WaveStack ne doit pas compter deux fois un serveur externe. Documenter la règle
+    de HarnessLab ne doit pas compter deux fois un serveur externe. Documenter la règle
     retenue. (5) Les raisons renvoyées par la sonde (processus enfant) ne sont plus mal
     décodées (« abÃ®mÃ© ») et les raisons déjà enregistrées ainsi dans settings.json
     (failed_probes) sont réparées ou ignorées à la lecture.
@@ -563,7 +563,7 @@
     process_rss() avant la création du moteur (ou après _release) et le garder dans la
     réservation. (2) config.memory_budget_bytes config.py:~369 ; psutil.virtual_memory() ;
     exposer le calcul au diagnostic (session/diagnostic.py) et dans le texte du refus ; mettre
-    à jour wavestack.toml (commentaires), README, spine AD-8 (ligne « à valider »). (3)
+    à jour harness-lab.toml (commentaires), README, spine AD-8 (ligne « à valider »). (3)
     _load app_session.py:1454-1500, probe = Diagnostic.probe_path diagnostic.py:722-738,
     subprocess.run bloquant (_probe_candidate diagnostic.py:191-211, PROBE_TIMEOUT_S 300
     l. 58) ; _checkpoint(cancel) seulement après, l. 1491 ; « Arrêter » arme _load_cancel
@@ -624,7 +624,7 @@
   spec_checkpoint: false
   done_checkpoint: false
   invoke_dev_with: >-
-    Fenêtre : config.context_window config.py:362-366 (wavestack.toml:39) ; local et servis :
+    Fenêtre : config.context_window config.py:362-366 (harness-lab.toml:39) ; local et servis :
     _install app_session.py:1659-1684 (effective_window context/window.py:14, min avec le
     contexte du serveur, use_window pour Ollama) ; cloud : config.cloud_window
     config.py:579-587 appelé app_session.py:1726 ; la fenêtre sert aussi à la sonde
@@ -754,7 +754,7 @@
 - id: "31"
   title: "Mode sombre"
   description: >-
-    Ajouter un mode sombre à WaveStack (demande du 2026-09-28), pour l'atelier, le
+    Ajouter un mode sombre à HarnessLab (demande du 2026-09-28), pour l'atelier, le
     diagnostic et les nouveaux écrans. Un sélecteur dans la barre haute propose « Système »
     (par défaut, suit le réglage du poste), « Clair » et « Sombre » ; le choix est mémorisé
     et appliqué dès le chargement, sans flash du thème clair. La palette sombre est dessinée,

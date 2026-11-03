@@ -93,23 +93,23 @@ Deux bascules s'ajoutent : « Texte exact » (brut, sans habillage) et, en mode 
 
 ## Code Map
 
-- `src/wavestack/context/window.py` -- `gauge()`, fonction unique des charges (AD-9). Story 33 y ajoute `discipline_of`, `tokens_by_brick` et `categories`. Y ajouter `seen: int = 0`, puis appeler une nouvelle fonction pure `context_sections(segments, labels, categories, seen)`, qui renvoie `sections`, `seen_segments` et `seen_tokens`. Y ajouter aussi `seen_prefix(previous, current) -> int`.
-- `src/wavestack/context/segments.py` -- `Segment` (dont `label_fr` propre), `SegmentKind`, `SegmentLabels` (`kinds`, libellés de `content/labels/segment_kinds.yaml`).
-- `src/wavestack/context/render.py` -- `_attribute` (segments ordonnés et disjoints, gabarit compris), `RenderedContext`, `RenderedChat`, `render_chat_body` (segment fournisseur sans texte, en dernier), `with_total`. Le décodage `\n` est sûr, car les fragments non gabarit du mode chat sont toujours à l'intérieur d'une chaîne JSON (sentinelles).
-- `src/wavestack/trace/catalog.py` -- `SegmentPayload`, `BreakdownItem`, `BrickTokens`, `ContextWindowPayload` (et `ContextReconciledPayload`), `Discipline`, `ModelCallEndedPayload` (`raw_output`, `reasoning`, `text`, `tool_calls`, `prompt_tokens`, `evaluated_tokens`, `output_tokens`, `usage_source`), `ReasoningCutPayload`.
-- `src/wavestack/session/app_session.py` -- à modifier :
+- `src/harness_lab/context/window.py` -- `gauge()`, fonction unique des charges (AD-9). Story 33 y ajoute `discipline_of`, `tokens_by_brick` et `categories`. Y ajouter `seen: int = 0`, puis appeler une nouvelle fonction pure `context_sections(segments, labels, categories, seen)`, qui renvoie `sections`, `seen_segments` et `seen_tokens`. Y ajouter aussi `seen_prefix(previous, current) -> int`.
+- `src/harness_lab/context/segments.py` -- `Segment` (dont `label_fr` propre), `SegmentKind`, `SegmentLabels` (`kinds`, libellés de `content/labels/segment_kinds.yaml`).
+- `src/harness_lab/context/render.py` -- `_attribute` (segments ordonnés et disjoints, gabarit compris), `RenderedContext`, `RenderedChat`, `render_chat_body` (segment fournisseur sans texte, en dernier), `with_total`. Le décodage `\n` est sûr, car les fragments non gabarit du mode chat sont toujours à l'intérieur d'une chaîne JSON (sentinelles).
+- `src/harness_lab/trace/catalog.py` -- `SegmentPayload`, `BreakdownItem`, `BrickTokens`, `ContextWindowPayload` (et `ContextReconciledPayload`), `Discipline`, `ModelCallEndedPayload` (`raw_output`, `reasoning`, `text`, `tool_calls`, `prompt_tokens`, `evaluated_tokens`, `output_tokens`, `usage_source`), `ReasoningCutPayload`.
+- `src/harness_lab/session/app_session.py` -- à modifier :
   - `_render` et `_render_chat` : les deux appels à `gauge()` ;
   - `_chat_gauge`, qui refait la charge pour `context_reconciled`, dans le code du mode chat qui émet `"context_reconciled"` ;
   - `_categories` ;
   - la boucle du tour principal, autour de `journal.emit("context_rendered", payload)` : `previous`, `_check_reuse` et `call_id = f"{turn_id}.main.c{n}"` ;
   - `_run_subagent`, même émission, contexte `sub{n}`.
-- `src/wavestack/web/static/app.js` -- à modifier :
+- `src/harness_lab/web/static/app.js` -- à modifier :
   - réducteurs : `case "context_rendered"`, `"context_reconciled"`, `"model_call_ended"` et `"reasoning_cut"` du réducteur principal ; les mêmes dans `applySubEnvelope`. Chaque appel est déjà une étape `{type: "call", id, context, ended}` de `turn.steps` ou de `sub.steps`. Une `reasoning_cut` suit son appel dans `steps`. `lastCall` ;
   - rendu : `renderContext`, `renderContextBody` (dernier contexte seulement, `ctx-banner`, `ctx-total`, `ctx-compressed-total`, raisonnement, `ctx-raw`), `appendSegments` (une boîte par segment, `data-discipline`, `--segment-color`, `compressed_from` et `textBefore`), `renderSubContext`, `ctxViewSwitch` (onglets, story 22), `reasoningBlock` et `store.openReasoning` ;
   - aides : `approx`, `approxTotal`, `fmt`, `seconds`, `turnName`, `shownTurns`, `brickName`, `GROUP_COLORS`, `formatCall`, `showSubContext`, `loadShowReasoning` (modèle de mémorisation `localStorage` avec try/catch) ;
   - à ne pas modifier : `renderCompare`, `compareCell`, `brickGroups`.
   - Pour éviter une reconstruction inutile, suivre le modèle de `renderSchema`, qui compare une clé `JSON.stringify`.
-- `src/wavestack/web/static/app.css` -- `.ctx-total`, `.ctx-segment*`, `.ctx-raw`, `.ctx-heading`, `.ctx-banner`, `.ctx-view-switch`, `.ctx-view-button`, `.ctx-compressed*`, `.reasoning-block`. `tokens.css` pour les jetons.
+- `src/harness_lab/web/static/app.css` -- `.ctx-total`, `.ctx-segment*`, `.ctx-raw`, `.ctx-heading`, `.ctx-banner`, `.ctx-view-switch`, `.ctx-view-button`, `.ctx-compressed*`, `.reasoning-block`. `tokens.css` pour les jetons.
 - `tests/test_turn.py` -- tests de `gauge()` (story 33). Tours à outil : `tests/test_tools.py` (faux moteur local), `tests/test_cloud.py` (faux fournisseur, deux `context_rendered` et un `context_reconciled`), `tests/test_subagent.py`. `tests/test_web_tokens.py` : jetons et contrastes (story 33).
 - `tools/e2e/run_e2e.py` -- vérifications de Contexte LLM à adapter :
   - `s_native_tools` (mode chat, `get_datetime`) ;
@@ -127,9 +127,9 @@ Deux bascules s'ajoutent : « Texte exact » (brut, sans habillage) et, en mode 
 ## Tasks & Acceptance
 
 **Execution:**
-1. `src/wavestack/trace/catalog.py` -- Ajouter `ContextSection{start: int, end: int, kind: str, label_fr: str, brick: str | None, discipline: Discipline, tokens: int, template_tokens: int, estimated: bool, seen: bool}`. `start` et `end` sont des index dans `segments`, `end` exclu. Ajouter à `ContextWindowPayload` : `sections: list[ContextSection] = []`, `seen_segments: int = 0` et `seen_tokens: int = 0`. Raison : AD-2, la forme est dans le catalogue ; les valeurs par défaut gardent les journaux anciens valides.
-2. `src/wavestack/context/window.py` -- Écrire `seen_prefix` et `context_sections` selon la matrice et les Design Notes, puis les brancher dans `gauge(…, seen=0)`. Raison : AD-1 et AD-9.
-3. `src/wavestack/session/app_session.py` -- Dans la boucle principale et dans `_run_subagent`, garder les segments de l'appel précédent du même contexte **dans le tour**, calculer `seen_prefix` et le passer à `gauge()` par `_render` et `_render_chat`. Garder la valeur avec l'objet rendu, pour que `_chat_gauge` la redonne à `context_reconciled`. Raison : « déjà lu » et « nouveau » viennent de la session.
+1. `src/harness_lab/trace/catalog.py` -- Ajouter `ContextSection{start: int, end: int, kind: str, label_fr: str, brick: str | None, discipline: Discipline, tokens: int, template_tokens: int, estimated: bool, seen: bool}`. `start` et `end` sont des index dans `segments`, `end` exclu. Ajouter à `ContextWindowPayload` : `sections: list[ContextSection] = []`, `seen_segments: int = 0` et `seen_tokens: int = 0`. Raison : AD-2, la forme est dans le catalogue ; les valeurs par défaut gardent les journaux anciens valides.
+2. `src/harness_lab/context/window.py` -- Écrire `seen_prefix` et `context_sections` selon la matrice et les Design Notes, puis les brancher dans `gauge(…, seen=0)`. Raison : AD-1 et AD-9.
+3. `src/harness_lab/session/app_session.py` -- Dans la boucle principale et dans `_run_subagent`, garder les segments de l'appel précédent du même contexte **dans le tour**, calculer `seen_prefix` et le passer à `gauge()` par `_render` et `_render_chat`. Garder la valeur avec l'objet rendu, pour que `_chat_gauge` la redonne à `context_reconciled`. Raison : « déjà lu » et « nouveau » viennent de la session.
 4. `tests/test_turn.py` (ou `tests/test_context_sections.py`) et `tests/test_tools.py`, `tests/test_cloud.py`, `tests/test_subagent.py` -- Tests unitaires de chaque ligne de la matrice : Σ = `used`, absorption, libellé propre, frontière `seen`. Tests d'intégration :
    - appel 1 : `seen_segments == 0` ;
    - appel 2 d'un tour à outil, en local et en chat : `seen_segments > 0`, et une section `tool_result` non vue ;
@@ -137,8 +137,8 @@ Deux bascules s'ajoutent : « Texte exact » (brut, sans habillage) et, en mode 
    - appel 2 du sous-agent : `seen_segments > 0` ;
    - `"".join(texts)` inchangé.
    Raison : verrouiller le contrat.
-5. `DESIGN.md` (frontmatter et prose) puis `src/wavestack/web/static/tokens.css`, `tests/test_web_tokens.py` -- Ajouter les jetons de la note de conception, les paires de contraste et les composants `context-call`, `context-section`, `produced-block`, `json-tree`. Raison : AD-18, story 33, story 31.
-6. `src/wavestack/web/static/app.js` -- Remplacer le rendu du dernier contexte par la **suite des appels** du contexte affiché, principal ou onglet du sous-agent (`renderCalls(owner)`, partagé par `renderContextBody` et `renderSubContext`) :
+5. `DESIGN.md` (frontmatter et prose) puis `src/harness_lab/web/static/tokens.css`, `tests/test_web_tokens.py` -- Ajouter les jetons de la note de conception, les paires de contraste et les composants `context-call`, `context-section`, `produced-block`, `json-tree`. Raison : AD-18, story 33, story 31.
+6. `src/harness_lab/web/static/app.js` -- Remplacer le rendu du dernier contexte par la **suite des appels** du contexte affiché, principal ou onglet du sous-agent (`renderCalls(owner)`, partagé par `renderContextBody` et `renderSubContext`) :
    - en tête : onglets (story 22), bascule d'affichage, bandeau du mode chat, `.ctx-total` (dernier appel, texte inchangé), total sans compression ;
    - un `section.ctx-call` par appel, `data-call-id`, titre « Appel {i} sur {n} » ;
    - ligne de chiffres « Lu : {prompt_tokens} tokens · évalués : {evaluated_tokens | « non communiqué »} · produits : {output_tokens} », avec « ≈ » si `usage_source === "estimate"`. En cours : « Lu : {approxTotal}{used} tokens · en cours ».
@@ -163,11 +163,11 @@ Deux bascules s'ajoutent : « Texte exact » (brut, sans habillage) et, en mode 
    - `div.ctx-produced.is-answer` : « Réponse », `pre` ;
    - `div.ctx-produced.is-tool-call` : « Appel d'outil », `jsonTree({name, arguments})`, `arguments` décodé s'il est une chaîne JSON.
    Chaque bloc porte l'étiquette encre « Produit par le modèle ». Entre deux appels, une ligne du harnais : « Le harnais exécute {outils} ; le résultat est lu à l'appel {i+1}. » Pour une délégation, ajouter un bouton qui appelle `showSubContext`. Raison : point (3).
-10. `app.js` (bascule) -- `div[role=group][aria-label="Affichage du contexte"]`, boutons `aria-pressed` : « Lecture groupée » (défaut), « Texte exact », et « Corps JSON » en mode chat seulement. Le choix est mémorisé par le navigateur (`wavestack.ctxMode`, try/catch) ; « Corps JSON » retombe sur « Lecture groupée » hors mode chat.
+10. `app.js` (bascule) -- `div[role=group][aria-label="Affichage du contexte"]`, boutons `aria-pressed` : « Lecture groupée » (défaut), « Texte exact », et « Corps JSON » en mode chat seulement. Le choix est mémorisé par le navigateur (`harness_lab.ctxMode`, try/catch) ; « Corps JSON » retombe sur « Lecture groupée » hors mode chat.
     - « Texte exact » : pour chaque appel, `pre.ctx-exact` (jointure des segments, ou `body`), puis `pre.ctx-raw` (`raw_output`, ou les deltas en cours). Aucune couleur ni marge. Le texte lu des appels antérieurs au dernier est dans un `details` fermé.
     - « Corps JSON » : `jsonTree(JSON.parse(body))` par appel.
     Raison : point (1), « Texte exact ».
-11. `src/wavestack/web/static/app.css` -- Styles `.ctx-call`, `.ctx-view-mode`, `.ctx-section` (grille, trait `--segment-color` et discipline), `.is-new`, `.ctx-seen`, `.ctx-seg`, `.ctx-produced` (fond `produced-soft`, trait `ink`, étiquette sur `ink`, texte `on-ink`), `.is-reasoning` (fond `reasoning-soft`), `.json-*`, `.ctx-between`. Variables seulement. Raison : DESIGN.md.
+11. `src/harness_lab/web/static/app.css` -- Styles `.ctx-call`, `.ctx-view-mode`, `.ctx-section` (grille, trait `--segment-color` et discipline), `.is-new`, `.ctx-seen`, `.ctx-seg`, `.ctx-produced` (fond `produced-soft`, trait `ink`, étiquette sur `ink`, texte `on-ink`), `.is-reasoning` (fond `reasoning-soft`), `.json-*`, `.ctx-between`. Variables seulement. Raison : DESIGN.md.
 12. EXPERIENCE.md, spine, SPEC.md, `tools/e2e/README.md` -- Mettre à jour :
     - EXPERIENCE.md : table des volets (Contexte LLM), description du volet, `reasoning-block`, `context-segment` (qui devient `context-section`), nouveaux `context-call` et `produced-block`, Streaming, « Modèle cloud actif » (trois affichages) et « Sous-agent au travail » ;
     - spine : AD-4 (sections et « déjà lu » calculés par la session, jointure = texte exact) et AD-9 (`sections`, `seen_segments`, `seen_tokens` par la fonction unique) ;
@@ -294,7 +294,7 @@ L'étiquette « Produit par le modèle » est en `on-ink` sur `ink` (19,7). Les 
 ## À vérifier sur PC
 
 - **Lecture d'un tour à outil**
-  - **Geste** : sur Windows 11, dans Chrome puis Edge, lancer `uv run wavestack` (PowerShell), charger Qwen3.5-4B (GGUF) et choisir le scénario « Outils natifs ». Envoyer « Quelle heure est-il ? », puis regarder Contexte LLM.
+  - **Geste** : sur Windows 11, dans Chrome puis Edge, lancer `uv run harness-lab` (PowerShell), charger Qwen3.5-4B (GGUF) et choisir le scénario « Outils natifs ». Envoyer « Quelle heure est-il ? », puis regarder Contexte LLM.
   - **Attendu** : Appel 1 et Appel 2 ; au second, le déjà-lu est replié et le résultat d'outil marqué « Nouveau » ; réflexion, appel d'outil et réponse sur leur fond.
   - **Critère** : Anaël dit en moins de 10 s ce qui est nouveau à l'appel 2, et juge la vue plus claire que l'ancienne.
   - **Moyen** : à la main (œil humain).

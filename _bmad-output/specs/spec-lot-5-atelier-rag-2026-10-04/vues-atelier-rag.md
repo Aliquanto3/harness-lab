@@ -9,7 +9,7 @@ parallélisme). Référence visuelle : `maquette-atelier-rag.html` (v2, validée
 Section 1 « La chaîne RAG, étape par étape » :
 1. barre : champ Question, « Lancer la chaîne », « Arrêter », état ;
 2. barre : bascule de mode « ✎ Composer » / « ▶ Dérouler » (`aria-pressed`, mémorisée par le
-   navigateur, `wavestack.ragLab.mode`, défaut Dérouler) ; en Composer, les architectures toutes
+   navigateur, `harness_lab.ragLab.mode`, défaut Dérouler) ; en Composer, les architectures toutes
    faites (5b) ; en Dérouler, le pas-à-pas (`diagram.createStepper`) et sa légende ;
 3. les trois vues ;
 4. repliée (`details#rag-details`) : « Toutes les étapes en détail », les `rag-stage-card`

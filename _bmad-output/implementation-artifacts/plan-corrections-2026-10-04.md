@@ -80,7 +80,7 @@ Les lots 1 et 3 n'attendent rien ; le lot 4 attend D5 ; 5c attend la validation 
 8. **Guide d'installation des modèles du RAG** (aujourd'hui seul `docs/guide.md:115-158` en parle) :
    - nouvelle section « Modèles du RAG » dans `docs/installation.md` : embedding
      `granite-embedding-107m-multilingual-Q8_0.gguf` (121 Mo, `[rag.embedding]` de
-     `wavestack.toml`), reranker `bge-reranker-v2-m3-Q4_K_M.gguf` (438 Mo, `[rag.reranker]`),
+     `harness-lab.toml`), reranker `bge-reranker-v2-m3-Q4_K_M.gguf` (438 Mo, `[rag.reranker]`),
      index `data/rag_index{,.en,.de}.sqlite` (livrés, reconstructibles par
      `scripts/build_rag_index.py --download`), FAISS et LanceDB (`uv sync --extra rag-alt`),
      fastembed (facultatif) ;
@@ -128,7 +128,7 @@ Modèle : Opus 5.5, effort high.
   (`Capture.record`, `mcp/lab.py:164`), événements `mcp_lab_message`,
   `mcp_lab_connect_ended`, `mcp_lab_call_ended` (`mcp.js:144-180`).
 - Trois vues :
-  1. architecture : Hôte (WaveStack) ⊃ Client ↔ Serveur ↔ source de données, transport
+  1. architecture : Hôte (HarnessLab) ⊃ Client ↔ Serveur ↔ source de données, transport
      stdio ou Streamable HTTP ;
   2. poignée de main en diagramme de séquence : `initialize` → capacités →
      `notifications/initialized` → `tools/list` → outils et leur poids en tokens ;

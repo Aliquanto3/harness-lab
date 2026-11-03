@@ -98,7 +98,7 @@ Le paradigme retenu (journal d'événements, volets en projection) convient trè
 - **Référence UX** : `context-gauge` et DESIGN, Components (« 1 840 / 4 096 tokens · 45 % », seuil d'alerte à 80 %, dépassement « au-delà de 100 % ») ; Voice and Tone : « 4 310 tokens pour une fenêtre de 4 096 ».
 - **Contradiction** : AD-9 déclare un dépassement dès que *contexte + 512 > 4 096*. Entre 3 585 et 4 096 tokens, la jauge affiche donc 88 à 100 % alors que l'appel est déjà refusé. La salle voit « 95 % » et une carte « Contexte dépassé » : c'est incompréhensible. Le seuil de 80 % n'est pas non plus placé dans l'architecture (configuration ? front ?).
 - **Correctif** (AD-9) :
-  - L'événement de contexte porte `window`, `output_reserve`, `usable = window − output_reserve`, `used`, `percent = used / usable`, `near_limit` et `overflow`, tous calculés par la session. Le seuil d'alerte (0,8) est dans `wavestack.toml`.
+  - L'événement de contexte porte `window`, `output_reserve`, `usable = window − output_reserve`, `used`, `percent = used / usable`, `near_limit` et `overflow`, tous calculés par la session. Le seuil d'alerte (0,8) est dans `harness-lab.toml`.
   - La jauge affiche « 1 840 / 3 584 tokens utiles · 51 % », et la réserve de sortie est expliquée au survol et dans le détail de la jauge.
   - Variante : dessiner la réserve comme une zone distincte en fin de jauge. Cela exige un token `segment-reserve` dans DESIGN.md, donc une demande de changement à l'UX.
   - Aligner le message de dépassement : « 3 800 tokens + 512 réservés à la réponse, pour une fenêtre de 4 096 ».
@@ -209,17 +209,17 @@ Le paradigme retenu (journal d'événements, volets en projection) convient trè
     - si le port est indisponible, « seul le terminal parle » ;
     - un échec bloquant rend l'interface inaccessible ;
     - un échec non bloquant affiche « Continuer » ;
-    - un diagnostic vert affiche « Ouvrir WaveStack » ;
+    - un diagnostic vert affiche « Ouvrir HarnessLab » ;
     - le diagnostic reste consultable depuis la barre haute.
   - Flow 3 : le diagnostic propose les GGUF déjà présents ou un chemin à saisir.
-- **Contradiction** : AD-21 dit « diagnostic (terminal, puis navigateur) », puis « démarre le serveur ». Si le diagnostic tourne avant le serveur, le navigateur ne peut pas montrer les lignes « En cours ». Si le modèle manque (échec bloquant), le spine ne dit pas si le serveur démarre, ni comment la page propose les modèles découverts d'AD-7. Rien ne conserve non plus les résultats pour l'icône de la barre haute, et un port occupé par une instance WaveStack déjà lancée n'est pas distingué d'un conflit.
+- **Contradiction** : AD-21 dit « diagnostic (terminal, puis navigateur) », puis « démarre le serveur ». Si le diagnostic tourne avant le serveur, le navigateur ne peut pas montrer les lignes « En cours ». Si le modèle manque (échec bloquant), le spine ne dit pas si le serveur démarre, ni comment la page propose les modèles découverts d'AD-7. Rien ne conserve non plus les résultats pour l'icône de la barre haute, et un port occupé par une instance HarnessLab déjà lancée n'est pas distingué d'un conflit.
 - **Correctif** (AD-21 réécrit) :
   1. **Port d'abord** : `cli` tente de réserver `127.0.0.1:port`.
-     - Si le port est occupé, `cli` interroge `GET /api/health`. Si une instance WaveStack répond, il ouvre le navigateur sur elle et quitte avec le code 0.
-     - Sinon, il écrit dans le terminal un message français : le port en conflit, puis `uv run wavestack --port 8766` ou la clé de `settings.json`. Il quitte avec un code non nul.
+     - Si le port est occupé, `cli` interroge `GET /api/health`. Si une instance HarnessLab répond, il ouvre le navigateur sur elle et quitte avec le code 0.
+     - Sinon, il écrit dans le terminal un message français : le port en conflit, puis `uv run harness-lab --port 8766` ou la clé de `settings.json`. Il quitte avec un code non nul.
   2. **Serveur en mode `diagnostic`** : il démarre aussitôt et ouvre `/diagnostic`. Les vérifications (mémoire, modèle, réseau) tournent dans le fil de travail (R-09).
   3. Chaque résultat est un événement `diagnostic_check {check, status: running|ok|failed, message_fr, action_fr, blocking}`. Le **même objet** s'affiche dans le terminal et part vers le SSE : une seule source.
-  4. **Échec bloquant** : aucune session n'est créée. La page liste les candidats d'AD-7 et un champ de chemin, via l'intention `select_model`, puis relance la vérification du modèle sans redémarrer. La voie « relancer WaveStack » de Flow 3 reste valable.
+  4. **Échec bloquant** : aucune session n'est créée. La page liste les candidats d'AD-7 et un champ de chemin, via l'intention `select_model`, puis relance la vérification du modèle sans redémarrer. La voie « relancer HarnessLab » de Flow 3 reste valable.
   5. `GET /api/diagnostic` conserve le dernier résultat, pour l'icône de la barre haute.
   6. Le téléchargement du modèle par défaut affiche sa progression chiffrée dans la ligne « Modèle ».
   7. Définitions :
@@ -366,7 +366,7 @@ Le paradigme retenu (journal d'événements, volets en projection) convient trè
 ## Étape suivante recommandée
 
 - **Skill** : `bmad-architecture` (mise à jour du spine)
-- **Prompt** : « Mets à jour ARCHITECTURE-SPINE.md de WaveStack à partir de reviews/review-reconcile-ux.md : d'abord R-01 (enveloppe), R-03, R-07 et R-12 (contradictions), puis les majeurs. Tranche R-06 (aperçu du contexte contre modification de Flow 1) avec moi. Consigne les décisions dans .memlog.md et liste les demandes de changement à l'UX (R-06, R-07, R-20, R-24). »
+- **Prompt** : « Mets à jour ARCHITECTURE-SPINE.md de HarnessLab à partir de reviews/review-reconcile-ux.md : d'abord R-01 (enveloppe), R-03, R-07 et R-12 (contradictions), puis les majeurs. Tranche R-06 (aperçu du contexte contre modification de Flow 1) avec moi. Consigne les décisions dans .memlog.md et liste les demandes de changement à l'UX (R-06, R-07, R-20, R-24). »
 - **Modèle** : Opus
 - **Effort** : high
 - Ouvrir un nouveau chat (`/clear`) avant cette étape.

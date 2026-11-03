@@ -6,12 +6,12 @@ anomalies A1 à A8 de `resultats-test-pc-2026-09-29.md`, et rien d'autre.
 
 ---
 
-Tu vas vérifier sur ce poste les huit corrections du lot K de WaveStack. Travaille en français.
+Tu vas vérifier sur ce poste les huit corrections du lot K de HarnessLab. Travaille en français.
 
 ## Contexte
 
 - Poste : Windows 11, PowerShell 5.1, **sans droits d'administrateur**, CPU seul, 16 Go.
-  Modèles : Qwen3.5-2B et Qwen3.5-4B (dossier des modèles de WaveStack), llama-server `b11239`
+  Modèles : Qwen3.5-2B et Qwen3.5-4B (dossier des modèles de HarnessLab), llama-server `b11239`
   déjà installé dans `%LOCALAPPDATA%\llama.cpp` (sinon, point 8 d'abord).
 - Dépôt : branche `claude/lot-k-recette-pc`, commits `d50c1c4` (point 1) à `1297e2b` (point 8)
   et `05e83d8` (suite du point 2), puis le commit de documentation `8c7ef9e`, le commit de
@@ -23,7 +23,7 @@ Tu vas vérifier sur ce poste les huit corrections du lot K de WaveStack. Travai
 ## Règles
 
 1. **Ne modifie rien** du dépôt ni du dossier de données réel. Scripts hors du dépôt ; tout
-   lancement de WaveStack passe par `WAVESTACK_DATA_DIR` vers une copie jetable du dossier de
+   lancement de HarnessLab passe par `HARNESS_LAB_DATA_DIR` vers une copie jetable du dossier de
    données (`settings.json` compris : le point 1 doit lire les anciennes sondes). Pour les
    modèles, un dossier de **liens physiques** (`mklink /H`), pas de jonction.
 2. Ne réécris jamais `settings.json` pour corriger d'anciennes sondes (le changement de
@@ -39,13 +39,13 @@ Tu vas vérifier sur ce poste les huit corrections du lot K de WaveStack. Travai
 
 1. **Tests automatiques** : `git fetch`, `git checkout --detach origin/claude/lot-k-recette-pc`,
    `uv sync --extra compression`, `uv run ruff check .`, `uv run ruff format --check .`,
-   `uv run pytest -q`, puis avec `WAVESTACK_TEST_GGUF` = le 2B :
+   `uv run pytest -q`, puis avec `HARNESS_LAB_TEST_GGUF` = le 2B :
    `uv run pytest -s -rA tests/test_program.py -k fits` (tableau par prompt : note la plus petite
    marge), puis, avec `PYTHONUTF8=1` (sans lui, une sortie redirigée en cp1252 lève
    `UnicodeEncodeError` et fait échouer la suite en cascade),
    `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` (0 FAIL attendu,
    y compris `[linked_view]` aux quatre largeurs), et `git restore tools/e2e/screenshots`.
-2. **Point 1 (A2)** : l'entrée ancienne doit être lue par WaveStack. Dans le `settings.json`
+2. **Point 1 (A2)** : l'entrée ancienne doit être lue par HarnessLab. Dans le `settings.json`
    **jetable** seulement, réécris les clés de `probed_models` (et la valeur `ref` de
    `selected_model`) du vrai dossier des modèles vers le dossier de liens physiques : un lien
    physique garde la taille et la date du fichier, donc les valeurs des entrées restent telles
@@ -71,7 +71,7 @@ Tu vas vérifier sur ce poste les huit corrections du lot K de WaveStack. Travai
    trancher le modèle d'historique du test `fits`. Relève les `outbound_request`, les
    `tool_started` (trigger), les statuts de tour et les réponses.
 5. **Point 4 (A3)** : fenêtre 8 192 enregistrée, `llama-server -np 1 -c 4096` sur le 2B,
-   WaveStack relancé : bouton « Fenêtre 4 096 ▾ », infobulle « …, 8 192 choisi. » ; `/diagnostic`
+   HarnessLab relancé : bouton « Fenêtre 4 096 ▾ », infobulle « …, 8 192 choisi. » ; `/diagnostic`
    et `/api/diagnostic` : conseil « relancez-le avec `-np 1 -c 8192` ». Puis llama-server
    arrêté, retour au 2B intégré et à 4 096.
 6. **Point 5 (A4)** : Chromium puis Edge, « Sombre », `/diagnostic`, « Clair », « Précédent » :

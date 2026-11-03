@@ -1,6 +1,6 @@
 # Charte de messagerie d'Exemplia, version 2 (2026)
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette charte ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette charte ne décrit aucune entreprise réelle. -->
 
 Cette version remplace la version 1 depuis le 1er janvier 2026, à la suite du changement de fournisseur de messagerie décrit dans la note de changement associée : c'est la version en vigueur.
 

@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import json
 
-from wavestack import config
-from wavestack.rag import index as rag_index
+from harness_lab import config
+from harness_lab.rag import index as rag_index
 
 
 def _write_settings(settings: dict) -> None:

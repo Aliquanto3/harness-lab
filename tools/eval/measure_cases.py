@@ -144,7 +144,7 @@ def render(results: list[CaseMeasure], runs: int) -> str:
 
 def _model_path(arg: str | None) -> Path:
     """Resolved before the data directory changes: the real models folder."""
-    from wavestack import config
+    from harness_lab import config
 
     return Path(arg) if arg else config.models_dir() / config.DEFAULT_MODEL_FILE
 
@@ -161,11 +161,11 @@ def main(argv: list[str] | None = None) -> int:
     if not model.is_file():
         print(f"Modèle introuvable : {model}", file=sys.stderr)
         return 2
-    with tempfile.TemporaryDirectory(prefix="wavestack-eval-") as tmp:
-        os.environ["WAVESTACK_DATA_DIR"] = tmp  # before the session: the real data stays as is
-        from wavestack import config
-        from wavestack.agent_eval.cases import load_provided_cases
-        from wavestack.session.app_session import AppSession
+    with tempfile.TemporaryDirectory(prefix="harness-lab-eval-") as tmp:
+        os.environ["HARNESS_LAB_DATA_DIR"] = tmp  # before the session: the real data stays as is
+        from harness_lab import config
+        from harness_lab.agent_eval.cases import load_provided_cases
+        from harness_lab.session.app_session import AppSession
 
         cases = load_provided_cases("fr")
         if args.cases:

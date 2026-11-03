@@ -20,17 +20,17 @@ from fake_engine import FakeEngine
 from gguf_writer import make_sparse, write_gguf
 from starlette.testclient import TestClient
 
-from wavestack import config
-from wavestack.models import discovery, servers
-from wavestack.models.capabilities import capabilities_for
-from wavestack.models.engine import CancelToken, EngineMetadata, LlamaCppEngine, VocabTokenizer
-from wavestack.models.load_registry import ModelChoice
-from wavestack.net.factory import create_loopback_client
-from wavestack.net.guard import NetworkBlocked
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.models import discovery, servers
+from harness_lab.models.capabilities import capabilities_for
+from harness_lab.models.engine import CancelToken, EngineMetadata, LlamaCppEngine, VocabTokenizer
+from harness_lab.models.load_registry import ModelChoice
+from harness_lab.net.factory import create_loopback_client
+from harness_lab.net.guard import NetworkBlocked
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 QWEN = (Path(__file__).parent / "fixtures" / "qwen3_5_chat_template.jinja").read_text("utf-8")
 ORIGIN = {"Origin": "http://127.0.0.1:8420"}
@@ -590,7 +590,7 @@ def test_ollama_too_old_for_the_architecture_explains_and_goes_back(fake):
     assert "« qwen35 »" in error["message_text"] and "llama-server" in error["message_text"]
     assert "Mettez Ollama à jour" in error["message_text"]
     assert "unknown model architecture" in error["cause"]  # the server's text, a detail
-    assert error["effect_text"] == "WaveStack revient au modèle précédent, A."
+    assert error["effect_text"] == "HarnessLab revient au modèle précédent, A."
     [started] = events["model_load_started"]
     assert started["model"]["label"] == "A"
     [ended] = events["model_load_ended"]
@@ -643,7 +643,7 @@ def test_a_way_back_that_fails_leaves_no_model_and_says_so(fake):
 
 def test_ollama_too_old_without_a_previous_model_explains_only(fake):
     """E119, launched on the served model: no model to go back to, the reason and the way
-    out are said, the turn ends in error and WaveStack stays usable."""
+    out are said, the turn ends in error and HarnessLab stays usable."""
     session = _booted("ollama")
     fake.generate_error = "unsupported model architecture: qwen35"
 
@@ -663,7 +663,7 @@ def test_ollama_too_old_without_a_previous_model_explains_only(fake):
 def test_a_refusal_on_the_llm_screen_promises_nothing_and_leaves_no_way_back(fake):
     """E119, review: the « LLM nu » screen says the reason, but neither promises nor leaves a
     way back that a later, unrelated workshop turn would take."""
-    from wavestack.models.engine import Sampling
+    from harness_lab.models.engine import Sampling
 
     session = _session()
     assert session.boot("A.gguf").result() == "ok"
@@ -782,13 +782,13 @@ def test_leaving_ollama_unloads_it_and_never_two_models(fake):
     _, future = session.switch_model(ModelChoice.served(_candidate("ollama")))
     future.result()
     _run(session, "Bonjour")
-    session.close()  # closing WaveStack
+    session.close()  # closing HarnessLab
     assert fake.posts("/api/generate")[-1] == {"model": OLLAMA_NAME, "keep_alive": 0}
 
 
 def test_ollama_never_unloads_what_it_did_not_load(fake):
     """No generation asked, or a model Ollama already held when chosen (another client's):
-    WaveStack leaves it loaded."""
+    HarnessLab leaves it loaded."""
     session = _booted("ollama")
     _, future = session.switch_model(ModelChoice("file", "B.gguf"))
     assert future.result() == "ok" and fake.posts("/api/generate") == []  # never used
@@ -1511,7 +1511,7 @@ if sys.argv[2] == "raw":  # the control: the model opened as before lot J
     params.vocab_only = True
     _internals.LlamaModel(path_model=sys.argv[1], params=params, verbose=False)
 else:
-    from wavestack.models.engine import VocabTokenizer
+    from harness_lab.models.engine import VocabTokenizer
     tokenizer = VocabTokenizer(sys.argv[1])
     tokenizer.tokenize("Bonjour")
     tokenizer.close()
@@ -1727,7 +1727,7 @@ def test_llama_server_kv_unreadable_counts_the_file_and_keeps_the_warning(fake):
 
 
 def test_llama_server_relative_model_path_is_not_read_here(fake, monkeypatch):
-    """A relative `model_path` is the server's working directory's, not WaveStack's."""
+    """A relative `model_path` is the server's working directory's, not HarnessLab's."""
     monkeypatch.chdir(Path(TINY).parent)
     fake.n_ctx, fake.model_path = 4096, "tiny-llama.gguf"  # readable from here, by chance
 
@@ -1924,8 +1924,8 @@ def test_diagnostic_advises_np_1_c_8192_when_the_server_is_under_the_window(
     assert "relancez-le avec `-np 1 -c 8192`" in check["message_text"]
 
 
-def test_refusal_with_a_served_model_active_counts_wavestack_whole(fake, tmp_path):
-    """E3: llama-server's model is in another process: WaveStack's RSS is not reduced by it
+def test_refusal_with_a_served_model_active_counts_harness_lab_whole(fake, tmp_path):
+    """E3: llama-server's model is in another process: HarnessLab's RSS is not reduced by it
     (the refusal said « 0,0 Go »)."""
     blob = tmp_path / "blob"
     make_sparse(blob, 5 * GIB)  # sparse: nothing written
@@ -1935,7 +1935,7 @@ def test_refusal_with_a_served_model_active_counts_wavestack_whole(fake, tmp_pat
     with pytest.raises(SendRefused) as refused:
         session.switch_model(ModelChoice.served(_candidate("ollama", str(blob))))
 
-    assert "WaveStack occupe 210 Mo sans le modèle actif" in refused.value.reason_text
+    assert "HarnessLab occupe 210 Mo sans le modèle actif" in refused.value.reason_text
     assert "Qwen3.5-2B-Q4_K_M reste actif" in refused.value.reason_text
 
 
@@ -1979,10 +1979,10 @@ def _ollama_blob(monkeypatch, tmp_path, header: dict | None, size: int) -> Path:
 def test_ollama_not_resident_costs_file_kv_at_the_window_and_margin(
     monkeypatch, tmp_path, fake, header, kv
 ):
-    """C5: never the probe's RSS of the blob (llama-cpp-python in WaveStack's child, 3,6 Go
+    """C5: never the probe's RSS of the blob (llama-cpp-python in HarnessLab's child, 3,6 Go
     here), but the file, its KV (f16) at the window and the margin: llama3.2:3b (2,0 Go)
     passes under 4 096 Mo with ≈ 150 Mo of base. KV unreadable: the file and the margin."""
-    from wavestack.models import probe
+    from harness_lab.models import probe
 
     size = 2_000_000_000
     blob = _ollama_blob(monkeypatch, tmp_path, header, size)

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from wavestack.models.engine import CancelToken, LlamaCppEngine
+from harness_lab.models.engine import CancelToken, LlamaCppEngine
 
 TINY = Path(__file__).parent / "fixtures" / "tiny-llama.gguf"
 
@@ -75,7 +75,7 @@ def test_a_prefilled_prefix_is_extended_by_the_next_completion(engine):
 
 
 def test_a_prefill_cancelled_after_its_first_batch_keeps_what_it_evaluated(engine, monkeypatch):
-    from wavestack.models import engine as engine_module
+    from harness_lab.models import engine as engine_module
 
     monkeypatch.setattr(engine_module, "PREFILL_BATCH", 4)
     ids = engine.tokenize("<|im_start|>system\nContexte principal, long de deux lots.<|im_end|>\n")

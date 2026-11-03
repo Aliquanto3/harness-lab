@@ -1,6 +1,6 @@
 # Klassifizierung von Informationen bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
 
 Jede Information, die Exemplia erzeugt oder erhält, trägt eine der folgenden 4 Klassifizierungsstufen: Öffentlich, Intern, Vertraulich und Geheim. Ein Dokument ohne Kennzeichnung wird standardmäßig als Intern behandelt.
 

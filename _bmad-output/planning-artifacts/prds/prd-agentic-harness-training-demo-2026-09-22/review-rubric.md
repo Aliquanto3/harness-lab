@@ -1,4 +1,4 @@
-# Revue qualité du PRD : WaveStack
+# Revue qualité du PRD : HarnessLab
 
 *Revue menée selon la grille `prd-validation-checklist.md`. Barème calibré pour un outil de formation interne (50 à 100 personnes, puis démo client éventuelle). La question des quatre ou cinq volets est reportée volontairement à la session de maquette : elle n'est pas traitée ici. Parmi les `[ASSUMPTION]`, seules celles qui bloquent l'UX, l'architecture ou les epics sont relevées.*
 
@@ -23,7 +23,7 @@ La faiblesse principale : l'arbitrage le plus lourd est repoussé. Le §9 reconn
 
 ### Constats
 - **[high]** Aucune ligne de coupe dans le périmètre V1 (§7.1, §9 ligne « Périmètre V1 large ») : les 11 briques, le rejeu, les sessions enregistrées et le schéma animé ont tous le même statut. Les epics devront donc trancher sans cadre, et SM-C2 (« Ajouter des briques pour paraître complet dilue la progression ») reste sans effet sur le périmètre. *Correction :* sortir le socle du §9 et l'inscrire au §7.1 comme « V1 socle ». Ajouter un palier « V1 complément » (par exemple mémoire globale, reranking, compression Headroom, sous-agent) avec une règle explicite : ce palier glisse en V2 si le socle n'est pas prêt pour la session pilote.
-- **[medium]** Publication open source sous-estimée (§10 Q2) : « à vérifier avant la première publication ». Pourtant NFR-10 (« Le dépôt GitHub est public »), FR-35 (« depuis GitHub ») et le nom « WaveStack » en dépendent directement. Un refus de Wavestone changerait le mode d'installation et la stratégie de licence. *Correction :* passer ce point en `[NOTE FOR PM]`, fixer une échéance avant les epics d'installation et nommer le plan B (dépôt interne, archive zip sur un partage).
+- **[medium]** Publication open source sous-estimée (§10 Q2) : « à vérifier avant la première publication ». Pourtant NFR-10 (« Le dépôt GitHub est public »), FR-35 (« depuis GitHub ») et le nom « HarnessLab » en dépendent directement. Un refus changerait le mode d'installation et la stratégie de licence. *Correction :* passer ce point en `[NOTE FOR PM]`, fixer une échéance avant les epics d'installation et nommer le plan B (dépôt interne, archive zip sur un partage).
 - **[low]** Le seul `[NOTE FOR PM]` (§7.2) est posé sur un point sans tension (« C'est la trajectoire qui justifie l'investissement »). Les vraies tensions n'en ont pas : périmètre contre porteur seul, marque et publication, fiabilité du MCP public. *Correction :* déplacer les callouts vers ces trois tensions.
 
 ## Substance plutôt que décor : forte
@@ -45,13 +45,13 @@ Le type de MVP est clair : un MVP d'expérience, qui vise le moment de compréhe
 ### Constats
 - **[medium]** Le repli du MCP public casse le déclic (FR-20, addendum « Vigilance »). data.gouv.fr est proposé comme serveur principal alors que sa gestion de session « a renvoyé une erreur ». De plus, le repli prévu est « le serveur MCP local ». Or le déclic d'UJ-1 repose précisément sur « un composant [qui] sort du poste ». Un repli local fait donc disparaître le message pédagogique. *Correction :* dans FR-20, ordonner le repli ainsi : second serveur public, puis session enregistrée (FR-40) du scénario « Où vont mes données ? », et seulement ensuite le MCP local. Reconsidérer aussi le choix du serveur principal au vu du test de fumée.
 - **[medium]** FR-22 ne montre pas ce qui part sur le réseau. La thèse est « mes données partent où ? », mais FR-22 se limite à « découverte des outils, appel, résultat », et FR-13 ne dit rien sur les outils réseau. *Correction :* ajouter à FR-22 et à FR-14, pour tout composant réseau, l'affichage de la destination (URL ou hôte) et de la charge envoyée (arguments de l'appel). C'est la preuve visuelle dont SM-3 a besoin.
-- **[low]** Les indicateurs n'ont pas de point de départ. SM-1 à SM-4 sont mesurés en fin de session seulement : sans question posée en début de session, on ne sait pas quelle part des 80 % visés vient de WaveStack. De plus, SM-6 (90 % des sessions sans repli) porte sur 5 à 8 sessions : une seule défaillance suffit à manquer la cible. *Correction :* ajouter deux ou trois questions en ouverture de session, et exprimer SM-6 en nombre de sessions.
+- **[low]** Les indicateurs n'ont pas de point de départ. SM-1 à SM-4 sont mesurés en fin de session seulement : sans question posée en début de session, on ne sait pas quelle part des 80 % visés vient de HarnessLab. De plus, SM-6 (90 % des sessions sans repli) porte sur 5 à 8 sessions : une seule défaillance suffit à manquer la cible. *Correction :* ajouter deux ou trois questions en ouverture de session, et exprimer SM-6 en nombre de sessions.
 
 ## Clarté du « fini » : adéquate
 
 La plupart des FR ont une conséquence testable. En voici de bons exemples :
 - « Toutes les briques désactivées correspondent exactement au LLM nu » (FR-5) ;
-- « Un appel mal formé ne fait jamais planter WaveStack » (FR-15) ;
+- « Un appel mal formé ne fait jamais planter HarnessLab » (FR-15) ;
 - les checklists de FR-2 et FR-14 ;
 - les quatre contrôles de FR-37.
 

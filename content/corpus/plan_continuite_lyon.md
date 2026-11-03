@@ -1,6 +1,6 @@
 # Plan de continuité d'activité du site de Lyon (document en français uniquement)
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : ce plan ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : ce plan ne décrit aucune entreprise réelle. -->
 
 Ce document concerne uniquement le site de Lyon d'Exemplia ; il n'existe qu'en français, car il relève d'une équipe locale qui travaille dans cette langue.
 

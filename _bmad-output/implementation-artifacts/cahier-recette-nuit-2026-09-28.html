@@ -215,7 +215,7 @@ code { font: 0.9em var(--mono); background: var(--code-bg); border-radius: 4px; 
 <div class="shell">
   <aside>
     <div class="brand">
-      <span class="kicker">WaveStack · nuit du 28 au 29/09</span>
+      <span class="kicker">HarnessLab · nuit du 28 au 29/09</span>
       <h1>Recette sur le PC cible</h1>
       <p>Stories 22 à 27 et 31 à 34, livrées sur la branche claude/lucid-cori-1rkbjf.</p>
     </div>
@@ -252,9 +252,9 @@ code { font: 0.9em var(--mono); background: var(--code-bg); border-radius: 4px; 
         <li>Chaque test : prérequis, geste numéroté, ce que vous devez voir, critère, ce qu'il faut rapporter. Donnez-lui un statut (OK, KO, non fait, bloqué) et notez ce que vous voyez. Tout s'enregistre seul ; à la fin, « Copier le compte rendu » et collez-le dans la conversation.</li>
         <li>Faites d'abord la section « Préparation ». Les groupes suivent l'ordre des stories livrées : 22, 33, 23, 34, 32, 24, 25, 26, 27, puis 31. Les libellés entre guillemets sont ceux de l'interface, relevés dans le code du commit.</li>
         <li>« Journal » renvoie à la commande du test P4 : elle copie tous les événements de la session dans un fichier et les lit depuis PowerShell. Elle remplace le « script AppSession » des specs pour la plupart des vérifications.</li>
-        <li>Adresse de WaveStack : <code>http://127.0.0.1:8420/</code> ; diagnostic : <code>/diagnostic</code> ; tableau des modèles : <code>/models</code>.</li>
+        <li>Adresse de HarnessLab : <code>http://127.0.0.1:8420/</code> ; diagnostic : <code>/diagnostic</code> ; tableau des modèles : <code>/models</code>.</li>
       </ul>
-      <div class="measure-rule"><b>Tests étiquetés « Mesure » (temps, mémoire, CPU)</b> : fermez Edge, Outlook et Teams avant la mesure (Edge aussi depuis sa zone de notification, clic droit, « Fermer Microsoft Edge »). Ouvrez ce cahier et WaveStack dans Chrome pendant ces mesures. Personne n'utilise le PC pendant le chronométrage.</div>
+      <div class="measure-rule"><b>Tests étiquetés « Mesure » (temps, mémoire, CPU)</b> : fermez Edge, Outlook et Teams avant la mesure (Edge aussi depuis sa zone de notification, clic droit, « Fermer Microsoft Edge »). Ouvrez ce cahier et HarnessLab dans Chrome pendant ces mesures. Personne n'utilise le PC pendant le chronométrage.</div>
       <div class="scope"><b>Hors de ce cahier</b> : la story 28 (guide de test et cahier corrigés), la story 29 (écran « LLM nu ») et la story 30 (atelier RAG) sont encore en cours. La story 31 (mode sombre) est terminée : son groupe suit le code livré.</div>
     </div>
     <div id="groups"></div>
@@ -275,7 +275,7 @@ git branch --show-current
 git fetch origin claude/lucid-cori-1rkbjf
 git checkout --detach 175eb5afcd6d410870e27d30948757e528c4be62
 git log -1 --oneline</script>
-<script type="text/plain" id="cmd-backup">$d = "$env:LOCALAPPDATA\WaveStack"; $b = "$d\sauvegarde-nuit"
+<script type="text/plain" id="cmd-backup">$d = "$env:LOCALAPPDATA\HarnessLab"; $b = "$d\sauvegarde-nuit"
 New-Item -ItemType Directory -Force $b | Out-Null
 Copy-Item "$d\settings.json", "$d\api_keys.json", "$d\memory.json", "$d\audit.log" $b -ErrorAction SilentlyContinue
 Get-ChildItem $b | Select-Object Name, Length, LastWriteTime
@@ -283,14 +283,14 @@ Get-FileHash "$d\settings.json" | Select-Object Hash
 (Select-String -Path "$d\settings.json" -Pattern "Ã|Â" -Encoding UTF8).Count</script>
 <script type="text/plain" id="cmd-launch">$env:UV_SYSTEM_CERTS = "1"
 uv sync --extra compression
-uv run wavestack</script>
+uv run harness-lab</script>
 <script type="text/plain" id="cmd-journal">curl.exe -s -N --noproxy "*" --max-time 5 http://127.0.0.1:8420/api/stream -o "$env:TEMP\ws-journal.txt"
 $ev = Get-Content "$env:TEMP\ws-journal.txt" -Encoding UTF8 | Where-Object { $_ -like 'data: {"seq"*' } | ForEach-Object { $_.Substring(6) | ConvertFrom-Json }
 "{0} événements lus" -f $ev.Count</script>
 <script type="text/plain" id="cmd-calls">$ev | Where-Object kind -eq model_call_ended | Select-Object turn_id, call_id,
   @{n = "prompt_ms"; e = { $_.payload.prompt_ms } }, @{n = "lus"; e = { $_.payload.prompt_tokens } },
   @{n = "evalues"; e = { $_.payload.evaluated_tokens } }, @{n = "produits"; e = { $_.payload.output_tokens } } | Format-Table</script>
-<script type="text/plain" id="cmd-peak">Get-Process python*, wavestack*, llama-server*, ollama* -ErrorAction SilentlyContinue |
+<script type="text/plain" id="cmd-peak">Get-Process python*, harness-lab*, llama-server*, ollama* -ErrorAction SilentlyContinue |
   Select-Object Name, Id, @{n = "Mo"; e = { [math]::Round($_.WorkingSet64 / 1MB) } },
     @{n = "Pic Mo"; e = { [math]::Round($_.PeakWorkingSet64 / 1MB) } }</script>
 <script type="text/plain" id="cmd-llama-install">[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12   # PowerShell 5.1
@@ -309,21 +309,21 @@ $llama = "$dest\llama-server.exe"; & $llama --version; $LASTEXITCODE
 # Erreur 407 : ajoutez -ProxyUseDefaultCredentials aux appels Invoke-RestMethod et Invoke-WebRequest.</script>
 <script type="text/plain" id="cmd-llama-find">$llama = Get-ChildItem "$env:LOCALAPPDATA\llama.cpp" -Recurse -Filter llama-server.exe | Sort-Object LastWriteTime | Select-Object -Last 1 -ExpandProperty FullName
 $llama</script>
-<script type="text/plain" id="cmd-llama-run">& $llama -m "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096</script>
-<script type="text/plain" id="cmd-budget-fixed">uv run python -c "from wavestack import config; config.save_setting('memory', {'budget_mode': 'fixed', 'budget_mb': 6144}); print(config.read_settings()['memory'])"</script>
-<script type="text/plain" id="cmd-budget-default">uv run python -c "import json; from wavestack import config; s = config.read_settings(); s.pop('memory', None); config.settings_path().write_text(json.dumps(s, ensure_ascii=False, indent=2), encoding='utf-8'); print('memory' in config.read_settings())"</script>
-<script type="text/plain" id="cmd-restore">$d = "$env:LOCALAPPDATA\WaveStack"; $b = "$d\sauvegarde-nuit"
+<script type="text/plain" id="cmd-llama-run">& $llama -m "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096</script>
+<script type="text/plain" id="cmd-budget-fixed">uv run python -c "from harness_lab import config; config.save_setting('memory', {'budget_mode': 'fixed', 'budget_mb': 6144}); print(config.read_settings()['memory'])"</script>
+<script type="text/plain" id="cmd-budget-default">uv run python -c "import json; from harness_lab import config; s = config.read_settings(); s.pop('memory', None); config.settings_path().write_text(json.dumps(s, ensure_ascii=False, indent=2), encoding='utf-8'); print('memory' in config.read_settings())"</script>
+<script type="text/plain" id="cmd-restore">$d = "$env:LOCALAPPDATA\HarnessLab"; $b = "$d\sauvegarde-nuit"
 Copy-Item "$b\*" $d -Force
 Remove-Item "$d\models\Qwen3.5-2B-copie-test.gguf" -ErrorAction SilentlyContinue
 git switch <branche notée en P1>
 uv sync --extra compression
 git status</script>
 <script type="text/plain" id="cmd-turns">$ev | Where-Object kind -eq turn_started | Select-Object seq, turn_id, @{n = "message"; e = { $_.payload.message } } | Format-Table</script>
-<script type="text/plain" id="cmd-memory8">uv run python -c "from wavestack import config, memory as m; m.write_memory(config.memory_path(), [m.MemoryEntry(id=f'test{i}', text=f'Entree de test {i} : une ligne assez longue pour remplir le tiroir de la memoire globale et verifier que son pied reste visible.', created_at='2026-09-29T08:00:00+00:00', source='user') for i in range(1, 9)]); print(len(m.read_memory(config.memory_path())), 'entrees')"</script>
+<script type="text/plain" id="cmd-memory8">uv run python -c "from harness_lab import config, memory as m; m.write_memory(config.memory_path(), [m.MemoryEntry(id=f'test{i}', text=f'Entree de test {i} : une ligne assez longue pour remplir le tiroir de la memoire globale et verifier que son pied reste visible.', created_at='2026-09-29T08:00:00+00:00', source='user') for i in range(1, 9)]); print(len(m.read_memory(config.memory_path())), 'entrees')"</script>
 <script type="text/plain" id="cmd-model-headers">$ev | Where-Object { $_.kind -eq "outbound_request" -and $_.payload.origin -eq "model" } | Select-Object -Last 1 |
   ForEach-Object { $_.payload.headers } | Format-Table name, value, masked</script>
 <script type="text/plain" id="cmd-key-search">$k = Read-Host "8 caractères pris au milieu de la clé (pas le début gsk_)"
-(Select-String -Path "$env:TEMP\ws-journal.txt", "$env:LOCALAPPDATA\WaveStack\audit.log" -SimpleMatch $k -Encoding UTF8 -ErrorAction SilentlyContinue).Count</script>
+(Select-String -Path "$env:TEMP\ws-journal.txt", "$env:LOCALAPPDATA\HarnessLab\audit.log" -SimpleMatch $k -Encoding UTF8 -ErrorAction SilentlyContinue).Count</script>
 <script type="text/plain" id="cmd-brick-headers">$ev | Where-Object { $_.kind -eq "outbound_request" -and $_.payload.origin -eq "brick" } | ForEach-Object {
   $u = $_.payload.url; $_.payload.headers | Select-Object @{n = "url"; e = { $u } }, name, value, masked } | Format-Table -AutoSize</script>
 <script type="text/plain" id="cmd-turn-outbound">$t = ($ev | Where-Object kind -eq turn_started | Select-Object -Last 1).turn_id
@@ -334,34 +334,34 @@ $sum = ($r.payload.sections | Measure-Object -Property tokens -Sum).Sum
 $lus = ($ev | Where-Object { $_.kind -eq "model_call_ended" -and $_.call_id -eq $r.call_id }).payload.prompt_tokens
 "Somme des sections : {0} · lus (model_call_ended) : {1} · appel {2}" -f $sum, $lus, $r.call_id</script>
 <script type="text/plain" id="cmd-ram">uv run python -c "import psutil; v = psutil.virtual_memory(); print('total', v.total // 2**20, 'Mo ; disponible', v.available // 2**20, 'Mo ; 60 % :', int(0.6 * v.available / 2**20), 'Mo')"</script>
-<script type="text/plain" id="cmd-copy-model">$m = "$env:LOCALAPPDATA\WaveStack\models"
+<script type="text/plain" id="cmd-copy-model">$m = "$env:LOCALAPPDATA\HarnessLab\models"
 Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-test.gguf"</script>
-<script type="text/plain" id="cmd-touch-copy">(Get-Item "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-copie-test.gguf").LastWriteTime = Get-Date</script>
+<script type="text/plain" id="cmd-touch-copy">(Get-Item "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-copie-test.gguf").LastWriteTime = Get-Date</script>
 <script type="text/plain" id="cmd-probe-watch">1..40 | ForEach-Object {
-  $p = Get-CimInstance Win32_Process -Filter "Name like 'python%'" | Where-Object CommandLine -match "wavestack.models.probe"
+  $p = Get-CimInstance Win32_Process -Filter "Name like 'python%'" | Where-Object CommandLine -match "harness_lab.models.probe"
   "{0:HH:mm:ss.f}  sonde en cours : {1}" -f (Get-Date), [bool]$p
   Start-Sleep -Milliseconds 500 }</script>
-<script type="text/plain" id="cmd-failed-probes">uv run python -c "from wavestack import config; f = config.read_settings().get('failed_probes', {}); print(len(f), 'entree(s)'); [print(k, '->', v.get('reason')) for k, v in f.items()]"</script>
+<script type="text/plain" id="cmd-failed-probes">uv run python -c "from harness_lab import config; f = config.read_settings().get('failed_probes', {}); print(len(f), 'entree(s)'); [print(k, '->', v.get('reason')) for k, v in f.items()]"</script>
 <script type="text/plain" id="cmd-ollama">ollama ps
 [Environment]::GetEnvironmentVariable("OLLAMA_NUM_PARALLEL", "User"); $env:OLLAMA_NUM_PARALLEL
 [Environment]::GetEnvironmentVariable("OLLAMA_KV_CACHE_TYPE", "User"); $env:OLLAMA_KV_CACHE_TYPE</script>
-<script type="text/plain" id="cmd-mojibake">(Select-String -Path "$env:LOCALAPPDATA\WaveStack\settings.json" -Pattern "Ã|Â" -Encoding UTF8).Count
-Get-FileHash "$env:LOCALAPPDATA\WaveStack\settings.json" | Select-Object Hash</script>
+<script type="text/plain" id="cmd-mojibake">(Select-String -Path "$env:LOCALAPPDATA\HarnessLab\settings.json" -Pattern "Ã|Â" -Encoding UTF8).Count
+Get-FileHash "$env:LOCALAPPDATA\HarnessLab\settings.json" | Select-Object Hash</script>
 <script type="text/plain" id="cmd-diag-time">Measure-Command { Invoke-RestMethod -UseBasicParsing http://127.0.0.1:8420/api/diagnostic | Out-Null } | Select-Object TotalMilliseconds
 Measure-Command { Invoke-RestMethod -UseBasicParsing http://127.0.0.1:8420/api/diagnostic | Out-Null } | Select-Object TotalMilliseconds</script>
-<script type="text/plain" id="cmd-kv">uv run python -c "from wavestack import config; e = config.read_settings().get('probed_models', {}); [print(k.split(chr(92))[-1], '->', *[str(w) + ' : ' + str(round(v['kv_bytes_per_token'] * w / 2**20)) + ' Mio ;' for w in (4096, 8192, 16384)]) for k, v in e.items() if v.get('kv_bytes_per_token')]"</script>
+<script type="text/plain" id="cmd-kv">uv run python -c "from harness_lab import config; e = config.read_settings().get('probed_models', {}); [print(k.split(chr(92))[-1], '->', *[str(w) + ' : ' + str(round(v['kv_bytes_per_token'] * w / 2**20)) + ' Mio ;' for w in (4096, 8192, 16384)]) for k, v in e.items() if v.get('kv_bytes_per_token')]"</script>
 <script type="text/plain" id="cmd-rate">$c = $ev | Where-Object { $_.kind -eq "model_call_ended" -and $_.payload.evaluated_tokens -ge 64 } | Select-Object -Last 1
 $tps = $c.payload.evaluated_tokens / ($c.payload.prompt_ms / 1000)
 "Débit de lecture : {0:N0} tokens/s (appel {1})" -f $tps, $c.call_id
 foreach ($w in 4096, 8192, 16384) { "{0} tokens : {1:N0} s" -f $w, ($w / $tps) }</script>
-<script type="text/plain" id="cmd-window-setting">uv run python -c "from wavestack import config; print(config.read_settings().get('context'))"</script>
+<script type="text/plain" id="cmd-window-setting">uv run python -c "from harness_lab import config; print(config.read_settings().get('context'))"</script>
 <script type="text/plain" id="cmd-subagent">$ev | Where-Object kind -eq subagent_started | Select-Object turn_id, context_id | Format-Table
 $ev | Where-Object kind -eq prefix_not_reused | Select-Object turn_id, call_id, @{n = "cause"; e = { $_.payload.cause } } | Format-Table</script>
 <script type="text/plain" id="cmd-tools">$ev | Where-Object { $_.kind -in "tool_started", "tool_ended", "hook_decided" } | Select-Object turn_id, kind, trigger,
   @{n = "detail"; e = { if ($_.payload.tool) { $_.payload.tool } elseif ($_.payload.hook) { "$($_.payload.hook) $($_.payload.decision)" } else { "$($_.payload.status) $($_.payload.truncated.tokens)" } } } | Format-Table -AutoSize</script>
-<script type="text/plain" id="cmd-fits">$env:WAVESTACK_TEST_GGUF = "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf"
+<script type="text/plain" id="cmd-fits">$env:HARNESS_LAB_TEST_GGUF = "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf"
 uv run pytest -s -rA tests/test_program.py -k fits
-Remove-Item Env:WAVESTACK_TEST_GGUF</script>
+Remove-Item Env:HARNESS_LAB_TEST_GGUF</script>
 
 <script>
 const GROUPS = [
@@ -375,13 +375,13 @@ const GROUPS = [
   { id: "s25", title: "Story 25 · Sélecteur regroupé et tableau des capacités", sub: "« Changer de modèle… » et page /models" },
   { id: "s26", title: "Story 26 · Fenêtre de contexte réglable", sub: "4 096, 8 192 ou 16 384 tokens", note: "À la fin du groupe, revenez à 4 096 (N26-7, dernier geste) : les scénarios du groupe 27 sont conçus pour 4 096." },
   { id: "s27", title: "Story 27 · Scénarios et consignes du palier 2 (lot H)", sub: "Comportement réel du 2B sur les scénarios revus", note: "Qwen3.5-2B, fenêtre 4 096. Chaque test lance son scénario depuis le sélecteur de la barre haute ; un prompt suggéré se clique (il remplit le champ), puis « Envoyer »." },
-  { id: "s31", title: "Story 31 · Mode sombre", sub: "Sélecteur Système, Clair, Sombre sur l'atelier, le diagnostic et /models", note: "Sélecteur « Thème de l'interface » de la barre haute, avant « ⟲ Réinitialiser » : « ◐ Système », « ☀ Clair », « ☾ Sombre » ; sous 1400 px de large, forme compacte « ◐▾ », « ☀▾ » ou « ☾▾ ». Choix mémorisé par le navigateur (clé wavestack.theme), suivi par les autres onglets et par une page rouverte avec « Précédent »." },
+  { id: "s31", title: "Story 31 · Mode sombre", sub: "Sélecteur Système, Clair, Sombre sur l'atelier, le diagnostic et /models", note: "Sélecteur « Thème de l'interface » de la barre haute, avant « ⟲ Réinitialiser » : « ◐ Système », « ☀ Clair », « ☾ Sombre » ; sous 1400 px de large, forme compacte « ◐▾ », « ☀▾ » ou « ☾▾ ». Choix mémorisé par le navigateur (clé harness_lab.theme), suivi par les autres onglets et par une page rouverte avec « Précédent »." },
 ];
 
 const TESTS = [
   // ---------------------------------------------------------------- Préparation
   { id: "P1", g: "prep", title: "Récupérer la branche de la nuit", min: 3,
-    pre: "Clone WaveStack habituel, PowerShell ouvert à sa racine, WaveStack arrêté (Ctrl+C dans son terminal).",
+    pre: "Clone HarnessLab habituel, PowerShell ouvert à sa racine, HarnessLab arrêté (Ctrl+C dans son terminal).",
     steps: [
       "Lancez « git status » (première ligne du bloc) : aucun fichier modifié ne doit apparaître. Sinon, notez-les et mettez-les de côté par « git stash ».",
       "Notez la branche actuelle, affichée par « git branch --show-current » : vous y reviendrez en P7.",
@@ -395,9 +395,9 @@ const TESTS = [
     fields: [{ k: "commit", label: "Commit affiché", type: "text" }, { k: "branche", label: "Branche d'origine", type: "text" }] },
 
   { id: "P2", g: "prep", title: "Sauvegarder vos réglages et vos données", min: 2,
-    pre: "WaveStack arrêté. À faire avant le premier lancement de la nouvelle version (N24-8 s'appuie sur ce relevé).",
+    pre: "HarnessLab arrêté. À faire avant le premier lancement de la nouvelle version (N24-8 s'appuie sur ce relevé).",
     steps: [
-      "Copiez puis lancez le bloc « Sauvegarde » : il copie settings.json, api_keys.json, memory.json et audit.log dans %LOCALAPPDATA%\\WaveStack\\sauvegarde-nuit.",
+      "Copiez puis lancez le bloc « Sauvegarde » : il copie settings.json, api_keys.json, memory.json et audit.log dans %LOCALAPPDATA%\\HarnessLab\\sauvegarde-nuit.",
       "Relevez l'empreinte (Hash) de settings.json et le nombre de « Ã » ou « Â » trouvés (dernière ligne) : une raison de sonde abîmée du 28/09 (C6) en contient.",
     ],
     cmds: [{ label: "Sauvegarde", ref: "backup" }],
@@ -406,17 +406,17 @@ const TESTS = [
     report: "Le nombre de « Ã/Â » dans settings.json (utile à N24-8).",
     fields: [{ k: "mojibake", label: "« Ã/Â » dans settings.json", type: "num" }, { k: "hash", label: "4 premiers caractères du Hash", type: "text" }] },
 
-  { id: "P3", g: "prep", title: "Installer les dépendances et lancer WaveStack", min: 6,
+  { id: "P3", g: "prep", title: "Installer les dépendances et lancer HarnessLab", min: 6,
     pre: "P1 fait. Ollama lancé si vous comptez faire les tests Ollama (N24-6, N25, N26-5, N34-3).",
     steps: [
       "Derrière le proxy, gardez UV_SYSTEM_CERTS=1 (première ligne).",
       "Lancez « uv sync --extra compression » (garde Headroom, la brique Compression).",
-      "Lancez « uv run wavestack » : le navigateur par défaut s'ouvre sur le diagnostic ou sur la page principale. Ouvrez http://127.0.0.1:8420/ dans Chrome si besoin.",
+      "Lancez « uv run harness-lab » : le navigateur par défaut s'ouvre sur le diagnostic ou sur la page principale. Ouvrez http://127.0.0.1:8420/ dans Chrome si besoin.",
       "Lisez la barre haute, de gauche à droite.",
     ],
     cmds: [{ label: "Lancement habituel", ref: "launch" }],
     expect: [
-      "Barre haute foncée : « WaveStack », sélecteur « Choisir un scénario », jauge et sa légende, bouton « Fenêtre 4 096 ▾ », « Volets ▾ », indicateur du modèle, « Changer de modèle… », « Mode projection », sélecteur de thème « ◐ Système » (sous 1400 px de large : « ◐▾ »), « ⟲ Réinitialiser ».",
+      "Barre haute foncée : « HarnessLab », sélecteur « Choisir un scénario », jauge et sa légende, bouton « Fenêtre 4 096 ▾ », « Volets ▾ », indicateur du modèle, « Changer de modèle… », « Mode projection », sélecteur de thème « ◐ Système » (sous 1400 px de large : « ◐▾ »), « ⟲ Réinitialiser ».",
       "Qwen3.5-2B-Q4_K_M actif (indicateur du modèle).",
     ],
     crit: "La page s'ouvre, le 2B est actif, les boutons ci-dessus sont là.",
@@ -424,15 +424,15 @@ const TESTS = [
     fields: [{ k: "modele", label: "Modèle actif", type: "text" }, { k: "theme", label: "Sélecteur de thème présent ?", type: "yn" }] },
 
   { id: "P4", g: "prep", title: "Repères : fichiers, mémoire des processus, journal", min: 3,
-    pre: "WaveStack lancé. Un second terminal PowerShell ouvert à la racine du clone : gardez-le pour toute la séance.",
+    pre: "HarnessLab lancé. Un second terminal PowerShell ouvert à la racine du clone : gardez-le pour toute la séance.",
     steps: [
-      "Dossier de données (Explorateur, %LOCALAPPDATA%\\WaveStack) : settings.json (réglages, modèle choisi, sondes, fenêtre), api_keys.json (clés cloud saisies au diagnostic), memory.json (mémoire globale), audit.log (journal d'audit du hook H2), models\\ (fichiers GGUF). Le thème et le Mode projection sont gardés par le navigateur, pas dans ces fichiers.",
+      "Dossier de données (Explorateur, %LOCALAPPDATA%\\HarnessLab) : settings.json (réglages, modèle choisi, sondes, fenêtre), api_keys.json (clés cloud saisies au diagnostic), memory.json (mémoire globale), audit.log (journal d'audit du hook H2), models\\ (fichiers GGUF). Le thème et le Mode projection sont gardés par le navigateur, pas dans ces fichiers.",
       "Dans le second terminal, lancez « Journal » : il copie en 5 s tous les événements de la session dans %TEMP%\\ws-journal.txt et les charge dans $ev. Relancez-le après chaque tour à examiner.",
       "Lancez « Appels au modèle » : un tableau des appels (vide avant le premier tour).",
-      "Lancez « Mémoire des processus » : RSS et pic de chaque processus WaveStack, Ollama, llama-server.",
+      "Lancez « Mémoire des processus » : RSS et pic de chaque processus HarnessLab, Ollama, llama-server.",
     ],
     cmds: [{ label: "Journal", ref: "journal" }, { label: "Appels au modèle (après Journal)", ref: "calls" }, { label: "Mémoire des processus", ref: "peak" }],
-    expect: ["« N événements lus » avec N > 0.", "Un processus python (WaveStack) dans la mémoire des processus."],
+    expect: ["« N événements lus » avec N > 0.", "Un processus python (HarnessLab) dans la mémoire des processus."],
     crit: "Les trois commandes répondent sans erreur.",
     report: "Toute erreur de ces commandes (curl.exe absent, ConvertFrom-Json…).",
     fields: [{ k: "events", label: "Événements lus", type: "num" }] },
@@ -453,11 +453,11 @@ const TESTS = [
     fields: [{ k: "version", label: "Version (bNNNNN)", type: "text" }, { k: "chemin", label: "Chemin qui a marché", type: "text" }] },
 
   { id: "P6", g: "prep", title: "Autoriser le 4B (facultatif) : budget fixe 6 144 Mo", min: 3, opt: true,
-    pre: "Le budget par défaut (plafond 4 096 Mo) refuse Qwen3.5-4B (≈ 4,4 Go). Plusieurs specs citent le 4B ; le 2B convient partout ailleurs (même format d'appel d'outils). WaveStack arrêté avant chaque commande.",
+    pre: "Le budget par défaut (plafond 4 096 Mo) refuse Qwen3.5-4B (≈ 4,4 Go). Plusieurs specs citent le 4B ; le 2B convient partout ailleurs (même format d'appel d'outils). HarnessLab arrêté avant chaque commande.",
     steps: [
-      "WaveStack arrêté (Ctrl+C), lancez « Budget fixe » : il écrit {'budget_mode': 'fixed', 'budget_mb': 6144} sous « memory » dans settings.json.",
-      "Relancez « uv run wavestack » : le diagnostic dit « valeur fixe ».",
-      "Avant le groupe 24, et en fin de séance : WaveStack arrêté, lancez « Budget par défaut » (il doit afficher False), puis relancez.",
+      "HarnessLab arrêté (Ctrl+C), lancez « Budget fixe » : il écrit {'budget_mode': 'fixed', 'budget_mb': 6144} sous « memory » dans settings.json.",
+      "Relancez « uv run harness-lab » : le diagnostic dit « valeur fixe ».",
+      "Avant le groupe 24, et en fin de séance : HarnessLab arrêté, lancez « Budget par défaut » (il doit afficher False), puis relancez.",
     ],
     cmds: [{ label: "Budget fixe", ref: "budget-fixed" }, { label: "Budget par défaut", ref: "budget-default" }],
     expect: ["« {'budget_mode': 'fixed', 'budget_mb': 6144} » puis, au retour, « False »."],
@@ -466,23 +466,23 @@ const TESTS = [
     fields: [{ k: "utilise", label: "4B utilisé ?", type: "yn" }] },
 
   { id: "P7", g: "prep", title: "Fin de séance : revenir à l'état initial", min: 5,
-    pre: "À faire en dernier. WaveStack et llama-server arrêtés (Ctrl+C dans leurs terminaux).",
+    pre: "À faire en dernier. HarnessLab et llama-server arrêtés (Ctrl+C dans leurs terminaux).",
     steps: [
-      "Dans WaveStack, avant de l'arrêter : thème « ◐ Système », « Mode projection » relâché, zoom du navigateur à 100 % (Ctrl+0).",
-      "Arrêtez WaveStack puis llama-server.",
+      "Dans HarnessLab, avant de l'arrêter : thème « ◐ Système », « Mode projection » relâché, zoom du navigateur à 100 % (Ctrl+0).",
+      "Arrêtez HarnessLab puis llama-server.",
       "Remplacez <branche notée en P1>, puis lancez « Retour » : il remet settings.json, api_keys.json, memory.json et audit.log de la sauvegarde, supprime la copie de modèle de N24-5, revient à votre branche et resynchronise les dépendances.",
       "Windows : mode de couleur, effets d'animation, thème de contraste et Narrateur comme avant la séance.",
-      "Facultatif : le dossier %LOCALAPPDATA%\\llama.cpp peut rester (aucun effet sur WaveStack) ou être supprimé.",
+      "Facultatif : le dossier %LOCALAPPDATA%\\llama.cpp peut rester (aucun effet sur HarnessLab) ou être supprimé.",
     ],
     cmds: [{ label: "Retour", ref: "restore" }],
     expect: ["git status propre, sur votre branche.", "Au lancement suivant, le modèle et la fenêtre d'avant la séance."],
-    crit: "Relancé, WaveStack retrouve l'état d'avant la séance.",
+    crit: "Relancé, HarnessLab retrouve l'état d'avant la séance.",
     report: "Tout écart après le retour.",
     fields: [] },
 
   // ---------------------------------------------------------------- Story 22
   { id: "N22-1", g: "s22", title: "Raisonnement en tête, sous-options grisées brique éteinte", min: 8,
-    pre: "WaveStack lancé, Qwen3.5-2B actif. Edge puis Chrome.",
+    pre: "HarnessLab lancé, Qwen3.5-2B actif. Edge puis Chrome.",
     steps: [
       "Dans Edge, ouvrez http://127.0.0.1:8420/ et cliquez « ⟲ Réinitialiser » (barre haute) : retour au LLM nu.",
       "Panneau des briques : lisez le nom de la première carte, sous « Ce que le modèle lit ».",
@@ -520,7 +520,7 @@ const TESTS = [
   { id: "N22-3", g: "s22", title: "Tiroir de la mémoire : croix et pied visibles avec 8 entrées", min: 8,
     pre: "P2 fait (memory.json sauvegardé). Écrire 8 entrées par « Écrire en mémoire » demande 8 tours : la commande ci-dessous les écrit directement.",
     steps: [
-      "Arrêtez WaveStack (Ctrl+C), lancez « 8 entrées de test » (réponse : « 8 entrees »), puis relancez « uv run wavestack ».",
+      "Arrêtez HarnessLab (Ctrl+C), lancez « 8 entrées de test » (réponse : « 8 entrees »), puis relancez « uv run harness-lab ».",
       "Ne lancez pas le scénario « Mémoire globale » : il restaure la mémoire de démonstration. Allumez la brique « Mémoire globale » par son interrupteur dans le Panneau des briques.",
       "Sur sa carte, cliquez « Modifier la mémoire ». Sans rien faire défiler, regardez le haut et le bas du tiroir.",
       "Zoom à 150 % (Ctrl et +) : même lecture. Puis Ctrl+0.",
@@ -664,7 +664,7 @@ const TESTS = [
     pre: "Hors du périmètre de la story 31 (forced-colors) : ce test vérifie seulement que rien ne devient illisible.",
     steps: [
       "Paramètres → Accessibilité → Thèmes de contraste → « Désert » → « Appliquer ».",
-      "Rechargez WaveStack (F5).",
+      "Rechargez HarnessLab (F5).",
       "Parcourez la barre haute et les interrupteurs des briques à la touche Tab.",
       "Remettez « Aucun » dans Thèmes de contraste.",
     ],
@@ -685,7 +685,7 @@ const TESTS = [
     ],
     expect: [
       "« GET https://fr.wikipedia.org/api/rest_v1/page/summary/… ».",
-      "« User-Agent: WaveStack/0.1 (demonstrateur pedagogique; https://github.com/Aliquanto3/agentic-harness-training-demo) », « Accept: */* ».",
+      "« User-Agent: HarnessLab/0.1 (demonstrateur pedagogique; https://github.com/Aliquanto3/agentic-harness-training-demo) », « Accept: */* ».",
       "« Aucun corps : seule l'adresse sort du poste. »",
       "L'outil réussit : le résumé de l'article arrive, pas de 403.",
     ],
@@ -724,8 +724,8 @@ const TESTS = [
     fields: [{ k: "session", label: "Mcp-Session-Id masqué ?", type: "yn" }, { k: "clair", label: "Secret vu en clair (lequel)", type: "text" }] },
 
   { id: "N23-4", g: "s23", title: "Un novice trouve ce qui part vers Wikipédia (retest M2)", min: 5,
-    pre: "Une personne qui ne connaît pas WaveStack. Le tour de N33-0 à l'écran, Orchestration repliée, pointeur sur le Panneau des briques.",
-    steps: ["Donnez la consigne : « Trouve ce que WaveStack envoie à Wikipédia. »", "Chronométrez sans aider.", "Notez le chemin suivi (carte Outils, nœud du schéma, étape)."],
+    pre: "Une personne qui ne connaît pas HarnessLab. Le tour de N33-0 à l'écran, Orchestration repliée, pointeur sur le Panneau des briques.",
+    steps: ["Donnez la consigne : « Trouve ce que HarnessLab envoie à Wikipédia. »", "Chronométrez sans aider.", "Notez le chemin suivi (carte Outils, nœud du schéma, étape)."],
     expect: ["Il lit la carte Outils (« Peuvent sortir du poste : … »), puis clique le nœud 🌐 ou l'étape."],
     crit: "Bloc « Données sortantes » trouvé en moins de 30 s, sans aide.",
     report: "Le temps et le chemin.",
@@ -812,7 +812,7 @@ const TESTS = [
 
   { id: "N34-5", g: "s34", title: "Mouvement réduit de Windows", min: 4,
     pre: "Aucun.",
-    steps: ["Paramètres → Accessibilité → Effets visuels → désactivez « Effets d'animation ».", "Rechargez WaveStack (F5), survolez une carte de brique.", "Réactivez « Effets d'animation »."],
+    steps: ["Paramètres → Accessibilité → Effets visuels → désactivez « Effets d'animation ».", "Rechargez HarnessLab (F5), survolez une carte de brique.", "Réactivez « Effets d'animation »."],
     expect: ["Estompage instantané, sans fondu ; même éclairage."],
     crit: "Aucune transition visible.",
     report: "Toute animation restante.",
@@ -821,7 +821,7 @@ const TESTS = [
   { id: "N34-6", g: "s34", title: "Clavier et Narrateur", min: 7,
     pre: "Un tour affiché (N33-0). Narrateur : Ctrl + touche Windows + Entrée.",
     steps: [
-      "Activez le Narrateur. Cliquez dans la barre haute sur « WaveStack » pour y placer le point de départ.",
+      "Activez le Narrateur. Cliquez dans la barre haute sur « HarnessLab » pour y placer le point de départ.",
       "Tab jusqu'à une section de Contexte LLM (l'étiquette de marge d'une section est l'arrêt de tabulation), puis Entrée.",
       "« Volets ▾ » → masquez Contexte LLM ; écoutez la puce « + Contexte LLM · lié ».",
       "Appuyez sur Échap.",
@@ -932,9 +932,9 @@ const TESTS = [
   { id: "N24-1", g: "s24", title: "Budget calculé au lancement", min: 6, mesure: true,
     pre: "Budget par défaut (pas de P6 en place).",
     steps: [
-      "WaveStack arrêté. Fermez Edge, Outlook et Teams.",
-      "Relancez « uv run wavestack ». Ouvrez le diagnostic (clic sur l'indicateur du modèle, ou « Volets ▾ » → « Diagnostic »).",
-      "Lisez la ligne « RAM du poste : … Mo, dont … Mo disponibles au lancement. Budget mémoire de WaveStack : … Mo (…) ».",
+      "HarnessLab arrêté. Fermez Edge, Outlook et Teams.",
+      "Relancez « uv run harness-lab ». Ouvrez le diagnostic (clic sur l'indicateur du modèle, ou « Volets ▾ » → « Diagnostic »).",
+      "Lisez la ligne « RAM du poste : … Mo, dont … Mo disponibles au lancement. Budget mémoire de HarnessLab : … Mo (…) ».",
       "Tout de suite après, lancez « RAM du poste ».",
     ],
     cmds: [{ label: "RAM du poste", ref: "ram" }],
@@ -946,24 +946,24 @@ const TESTS = [
   { id: "N24-2", g: "s24", title: "Budget quand la RAM se remplit (Edge et Teams ouverts)", min: 6,
     pre: "Exception à la règle des mesures : ici Edge et Teams doivent être ouverts.",
     steps: [
-      "WaveStack arrêté. Ouvrez Edge (plusieurs onglets) et Teams.",
-      "Relancez WaveStack, relisez la ligne du diagnostic ; lancez « RAM du poste ».",
+      "HarnessLab arrêté. Ouvrez Edge (plusieurs onglets) et Teams.",
+      "Relancez HarnessLab, relisez la ligne du diagnostic ; lancez « RAM du poste ».",
     ],
     cmds: [{ label: "RAM du poste", ref: "ram" }],
-    expect: ["Disponible sous ≈ 6 827 Mo : budget sous 4 096 Mo, ligne en avertissement « La RAM disponible limite le budget sous son plafond : fermez des applications puis relancez WaveStack. »", "Disponible au-dessus : budget 4 096 Mo, sans avertissement."],
+    expect: ["Disponible sous ≈ 6 827 Mo : budget sous 4 096 Mo, ligne en avertissement « La RAM disponible limite le budget sous son plafond : fermez des applications puis relancez HarnessLab. »", "Disponible au-dessus : budget 4 096 Mo, sans avertissement."],
     crit: "Chiffres cohérents avec PowerShell (à 5 % près).",
     report: "Disponible, budget et texte de la ligne.",
     fields: [{ k: "dispo", label: "Disponible", unit: "Mo", type: "num" }, { k: "budget", label: "Budget", unit: "Mo", type: "num" }, { k: "warn", label: "Avertissement affiché ?", type: "yn" }] },
 
   { id: "N24-3", g: "s24", title: "Budget fixe 6 144 Mo", min: 4,
-    pre: "La spec modifie [memory] de wavestack.toml ; settings.json (qui le surcharge) évite de toucher au dépôt.",
+    pre: "La spec modifie [memory] de harness-lab.toml ; settings.json (qui le surcharge) évite de toucher au dépôt.",
     steps: [
-      "WaveStack arrêté, lancez « Budget fixe », relancez WaveStack.",
+      "HarnessLab arrêté, lancez « Budget fixe », relancez HarnessLab.",
       "Diagnostic : lisez la ligne du budget.",
-      "WaveStack arrêté, lancez « Budget par défaut » (réponse False), relancez.",
+      "HarnessLab arrêté, lancez « Budget par défaut » (réponse False), relancez.",
     ],
     cmds: [{ label: "Budget fixe", ref: "budget-fixed" }, { label: "Budget par défaut", ref: "budget-default" }],
-    expect: ["« Budget mémoire de WaveStack : 6 144 Mo (valeur fixe 6 144 Mo (budget_mode = « fixed »)). »", "Si 6 144 Mo dépassent la RAM disponible : avertissement « Le budget fixe dépasse … »."],
+    expect: ["« Budget mémoire de HarnessLab : 6 144 Mo (valeur fixe 6 144 Mo (budget_mode = « fixed »)). »", "Si 6 144 Mo dépassent la RAM disponible : avertissement « Le budget fixe dépasse … »."],
     crit: "Texte « valeur fixe » et 6 144 Mo.",
     report: "Le texte exact.",
     fields: [{ k: "texte", label: "Texte du budget", type: "text" }] },
@@ -971,23 +971,23 @@ const TESTS = [
   { id: "N24-4", g: "s24", title: "Refus chiffré du 4B, jamais « 0 Mo »", min: 4,
     pre: "Budget par défaut, 2B actif.",
     steps: ["« Changer de modèle… » → « Local · fichier · Qwen3.5-4B-Q4_K_M.gguf … » → « Charger ».", "Lisez le message (barre haute et Vue humain)."],
-    expect: ["« Changement refusé : Qwen3.5-4B-Q4_K_M demande environ … ; WaveStack occupe N Mo sans le modèle actif, pour un budget de … », puis le calcul court.", "Le 2B reste actif."],
+    expect: ["« Changement refusé : Qwen3.5-4B-Q4_K_M demande environ … ; HarnessLab occupe N Mo sans le modèle actif, pour un budget de … », puis le calcul court.", "Le 2B reste actif."],
     crit: "80 ≤ N ≤ 400, jamais 0.",
     known: "La comparaison de N à la RSS mesurée « après libération » (± 100 Mo) demande le script AppSession : non praticable à la main.",
     report: "Le message exact et N.",
-    fields: [{ k: "n", label: "N (« WaveStack occupe »)", unit: "Mo", type: "num" }, { k: "msg", label: "Message", type: "text" }] },
+    fields: [{ k: "n", label: "N (« HarnessLab occupe »)", unit: "Mo", type: "num" }, { k: "msg", label: "Message", type: "text" }] },
 
   { id: "N24-5", g: "s24", title: "« Arrêter » pendant la sonde d'un fichier jamais sondé", min: 10, mesure: true,
     pre: "Budget par défaut, 2B actif. 1,3 Go libres dans le profil pour la copie.",
     steps: [
-      "WaveStack arrêté, lancez « Copier le 2B », puis relancez WaveStack : le diagnostic de lancement sonde la copie une fois (≈ 30 à 50 s).",
-      "WaveStack lancé, 2B actif : lancez « Rendre la sonde périmée » (la sonde de la copie ne vaut plus : le prochain choix la relance).",
+      "HarnessLab arrêté, lancez « Copier le 2B », puis relancez HarnessLab : le diagnostic de lancement sonde la copie une fois (≈ 30 à 50 s).",
+      "HarnessLab lancé, 2B actif : lancez « Rendre la sonde périmée » (la sonde de la copie ne vaut plus : le prochain choix la relance).",
       "Dans un terminal, lancez « Surveiller la sonde » (20 s).",
       "Aussitôt : « Changer de modèle… » → « Local · fichier · Qwen3.5-2B-copie-test.gguf … » → « Charger ». Dans les 5 s, cliquez « Arrêter » (Vue humain, sous le champ). Notez l'heure du clic (secondes).",
       "Lisez le message ; lancez « Sondes en échec ».",
-      "WaveStack arrêté, supprimez la copie (P7 la supprime aussi).",
+      "HarnessLab arrêté, supprimez la copie (P7 la supprime aussi).",
     ],
-    cmds: [{ label: "Copier le 2B (WaveStack arrêté)", ref: "copy-model" }, { label: "Rendre la sonde périmée", ref: "touch-copy" }, { label: "Surveiller la sonde", ref: "probe-watch" }, { label: "Sondes en échec", ref: "failed-probes" }],
+    cmds: [{ label: "Copier le 2B (HarnessLab arrêté)", ref: "copy-model" }, { label: "Rendre la sonde périmée", ref: "touch-copy" }, { label: "Surveiller la sonde", ref: "probe-watch" }, { label: "Sondes en échec", ref: "failed-probes" }],
     expect: ["« Arrêt demandé · » dans la barre haute, puis « Chargement arrêté : Qwen3.5-2B-Q4_K_M est de nouveau actif. »", "« sonde en cours : True » puis False moins de 1 s après le clic.", "Aucune entrée pour la copie dans les sondes en échec."],
     crit: "Sonde terminée ≤ 1 s après le clic ; fin de l'arrêt ≤ 3 s plus le rechargement du 2B ; rien d'enregistré.",
     report: "Délai clic → False, durée totale, message.",
@@ -1033,7 +1033,7 @@ const TESTS = [
 
   // ---------------------------------------------------------------- Story 25
   { id: "N25-1", g: "s25", title: "« Changer de modèle… » regroupé et trié", min: 6,
-    pre: "Qwen3.5-2B et 4B dans models\\, Ollama lancé avec llama3.2:3b et qwen3.5:2b. WaveStack relancé après le démarrage d'Ollama. Chrome puis Edge.",
+    pre: "Qwen3.5-2B et 4B dans models\\, Ollama lancé avec llama3.2:3b et qwen3.5:2b. HarnessLab relancé après le démarrage d'Ollama. Chrome puis Edge.",
     steps: ["Ouvrez la liste « Changer de modèle… » (barre haute).", "Lisez la première ligne (grisée), les titres de groupe et l'ordre.", "Refaites dans Edge."],
     expect: [
       "Première ligne grisée : la légende du préfixe (« Local · Ollama », « RÉSEAU · Groq »…).",
@@ -1049,7 +1049,7 @@ const TESTS = [
     steps: [
       "« Changer de modèle… » → « Tableau des modèles et de leurs capacités… » → « Ouvrir le tableau » (page /models).",
       "Relevez « Appel d'outils » et « Raisonnement » pour Qwen3.5-2B, 4B, llama3.2:3b, Groq gpt-oss-120b, Mistral.",
-      "« Ouvrir WaveStack » ; chargez tour à tour le 2B, llama3.2:3b, Groq et Mistral ; regardez les cartes Raisonnement et Outils.",
+      "« Ouvrir HarnessLab » ; chargez tour à tour le 2B, llama3.2:3b, Groq et Mistral ; regardez les cartes Raisonnement et Outils.",
       "Revenez au 2B.",
     ],
     expect: ["2B et 4B : outils « oui », raisonnement « activable ».", "llama3.2:3b : outils « non » avec la raison, raisonnement « jamais ».", "Groq : « toujours », 120B ; Mistral : « activable »."],
@@ -1068,7 +1068,7 @@ const TESTS = [
 
   { id: "N25-4", g: "s25", title: "Temps de /api/diagnostic", min: 4, mesure: true,
     pre: "Idéalement 10 GGUF ou plus trouvés (cache Hugging Face, LM Studio) ; sinon, notez combien.",
-    steps: ["WaveStack lancé, lancez « Temps du diagnostic » (deux mesures).", "Comptez les fichiers de « Modèles détectés » au diagnostic."],
+    steps: ["HarnessLab lancé, lancez « Temps du diagnostic » (deux mesures).", "Comptez les fichiers de « Modèles détectés » au diagnostic."],
     cmds: [{ label: "Temps du diagnostic", ref: "diag-time" }],
     expect: ["Premier appel plus lent (lecture des en-têtes), second rapide (mémorisé)."],
     crit: "Moins de 2 s au premier appel, moins de 200 ms au second.",
@@ -1078,17 +1078,17 @@ const TESTS = [
 
   { id: "N25-5", g: "s25", title: "Modèle sans gabarit ou de famille inconnue", min: 4,
     pre: "Un modèle Ollama dont le blob n'a pas de gabarit GGUF, ou d'une famille inconnue.",
-    steps: ["Page /models : trouvez sa ligne.", "Regardez le terminal de WaveStack."],
+    steps: ["Page /models : trouvez sa ligne.", "Regardez le terminal de HarnessLab."],
     expect: ["« inconnu » avec une raison compréhensible, ou la ligne grisée « (incompatible) » et sa raison."],
     crit: "Aucune ligne vide ; aucune exception (Traceback) dans le terminal.",
     report: "Le modèle et la raison.",
     fields: [{ k: "modele", label: "Modèle", type: "text" }, { k: "raison", label: "Raison", type: "text" }] },
 
   { id: "N25-6", g: "s25", title: "llama-server (-c 4096) dans le tableau", min: 8,
-    pre: "P5 fait. llama-server lancé avec -c 4096 : le 2B peut rester chargé dans WaveStack pendant ce temps (deux fois ≈ 2 Go, sans risque).",
+    pre: "P5 fait. llama-server lancé avec -c 4096 : le 2B peut rester chargé dans HarnessLab pendant ce temps (deux fois ≈ 2 Go, sans risque).",
     steps: [
       "Dans le terminal de P5 (ou « Retrouver llama-server »), lancez « Lancer llama-server » et attendez « server is listening ».",
-      "Arrêtez puis relancez WaveStack (la découverte des serveurs se fait au lancement).",
+      "Arrêtez puis relancez HarnessLab (la découverte des serveurs se fait au lancement).",
       "Page /models : ligne « Local · llama-server · … ». Laissez llama-server lancé pour N26-6.",
     ],
     cmds: [{ label: "Retrouver llama-server", ref: "llama-find" }, { label: "Lancer llama-server", ref: "llama-run" }],
@@ -1170,7 +1170,7 @@ const TESTS = [
     fields: [{ k: "s0", label: "SIZE à 4 096", type: "text" }, { k: "s1", label: "SIZE à 8 192", type: "text" }, { k: "kv", label: "Cache annoncé 8 192", type: "text" }] },
 
   { id: "N26-6", g: "s26", title: "llama-server lancé à -c 4096 : fenêtre bornée", min: 5,
-    pre: "llama-server lancé avec -c 4096 (N25-6), WaveStack relancé depuis.",
+    pre: "llama-server lancé avec -c 4096 (N25-6), HarnessLab relancé depuis.",
     steps: [
       "Chargez « Local · llama-server · … ».",
       "« Fenêtre ▾ » → 8 192 : lisez la ligne du choix ; « Appliquer ».",
@@ -1184,7 +1184,7 @@ const TESTS = [
   { id: "N26-7", g: "s26", title: "Choix repris au lancement suivant, puis retour à 4 096", min: 6,
     pre: "Suite de N26-6 (8 192 enregistré), llama-server toujours lancé à -c 4096.",
     steps: [
-      "Arrêtez et relancez WaveStack.",
+      "Arrêtez et relancez HarnessLab.",
       "Lisez le bouton de la barre haute au premier affichage, puis la ligne llama-server du diagnostic.",
       "Arrêtez llama-server (Ctrl+C dans son terminal). Chargez le 2B intégré.",
       "« Fenêtre ▾ » → 4 096 → « Appliquer » (indispensable pour le groupe 27).",
@@ -1302,7 +1302,7 @@ const TESTS = [
     fields: [{ k: "trigger", label: "Trigger de read_file", type: "text" }, { k: "jauge", label: "Jauge après le tour", type: "num" }] },
 
   { id: "N27-9", g: "s27", title: "Test « fits » avec le vrai tokenizer du 2B", min: 5,
-    pre: "PowerShell à la racine du clone. WaveStack peut rester lancé.",
+    pre: "PowerShell à la racine du clone. HarnessLab peut rester lancé.",
     steps: ["Lancez le bloc « Test fits ».", "Lisez le tableau imprimé (marge par scénario)."],
     cmds: [{ label: "Test fits", ref: "fits" }],
     expect: ["Test réussi, jauge locale exacte."],
@@ -1311,7 +1311,7 @@ const TESTS = [
     fields: [{ k: "mcp", label: "Marge mcp_full", unit: "tokens", type: "num" }, { k: "min", label: "Plus petite marge", type: "text" }] },
 
   { id: "N27-10", g: "s27", title: "Consignes suivies par un formateur novice", min: 10,
-    pre: "Une personne qui ne connaît pas WaveStack.",
+    pre: "Une personne qui ne connaît pas HarnessLab.",
     steps: ["Faites-lui lancer « Où vont mes données ? », « Skills » puis « Métier SOC ».", "Pour chacun : « Afficher plus », lecture, puis elle suit la consigne sans aide.", "Chronométrez chaque consigne."],
     expect: ["Elle sait quoi cliquer et quoi dire."],
     crit: "Chaque consigne suivie jusqu'au bout en moins de 2 min.",
@@ -1343,7 +1343,7 @@ const TESTS = [
     steps: [
       "Regardez le sélecteur de thème dans la barre haute.",
       "Cliquez-le : la liste native s'ouvre ; choisissez « ☾ Sombre », puis « ☀ Clair ».",
-      "Au clavier : cliquez sur le titre « WaveStack », puis Tab jusqu'au sélecteur de thème. Flèche bas / flèche haut (ou Alt+flèche bas pour ouvrir la liste) pour changer le choix.",
+      "Au clavier : cliquez sur le titre « HarnessLab », puis Tab jusqu'au sélecteur de thème. Flèche bas / flèche haut (ou Alt+flèche bas pour ouvrir la liste) pour changer le choix.",
       "Revenez à « ◐ Système », fermez les outils de développement.",
     ],
     expect: [
@@ -1357,7 +1357,7 @@ const TESTS = [
 
   { id: "N31-2", g: "s31", title: "Suivi du mode de Windows sans rechargement", min: 5,
     pre: "Sélecteur sur « ◐ Système ».",
-    steps: ["Paramètres → Personnalisation → Couleurs → « Choisir votre mode » : Sombre.", "Regardez WaveStack dans Chrome, puis dans Edge, sans recharger.", "Repassez Windows en Clair."],
+    steps: ["Paramètres → Personnalisation → Couleurs → « Choisir votre mode » : Sombre.", "Regardez HarnessLab dans Chrome, puis dans Edge, sans recharger.", "Repassez Windows en Clair."],
     expect: ["L'atelier passe en sombre puis revient en clair de lui-même."],
     crit: "Bascule en moins de 2 s, sans rechargement, dans les deux navigateurs.",
     report: "Délai observé par navigateur.",
@@ -1366,7 +1366,7 @@ const TESTS = [
   { id: "N31-3", g: "s31", title: "Autre onglet et page rouverte par « Précédent » suivent le choix", min: 5,
     pre: "Chrome, « ◐ Système », Windows en clair.",
     steps: [
-      "Ouvrez WaveStack dans deux onglets (A et B) côte à côte, ou passez de l'un à l'autre.",
+      "Ouvrez HarnessLab dans deux onglets (A et B) côte à côte, ou passez de l'un à l'autre.",
       "Dans A, choisissez « ☾ Sombre ». Regardez B sans le recharger.",
       "Dans B, ouvrez /diagnostic (indicateur du modèle ou « Volets ▾ » → « Diagnostic ») ; choisissez « ☀ Clair » sur cette page.",
       "Bouton « Précédent » du navigateur : l'atelier revient. Regardez son thème et son sélecteur.",
@@ -1422,8 +1422,8 @@ const TESTS = [
   { id: "N31-8", g: "s31", title: "Choix mémorisé, et fenêtre InPrivate sans erreur", min: 6,
     pre: "Chrome et Edge.",
     steps: [
-      "Chrome : « ☾ Sombre », fermez Chrome, arrêtez et relancez WaveStack ; rouvrez http://127.0.0.1:8420/.",
-      "Edge : nouvelle fenêtre InPrivate (Ctrl+Maj+N), ouvrez WaveStack, F12 → Console, choisissez « ☾ Sombre ».",
+      "Chrome : « ☾ Sombre », fermez Chrome, arrêtez et relancez HarnessLab ; rouvrez http://127.0.0.1:8420/.",
+      "Edge : nouvelle fenêtre InPrivate (Ctrl+Maj+N), ouvrez HarnessLab, F12 → Console, choisissez « ☾ Sombre ».",
       "Fermez InPrivate, rouvrez-en une.",
       "Remettez « ◐ Système » dans Chrome.",
     ],
@@ -1437,7 +1437,7 @@ const STATUS_LABEL = { ok: "OK", ko: "KO", na: "Non fait", bl: "Bloqué", "": "�
 const STATUSES = ["ok", "ko", "na", "bl"];
 const KEY = "recette-nuit-2026-09-28";
 const COLLECTION = "results-nuit";
-const MEASURE_FR = "Mesure : fermez Edge, Outlook et Teams avant la mesure (Edge aussi depuis sa zone de notification). Utilisez Chrome pour ce cahier et pour WaveStack.";
+const MEASURE_FR = "Mesure : fermez Edge, Outlook et Teams avant la mesure (Edge aussi depuis sa zone de notification). Utilisez Chrome pour ce cahier et pour HarnessLab.";
 const state = {};
 let filter = "all";
 let db = null;

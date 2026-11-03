@@ -1,4 +1,4 @@
-# Vérification technique : mise à jour R01 à R04 du spine WaveStack
+# Vérification technique : mise à jour R01 à R04 du spine HarnessLab
 
 - **Date :** 2026-09-23
 - **Objet :** `ARCHITECTURE-SPINE.md` (AD-2, AD-4, AD-5, AD-9, AD-15, AD-21, table Stack)
@@ -50,7 +50,7 @@ Résultats du test local (serveur sur 127.0.0.1, hook qui refuse le port cible) 
 
 **Cause.** Sous Windows, `IocpProactor.connect` passe par `_overlapped.Overlapped.ConnectEx`, implémenté en C sans aucun `PySys_Audit`. Le fichier ne contient d'ailleurs aucun appel d'audit ([cpython 3.13, Modules/overlapped.c](https://raw.githubusercontent.com/python/cpython/3.13/Modules/overlapped.c)). Seuls `sock_connect` en mode Selector et `socket.connect` en synchrone passent par l'événement.
 
-**Pourquoi c'est grave pour WaveStack.** uvicorn 0.53.0 choisit `asyncio.ProactorEventLoop` sous Windows quand il n'y a ni rechargement ni workers (`uvicorn/loops/asyncio.py` : `if sys.platform == "win32" and not use_subprocess: return asyncio.ProactorEventLoop`). Or AD-24 place les clients MCP (`httpx2.AsyncClient`, transport Streamable HTTP) sur cette boucle. Les sorties vers data.gouv.fr et Microsoft Learn **échappent donc à la garde** sur la plateforme cible. Les tests pytest asynchrones sous Windows sont dans le même cas, ce qui fragilise la convention « aucun test ne dépend du réseau ».
+**Pourquoi c'est grave pour HarnessLab.** uvicorn 0.53.0 choisit `asyncio.ProactorEventLoop` sous Windows quand il n'y a ni rechargement ni workers (`uvicorn/loops/asyncio.py` : `if sys.platform == "win32" and not use_subprocess: return asyncio.ProactorEventLoop`). Or AD-24 place les clients MCP (`httpx2.AsyncClient`, transport Streamable HTTP) sur cette boucle. Les sorties vers data.gouv.fr et Microsoft Learn **échappent donc à la garde** sur la plateforme cible. Les tests pytest asynchrones sous Windows sont dans le même cas, ce qui fragilise la convention « aucun test ne dépend du réseau ».
 
 **Conséquences pour le spine (AD-15, AD-24) :**
 1. Faire tourner uvicorn sur une boucle Selector sous Windows, par exemple `uvicorn.Config(..., loop="asyncio:SelectorEventLoop")` (uvicorn accepte une chaîne d'import de fabrique de boucle, `config.py`, `get_loop_factory`). Le transport stdio du SDK `mcp` le permet : sur une boucle sans sous-processus asynchrones, il se replie sur `subprocess.Popen` ([mcp/os/win32/utilities.py](https://github.com/modelcontextprotocol/python-sdk/blob/main/src/mcp/os/win32/utilities.py), `create_windows_process` → `_create_windows_fallback_process`).

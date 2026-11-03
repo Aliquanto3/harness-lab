@@ -11,7 +11,7 @@ rag_source_text: RAG excerpt no. {n}
 unchanged_text: >-
   Unchanged: Headroom does not shorten this text (prose, or already short). It is sent as
   it is.
-# Line of the card; {min_chars} is the threshold in wavestack.toml ([compression] min_chars).
+# Line of the card; {min_chars} is the threshold in harness-lab.toml ([compression] min_chars).
 limits_text: >-
   Compressed: the tool results (native, network, MCP) and the RAG excerpts of at least
   {min_chars} characters, in the main context. Never: the history, the skills, the

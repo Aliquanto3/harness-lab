@@ -28,33 +28,33 @@ baseline_commit: '3f83f09bd0db3e4e99bedf763840c106c2e7a504'
 ## Code Map
 
 - `content/scenarios.yaml:5-7,82-94,96-109` -- retirer la doc et le champ `expects_overflow: true` de `mcp_full` ; reformuler `description_fr` de `mcp_full` (jauge presque pleine, sans annoncer de débordement) et ajuster celle de `mcp_lazy` (ne plus présupposer un débordement du scénario précédent).
-- `src/wavestack/scenarios.py:30,58` -- retirer le champ Pydantic `expects_overflow` (plus aucun scénario ne l'utilise) et sa sérialisation.
-- `src/wavestack/web/static/app.js:1261` -- retirer la phrase concaténée liée à `expects_overflow`.
+- `src/harness_lab/scenarios.py:30,58` -- retirer le champ Pydantic `expects_overflow` (plus aucun scénario ne l'utilise) et sa sérialisation.
+- `src/harness_lab/web/static/app.js:1261` -- retirer la phrase concaténée liée à `expects_overflow`.
 - `_bmad-output/implementation-artifacts/deferred-work.md:175-177` -- clore l'entrée `mcp_full` avec les mesures (3 018/3 584 tokens ; lazy loading ~1 040) ; ajouter deux entrées (tour MCP doc complète 109,5 s / 91 tokens de sortie / contexte 3 018 tokens, bien au-delà de NFR-1 ; risque BH1a — flèches clavier sur le sélecteur sous Windows non vérifié, l'animateur ayant utilisé la souris).
-- `src/wavestack/web/static/app.js:41` -- `store.openExplanations` (Set) ; après ce changement il ne sert plus qu'aux listes d'options (clé `options:{brick.id}`), plus aux explications.
-- `src/wavestack/web/static/app.js:1300-1302` (`resetHarness`) -- ajouter `store.openExplanations.clear()` et fermer tout popover d'explication ouvert (`.hidePopover()`), avant le `render()` déjà déclenché par `scenarioIntention`.
-- `src/wavestack/web/static/app.js:536-545` (`<details class="brick-explanation">`) -- remplacer par un bouton rond `popovertarget` + un élément `popover` positionné en haut à droite de la carte, contenu généré depuis les blocs d'`explanation_fr`.
-- `src/wavestack/web/static/app.js:568-621` (`brickOptions`) -- inchangé (garde `store.openExplanations`, clé `options:`).
-- `src/wavestack/bricks/contract.py:40-46` (`BrickContent.explanation_fr`) -- passe de `str` à `list[str | list[str]]` (un `str` = paragraphe, une liste = puces).
-- `src/wavestack/trace/catalog.py:223` (`BrickState.explanation_fr`) -- même type, pour rester aligné avec `BrickContent`.
-- `src/wavestack/session/app_session.py:~671` (`_emit_bricks`) -- transmet la structure telle quelle (plus une simple chaîne).
+- `src/harness_lab/web/static/app.js:41` -- `store.openExplanations` (Set) ; après ce changement il ne sert plus qu'aux listes d'options (clé `options:{brick.id}`), plus aux explications.
+- `src/harness_lab/web/static/app.js:1300-1302` (`resetHarness`) -- ajouter `store.openExplanations.clear()` et fermer tout popover d'explication ouvert (`.hidePopover()`), avant le `render()` déjà déclenché par `scenarioIntention`.
+- `src/harness_lab/web/static/app.js:536-545` (`<details class="brick-explanation">`) -- remplacer par un bouton rond `popovertarget` + un élément `popover` positionné en haut à droite de la carte, contenu généré depuis les blocs d'`explanation_fr`.
+- `src/harness_lab/web/static/app.js:568-621` (`brickOptions`) -- inchangé (garde `store.openExplanations`, clé `options:`).
+- `src/harness_lab/bricks/contract.py:40-46` (`BrickContent.explanation_fr`) -- passe de `str` à `list[str | list[str]]` (un `str` = paragraphe, une liste = puces).
+- `src/harness_lab/trace/catalog.py:223` (`BrickState.explanation_fr`) -- même type, pour rester aligné avec `BrickContent`.
+- `src/harness_lab/session/app_session.py:~671` (`_emit_bricks`) -- transmet la structure telle quelle (plus une simple chaîne).
 - `content/bricks/{mcp,hooks,short_memory,skills,system_prompt,tools}.yaml` -- restructurer `explanation_fr` en blocs courts ; `mcp.yaml` doit isoler les deux modes (documentation complète / lazy loading) en liste.
-- `src/wavestack/web/static/app.css:1417-1496` (`.brick-card`) -- `position: relative` sur la carte ; nouveau style pour le bouton rond et le popover (rayons/couleurs des tokens existants).
+- `src/harness_lab/web/static/app.css:1417-1496` (`.brick-card`) -- `position: relative` sur la carte ; nouveau style pour le bouton rond et le popover (rayons/couleurs des tokens existants).
 - `tests/test_bricks.py:250,329,370,384` -- adapter `explanation_fr="x"` à la nouvelle structure (ex. `["x"]`).
 
 ## Tasks & Acceptance
 
 **Execution:**
 - [x] `content/scenarios.yaml` -- retirer `expects_overflow` de `mcp_full`, reformuler les deux `description_fr` -- corrige l'annonce erronée constatée au test.
-- [x] `src/wavestack/scenarios.py` -- retirer le champ `expects_overflow` du modèle et de la sérialisation -- plus aucun consommateur.
-- [x] `src/wavestack/web/static/app.js` (ligne ~1261) -- retirer la phrase liée à `expects_overflow` -- suit la suppression du champ.
+- [x] `src/harness_lab/scenarios.py` -- retirer le champ `expects_overflow` du modèle et de la sérialisation -- plus aucun consommateur.
+- [x] `src/harness_lab/web/static/app.js` (ligne ~1261) -- retirer la phrase liée à `expects_overflow` -- suit la suppression du champ.
 - [x] `_bmad-output/implementation-artifacts/deferred-work.md` -- clore l'entrée `mcp_full`, ajouter les deux nouvelles entrées -- trace les constats du test.
-- [x] `src/wavestack/bricks/contract.py`, `src/wavestack/trace/catalog.py` -- changer le type d'`explanation_fr` -- support de la restructuration en blocs. (Aussi retiré `ScenarioEntry.expects_overflow` dans `catalog.py`, manqué par la Code Map, nécessaire une fois la clé disparue de `payload()`.)
+- [x] `src/harness_lab/bricks/contract.py`, `src/harness_lab/trace/catalog.py` -- changer le type d'`explanation_fr` -- support de la restructuration en blocs. (Aussi retiré `ScenarioEntry.expects_overflow` dans `catalog.py`, manqué par la Code Map, nécessaire une fois la clé disparue de `payload()`.)
 - [x] `content/bricks/*.yaml` (6 fichiers) -- restructurer `explanation_fr` en paragraphes/listes -- lisibilité demandée.
-- [x] `src/wavestack/session/app_session.py` -- adapter `_emit_bricks` à la nouvelle structure -- garde l'API front cohérente.
-- [x] `src/wavestack/web/static/app.js` -- remplacer le `<details>` d'explication par bouton « ? » + `popover`, rendre les blocs en `<p>`/`<ul>` -- UX demandée.
-- [x] `src/wavestack/web/static/app.js` (`resetHarness`) -- vider `store.openExplanations` et fermer les popovers ouverts -- comportement de Réinitialiser demandé.
-- [x] `src/wavestack/web/static/app.css` -- styles du bouton rond et du popover -- cohérence avec `DESIGN.md`.
+- [x] `src/harness_lab/session/app_session.py` -- adapter `_emit_bricks` à la nouvelle structure -- garde l'API front cohérente.
+- [x] `src/harness_lab/web/static/app.js` -- remplacer le `<details>` d'explication par bouton « ? » + `popover`, rendre les blocs en `<p>`/`<ul>` -- UX demandée.
+- [x] `src/harness_lab/web/static/app.js` (`resetHarness`) -- vider `store.openExplanations` et fermer les popovers ouverts -- comportement de Réinitialiser demandé.
+- [x] `src/harness_lab/web/static/app.css` -- styles du bouton rond et du popover -- cohérence avec `DESIGN.md`.
 - [x] `tests/test_bricks.py` -- adapter à la nouvelle structure d'`explanation_fr` -- garde les tests verts.
 
 **Acceptance Criteria:**
@@ -66,7 +66,7 @@ baseline_commit: '3f83f09bd0db3e4e99bedf763840c106c2e7a504'
 ## Implementation Notes
 
 - Le bouton « ? » utilise le positionnement natif par ancre CSS (`anchor-name`/`position-anchor`, `position-area`), sans dépendance ; `ponytail:` noté en commentaire dans `app.js` : pas de repli hors moteurs Chromium, acceptable car la démo cible un navigateur Chromium sur le PC.
-- `ScenarioEntry.expects_overflow` (`src/wavestack/trace/catalog.py`) retiré en plus de la Code Map : `payload()` ne l'émet plus, ce champ aurait fait échouer la validation du DTO de trace.
+- `ScenarioEntry.expects_overflow` (`src/harness_lab/trace/catalog.py`) retiré en plus de la Code Map : `payload()` ne l'émet plus, ce champ aurait fait échouer la validation du DTO de trace.
 - Vérifié : `uv run pytest` (310 passed, 2 deselected), `uv run ruff check .` (aucune erreur), `node --check app.js` (syntaxe OK). Non vérifié : contrôles manuels (jauge `mcp_full`, ouverture/fermeture au clic/clavier/Échap, non-régression de « Vider la conversation » et du rechargement) — à faire sur le PC cible, aucun navigateur disponible dans cet environnement.
 - Revue (Blind Hunter, Edge Case Hunter, Verification Gap) : un `patch` appliqué — le popover d'aide perdait son état ouvert à chaque `render()` non lié (déclenché par `model_delta` toutes les ~50 ms pendant un tour en cours) ; ajout de `store.openBrickHelp` et rouverture via `showPopover()` après reconstruction. Corrigés dans la foulée : relief au clic sur `.brick-help` (cohérence avec les autres boutons ronds), position de repli statique pour `.brick-explanation` si le positionnement par ancre CSS n'est pas supporté. Reste diagnostiqué mais différé (voir `deferred-work.md`) : aucun banc de test JS pour ce popover ni pour `resetHarness`, écart déjà connu et accepté depuis les stories 5b–9b. Re-vérifié après patch : `uv run pytest` (310 passed, 2 deselected), `uv run ruff check .` (aucune erreur).
 

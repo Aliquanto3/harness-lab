@@ -9,15 +9,15 @@ from fake_engine import FakeEngine
 from pydantic import ValidationError
 from starlette.testclient import TestClient
 
-from wavestack import config
-from wavestack.models import catalog, discovery, probe
-from wavestack.session import diagnostic as diagnostic_module
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.catalog import PAYLOAD_MODELS
-from wavestack.trace.journal import get_journal
-from wavestack.web import app as app_module
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.models import catalog, discovery, probe
+from harness_lab.session import diagnostic as diagnostic_module
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.catalog import PAYLOAD_MODELS
+from harness_lab.trace.journal import get_journal
+from harness_lab.web import app as app_module
+from harness_lab.web.app import create_app
 
 
 def _client(app):
@@ -28,7 +28,7 @@ def _client(app):
 
 def _build(monkeypatch, tmp_path, *, models=(), saved=None, app_session=None):
     """`models`: GGUF file names created in the models dir; `saved`: the stored choice."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     if models:
         config.models_dir().mkdir(parents=True)
     for name in models:
@@ -630,7 +630,7 @@ def test_choose_before_load_saves_and_loads_exactly_that_file(monkeypatch, tmp_p
     assert body["ready"] is True and body["saved"] is True and body["switching"] is True
     assert received == [str(chosen)]
     assert config.read_settings()["selected_model"] == {"kind": "file", "ref": str(chosen)}
-    assert _client(app).get("/api/diagnostic").json()["ready"] is True  # "Ouvrir WaveStack"
+    assert _client(app).get("/api/diagnostic").json()["ready"] is True  # "Ouvrir HarnessLab"
 
     # Relaunch: the saved choice is loaded with no further action.
     relaunched = DiagnosticSession(config.load_config(), port=8420)
@@ -891,7 +891,7 @@ def test_quoted_pasted_path_is_accepted(monkeypatch, tmp_path):
 
 def test_two_models_and_no_choice_launch_on_the_diagnostic_page(monkeypatch, tmp_path):
     """Story 11b: a blocked launch opens `/diagnostic`, a ready one `/`."""
-    from wavestack.session.diagnostic import launch_page
+    from harness_lab.session.diagnostic import launch_page
 
     session, _ = _build(monkeypatch, tmp_path, models=("a.gguf", "b.gguf"))
 
@@ -903,7 +903,7 @@ def test_two_models_and_no_choice_launch_on_the_diagnostic_page(monkeypatch, tmp
 
 def test_launch_fallback_loads_the_file(monkeypatch, tmp_path):
     """Story 11b: a saved cloud model without key falls back on the file at launch."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     config.save_setting("selected_model", {"kind": "cloud", "ref": "groq"})
     received = []
     session, app = _build(
@@ -1044,7 +1044,7 @@ def test_incompatible_probe_keeps_the_loader_message_as_the_cause(monkeypatch, t
 
 def _hf_gguf(monkeypatch, tmp_path, name="hf.gguf"):
     """A GGUF in the isolated Hugging Face cache of `_build` (read on demand only, CAP-4)."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     hf_file = tmp_path / "no-hf-cache" / name
     hf_file.parent.mkdir(parents=True, exist_ok=True)
     hf_file.write_bytes(b"placeholder")

@@ -7,14 +7,14 @@ from pathlib import Path
 
 import pytest
 
-from wavestack.context.render import render_context, render_template
-from wavestack.context.segments import Joined, Part, SegmentKind
-from wavestack.models.capabilities import capabilities_for
-from wavestack.trace.journal import get_journal
+from harness_lab.context.render import render_context, render_template
+from harness_lab.context.segments import Joined, Part, SegmentKind
+from harness_lab.models.capabilities import capabilities_for
+from harness_lab.trace.journal import get_journal
 
 FIXTURES = Path(__file__).parent / "fixtures"
 QWEN_TEMPLATE = FIXTURES / "qwen3_5_chat_template.jinja"
-# Expected render, produced independently (transformers `apply_chat_template`), never by WaveStack.
+# Expected render, produced independently (transformers `apply_chat_template`), never by HarnessLab.
 QWEN_REFERENCE = FIXTURES / "qwen3_5_reference_render.txt"
 
 MESSAGES = [
@@ -52,12 +52,12 @@ def test_qwen3_5_render_matches_reference():
 
 @pytest.mark.model
 def test_real_gguf_passes_checks_4_and_6():
-    """Set WAVESTACK_TEST_GGUF to a local GGUF path; skipped otherwise."""
-    from wavestack.models.engine import LlamaCppEngine
+    """Set HARNESS_LAB_TEST_GGUF to a local GGUF path; skipped otherwise."""
+    from harness_lab.models.engine import LlamaCppEngine
 
-    path = os.environ.get("WAVESTACK_TEST_GGUF")
+    path = os.environ.get("HARNESS_LAB_TEST_GGUF")
     if not path or not Path(path).is_file():
-        pytest.skip("WAVESTACK_TEST_GGUF does not point to a GGUF file.")
+        pytest.skip("HARNESS_LAB_TEST_GGUF does not point to a GGUF file.")
     engine = LlamaCppEngine(path, n_ctx=4096)
     try:
         meta = engine.metadata()
@@ -132,13 +132,13 @@ def test_real_gguf_passes_checks_4_and_6():
 def test_real_gguf_reuses_its_cache_between_two_turns():
     """Lot A (A5, AD-4): two turns of `native_tools` on the real model; the second turn's
     first call evaluates, as llama.cpp counts them, only the tokens after the first turn's
-    last call and its output. Set WAVESTACK_TEST_GGUF; skipped otherwise."""
-    from wavestack import config
-    from wavestack.session.app_session import AppSession
+    last call and its output. Set HARNESS_LAB_TEST_GGUF; skipped otherwise."""
+    from harness_lab import config
+    from harness_lab.session.app_session import AppSession
 
-    path = os.environ.get("WAVESTACK_TEST_GGUF")
+    path = os.environ.get("HARNESS_LAB_TEST_GGUF")
     if not path or not Path(path).is_file():
-        pytest.skip("WAVESTACK_TEST_GGUF does not point to a GGUF file.")
+        pytest.skip("HARNESS_LAB_TEST_GGUF does not point to a GGUF file.")
     session = AppSession(config.Config(values={"context": {"window": 4096}}))
     try:
         assert session.boot(path).result() != "error"
@@ -166,12 +166,12 @@ def test_real_gguf_reuses_its_cache_between_two_turns():
 def test_real_gguf_state_restored_after_a_divergent_prompt():
     """Lot A (N2, AD-11): the main context's state saved, a sub-agent's prompt evaluated in
     its place, the state restored: a prompt extending the main context evaluates its new
-    tokens only, on the real (hybrid, for Qwen3.5) model. Set WAVESTACK_TEST_GGUF."""
-    from wavestack.models.engine import CancelToken, LlamaCppEngine
+    tokens only, on the real (hybrid, for Qwen3.5) model. Set HARNESS_LAB_TEST_GGUF."""
+    from harness_lab.models.engine import CancelToken, LlamaCppEngine
 
-    path = os.environ.get("WAVESTACK_TEST_GGUF")
+    path = os.environ.get("HARNESS_LAB_TEST_GGUF")
     if not path or not Path(path).is_file():
-        pytest.skip("WAVESTACK_TEST_GGUF does not point to a GGUF file.")
+        pytest.skip("HARNESS_LAB_TEST_GGUF does not point to a GGUF file.")
     engine = LlamaCppEngine(path, n_ctx=4096)
     try:
 

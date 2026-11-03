@@ -38,7 +38,7 @@ context:
 
 ## Code Map
 
-- `src/wavestack/rag/lab.py` -- `PRESETS`, `RagLabContent.presets`, `Catalog.payload()["presets"]`.
+- `src/harness_lab/rag/lab.py` -- `PRESETS`, `RagLabContent.presets`, `Catalog.payload()["presets"]`.
 - contenus fr/en/de -- `presets.*`.
 - `rag.html`, `rag.js`, `rag.css` -- `#rag-presets`.
 - `tests/test_rag_lab.py`, `tests/test_i18n.py`, `tools/e2e/run_e2e.py` (`_rag_lab_presets`).

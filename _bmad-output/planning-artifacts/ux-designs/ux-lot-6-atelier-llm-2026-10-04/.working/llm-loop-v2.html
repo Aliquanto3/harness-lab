@@ -12,11 +12,11 @@
      Jetons recopiés de tokens.css (clair, sombre). DESIGN.md et EXPERIENCE.md l'emportent. -->
 <style>
 :root {
-  --color-primary: #451DC7; --color-primary-deep: #250F6B; --color-primary-soft: #EDE7FE;
-  --color-accent-soft: #CAFEE0; --color-ink: #0A0A14; --color-ink-soft: #4A4A5E;
-  --color-muted: #8A8A9E; --color-line: #E6E6EC; --color-surface: #F6F5FA;
-  --color-surface-raised: #FFFFFF; --color-warning: #FFCA4A; --color-warning-soft: #FFF4D6;
-  --color-state-active: #04F06A; --color-state-blocked: #FF2A49; --color-relief: #D9D0F6;
+  --color-primary: #0B6B78; --color-primary-deep: #084E58; --color-primary-soft: #DCEFF1;
+  --color-accent-soft: #FBE7D7; --color-ink: #0A0A14; --color-ink-soft: #4A4A5E;
+  --color-muted: #8A8A9E; --color-line: #E6E6EC; --color-surface: #F7F8F6;
+  --color-surface-raised: #FFFFFF; --color-warning: #E8A317; --color-warning-soft: #FFF4D6;
+  --color-state-active: #B4500F; --color-state-blocked: #B42318; --color-relief: #D9D0F6;
   --color-discipline-context: #0F7B6C; --color-discipline-neutral-soft: #EFEFF4;
   --color-ink-fill: #0A0A14; --color-on-ink: #FFFFFF; --color-on-vivid: #0A0A14;
   color-scheme: light;
@@ -293,7 +293,7 @@ const EXPLAIN = {
   embed: "Chaque identifiant choisit une ligne de la table d'embedding : un vecteur de nombres appris à l'entraînement. Les dimensions sont réelles ; les couleurs des cellules sont illustratives.",
   blocks: "Chaque bloc fait deux choses : l'attention, où chaque token regarde les tokens précédents et y puise de l'information, puis le MLP, qui transforme chaque token seul en passant par une couche plus large. Le moteur n'expose pas ces calculs : la forme est juste, les valeurs ne sont pas montrées.",
   logits: "Le dernier vecteur est comparé à tout le vocabulaire : un score par token, ramené en probabilité. Réel : les barres sont les probabilités des 5 candidats les plus probables, lues dans le moteur.",
-  sampling: "Les réglages de la section 2, appliqués dans l'ordre de llama.cpp : top-k, top-p, min-p, puis la température. Réel : WaveStack recalcule qui reste en lice.",
+  sampling: "Les réglages de la section 2, appliqués dans l'ordre de llama.cpp : top-k, top-p, min-p, puis la température. Réel : HarnessLab recalcule qui reste en lice.",
   token: "Le token tiré s'ajoute à la suite des tokens, sans repasser par le tokenizer. Le modèle relit la fenêtre (le cache lui évite de tout recalculer) et la boucle recommence.",
 };
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -310,7 +310,7 @@ function fill() {
   $("#source").textContent = a.source;
   const tokenized = state === "tokenized", noCand = arch === "unknown";
   const wait = "après « Générer » avec les tokens candidats";
-  const why = "Candidats indisponibles : WaveStack ne lit les probabilités qu'avec un modèle chargé en processus (fichier GGUF), pas auprès de llama-server.";
+  const why = "Candidats indisponibles : HarnessLab ne lit les probabilités qu'avec un modèle chargé en processus (fichier GGUF), pas auprès de llama-server.";
   $$("[data-live]").forEach((n) => (n.hidden = tokenized || noCand));
   $('[data-v="logitcap"]').textContent = noCand ? why : tokenized ? wait : "un score par token du vocabulaire, ramené en probabilité";
   $('[data-v="sampling"]').textContent = "T 0,7 · top-k 20 · top-p 0,9 · min-p 0,05";

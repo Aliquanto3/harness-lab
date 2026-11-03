@@ -1,6 +1,6 @@
 # Formation à la sécurité chez Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
 
 Chaque collaborateur d'Exemplia suit une formation à la sécurité de l'information de 2 heures, en ligne, puis valide un questionnaire d'au moins 8 bonnes réponses sur 10 pour l'obtenir. Un nouvel arrivant la suit dans son premier mois ; elle est renouvelée chaque année pour tous.
 

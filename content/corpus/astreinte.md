@@ -1,6 +1,6 @@
 # Annexe des contacts d'astreinte d'Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette annexe ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette annexe ne décrit aucune entreprise réelle. -->
 
 Cette annexe de la procédure de gestion de crise liste les contacts à joindre en dehors des heures ouvrées, jour et nuit, selon le domaine concerné.
 

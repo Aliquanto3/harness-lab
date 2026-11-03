@@ -1,6 +1,6 @@
 # Procédure de gestion de crise chez Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
 
 Cette procédure prend le relais de la procédure de signalement des incidents dès qu'un incident de niveau 3 est déclaré, ou quand plusieurs sites d'Exemplia sont touchés en même temps.
 

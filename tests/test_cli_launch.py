@@ -7,8 +7,8 @@ import time
 
 import pytest
 
-from wavestack import cli, config
-from wavestack.session.diagnostic import DiagnosticResult, DiagnosticSession, launch_page
+from harness_lab import cli, config
+from harness_lab.session.diagnostic import DiagnosticResult, DiagnosticSession, launch_page
 
 
 def test_reserve_port_then_conflict_returns_none_for_second_caller():

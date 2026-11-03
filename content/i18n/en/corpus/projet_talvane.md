@@ -1,6 +1,6 @@
 # Project Talvane (sentinel document, inactive)
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this sentinel document is used for erasure demonstrations (CAP-14) and is never active by default. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this sentinel document is used for erasure demonstrations (CAP-14) and is never active by default. -->
 
 This sentinel document is used for demonstrations of erasing a document from the corpus (story 18): it carries an easily recognisable content, which must disappear entirely from a search once the document is removed.
 

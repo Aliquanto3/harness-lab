@@ -1,5 +1,5 @@
 # English translation of content/rag_lab.yaml (languages 4/5, AD-19): same keys, same
-# stage, option and param ids, same placeholders. Validated by wavestack.rag.lab.RagLabContent.
+# stage, option and param ids, same placeholders. Validated by harness_lab.rag.lab.RagLabContent.
 
 title_text: "Document search workshop: the search architecture to handle"
 intro_text: >-
@@ -52,7 +52,7 @@ legend_live_text: "Run in progress…"
 legend_done_text: "Run finished: replay it with ◀ ▶."
 legend_replay_text: "Replaying the run."
 details_text: "Every step in detail (full tables, durations, memory)"
-results_empty_text: "Run the pipeline: each step will show here what it receives, what it produces, how long it takes and WaveStack's memory."
+results_empty_text: "Run the pipeline: each step will show here what it receives, what it produces, how long it takes and HarnessLab's memory."
 generation_not_run_text: >-
   Not run: you chose not to generate (the “Do not generate” option). Here is what the model
   would receive.
@@ -72,7 +72,7 @@ input_text: "Input"
 output_text: "Output"
 facts_text: "Figures"
 duration_text: "Duration"
-memory_text: "WaveStack's memory"
+memory_text: "HarnessLab's memory"
 last_run_text: "Last run"
 reset_chain_text: "Back to the default pipeline"
 unavailable_text: "unavailable"
@@ -686,7 +686,7 @@ tree:
   tokens_count_text: "{count} tokens"
   length_text: "output reserve reached"
   otel_missing_text: "OTLP export: install the otel extra (uv sync --extra otel) and set the URL of your Langfuse or Phoenix. Otherwise nothing leaves the workstation."
-  otel_unset_text: "OTLP export: set [otel] endpoint, the URL of your Langfuse or Phoenix, then restart WaveStack. Otherwise nothing leaves the workstation."
+  otel_unset_text: "OTLP export: set [otel] endpoint, the URL of your Langfuse or Phoenix, then restart HarnessLab. Otherwise nothing leaves the workstation."
   otel_ready_text: "OTLP export to {endpoint}, following the OpenTelemetry GenAI conventions. Without the texts: no question, no passage, no answer."
   otel_content_text: "OTLP export to {endpoint}, following the OpenTelemetry GenAI conventions. The texts leave too: question, prompts with the corpus passages, and answers (capture_content)."
   export_text: "Export this run"
@@ -789,8 +789,8 @@ sheets:
         url: "https://arxiv.org/abs/2004.04906"
   embedding.fastembed:
     purpose_text: "Vectorize with a second embedding model, run by fastembed (ONNX format, no PyTorch or GPU, the model's files copied by hand onto the machine), to compare its effect with the RAG brick's model."
-    when_text: "Use to compare two embedding models on the same corpus. Avoid without fastembed and the model: WaveStack neither ships nor downloads either (the guide, docs/guide.md, gives the install command), so the option stays unavailable and says why. The vectors of two models do not have the same dimension and cannot be mixed: changing the model rebuilds the index."
-    cost_text: "Loading fastembed and onnxruntime adds memory for the whole life of WaveStack (150 MB expected by default, adjustable), besides the model; then one pass per chunk at indexing and one per question, on a processor."
+    when_text: "Use to compare two embedding models on the same corpus. Avoid without fastembed and the model: HarnessLab neither ships nor downloads either (the guide, docs/guide.md, gives the install command), so the option stays unavailable and says why. The vectors of two models do not have the same dimension and cannot be mixed: changing the model rebuilds the index."
+    cost_text: "Loading fastembed and onnxruntime adds memory for the whole life of HarnessLab (150 MB expected by default, adjustable), besides the model; then one pass per chunk at indexing and one per question, on a processor."
     literature_text: "The same primary sources as for the brick's model: Reimers and Gurevych (comparing sentences by cosine) and Karpukhin et al. (a dense retriever against BM25). They say nothing of the chosen model or of ONNX: the library is presented by its repository, with no quality measure on this corpus. The framing's hypotheses do not cover embeddings."
     bench_text: ""
     sources:
@@ -829,7 +829,7 @@ sheets:
   vector_store.faiss:
     purpose_text: "Store the vectors in a FAISS index, Meta's vector search library, in exact inner product on normalized vectors (so the cosine), written to disk then read back."
     when_text: "Use to see what a specialised library brings, or to compare its memory and latency. Avoid without the « rag-alt » extra: FAISS is not installed by default, the step gives the command to run."
-    cost_text: "One more dependency, imported once and kept in memory (WaveStack announces its cost); an index file written at indexing. The index is exact here: FAISS can also search approximately, faster and less accurately, which the workshop does not do."
+    cost_text: "One more dependency, imported once and kept in memory (HarnessLab announces its cost); an index file written at indexing. The index is exact here: FAISS can also search approximately, faster and less accurately, which the workshop does not do."
     literature_text: "The framing (H14) holds that the vector database mostly changes latency, memory and cost, little quality: partially supported. The studies cited measure approximate indexes, not the workshop's exact index: their recall losses are not found here."
     bench_text: ""
     sources:
@@ -842,7 +842,7 @@ sheets:
   vector_store.lancedb:
     purpose_text: "Store the vectors in a LanceDB table, an embedded vector database, created on disk then queried with the cosine distance."
     when_text: "Use to see a full vector database (table, columns) rather than a bare library. Avoid without the « rag-alt » extra: LanceDB is not installed by default, the step gives the command to run."
-    cost_text: "One more dependency, imported once and kept in memory (WaveStack announces its cost); a table folder written at indexing. The search stays exact here: no approximate index is built."
+    cost_text: "One more dependency, imported once and kept in memory (HarnessLab announces its cost); a table folder written at indexing. The search stays exact here: no approximate index is built."
     literature_text: "The framing (H14) holds that the vector database mostly changes latency, memory and cost, little quality: partially supported. The studies cited are about approximate indexes (ANN recall, filtering, deletions); here the search is exact and the order is the one of the other options, up to score ties and rounding."
     bench_text: ""
     sources:

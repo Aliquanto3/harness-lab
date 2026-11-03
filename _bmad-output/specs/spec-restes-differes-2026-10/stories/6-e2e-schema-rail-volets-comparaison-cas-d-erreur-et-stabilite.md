@@ -50,7 +50,7 @@ deferred:
 ## Code Map
 
 - `tools/e2e/run_e2e.py` -- fichier principal. Helpers à réutiliser : `Run.check` (paramètre `known=` : anomalie déjà décrite, signalée `KNOWN` sans faire échouer), `Run.poll`, `Run.send`/`replay`, `Run.set_option`, `Run.open_options` (story 5 : reclique si la liste se replie), `Run.show_forced`, `Run.api`, `_step`, `_unfold_step`, `_pick_model`, `_ui_catalogue(lang)`, `A_LABEL`. Scénarios touchés : `native_tools` (rail, journal, robot, halo), `system_prompt` (rejeu, « Comparer »), `h5` (✋, bacs, H5 « désactivé »), `hooks` (✖), `data_flows` (bacs MCP), `subagent` (`aria-expanded`), `rag_rerank` (joué après `rag`), `gemini_shape` (`_footprint_line`) ; scénarios nouveaux `panes` et `priced_estimate` (après `gemini_shape`) dans `SCENARIOS`. `main()` : option `--channel` (Edge).
-- `src/wavestack/web/static/app.js` (module ES : aucune fonction globale, donc lecture par le DOM, `localStorage`, le clavier et `page.evaluate` sur les nœuds) -- lignes protégées :
+- `src/harness_lab/web/static/app.js` (module ES : aucune fonction globale, donc lecture par le DOM, `localStorage`, le clavier et `page.evaluate` sur les nœuds) -- lignes protégées :
   - E020 : `robotPose` (6723), `robotKey` = `[pose, subPose, model]` dans `renderSchema` (6916).
   - E031 : `toggleStep` (`o.live = false`, 5809-5814), `renderSteps` (`o.turnOpen.clear()` d'un nouveau tour en direct 5918, `unfolded` 6000), `followLive` (5886), `syncLogGroups` (fusion des `model_delta`, 6562), `logRow` (`KIND_LABELS[group.kind]`, 6606), `eventSummary` (6387), `renderJournal` (titre « Journal des événements ({count}) », 6638).
   - E032 : `schemaActivity` (6800), `drawSchemaWires` (marqueurs ✖ `is-block`, ✋ `is-stop`, `.arch-path`, 7289-7320), `component: envelope.component` des étapes `tool` (505) et `hook` (592), `stepLinks` (5179), `schemaColumns` (filtre `hosting`, 7124), `hookStrip` (`is-off`, `is-blocked`, « · désactivé », « · ✖ a bloqué », 7096-7103).
@@ -61,7 +61,7 @@ deferred:
   - E135 : `costText` (`approx(cost.cost_source === "estimate")`, 2351), `renderConsumption` (`approx(c.approx)`, 2394).
   - E141 : `callBody` (`footprintNode`, 4638-4640).
 - `tools/e2e/fake_openai.py` -- `POST /_e2e/reranker_fail` (`{"fail": bool}`) : `/_e2e/reranker.gguf` répond 503 tant que l'échec est armé.
-- `tools/e2e/wavestack_e2e.py` -- faux reranker qui lève quand la question contient `[reranker-en-panne]` (sur `tests/fake_reranker.py`).
+- `tools/e2e/harness_lab_e2e.py` -- faux reranker qui lève quand la question contient `[reranker-en-panne]` (sur `tests/fake_reranker.py`).
 - `tools/e2e/launch_app.py` -- `read_file` de `confidentiel/outil-lent-e2e` attend 1,5 s avant de lire (outil lent pour voir halo, chemin et pose « utilise un outil »).
 - `tools/e2e/stack.py` -- cinquième faux modèle `fake_m` (« Faux fournisseur M (e2e) », `faux-modele-tarife`), `stream_usage: false`, `pricing` du préréglage Mistral.
 - `tests/test_tools.py` -- enveloppe `tool_started` : `component == "tools.<nom>"`, `brick == "tools"`.
@@ -72,7 +72,7 @@ deferred:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `tools/e2e/fake_openai.py`, `tools/e2e/wavestack_e2e.py`, `tools/e2e/launch_app.py`, `tools/e2e/stack.py` -- doublures (échec du fichier du reranker, reranker en panne, outil lent, `fake_m`) -- E094, E032, E020, E135.
+- [x] `tools/e2e/fake_openai.py`, `tools/e2e/harness_lab_e2e.py`, `tools/e2e/launch_app.py`, `tools/e2e/stack.py` -- doublures (échec du fichier du reranker, reranker en panne, outil lent, `fake_m`) -- E094, E032, E020, E135.
 - [x] `tools/e2e/run_e2e.py` -- `native_tools` : quatrième tour « Lis le fichier confidentiel/outil-lent-e2e [lent] » ; un `MutationObserver` note les poses du robot (« réfléchit », « utilise un outil », « au repos »), le halo `is-active` de `tools.read_file` et `.arch-path` ; le tour 3 ouvert à la main se replie au tour 4 ; ligne courante dépliée en direct ; clic sur une ligne : vue figée, la ligne reste dépliée, les suivantes non ; « Suivre le direct » ; journal : `× N` = nombre de `model_delta` de l'appel, compte du titre = événements reçus, libellé et résumé de chaque ligne, catalogue complet en `fr`/`en`/`de` -- E020, E031, E032.
 - [x] `tools/e2e/run_e2e.py` -- `h5` : ✋ et halo de `hooks.h5` pendant l'attente, bacs « Outils » et « Outils réseau » ; H5 « désactivé » après « ne plus demander » ; `hooks` : ✖ pendant le tour lent, « ✖ a bloqué » après, lien `hooks.h1` ; `data_flows` : serveur local et data.gouv.fr dans leurs zones -- E032.
 - [x] `tools/e2e/run_e2e.py` -- scénario `panes` : flèches sur les poignées, bornes, voisins seuls, hauteur du schéma, double clic, masquage mémorisé, stockage corrompu et cinq volets masqués -- E033.
@@ -88,7 +88,7 @@ deferred:
 
 ## Design Notes
 
-- `app.js` est chargé en module : `robotPose`, `turnRows`, `moveBoundary`, `loadPaneLayout` ne sont pas joignables par `page.evaluate`. Les contrôles passent par ce que ces fonctions produisent : `aria-label` du robot, classes et `aria-expanded` du rail, lignes du journal, tailles des volets après les flèches, `localStorage["wavestack.panes"]`.
+- `app.js` est chargé en module : `robotPose`, `turnRows`, `moveBoundary`, `loadPaneLayout` ne sont pas joignables par `page.evaluate`. Les contrôles passent par ce que ces fonctions produisent : `aria-label` du robot, classes et `aria-expanded` du rail, lignes du journal, tailles des volets après les flèches, `localStorage["harness_lab.panes"]`.
 - Pose et halo ne durent qu'un instant avec le faux modèle : l'outil lent (doublure) et `[lent]` les rendent observables ; un `MutationObserver` posé avant l'envoi note chaque état, sans délai fixe.
 - `_footprint_line` : l'échec intermittent vient du dépliage. `Run.send` rend la main au `turn_ended` du flux Python ; la page peut ne pas l'avoir rendu. L'étape « Appelle le modèle » encore courante est dépliée par le direct, `_unfold_step` ne clique pas, puis le direct la replie. Correctif : attendre que l'en-tête du tour soit rendu terminé, déplier, puis attendre `.footprint`, en recliquant si la ligne se replie.
 - E125 : `b.click(); return b.getAttribute("aria-expanded")` dans un seul `evaluate` lit le bouton cliqué avant le rendu de la frame suivante ; sans la ligne du lot K, il vaut encore `false`.
@@ -106,7 +106,7 @@ deferred:
 ## Implementation Notes
 
 - Implémenté directement par l'agent de la story (mode nuit) plutôt que par un sous-agent : l'investigation était faite et l'E2E ne se joue qu'une tranche à la fois.
-- Fichiers : `tools/e2e/run_e2e.py` (`_turn_group`, `_turn_rendered_ended`, `_slow_tool_turn`, `_event_log`, `_log_catalog`, `_schema_bins`, `_schema_h5_pending`, `_schema_blocked_while_running`, `_hook_strip_state`, `s_panes`, `_default_compare_pair`, `_rerank_download_fails`, `_rerank_step_failed`, `s_priced_estimate`, `_footprint_line` réécrit, option `--channel`), `tools/e2e/fake_openai.py` (`/_e2e/reranker_fail`), `tools/e2e/wavestack_e2e.py` (`_E2EReranker`), `tools/e2e/launch_app.py` (`read_file` lent), `tools/e2e/stack.py` (`fake_m`, `preset()`), `tools/e2e/README.md`, `tests/test_tools.py`, `tests/test_e2e_fake_openai.py`, `deferred-work.md` (neuf `closed:`, deux entrées nouvelles). `app.js` inchangé.
+- Fichiers : `tools/e2e/run_e2e.py` (`_turn_group`, `_turn_rendered_ended`, `_slow_tool_turn`, `_event_log`, `_log_catalog`, `_schema_bins`, `_schema_h5_pending`, `_schema_blocked_while_running`, `_hook_strip_state`, `s_panes`, `_default_compare_pair`, `_rerank_download_fails`, `_rerank_step_failed`, `s_priced_estimate`, `_footprint_line` réécrit, option `--channel`), `tools/e2e/fake_openai.py` (`/_e2e/reranker_fail`), `tools/e2e/harness_lab_e2e.py` (`_E2EReranker`), `tools/e2e/launch_app.py` (`read_file` lent), `tools/e2e/stack.py` (`fake_m`, `preset()`), `tools/e2e/README.md`, `tests/test_tools.py`, `tests/test_e2e_fake_openai.py`, `deferred-work.md` (neuf `closed:`, deux entrées nouvelles). `app.js` inchangé.
 - Défauts trouvés, notés sans correctif (la story ne change pas l'interface) : huit types du catalogue sans libellé dans `main.log.kinds` (fr, en, de) et huit sans résumé dans `eventSummary` ; contrôles `KNOWN [deferred-work : libellés du journal]` et `KNOWN [deferred-work : résumés du journal]`.
 - Surprise : `s_hooks` vérifiait la ligne H1 par `[data-links~="hooks.h1"]` ; une seconde étape du tour porte aussi ce lien, et la mutation du `component` des étapes `hook` passait. Le contrôle lit désormais l'étape « Hook H1 » seule.
 - Surprise : sans bornes dans `moveBoundary`, le CSS (`--pane-min-width`) tient encore la Vue humain à 240 px ; le contrôle ajoute un → qui doit la rendre aussitôt à 256 px.

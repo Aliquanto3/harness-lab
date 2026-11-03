@@ -31,7 +31,7 @@ sections:
       Bei jedem Schritt gibt das Modell jedem Token des Vokabulars eine Wahrscheinlichkeit.
       Sampling ist die Zufallsziehung des nächsten Tokens unter ihnen; diese Einstellungen
       entscheiden, wie sie abläuft. Die
-      hier beschriebene Reihenfolge ist die von llama.cpp (Engine von WaveStack,
+      hier beschriebene Reihenfolge ist die von llama.cpp (Engine von HarnessLab,
       llama-server, Ollama): Top-k (nur die wahrscheinlichsten Tokens behalten), dann Top-p
       (eine Gruppe von Tokens behalten, deren Wahrscheinlichkeit zusammen einen Wert
       erreicht), dann Min-p (zu unwahrscheinliche Tokens verwerfen), dann die Temperatur
@@ -126,7 +126,7 @@ stages:
       Ihren Text: Seine echten Tokens ersetzen diese.
     example_cloud_text: >-
       Ein Beispiel der Zerlegung, nicht die dieses Modells: Sein Tokenizer liegt beim Anbieter.
-      Für Ihren Text gibt WaveStack nur die Schätzung daneben an.
+      Für Ihren Text gibt HarnessLab nur die Schätzung daneben an.
   transfo:
     title_text: "TRANSFORMATION"
     subtitle_text: "die Zahlen durchlaufen die Schichten (die Rechenstufen) des Modells"
@@ -229,7 +229,7 @@ stages:
       stack_hybrid_text: "Schicht {n} von {couches} · voll: volle Attention, gestrichelt: rekurrent"
       stack_done_text: "{couches} Schichten durchlaufen"
       stack_unknown_text: "Zahl der Schichten für dieses Modell unbekannt"
-      unknown_text: "Dimensionen für dieses Modell unbekannt: WaveStack kann sie nicht lesen."
+      unknown_text: "Dimensionen für dieses Modell unbekannt: HarnessLab kann sie nicht lesen."
     note_text:
       one: >-
         Die Engine legt weder die Attention-Gewichte noch die verborgenen Zustände offen:
@@ -427,7 +427,7 @@ generation:
     Ereignisprotokoll.
   more_text: "… und {reste} weitere, nicht angezeigt (höchstens 512 Chips)."
   legend_text: >-
-    Die Farben (Violett, Grün) wechseln von Chip zu Chip ohne Bedeutung: Sie trennen nur ein
+    Die Farben (Blau, Orange) wechseln von Chip zu Chip ohne Bedeutung: Sie trennen nur ein
     Token von seinem Nachbarn.
   sent_summary_text: "Den an das Modell gesendeten Prompt ansehen"
   status:
@@ -437,7 +437,7 @@ generation:
     error: "Die Generierung ist fehlgeschlagen."
 
 loading:
-  empty_text: "Seit dem Start von WaveStack wurde kein Modell geladen."
+  empty_text: "Seit dem Start von HarnessLab wurde kein Modell geladen."
   running_text: "Laden läuft… {duree}"
   total_text: "{modele}: {statut} in {duree}"
   local_text: "Lokal: CPU-RAM, keine GPU. Das Modell läuft auf dem Prozessor dieses Arbeitsplatzes."
@@ -485,7 +485,7 @@ distribution:
   title_text: "Was die Einstellungen mit den Kandidaten machen"
   intro_text: >-
     Die Kandidaten eines bereits erzeugten Tokens, so wie das Modell sie gesehen hat.
-    Bewegen Sie einen Regler: WaveStack berechnet neu, welche im Rennen bleiben und welche
+    Bewegen Sie einen Regler: HarnessLab berechnet neu, welche im Rennen bleiben und welche
     Chance jeder hat, gezogen zu werden, ohne neue Generierung. Die Wahrscheinlichkeit des
     Modells bewegt sich nicht.
   empty_text: >-
@@ -500,7 +500,7 @@ distribution:
   more_text: "… und {reste} weitere gelesene Kandidaten, weiter unten, nicht angezeigt."
   tail_text: "Rest des Vokabulars"
   tail_help_text: >-
-    WaveStack behält die {lus} wahrscheinlichsten Kandidaten jedes Tokens; der Rest des
+    HarnessLab behält die {lus} wahrscheinlichsten Kandidaten jedes Tokens; der Rest des
     Vokabulars wiegt {reste} der Wahrscheinlichkeit. Die Chance, gezogen zu werden, wird nur
     unter den behaltenen Kandidaten verteilt: eine Näherung, treu, solange dieser Rest klein
     ist.

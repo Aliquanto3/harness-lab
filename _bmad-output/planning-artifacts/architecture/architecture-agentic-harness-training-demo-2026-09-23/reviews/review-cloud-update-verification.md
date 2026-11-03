@@ -3,7 +3,7 @@
 - **Date :** 2026-09-24
 - **Objet :** `ARCHITECTURE-SPINE.md` après intégration des retours cloud (AD-4 mode chat, AD-5 `openai_chat`, AD-6, AD-9, AD-10, AD-15, AD-16, AD-20, AD-21, Deferred).
 - **Point de départ :** `review-cloud-verification.md`. Ce qui y est sourcé n'est pas refait ; on contrôle (1) que le spine en a tiré les bonnes conséquences, (2) les affirmations nouvelles.
-- **Méthode :** documentation officielle (Groq, Mistral, Microsoft Learn, pydantic), code source de httpx 0.28.1 sur GitHub, code du worktree (`src/wavestack/net/factory.py`, `models/engine.py`, `web/app.py`). Aucun appel avec clé : **rien n'a été testé en réel**. L'exécution Python locale n'a pas été possible (refusée par le classifieur de permissions) : les comportements pydantic et httpx sont tirés de la documentation et du code source publiés.
+- **Méthode :** documentation officielle (Groq, Mistral, Microsoft Learn, pydantic), code source de httpx 0.28.1 sur GitHub, code du worktree (`src/harness_lab/net/factory.py`, `models/engine.py`, `web/app.py`). Aucun appel avec clé : **rien n'a été testé en réel**. L'exécution Python locale n'a pas été possible (refusée par le classifieur de permissions) : les comportements pydantic et httpx sont tirés de la documentation et du code source publiés.
 - **Incident à signaler :** une commande `uv run --no-sync` lancée dans le worktree cloud y a créé un dossier `.venv` **vide** (20:43, 4 fichiers dans `site-packages`, aucun paquet). La suppression a été refusée par le classifieur. Il faut le supprimer à la main (`Remove-Item -Recurse .venv` dans `agentic-harness-training-demo-cloud`) ou lancer `uv sync`. Le spine n'a pas été modifié.
 
 ## Verdict global
@@ -55,7 +55,7 @@ Le spine a bien repris les six correctifs prioritaires de la vérification préc
 
 - httpx 0.28.1, `encode_content` : pour `content=bytes`, seul `Content-Length` est posé. Pour `json=`, httpx pose `Content-Type: application/json` et sérialise avec `ensure_ascii=False, separators=(",", ":"), allow_nan=False`.
 - Le spine envoie des octets (à juste titre, pour garantir « corps tracé = corps envoyé »). Sans `Content-Type`, certains frontaux (APIM Azure, passerelle interne) peuvent répondre 400 ou 415. Ce n'est pas vérifiable sans clé, mais c'est gratuit à éviter.
-- La fabrique `net` ajoute déjà `User-Agent: WaveStack/0.1 …` (`net/factory.py` l. 67). La phrase « n'y ajoute que l'en-tête d'authentification » est donc littéralement fausse.
+- La fabrique `net` ajoute déjà `User-Agent: HarnessLab/0.1 …` (`net/factory.py` l. 67). La phrase « n'y ajoute que l'en-tête d'authentification » est donc littéralement fausse.
 - **Correctif :** « l'adaptateur n'ajoute rien au **corps** ; il pose `Content-Type: application/json`, `Accept: text/event-stream` et l'en-tête d'authentification ; le `User-Agent` vient de `net` ». Ajouter `allow_nan=False` au `json.dumps` d'AD-4, pour s'aligner sur httpx et refuser un `NaN` qui produirait du JSON invalide.
 - Au passage : `.encode("utf-8")` lève une exception sur un substitut isolé (`\ud800`), qu'un résultat d'outil MCP décodé depuis du JSON peut contenir. La normalisation de l'étape 2 peut les retirer, comme la zone privée Unicode.
 
@@ -63,7 +63,7 @@ Le spine a bien repris les six correctifs prioritaires de la vérification préc
 
 - `create_client(timeout=5.0)` applique 5 s à la connexion **et à la lecture**. En streaming, httpx compte le délai de lecture entre deux blocs reçus, y compris l'attente des en-têtes de réponse.
 - Mistral en `reasoning_effort: high`, Azure GPT-5, ou un prompt de 4 000 tokens chez un fournisseur chargé peuvent dépasser 5 s avant le premier octet : on aurait des « délai dépassé » intermittents.
-- **Correctif :** AD-15 : « pour `origin = model`, délai de connexion 10 s, de lecture 60 s (réglables dans `wavestack.toml`) ; l'annulation reste le recours de l'utilisateur ».
+- **Correctif :** AD-15 : « pour `origin = model`, délai de connexion 10 s, de lecture 60 s (réglables dans `harness-lab.toml`) ; l'annulation reste le recours de l'utilisateur ».
 
 ### 4. Raisonnement non renvoyé (AD-4, Deferred) : moyenne
 

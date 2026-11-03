@@ -1,6 +1,6 @@
 # Tests de bout en bout (faux modèle)
 
-Rejoue l'interface de WaveStack dans un Chromium sans affichage, sans GGUF ni accès à un
+Rejoue l'interface de HarnessLab dans un Chromium sans affichage, sans GGUF ni accès à un
 fournisseur : un faux serveur compatible OpenAI, déclaré comme modèle cloud, répond de façon
 scriptée et déterministe.
 
@@ -24,23 +24,23 @@ cette page de code (par exemple « ◐ » dans `themes`).
   ou les modèles manquants (ces échecs ne sont pas des régressions). Pour le découpage en
   tranches de 4 à 6 scénarios, mettez `rag rag_rerank` en tête de chaque tranche qui contient un
   `rag_lab*`.
-- `--keep` : garde le dossier de données temporaire (journaux `wavestack.log`,
+- `--keep` : garde le dossier de données temporaire (journaux `harness_lab.log`,
   `fake_openai.log`, `settings.json`, `audit.log`) ; son chemin s'affiche au début.
 - `--headed` : navigateur visible.
 - `--channel msedge` (story 6 des restes différés) : un navigateur installé (Edge, Chrome) au
   lieu du Chromium de Playwright ; absent du poste, le parcours le dit et sort avec le code 2.
-- `--no-rag-alt` (story 30) : WaveStack comme sur un poste sans l'extra `rag-alt` (FAISS et
+- `--no-rag-alt` (story 30) : HarnessLab comme sur un poste sans l'extra `rag-alt` (FAISS et
   LanceDB indisponibles) ; le scénario `rag_lab` prend alors la branche « sans l'extra ».
-- `--no-headroom` : WaveStack comme sur un poste sans l'extra `compression` ; le scénario
+- `--no-headroom` : HarnessLab comme sur un poste sans l'extra `compression` ; le scénario
   `compression` vérifie alors la carte (commande d'installation) et un tour sans étape, puis
   se saute (`--only compression --no-headroom`).
 
-Le parcours coupe lui-même le réseau sortant de WaveStack, pour donner le même résultat sur un
+Le parcours coupe lui-même le réseau sortant de HarnessLab, pour donner le même résultat sur un
 poste connecté, derrière un proxy d'entreprise ou hors ligne (Linux comme Windows) : `stack.py`
 remplace les variables de proxy du processus lancé (`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`)
 par un port de la boucle locale sur lequel rien n'écoute, et contourne ce proxy fermé pour la
 boucle locale (`NO_PROXY=127.0.0.1,localhost,::1`), où tournent le faux serveur, le faux
-llama-server, le faux Ollama et WaveStack. Une requête vers un service public (`public_holidays`,
+llama-server, le faux Ollama et HarnessLab. Une requête vers un service public (`public_holidays`,
 Wikipédia, data.gouv.fr, Microsoft Learn) passe donc la garde réseau et est tracée
 (`outbound_request`), puis échoue : service injoignable, échec expliqué. Ni `allowed_hosts` ni le
 réseau du poste ne changent (pas de pare-feu, pas de droits administrateur). Sous Windows, ce
@@ -55,7 +55,7 @@ sinon le script essaie `/opt/pw-browsers/chromium`. Code de sortie 1 si une vér
 
 Les captures (JPEG) sont réécrites dans `tools/e2e/screenshots/`.
 
-Pour explorer à la main : `uv run python tools/e2e/stack.py` lance le faux modèle et WaveStack
+Pour explorer à la main : `uv run python tools/e2e/stack.py` lance le faux modèle et HarnessLab
 (adresse affichée), puis choisissez « Faux fournisseur (e2e) » sur la page Modèles. Le réseau sortant
 y est coupé comme pendant le parcours ; `--network` garde les proxys du poste, pour joindre les
 vrais services.
@@ -87,18 +87,18 @@ vrais services.
   message d'assistant du tour renvoyé sans signature sur son premier appel reçoit un 400 dont
   le corps est un tableau JSON
   (`[{"error": …}]`, « missing a thought_signature … `default_api:nom` , position n »).
-- `stack.py` : réseau sortant de WaveStack coupé (proxy fermé, voir plus haut), dossier de
+- `stack.py` : réseau sortant de HarnessLab coupé (proxy fermé, voir plus haut), dossier de
   données temporaire, `settings.json` qui déclare six modèles sur le faux serveur (avec `sampling = ["temperature", "top_p"]` depuis la story 29, sauf `fake_a` : `["temperature"]`, comme Haiku), `fake`
-  (`wavestack-fake`), `fake_b` (`faux-modele-b`, pour le changement de modèle de la
+  (`harness-lab-fake`), `fake_b` (`faux-modele-b`, pour le changement de modèle de la
   story 17), `fake_r` (`faux-modele-raisonne`, `reasoning: {format: "field", always: true}`,
   pour la carte Raisonnement verrouillée de la story 33) et `fake_g` (`gemini-e2e-flash-lite`,
   « Faux Gemini (e2e) », avec le `reasoning` du préréglage `gemini` lu
-  dans `wavestack.toml`) et, depuis la story 6 des restes différés, `fake_m`
+  dans `harness-lab.toml`) et, depuis la story 6 des restes différés, `fake_m`
   (`faux-modele-tarife`, « Faux fournisseur M (e2e) », prix du préréglage `mistral`,
   `stream_usage = false` : coûts estimés, « ≈ ») et `fake_a` (`faux-claude`, au format
   Anthropic, finition V1), clé par
-  `key_env = WAVESTACK_FAKE_API_KEY`, lancement des deux serveurs sur
-  `127.0.0.1`. `wavestack.toml` n'est jamais modifié. Pour le RAG (story 15),
+  `key_env = HARNESS_LAB_FAKE_API_KEY`, lancement des deux serveurs sur
+  `127.0.0.1`. `harness-lab.toml` n'est jamais modifié. Pour le RAG (story 15),
   `settings.json` pointe `[rag]` vers un index dans ce dossier, absent au départ comme sur
   une installation neuve (le scénario `rag` le construit depuis la carte), et déclare un faux
   fichier de modèle servi par le faux serveur ; de même pour `[rag.reranker]` (story 16).
@@ -109,16 +109,16 @@ vrais services.
   `/api/generate` pour `keep_alive: 0`) qui sert un modèle sans GGUF sur le disque.
   `stack.py` les lance sur deux ports libres, que `settings.json` déclare en
   `[net.loopback_ports]` ; `/_e2e/requests` relit les corps reçus.
-- `wavestack_e2e.py` : le lanceur de WaveStack pendant le parcours. Il lance `wavestack.cli`
+- `harness_lab_e2e.py` : le lanceur de HarnessLab pendant le parcours. Il lance `harness_lab.cli`
   tel quel (garde réseau d'abord), la brique RAG chargeant le faux modèle d'embedding de
   `tests/fake_embedder.py` (sac de mots haché, 64 dimensions, aucun GGUF nécessaire) et le
   faux reranker de `tests/fake_reranker.py` (part des mots de la question présents dans
   l'extrait), qui lève sur une question portant `[reranker-en-panne]` (story 6 des restes
   différés), et applique `launch_app.py`.
-- `launch_app.py` : ralentit la seule préparation de `fake_b` (`WAVESTACK_E2E_LOAD_DELAY_S`,
+- `launch_app.py` : ralentit la seule préparation de `fake_b` (`HARNESS_LAB_E2E_LOAD_DELAY_S`,
   2 s par défaut) : sans cela, un modèle cloud se prépare trop vite pour que le parcours voie
   le chronomètre « Chargement du modèle… ». Story 6 des restes différés : `read_file` de
-  `confidentiel/outil-lent-e2e` attend `WAVESTACK_E2E_TOOL_DELAY_S` (1,5 s) avant d'échouer
+  `confidentiel/outil-lent-e2e` attend `HARNESS_LAB_E2E_TOOL_DELAY_S` (1,5 s) avant d'échouer
   (fichier absent), un outil assez lent pour voir le schéma au travail.
 - `run_e2e.py` : les scénarios Playwright ; le journal est lu en parallèle sur `/api/stream`.
 - `tests/test_e2e_fake_openai.py` : tests pytest du faux serveur, sans navigateur.
@@ -145,8 +145,8 @@ avertissement cloud dans la page (« Annuler » ne change rien, « Utiliser ce m
 chronomètre dans la barre haute et en fin de Vue humain, envoi et sélecteur désactivés avec la
 raison, conversation gardée, appel envoyé avec le nouveau modèle, lignes « Modèle : … », rejeu
 joué par le nouveau modèle, « Comparer » avec le modèle de chaque colonne, puis retour au
-premier modèle par « Choisir » sur la page Modèles, issue exacte « wavestack-fake est actif. », jamais
-« relancez WaveStack pour l'utiliser ». Capture :
+premier modèle par « Choisir » sur la page Modèles, issue exacte « harness-lab-fake est actif. », jamais
+« relancez HarnessLab pour l'utiliser ». Capture :
 `22-changement-de-modele.jpg`.
 
 ## Serveur local déjà lancé (story 18)
@@ -303,7 +303,7 @@ Vérifications ajoutées aux scénarios existants :
   « ☀▾ »), puis retour à « Système ». Poste émulé en sombre
   (`emulate_media`) : fond de `body` en `surface-dark` (lu dans DESIGN.md) sans rechargement ;
   de nouveau en clair : `surface`. « Sombre » choisi : `data-theme="dark"`,
-  `localStorage["wavestack.theme"] == "dark"`, barre haute, dernière bulle, tuile de l'appel au
+  `localStorage["harness_lab.theme"] == "dark"`, barre haute, dernière bulle, tuile de l'appel au
   modèle et plaque du modèle en `ink-fill-dark`, filet du prompt système en
   `discipline-prompt-dark`, chaque `.gauge-seg` sur le jeton sombre de sa discipline, puis le
   balayage des contrastes de la liste « Volets ▾ », du panneau « Fenêtre » et du tiroir
@@ -312,7 +312,7 @@ Vérifications ajoutées aux scénarios existants :
   déjà là (`theme.js`, en tête de page) ; `app.js` rendu, le sélecteur montre « Sombre », sans
   `pageerror` (seul le chargement interrompu s'écrit en console). `/diagnostic` et `/models` :
   sombres, sélecteur sur « Sombre ». « Clair » choisi au diagnostic, poste émulé en sombre :
-  l'atelier reste clair. `wavestack.theme = "violet"` : « Système ». Un contexte neuf dont
+  l'atelier reste clair. `harness_lab.theme = "violet"` : « Système ». Un contexte neuf dont
   `Storage.prototype.getItem` et `setItem` lèvent : « Système », puis « Sombre » appliqué à la
   page seule (rien d'écrit), sans erreur. Le scénario finit toujours sur « Système », poste
   clair, `unroute` : les autres scénarios restent en thème clair.
@@ -346,7 +346,7 @@ Vérifications ajoutées aux scénarios existants :
   web », jamais contacté, ne fait que le sélectionner (infobulle « Non contacté ») ; un clic
   sur le nœud « Wikipédia » (infobulle « Clic : ses données sortantes dans Orchestration »)
   réaffiche Orchestration, déplie l'étape, rouvre le bloc et l'amène dans `#orch-scroll`
-  (« GET https://fr.wikipedia.org/api/rest_v1/page/summary/… », « User-Agent: WaveStack/0.1
+  (« GET https://fr.wikipedia.org/api/rest_v1/page/summary/… », « User-Agent: HarnessLab/0.1
   (demonstrateur pedagogique; … », « Accept: */* ») ; la vue est figée. Capture
   `08b-donnees-sortantes-en-tetes.jpg`. Un second clic sur le nœud, déjà sélectionné, le
   garde sélectionné et ramène le bloc. De retour en direct, le tour des jours fériés est
@@ -405,7 +405,7 @@ Vérifications ajoutées aux scénarios existants :
   « llama-server »), puis « Réseau · Gemma (Google) » (préréglage Gemma), « Réseau · Gemini
   (Google) » (préréglage Gemini et `fake_g`),
   « Réseau · Mistral (Mistral AI) » et « Réseau · gpt-oss (OpenAI) » (préréglages de
-  `wavestack.toml`, sans clé) et « Réseau · Autres éditeurs » (les trois autres faux modèles
+  `harness-lab.toml`, sans clé) et « Réseau · Autres éditeurs » (les trois autres faux modèles
   cloud) ; lignes des préréglages Gemini (éditeur « Gemini (Google) », raisonnement
   « activable », prix « 0,30 $ / 2,50 $ ») et Gemma (éditeur « Gemma (Google) », « 26 B »,
   prix « — » sans `pricing`) ; dans le groupe Qwen, le faux Ollama (0.6B) avant le faux llama-server
@@ -413,7 +413,7 @@ Vérifications ajoutées aux scénarios existants :
   modèles et de leurs capacités… » puis « Autre fichier ou clé API… » en dernier. « Ouvrir le
   tableau » mène à `/models` : onglet « 🛠️ Modèles » courant,
   « 🛠️ Modèles » vers `/diagnostic` (mêmes onglets) ; lignes du faux llama-server (Qwen, outils « oui », « activable »,
-  « 4 096 tokens »), de R (« toujours »), de `wavestack-fake` (« jamais », « actif »), du faux
+  « 4 096 tokens »), de R (« toujours »), de `harness-lab-fake` (« jamais », « actif »), du faux
   Ollama (« inconnu », raison « introuvable » visible), « RÉSEAU » sur chaque ligne cloud,
   étiquette sur le jeton jaune, un en-tête par groupe du sélecteur. Puis R activé depuis le
   sélecteur : carte Raisonnement verrouillée et ligne « toujours », « actif » ; retour à A :
@@ -604,7 +604,7 @@ Contrôles préfixés de leur entrée de `deferred-work.md` ; chacun échoue si 
 module : les contrôles lisent le DOM, `localStorage`, les requêtes (`expect_request`) et, pour
 deux états difficiles à atteindre, réécrivent une réponse par `page.route`.
 
-- `mcp_full` (E016, E030) : serveur « Glossaire WaveStack » décoché puis recoché dans la carte
+- `mcp_full` (E016, E030) : serveur « Glossaire HarnessLab » décoché puis recoché dans la carte
   MCP (corps postés à `/api/intentions/mcp_server`) ; la nouvelle connexion, après le tour, dit
   « connecté », aucune ligne « connexion… », badge « MCP » une fois dépliée ; outils du serveur
   dans l'infobulle de son nœud ; « Vider la conversation » masque cette connexion.
@@ -655,7 +655,7 @@ un module, `robotPose`, `moveBoundary` ou `loadPaneLayout` se lisent par ce qu'i
 - `panes` (E033), scénario nouveau : flèches sur les poignées (16 px, seuls les voisins
   bougent, minimum de 240 px), poignée du schéma (↓ : le schéma perd 16 px), double clic
   (proportions par défaut, oubliées du stockage), masquage inscrit aussitôt dans
-  `localStorage["wavestack.panes"]`, disposition mémorisée rendue au rechargement, stockage
+  `localStorage["harness_lab.panes"]`, disposition mémorisée rendue au rechargement, stockage
   illisible, cinq volets masqués et tailles invalides refusés.
 - `rag_rerank` (E094) : `POST /_e2e/reranker_fail` fait refuser le fichier du reranker (503) :
   l'échec est dit sous l'interrupteur « Reranking », « Télécharger » revient ; plus loin, une
@@ -688,7 +688,7 @@ un module, `robotPose`, `moveBoundary` ou `loadPaneLayout` se lisent par ce qu'i
   clair, `x-request-id` masqué (sa valeur n'entre pas dans le journal) ; libellé « Réponse
   d'erreur reçue » et résumé `429 · POST url · quota` dans le journal, rien dans Orchestration,
   message D6 inchangé ; conversation vidée ensuite (R2). Le faux fournisseur écoute sur la
-  boucle locale, jamais tracée (AD-15) : `wavestack_e2e.py` remplace `factory._traced` pour
+  boucle locale, jamais tracée (AD-15) : `harness_lab_e2e.py` remplace `factory._traced` pour
   les seules requêtes dont le corps contient `[quota0]`.
 - `panes` : chaque volet en mode focus (⛶), à 1280×672 puis 1440×900 ; défilement
   d'Orchestration vers son dernier bloc « Données sortantes » (un tour `network_tools` d'abord
@@ -722,7 +722,7 @@ haut) :
 
 ## Lot 1 du plan de corrections du 2026-10-04
 
-- `diagnostic` : sur `/`, `<title>` « WaveStack — Atelier Harnais », un seul `h1` masqué
+- `diagnostic` : sur `/`, `<title>` « HarnessLab — Atelier Harnais », un seul `h1` masqué
   (`.sr-only`) et l'onglet « Harnais » courant ; `model_catalog` : `/diagnostic` titré
   « Modèles », lien `#models-link` vers `/models`.
 - `themes`, `mcp_lab`, `rag_lab`, `llm_screen` : la barre commune à cinq onglets
@@ -775,12 +775,12 @@ d'autres (story 21) :
 | `[mal-formé]` / `[mal-formé-toujours]` / `[outil-inconnu]` | arguments JSON invalides puis correction / à chaque essai / outil inexistant |
 | `[tool_use_failed]` | 400 `tool_use_failed` (façon Groq) |
 | `[erreur429]`, `[erreur500]`, `[erreur401]`, `[flux-erreur]` | refus du fournisseur, erreur au milieu du flux |
-| `[quota0]` (recette du 02/10) | 429 `Rate limit exceeded` avec `x-ratelimit-limit-req-minute: 0`, `x-ratelimit-remaining-req-minute: 0` et `x-request-id` (Mistral sans plan) ; tracé malgré la boucle locale par `wavestack_e2e.py` |
+| `[quota0]` (recette du 02/10) | 429 `Rate limit exceeded` avec `x-ratelimit-limit-req-minute: 0`, `x-ratelimit-remaining-req-minute: 0` et `x-request-id` (Mistral sans plan) ; tracé malgré la boucle locale par `harness_lab_e2e.py` |
 | `[markdown]` (recette du 02/10) | `MARKDOWN_SAMPLE` : le sous-ensemble Markdown rendu par la Vue humain et les injections qui doivent rester du texte ; son dernier bloc de code reste ouvert |
 | `[coupé]`, `[long]`, `[lent]`, `[raisonne]` | `finish_reason: length`, texte long, flux lent (pour « Arrêter »), champ `reasoning` |
 | `[jeté]` (finition V1, `POST /v1/messages` seulement) | `message_start` porte `input_transformations` (`thinking_dropped`, `prefix_binding_mismatch`, chemin `messages.1.content.0`) : le fournisseur dit avoir jeté un raisonnement ; recopié dans la tâche du sous-agent comme ` [lent]` |
-| `[sans-usage]` | réponse sans `usage` en fin de flux (tokens estimés par WaveStack) |
-| `[reranker-en-panne]` | (lu par le faux reranker de `wavestack_e2e.py`, pas par le faux modèle) le reranking lève, l'étape « Reranking » est en erreur |
+| `[sans-usage]` | réponse sans `usage` en fin de flux (tokens estimés par HarnessLab) |
+| `[reranker-en-panne]` | (lu par le faux reranker de `harness_lab_e2e.py`, pas par le faux modèle) le reranking lève, l'étape « Reranking » est en erreur |
 
 - `rag_lab`, suite V1.2 story 3 (CAP-8, `_rag_lab_costs`) : sur la chaîne livrée, un run remplit les
   cartes « Construction » (« mesuré à la construction » sur l'index précalculé) et « Requête » (5

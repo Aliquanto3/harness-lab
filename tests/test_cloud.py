@@ -16,16 +16,16 @@ from fake_engine import FakeEngine
 from pydantic import SecretStr
 from starlette.testclient import TestClient
 
-from wavestack import config
-from wavestack.context.render import distribute
-from wavestack.messages import msg
-from wavestack.models import discovery
-from wavestack.models.openai_chat import OpenAIChatEngine, _quota_scope
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.catalog import ContextReconciledPayload
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.context.render import distribute
+from harness_lab.messages import msg
+from harness_lab.models import discovery
+from harness_lab.models.openai_chat import OpenAIChatEngine, _quota_scope
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.catalog import ContextReconciledPayload
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 SENTINEL = "gsk_SENTINEL_0123456789_abcdefWXYZ"
 ORIGIN = {"Origin": "http://127.0.0.1:8420"}
@@ -734,7 +734,7 @@ def test_chat_overflow_is_decided_by_the_raw_estimate_only():
 
 
 def test_cli_relaunch_prepares_the_saved_cloud_model_without_request(monkeypatch):
-    from wavestack import cli
+    from harness_lab import cli
 
     config.save_setting("selected_model", {"kind": "cloud", "ref": "groq"})
     config.write_api_key("groq", "api.groq.com", SecretStr(SENTINEL))
@@ -1118,8 +1118,8 @@ def test_two_close_sends_are_spaced_across_adapters_and_the_wait_is_not_timed(mo
 
 
 def test_a_cancel_during_the_wait_sends_nothing():
-    from wavestack.models import openai_chat
-    from wavestack.models.engine import CancelToken
+    from harness_lab.models import openai_chat
+    from harness_lab.models.engine import CancelToken
 
     _spaced(30)
     provider = Provider(MISTRAL_TEXT)
@@ -1420,7 +1420,7 @@ def test_gemini_thought_marked_apart_goes_to_the_reasoning_channel():
     ],
 )
 def test_output_tokens_count_the_hidden_thinking(usage, expected):
-    from wavestack.models.openai_chat import output_tokens
+    from harness_lab.models.openai_chat import output_tokens
 
     assert output_tokens(usage) == expected
 
@@ -1533,8 +1533,8 @@ def gemini_call(name: str, arguments: str, call_id: str, signature: str) -> byte
 
 def test_calls_without_index_keep_their_arrival_order():
     """Gemini sends no `index`: calls keyed by `id` stay in arrival order, never sorted."""
-    from wavestack.models.engine import CancelToken
-    from wavestack.models.openai_chat import ChatBody, ChatEnd
+    from harness_lab.models.engine import CancelToken
+    from harness_lab.models.openai_chat import ChatBody, ChatEnd
 
     calls = [
         {"id": call_id, "type": "function", "function": {"name": name, "arguments": "{}"}}
@@ -1553,8 +1553,8 @@ def test_calls_without_index_keep_their_arrival_order():
 
 def _tool_calls_of(*fragments: dict) -> list[dict]:
     """The calls `openai_chat` reads from one streamed answer, a fragment per chunk."""
-    from wavestack.models.engine import CancelToken
-    from wavestack.models.openai_chat import ChatBody, ChatEnd
+    from harness_lab.models.engine import CancelToken
+    from harness_lab.models.openai_chat import ChatBody, ChatEnd
 
     stream = sse(*(delta(tool_calls=[f]) for f in fragments), delta("tool_calls"))
     entry = config.load_config().cloud_model("groq")
@@ -1652,7 +1652,7 @@ def _cost(payload: dict) -> tuple:
 
 
 def _spent() -> dict | None:
-    from wavestack.models import openai_chat
+    from harness_lab.models import openai_chat
 
     return openai_chat.session_spend(0.86)
 
@@ -1660,7 +1660,7 @@ def _spent() -> dict | None:
 def test_a_gemini_call_costs_its_prompt_and_every_output_token():
     """65 prompt tokens, `total_tokens` 1 065, `completion_tokens` 14: the output billed is
     1 000 tokens, the thinking tokens included (total − prompt)."""
-    from wavestack.trace.catalog import ConsumptionUpdatedPayload, ModelCallEndedPayload
+    from harness_lab.trace.catalog import ConsumptionUpdatedPayload, ModelCallEndedPayload
 
     usage = gemini_usage(65, 14, 986)
     stream = sse(gemini_delta(content="Bonjour.", usage=usage), gemini_delta("stop", usage=usage))
@@ -1766,7 +1766,7 @@ def test_tester_counts_in_the_session_total_and_the_state_gives_it(monkeypatch):
 
 
 def test_the_llm_screen_counts_in_the_session_total():
-    from wavestack.models.engine import Sampling
+    from harness_lab.models.engine import Sampling
 
     session = _cloud_session("gemini", GeminiProvider(GEMINI_TEXT))
     mark = get_journal().last_seq()

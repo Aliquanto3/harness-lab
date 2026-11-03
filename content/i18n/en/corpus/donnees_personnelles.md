@@ -1,6 +1,6 @@
 # Personal data retention periods at Exemplia
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: these periods describe no real company and do not constitute legal advice. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: these periods describe no real company and do not constitute legal advice. -->
 
 Personal data is kept only as long as necessary for the purpose for which it was collected. Exemplia's record of processing activities sets, for each processing activity, an active period, during which departments use the data, then an archiving period, during which only the legal department can access it.
 

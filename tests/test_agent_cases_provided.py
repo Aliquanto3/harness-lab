@@ -16,9 +16,9 @@ import yaml
 from fake_engine import FakeEngine, booted_session
 from test_tools import QWEN, call
 
-from wavestack import config
-from wavestack.agent_eval.cases import POSITIVE_KINDS, AgentCase, load_provided_cases
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.agent_eval.cases import POSITIVE_KINDS, AgentCase, load_provided_cases
+from harness_lab.trace.journal import get_journal
 
 ROOT = Path(__file__).resolve().parents[1]
 EVAL = ROOT / "tools" / "eval"

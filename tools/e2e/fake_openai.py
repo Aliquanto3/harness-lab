@@ -1,4 +1,4 @@
-"""Scripted OpenAI-compatible server for WaveStack's end-to-end tests (no real model).
+"""Scripted OpenAI-compatible server for HarnessLab's end-to-end tests (no real model).
 
 `POST /v1/chat/completions` (SSE stream, `usage` at the end when asked) and
 `GET /v1/models`, on the loopback only; `POST /v1/messages`, the same script in the shape of
@@ -49,7 +49,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response, StreamingResponse
 from starlette.routing import Route
 
-MODEL_ID = "wavestack-fake"
+MODEL_ID = "harness-lab-fake"
 EXPECTED_KEY = "e2e-fake-key"  # any other key gets a 401, like a real provider
 CHUNK_DELAY_S = 0.02  # between two SSE chunks: the UI sees a real stream
 SLOW_DELAY_S = 0.4  # with the « [lent] » trigger: time to click « Arrêter » or test a 409
@@ -121,8 +121,8 @@ def turn_slice(messages: list[dict[str, Any]]) -> tuple[str, list[dict[str, Any]
 @functools.cache
 def _chunk_texts() -> tuple[str, ...]:
     """The corpus's chunks, as the harness cuts them (the longest first)."""
-    from wavestack import config
-    from wavestack.rag.corpus import chunk_corpus, load_rag_content
+    from harness_lab import config
+    from harness_lab.rag.corpus import chunk_corpus, load_rag_content
 
     chunks = chunk_corpus(load_rag_content(), config.load_config().rag_chunk_max_chars)
     return tuple(sorted((c.text for c in chunks), key=len, reverse=True))
@@ -269,7 +269,7 @@ def _plan(
     """The tool calls a prompt leads to, in order; unavailable tools are skipped later.
     A trigger whose server is not connected falls through to the next ones."""
     low = user.lower()
-    if "test de connexion wavestack" in low:
+    if "test de connexion harness-lab" in low:
         return [("get_datetime", {})]
     if "sous-agent" in low and "délègue" in low:  # story 19: the main agent delegates
         task = (
@@ -385,7 +385,7 @@ def _final_text(user: str, messages: list[dict[str, Any]], results: list[str]) -
         excerpt = last if len(last) <= 240 else last[:240] + "…"
         return f"D'après le résultat de l'outil : {excerpt}"
     if "toujours en une phrase, comme un pirate" in system_text(messages).lower():
-        return "Arrr ! Je suis le faux modèle de WaveStack, moussaillon."
+        return "Arrr ! Je suis le faux modèle de HarnessLab, moussaillon."
     if "rappelle-moi mon prénom" in low:  # story 14: read from the global memory
         known = re.search(r"s'appelle (\w+)", system_text(messages))
         if known:
@@ -416,7 +416,7 @@ def _final_text(user: str, messages: list[dict[str, Any]], results: list[str]) -
     if "data.gouv" in low:
         return "Sans accès à data.gouv.fr, je ne peux pas chercher dans les données publiques."
     if "présente-toi" in low:
-        return "Je suis le faux modèle de WaveStack : mes réponses sont écrites d'avance."
+        return "Je suis le faux modèle de HarnessLab : mes réponses sont écrites d'avance."
     if "mcp" in low:
         return "MCP signifie Model Context Protocol (réponse sans outil)."
     return f"Réponse scriptée du faux modèle au message : « {user.strip()[:120]} »."
@@ -604,7 +604,7 @@ def sse_chunks(reply: Reply, body: dict[str, Any], completion_id: str) -> list[d
 def gemini_chunks(reply: Reply, body: dict[str, Any], completion_id: str) -> list[dict[str, Any]]:
     """Gemini mode: the chunks as the real API streams them (see the module's docstring)."""
     base = {"id": completion_id, "object": "chat.completion.chunk", "model": MODEL_ID}
-    # Nothing of the key (`e2e-fake-key`): WaveStack masks its pieces in the trace.
+    # Nothing of the key (`e2e-fake-key`): HarnessLab masks its pieces in the trace.
     signature = f"signature-fausse-{completion_id[-6:]}"
     marked = {"google": {"thought": True}}
     deltas: list[tuple[dict[str, Any], str | None]] = []

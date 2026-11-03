@@ -4,15 +4,15 @@
 - Poste : HP EliteBook x360 1030 G8, Intel Core i5-1145G7, 15,7 Go de RAM, Windows 11 Entreprise (build 26200), session sans droits admin. Proxy du poste : Zscaler (`ZSATunnel`, à l'écoute sur 127.0.0.1:9000), déclaré par `HTTPS_PROXY=http://127.0.0.1:9000` dans l'environnement utilisateur ; aucun proxy WinINET (`ProxyEnable = 0`).
 - Date : 2026-10-03 : Anthropic de 15:08 à 15:11 UTC (17:08 à 17:11, heure de Paris) ; OpenAI de 17:37 à 17:39 UTC (19:37 à 19:39), après la recharge du crédit par Anaël.
 - Code : branche `feat/stories-restantes-2026-10`, base `c396d6a` (stories 1 à 4 des fournisseurs natifs).
-- Modèles : `claude_haiku` (`claude-haiku-4-5`), `claude_sonnet` (`claude-sonnet-5`), `openai_luna` (`gpt-6-luna`), réglages de `wavestack.toml` sans surcharge. Plafond de séance : 5 $ (préréglage).
+- Modèles : `claude_haiku` (`claude-haiku-4-5`), `claude_sonnet` (`claude-sonnet-5`), `openai_luna` (`gpt-6-luna`), réglages de `harness-lab.toml` sans surcharge. Plafond de séance : 5 $ (préréglage).
 - Méthode :
-  - Serveur `wavestack` lancé dans sa propre console (masquée), piloté par l'API (`/api/intentions/*`) et le flux SSE (`/api/stream`) par un script jetable hors du dépôt. Chaque relevé vient des événements du journal (`diagnostic_check`, `model_call_ended`, `model_delta`, `outbound_request`, `outbound_response`, `tool_started`, `subagent_ended`, `consumption_updated`, `turn_ended`).
+  - Serveur `harness-lab` lancé dans sa propre console (masquée), piloté par l'API (`/api/intentions/*`) et le flux SSE (`/api/stream`) par un script jetable hors du dépôt. Chaque relevé vient des événements du journal (`diagnostic_check`, `model_call_ended`, `model_delta`, `outbound_request`, `outbound_response`, `tool_started`, `subagent_ended`, `consumption_updated`, `turn_ended`).
   - Les connexions TCP du serveur ont été échantillonnées par `netstat -ano` toutes les 0,4 s.
   - Langue de la session : `fr`. Les clés `ANTHROPIC_API_KEY` et `OPENAI_API_KEY` ont été lues dans l'environnement utilisateur (registre) et passées au seul processus serveur ; `api_keys.json` n'a pas été modifié.
   - `settings.json` et `memory.json` ont été sauvegardés avant, puis restaurés après chaque lancement.
   - Par modèle : « Tester », puis le scénario `reasoning` (prompt 1), `native_tools` prompt 1 (brique Raisonnement éteinte) et prompt 2 (brique Raisonnement allumée), `mcp_lazy` prompt 1 et `subagent` prompt 1.
 - Quatre lancements :
-  - Le premier a joué Haiku, puis le « Tester » et le tour Raisonnement de Sonnet. Le script s'est alors arrêté sur une erreur d'encodage de sa propre console, sans lien avec WaveStack : le serveur a été arrêté proprement et les fichiers ont été restaurés.
+  - Le premier a joué Haiku, puis le « Tester » et le tour Raisonnement de Sonnet. Le script s'est alors arrêté sur une erreur d'encodage de sa propre console, sans lien avec HarnessLab : le serveur a été arrêté proprement et les fichiers ont été restaurés.
   - Le deuxième a rejoué Sonnet depuis « Tester », puis le « Tester » de Luna (crédit encore épuisé).
   - Le troisième, crédit OpenAI rechargé, a joué toutes les lignes de Luna.
   - Le quatrième a ajouté deux tours Outils de Luna avec la brique Raisonnement (ligne L4b) : au prompt 2 de `native_tools`, Luna n'a pas raisonné, et aucun item `reasoning` n'était à renvoyer.
@@ -67,11 +67,11 @@ Aucun : aucune anomalie des stories 1 à 4 n'a été trouvée. Le constat S6 rel
 
 ## Actions d'Anaël
 
-1. **Console Anthropic : comparer le coût** (SPEC.md demande un écart d'au plus 10 %). **Fait le 2026-10-03 au soir** : 0,16 $ au tableau de bord pour le mois, ≈ 0,159 $ estimés par WaveStack sur la journée (stories 3 et 5, recette Chrome, plafond) ; écart sous l'arrondi au centime : OK (détail dans `resultats-batterie-2026-10-03.md`, section 6).
+1. **Console Anthropic : comparer le coût** (SPEC.md demande un écart d'au plus 10 %). **Fait le 2026-10-03 au soir** : 0,16 $ au tableau de bord pour le mois, ≈ 0,159 $ estimés par HarnessLab sur la journée (stories 3 et 5, recette Chrome, plafond) ; écart sous l'arrondi au centime : OK (détail dans `resultats-batterie-2026-10-03.md`, section 6).
    - Page Usage ou Cost, journée du 2026-10-03, par modèle. Les appels de la recette vont de 15:08:44 à 15:10:42 UTC (17:08 à 17:11, heure de Paris).
-   - Chiffres de WaveStack à comparer :
+   - Chiffres de HarnessLab à comparer :
 
-     | Modèle | Requêtes | Tokens d'entrée | Tokens de sortie | Coût WaveStack |
+     | Modèle | Requêtes | Tokens d'entrée | Tokens de sortie | Coût HarnessLab |
      |---|---|---|---|---|
      | `claude-haiku-4-5` | 14 | 20 837 | 1 828 | 0,029977 $ |
      | `claude-sonnet-5` | 20 | 29 228 | 2 382 | 0,082276 $ |
@@ -80,9 +80,9 @@ Aucun : aucune anomalie des stories 1 à 4 n'a été trouvée. Le constat S6 rel
    - La même journée compte aussi les mesures de la story 3 (10 requêtes facturées, 0,0258 $ ; `mesures-anthropic-2026-10.md`) et tout autre usage de la clé. Si la console ne filtre pas à la minute, comparer le total du jour à 0,1381 $ (0,112253 + 0,0258), plus les autres usages éventuels.
 2. **Console OpenAI : comparer le coût.** Crédit rechargé et lignes L1 à L8 jouées le 2026-10-03 au soir.
    - Page Usage, journée du 2026-10-03, modèle `gpt-6-luna`. Les appels facturés vont de 17:37:16 à 17:38:59 UTC (19:37 à 19:39, heure de Paris).
-   - Chiffres de WaveStack à comparer :
+   - Chiffres de HarnessLab à comparer :
 
-     | Modèle | Requêtes facturées | Tokens d'entrée | Tokens de sortie | Coût WaveStack |
+     | Modèle | Requêtes facturées | Tokens d'entrée | Tokens de sortie | Coût HarnessLab |
      |---|---|---|---|---|
      | `gpt-6-luna` | 20 | 12 289 | 965 | 0,001711 $ |
 

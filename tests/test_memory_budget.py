@@ -17,14 +17,14 @@ import psutil
 import pytest
 from fake_engine import FakeEngine
 
-from wavestack import config
-from wavestack.models import discovery, probe
-from wavestack.models.engine import CancelToken
-from wavestack.models.load_registry import LoadRegistry, ModelChoice
-from wavestack.session import diagnostic as diagnostic_module
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.models import discovery, probe
+from harness_lab.models.engine import CancelToken
+from harness_lab.models.load_registry import LoadRegistry, ModelChoice
+from harness_lab.session import diagnostic as diagnostic_module
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
 
 MIB = 1024**2
 GIB = 1024**3
@@ -73,8 +73,8 @@ def test_dynamic_budget_limited_by_the_ram(monkeypatch):
     assert cfg.memory_budget.bytes == 3000 * MIB and cfg.memory_budget.ram_limited
     check = _memory_check(cfg)
     assert (check["status"], check["blocking"]) == ("warn", False)
-    assert "fermez des applications puis relancez WaveStack" in check["action_text"]
-    assert f"Budget mémoire de WaveStack : 3{NB}000 Mo" in check["message_text"]
+    assert "fermez des applications puis relancez HarnessLab" in check["action_text"]
+    assert f"Budget mémoire de HarnessLab : 3{NB}000 Mo" in check["message_text"]
     assert f"RAM du poste : 16{NB}071 Mo, dont 5{NB}000 Mo disponibles" in check["message_text"]
 
     registry = LoadRegistry(cfg.memory_budget, 0, rss_fn=lambda: 150 * MIB)
@@ -82,12 +82,12 @@ def test_dynamic_budget_limited_by_the_ram(monkeypatch):
     # One unit per sentence, the calculation in short (the diagnostic has it in full).
     assert (
         f"pour un budget de 2,9 Go (= 60{PCT} des 4,9 Go de RAM disponibles au lancement). "
-        "Choisissez un modèle plus petit, ou fermez des applications puis relancez WaveStack."
+        "Choisissez un modèle plus petit, ou fermez des applications puis relancez HarnessLab."
     ) in refusal
     component = registry.check_component("le modèle d'embedding X", 3 * GIB, "embedding")
     assert (
         f"au-delà du budget de 3{NB}000 Mo (= 60{PCT} des 5{NB}000 Mo de RAM disponibles au "
-        "lancement). Désactivez une brique, ou fermez des applications puis relancez WaveStack."
+        "lancement). Désactivez une brique, ou fermez des applications puis relancez HarnessLab."
     ) in component
     assert "relevez [memory] budget_mb" not in component
 
@@ -100,7 +100,7 @@ def test_fixed_budget(monkeypatch):
     assert cfg.memory_budget.calc_fr().startswith(f"valeur fixe [memory] budget_mb de 6{NB}144 Mo")
     check = _memory_check(cfg)
     assert check["status"] == "ok" and check["action_text"] is None
-    assert f"Budget mémoire de WaveStack : 6{NB}144 Mo (valeur fixe" in check["message_text"]
+    assert f"Budget mémoire de HarnessLab : 6{NB}144 Mo (valeur fixe" in check["message_text"]
     refusal = LoadRegistry(cfg.memory_budget, 0, rss_fn=lambda: 0).check("B", 7 * GIB)
     assert "pour un budget de 6,0 Go (= valeur fixe [memory] budget_mb)." in refusal
 
@@ -110,7 +110,7 @@ def test_ram_at_the_cap_is_ok(monkeypatch):
     check = _memory_check(_cfg())
 
     assert (check["status"], check["action_text"]) == ("ok", None)
-    assert f"Budget mémoire de WaveStack : 4{NB}096 Mo (plafond" in check["message_text"]
+    assert f"Budget mémoire de HarnessLab : 4{NB}096 Mo (plafond" in check["message_text"]
 
 
 @pytest.mark.parametrize(
@@ -210,7 +210,7 @@ def test_budget_computed_once_and_shared_by_diagnostic_and_session(monkeypatch):
 
     assert cfg.memory_budget.bytes == 3000 * MIB
     assert session._load_registry.budget is cfg.memory_budget
-    assert f"Budget mémoire de WaveStack : 3{NB}000 Mo" in _memory_check(cfg)["message_text"]
+    assert f"Budget mémoire de HarnessLab : 3{NB}000 Mo" in _memory_check(cfg)["message_text"]
 
 
 # ---------- the base, measured before the engine ----------
@@ -223,7 +223,7 @@ def test_refusal_never_says_zero_when_the_weights_are_little_resident():
 
     refusal = registry.check("B", 4 * GIB)
 
-    assert "WaveStack occupe 150 Mo sans le modèle actif" in refusal
+    assert "HarnessLab occupe 150 Mo sans le modèle actif" in refusal
     registry.grant("A", 3 * GIB, share=round(2.5 * GIB))  # without the base (lot E): 0 Mo,
     assert registry.check("B", 4 * GIB) is None  # and a 4 Go model let through
 
@@ -233,7 +233,7 @@ def test_what_loaded_after_the_model_still_counts():
     registry = LoadRegistry(4 * GIB, 0, rss_fn=lambda: 150 * MIB + 2 * GIB + 300 * MIB)
     registry.grant("A", 2 * GIB, share=2 * GIB, base=150 * MIB)
 
-    assert "WaveStack occupe 450 Mo sans le modèle actif" in registry.check("B", 4 * GIB)
+    assert "HarnessLab occupe 450 Mo sans le modèle actif" in registry.check("B", 4 * GIB)
 
 
 def test_session_measures_the_base_just_before_the_engine(tmp_path):
@@ -272,7 +272,7 @@ def test_session_measures_the_base_just_before_the_engine(tmp_path):
     with pytest.raises(SendRefused) as refused:
         session.switch_model(ModelChoice("file", str(b)))
 
-    assert "WaveStack occupe 150 Mo sans le modèle actif" in refused.value.reason_text
+    assert "HarnessLab occupe 150 Mo sans le modèle actif" in refused.value.reason_text
     assert "pour un budget de 4,0 Go (= plafond [memory] budget_mb)." in refused.value.reason_text
 
 

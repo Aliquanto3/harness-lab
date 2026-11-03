@@ -1,6 +1,6 @@
 # Exemplia on-call contacts annex
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this annex describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this annex describes no real company. -->
 
 This annex of the crisis management procedure lists the contacts to reach outside working hours, day and night, depending on the area concerned.
 

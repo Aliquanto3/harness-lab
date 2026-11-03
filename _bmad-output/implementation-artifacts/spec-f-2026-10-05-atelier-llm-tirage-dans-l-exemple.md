@@ -47,18 +47,18 @@ context:
 
 ## Code Map
 
-- `src/wavestack/models/candidates.py` -- `distribution` (l.176) : rows `{p, kept, p_sampled}`. Ajouter une fonction pure `draw_index(rows, rng)` : index tiré parmi les `kept` au poids `p_sampled` (`rng.random()`), testable avec `random.Random(seed)`.
-- `src/wavestack/session/app_session.py` -- `llm_example_distribution` (l.9022) : réutiliser son contenu (`_lab_content`, `stages.output.example`) ; nouvelle `llm_example_draw(sampling)` juste après, mêmes erreurs (`DistributionMissing`), rend `{"index", "token_text", "example": True}`. Générateur `random.Random()` de l'instance (attribut créé à l'init, remplaçable par les tests).
-- `src/wavestack/web/app.py` -- `LlmExampleDistributionRequest` (l.237) réutilisé ; route `POST /api/llm_lab/example_draw` après `example_distribution` (l.548), même gestion 404, même `shown(...)`.
-- `src/wavestack/web/static/llm.js` --
+- `src/harness_lab/models/candidates.py` -- `distribution` (l.176) : rows `{p, kept, p_sampled}`. Ajouter une fonction pure `draw_index(rows, rng)` : index tiré parmi les `kept` au poids `p_sampled` (`rng.random()`), testable avec `random.Random(seed)`.
+- `src/harness_lab/session/app_session.py` -- `llm_example_distribution` (l.9022) : réutiliser son contenu (`_lab_content`, `stages.output.example`) ; nouvelle `llm_example_draw(sampling)` juste après, mêmes erreurs (`DistributionMissing`), rend `{"index", "token_text", "example": True}`. Générateur `random.Random()` de l'instance (attribut créé à l'init, remplaçable par les tests).
+- `src/harness_lab/web/app.py` -- `LlmExampleDistributionRequest` (l.237) réutilisé ; route `POST /api/llm_lab/example_draw` après `example_distribution` (l.548), même gestion 404, même `shown(...)`.
+- `src/harness_lab/web/static/llm.js` --
   - `drawStep` (l.1500) : en mode exemple, `post("/api/llm_lab/example_draw", {sampling: exampleSampling()})` au lieu de `llm_step`, avec un ticket (`store.step` ou `store.dist.ticket`) pour ignorer une réponse périmée ; `store.step.drawn = {id: null, text, example: true}`, historique, `store.steppers.output?.show(OUTPUT_STEPS.length - 1)`, puis `fetchExample()` pour marquer la ligne.
   - `stepReason` (l.1429) : en mode exemple, pas de raison (ni candidats, ni « Découpez d'abord », ni occupation de session).
   - `renderStep` (l.1460) : puce `is-example` + mention `stages.output.example.drawn_text` ; `aria-label` `stages.output.example.chip_label_text` ; `llm-step-append`/`llm-step-undo` `hidden` en mode exemple ; `aria-describedby="distribution-note"` en mode exemple.
   - `renderDistribution` (l.1302) : en exemple, `chosen = store.step.drawn?.example ? store.step.drawn.text : null` (lignes `is-chosen`), `#distribution-token` vide.
   - `unmarkStepToken` (l.1444) : retirer aussi les marques en exemple.
   - chargement de l'état (l.2349) : si le mode change (`available` change), effacer `drawn` et `history` de l'autre mode.
-- `src/wavestack/web/static/llm.css` -- `.llm-output-chip` (l.1006) : style de la mention « exemple » (reprendre le badge d'exemple existant si possible).
-- `src/wavestack/session/llm_lab.py` -- `OutputExample` (l.387) : `drawn_text`, `chip_label_text`.
+- `src/harness_lab/web/static/llm.css` -- `.llm-output-chip` (l.1006) : style de la mention « exemple » (reprendre le badge d'exemple existant si possible).
+- `src/harness_lab/session/llm_lab.py` -- `OutputExample` (l.387) : `drawn_text`, `chip_label_text`.
 - `content/llm_lab.yaml`, `content/i18n/{en,de}/llm_lab.yaml` -- `stages.output.example.drawn_text` (« exemple »), `chip_label_text` (« {texte}, tiré dans l'exemple »).
 - `tests/test_llm_lab.py` -- après `test_the_example_route_says_why_when_the_texts_cannot_be_read` (l.1839).
 - `tools/e2e/run_e2e.py` -- `_distribution_unavailable` (l.12087), appelée pour le cloud (l.11899) et llama-server (l.12022) : ajouter le contrôle du tirage d'exemple.

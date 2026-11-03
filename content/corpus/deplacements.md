@@ -1,6 +1,6 @@
 # Déplacements professionnels et notes de frais chez Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : ces barèmes ne décrivent aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : ces barèmes ne décrivent aucune entreprise réelle. -->
 
 Tout déplacement professionnel est validé à l'avance par le manager dans l'outil de réservation Voyagex, qui applique automatiquement les règles ci-dessous. Une réservation faite en dehors de Voyagex n'est remboursée qu'à titre exceptionnel, sur justification écrite.
 

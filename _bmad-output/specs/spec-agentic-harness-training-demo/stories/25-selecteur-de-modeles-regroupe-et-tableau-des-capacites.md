@@ -80,11 +80,11 @@ deferred:
 | llama-server | `/props` : gabarit Qwen3.5, `model_path` absent du disque ; nom `faux-llama-server.gguf` | Qwen, par la famille `qwen3` de `capabilities_for` (jamais Llama pour « llama-server ») ; taille = `meta.size` en Go ; fenêtre = min(configurée, native, contexte d'un emplacement) | En-tête illisible : éditeur par la famille, puis par le nom |
 | Cloud qui raisonne toujours | `reasoning.always = true`, `tools = true` | Raisonnement « toujours », outils « oui (déclaré) » | — |
 | Cloud sans déclaration | `reasoning` absent, `tools = false` | « jamais », « non » avec la raison « non déclaré » | — |
-| Gabarit `<think>` sans variable | famille inconnue, `<think>` dans le gabarit | « inconnu » : « raisonne peut-être de lui-même, WaveStack ne sait ni l'allumer ni l'éteindre » | Brique Raisonnement indisponible, comme aujourd'hui |
+| Gabarit `<think>` sans variable | famille inconnue, `<think>` dans le gabarit | « inconnu » : « raisonne peut-être de lui-même, HarnessLab ne sait ni l'allumer ni l'éteindre » | Brique Raisonnement indisponible, comme aujourd'hui |
 | Sans gabarit | GGUF sans `tokenizer.chat_template` | « inconnu » avec `incompatible_reason` | — |
 | Tri | 4B, 0.6B, taille inconnue de 1,5 Go, taille inconnue sans octets | 0.6B, 4B, puis 1,5 Go, puis le reste par nom | Égalité : par nom, insensible à la casse |
 | Taille dans le nom | `openai/gpt-oss-120b`, `llama3.2:3b`, `mistral-small-latest` | 120B, 3B, inconnue | `Q4_K_M`, `3.5` ne sont pas des tailles |
-| Éditeur inconnu | `wavestack-fake` | Groupe « Autres éditeurs », dernier de son hébergement | — |
+| Éditeur inconnu | `harness-lab-fake` | Groupe « Autres éditeurs », dernier de son hébergement | — |
 | YAML invalide | regex fausse ou clé manquante | Tous en « Autres éditeurs », `publishers_error_fr` dans la réponse | Jamais d'exception |
 
 </intent-contract>
@@ -93,31 +93,31 @@ deferred:
 
 Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.js`, `app.css`, `diagnostic.html`, `diagnostic.py`, `app_session.py` et `run_e2e.py` avant celle-ci. Se repérer aux symboles.
 
-- `src/wavestack/web/static/app.js`
+- `src/harness_lab/web/static/app.js`
   - `renderModelIndicator` (l.~1952 ; tags « Local », « Local · {provider} », « RÉSEAU · {provider} », inchangés).
   - `PICK_OTHER`, `modelKey`, `loadModelList` (`GET /api/diagnostic`, rechargé par `scheduleModelList`), `pickerOption`, `renderModelPicker` (libellé du bouton d'application selon la valeur notée).
   - `rebuildModelPicker` (l.~2045) : deux `optgroup` construits dans le navigateur. Serveurs : « Local · {provider} · {name} » plus « (actif) » ou « (incompatible) ». Fichiers : `{name} · {size_label}`, dédoublonnés par `path`. Cloud : « RÉSEAU · {provider} · {model} » plus « (indisponible) ». Aucun tri.
   - `applyPick` : `kind:ref`, `cloud:` passe par `openCloudWarning`.
-- `src/wavestack/web/app.py` -- `create_app` : `index_page` et `diagnostic_page` (`FileResponse`, `_revalidate_pages`) ; `diagnostic_state` (l.~264 : `candidates`, `loaded`, `cloud = session.cloud_rows(...)`, `app_session.active_choice()`).
-- `src/wavestack/models/discovery.py`
+- `src/harness_lab/web/app.py` -- `create_app` : `index_page` et `diagnostic_page` (`FileResponse`, `_revalidate_pages`) ; `diagnostic_state` (l.~264 : `candidates`, `loaded`, `cloud = session.cloud_rows(...)`, `app_session.active_choice()`).
+- `src/harness_lab/models/discovery.py`
   - `ModelCandidate` (l.~24 ; `architecture` et `size_label` viennent seulement du cache de sonde).
   - `_ollama_candidates` (blobs `found`, `name` = `model:tag`).
   - `_server_candidates` : `ServedModel` en main, `candidate.gguf_path` (blob Ollama ou `model_path` de llama-server). La story 24 y passe `cfg.context_window` à `served_bytes`.
   - `discover()` : ordre AD-7 (fichiers, cache HF, LM Studio, Ollama, serveurs), et `name` = nom du fichier.
-- `src/wavestack/models/servers.py`
+- `src/harness_lab/models/servers.py`
   - `ServedModel` (dataclass) ; `_served_by` : Ollama `/api/tags` (ignore `details`) et `/api/ps` ; llama-server `/props` (`model_path`, `chat_template` lus puis jetés) et `/v1/models` (`meta.size`, `n_ctx_train`).
   - `LlamaServerEngine._read_metadata` : `EngineMetadata(architecture=None, chat_template=props…, native_context=n_ctx_train, server_context=…)`, la référence à imiter.
-- `src/wavestack/models/capabilities.py` -- `Capabilities`, `capabilities_for`. Famille `qwen3` par l'architecture ou par le gabarit : `tool_call_parser` hermes ou qwen3_coder, `reasoning` = variable `enable_thinking`. Sinon `tool_call_parser=None` et `reasoning_tags` si `<think>`.
-- `src/wavestack/models/gguf_meta.py` -- `try_read_metadata(path)`, lecteur Python pur qui saute le vocabulaire. `probe.gguf_kv_bytes_per_token` l'utilise déjà dans le processus principal.
-- `src/wavestack/session/app_session.py`
+- `src/harness_lab/models/capabilities.py` -- `Capabilities`, `capabilities_for`. Famille `qwen3` par l'architecture ou par le gabarit : `tool_call_parser` hermes ou qwen3_coder, `reasoning` = variable `enable_thinking`. Sinon `tool_call_parser=None` et `reasoning_tags` si `<think>`.
+- `src/harness_lab/models/gguf_meta.py` -- `try_read_metadata(path)`, lecteur Python pur qui saute le vocabulaire. `probe.gguf_kv_bytes_per_token` l'utilise déjà dans le processus principal.
+- `src/harness_lab/session/app_session.py`
   - `_install` : `capabilities_for(engine.metadata())`, `effective_window(configured, native)`, puis `meta.server_context`.
   - `_install_cloud` : `Capabilities(...)` en ligne, à extraire.
   - `_capability_reason`, `_no_reasoning_fr`, `_always_fr`, `_CAPABILITIES_FR` : textes des cartes, à garder cohérents avec la table.
-- `src/wavestack/context/window.py` -- `effective_window`. `config.py` -- `CloudModel` (`tools`, `reasoning`, `always_reasons`, `context`), `cloud_window`, `Config.cloud_models`, `Config.context_window`, `content_dir()`.
-- `src/wavestack/session/diagnostic.py` -- `_discover` (état final des candidats : incompatibles par la sonde) ; `cloud_rows` (`disabled_fr`, `loaded`).
-- `src/wavestack/cloud.py` -- `load_cloud_content` (`@cache`, pydantic) : le modèle de chargeur à suivre.
-- `src/wavestack/web/static/diagnostic.html` -- page autonome : style en ligne, `#checks`, `#candidates`, `#cloud-models`, `#open-link`.
-- `src/wavestack/web/static/index.html` -- `#model-picker`, `#model-picker-apply` dans `.top-bar`. `tokens.css` et `fonts.css` sont réutilisables par une nouvelle page.
+- `src/harness_lab/context/window.py` -- `effective_window`. `config.py` -- `CloudModel` (`tools`, `reasoning`, `always_reasons`, `context`), `cloud_window`, `Config.cloud_models`, `Config.context_window`, `content_dir()`.
+- `src/harness_lab/session/diagnostic.py` -- `_discover` (état final des candidats : incompatibles par la sonde) ; `cloud_rows` (`disabled_fr`, `loaded`).
+- `src/harness_lab/cloud.py` -- `load_cloud_content` (`@cache`, pydantic) : le modèle de chargeur à suivre.
+- `src/harness_lab/web/static/diagnostic.html` -- page autonome : style en ligne, `#checks`, `#candidates`, `#cloud-models`, `#open-link`.
+- `src/harness_lab/web/static/index.html` -- `#model-picker`, `#model-picker-apply` dans `.top-bar`. `tokens.css` et `fonts.css` sont réutilisables par une nouvelle page.
 - `tools/e2e/fake_local_server.py` -- `tags` (Ollama : un modèle, `size`, sans `details`), `props`, `models`. `tools/e2e/stack.py` -- `settings` : trois entrées cloud A, B et R (R raisonne toujours, story 33), noms sans éditeur connu.
 - `tools/e2e/run_e2e.py`
   - `_picker_options` (libellé vers désactivé).
@@ -141,7 +141,7 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
   - LFM (Liquid AI), Nemotron (NVIDIA), gpt-oss (OpenAI), MiniCPM (OpenBMB) ;
   - `other_fr: Autres éditeurs`.
   Ajouter les textes de légende (`legend_fr`, `served_by_fr` : fichier, Ollama, llama-server) et un commentaire d'en-tête. La table reste en contenu, pas en code (AD-19).
-- `src/wavestack/models/capabilities.py` --
+- `src/harness_lab/models/capabilities.py` --
   - `cloud_capabilities(entry: CloudModel) -> Capabilities`, déplacé depuis `_install_cloud`.
   - `reasoning_mode(caps | None) -> Literal["never","always","toggle","unknown"]`, avec sa raison en français :
     - `None` ou `incompatible_reason` : `unknown` ;
@@ -151,10 +151,10 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
     - sinon `never`.
   - `tools_summary(caps)`, qui reprend le texte de `_CAPABILITIES_FR` pour « non ».
   Ce sont les règles des cartes, en un seul endroit.
-- `src/wavestack/context/window.py` -- `window_for(meta: EngineMetadata, configured) -> tuple[int, str]` : `effective_window`, puis `server_context`. `_install` l'utilise. La même fenêtre s'affiche dans la table et dans la jauge.
-- `src/wavestack/session/app_session.py` -- `_install_cloud` appelle `cloud_capabilities(entry)`, et `_install` appelle `window_for`. Comportement inchangé.
-- `src/wavestack/models/servers.py` -- `ServedModel` reçoit `family`, `parameter_size` (depuis `details` de `/api/tags`), `chat_template` et `n_ctx_train` (depuis `/props` et `/v1/models` de llama-server). Aucune requête en plus.
-- `src/wavestack/models/catalog.py` (nouveau) --
+- `src/harness_lab/context/window.py` -- `window_for(meta: EngineMetadata, configured) -> tuple[int, str]` : `effective_window`, puis `server_context`. `_install` l'utilise. La même fenêtre s'affiche dans la table et dans la jauge.
+- `src/harness_lab/session/app_session.py` -- `_install_cloud` appelle `cloud_capabilities(entry)`, et `_install` appelle `window_for`. Comportement inchangé.
+- `src/harness_lab/models/servers.py` -- `ServedModel` reçoit `family`, `parameter_size` (depuis `details` de `/api/tags`), `chat_template` et `n_ctx_train` (depuis `/props` et `/v1/models` de llama-server). Aucune requête en plus.
+- `src/harness_lab/models/catalog.py` (nouveau) --
   - `load_publishers()` : `@cache`, pydantic, regex compilées ; en cas d'erreur, table vide et `error_fr`.
   - `publisher_for(architectures, names) -> Publisher` : d'abord les préfixes d'architecture (en-tête, `details.family`, `caps.family` hors `unknown` et `openai_chat`), puis les regex sur les noms (`general.basename`, `general.name`, nom affiché, `model` cloud), puis « Autres ».
   - `parse_params(text) -> float | None` : « 2B », « 0.6B », « 270M », « 8x7B » = 56, « 30B-A3B » = 30, ou dans un nom avec des bornes non alphanumériques.
@@ -163,27 +163,27 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
   - `local_entries(candidates, cfg)`, qui dédoublonne les fichiers par chemin comme aujourd'hui, et `cloud_entries(cfg, rows)`, où `disabled_fr` vient de `cloud_rows`.
   - `group_models(entries) -> [{hosting, publisher_id, label_fr, models}]` : Local avant Réseau, éditeurs dans l'ordre du YAML, Autres en dernier, groupes vides omis. Tri par (taille en paramètres inconnue, paramètres, octets inconnus, octets, nom insensible à la casse).
   Tout le calcul reste en Python, une fonction par règle, testable.
-- `src/wavestack/models/discovery.py` -- `ModelCandidate` reçoit plusieurs champs, que `_server_candidates` et `discover()` remplissent :
+- `src/harness_lab/models/discovery.py` -- `ModelCandidate` reçoit plusieurs champs, que `_server_candidates` et `discover()` remplissent :
   - `publisher_hint` (famille Ollama), `params_label` (`parameter_size`), `size_bytes` (taille du fichier, ou `size` du serveur) ;
   - `server_template` et `native_context` (llama-server), déclarés `Field(default=None, exclude=True)` : le gabarit ne part pas dans le JSON de `/api/diagnostic`.
   Aucune lecture d'en-tête ici : le catalogue la fait et la mémorise.
-- `src/wavestack/web/app.py` -- Dans `diagnostic_state`, ajouter `"models": {"legend_fr", "groups", "publishers_error_fr"}`, construit par `catalog` à partir de `result.candidates`, `cfg` et `cloud_rows`. Ajouter `@app.get("/models")`, qui sert `models.html`. Une seule réponse sert le sélecteur et la page.
-- `src/wavestack/web/static/app.js` -- `rebuildModelPicker` lit `store.modelList.models.groups`.
+- `src/harness_lab/web/app.py` -- Dans `diagnostic_state`, ajouter `"models": {"legend_fr", "groups", "publishers_error_fr"}`, construit par `catalog` à partir de `result.candidates`, `cfg` et `cloud_rows`. Ajouter `@app.get("/models")`, qui sert `models.html`. Une seule réponse sert le sélecteur et la page.
+- `src/harness_lab/web/static/app.js` -- `rebuildModelPicker` lit `store.modelList.models.groups`.
   - Un `optgroup` par groupe, libellé « Sur ce poste · {éditeur} » ou « Réseau · {éditeur} ».
   - Chaque option porte `label_fr`, suivi de « (actif) » d'après `modelKey`, ou « (incompatible) » / « (indisponible) » avec `disabled_fr` en infobulle.
   - Juste après « Changer de modèle… », une option désactivée de légende : `legend_fr`.
   - Avant « Autre fichier ou clé API… », l'entrée « Tableau des modèles et de leurs capacités… » (`PICK_MODELS`) : le bouton affiche « Ouvrir le tableau », et `applyPick` ouvre `/models` dans le même onglet. L'infobulle du sélecteur reprend la légende.
   - Repli sur l'ancienne construction si `models` est absent.
   Aucune couleur écrite en dur.
-- `src/wavestack/web/static/models.html` (nouveau) -- La page « Modèles disponibles » :
+- `src/harness_lab/web/static/models.html` (nouveau) -- La page « Modèles disponibles » :
   - `fonts.css` et `tokens.css`, style en jetons seulement ;
-  - `<nav class="page-tabs">` : « Diagnostic » (`/diagnostic`), « Modèles » (`aria-current="page"`), « Ouvrir WaveStack » (`/`) ;
+  - `<nav class="page-tabs">` : « Diagnostic » (`/diagnostic`), « Modèles » (`aria-current="page"`), « Ouvrir HarnessLab » (`/`) ;
   - la légende ;
   - un `<table>` avec une `<caption>`, un `<tbody>` par groupe et son en-tête `th scope="rowgroup"`. Colonnes : Modèle (préfixe en `hosting-tag-local`, ou `hosting-tag-network` avec 🌐 RÉSEAU), Éditeur, Taille (« 2B · 1,3 Go », « — » si inconnue), Hébergement (qui le sert, et `hosting_fr` pour le cloud), Fenêtre (« 4 096 tokens », native en infobulle), Appel d'outils, Raisonnement (mot, et raison visible sous le mot quand elle est inconnue), État (actif, incompatible ou indisponible, avec la raison) ;
   - une ligne sous la table : « Capacités lues comme au chargement : mêmes règles que les cartes des briques. » ;
   - l'erreur de `publishers.yaml` affichée en tête si présente ;
   - un seul `fetch("/api/diagnostic")` au chargement, lecture seule.
-- `src/wavestack/web/static/diagnostic.html` -- Ajouter la même `nav.page-tabs` en haut (« Diagnostic » courant), additive. Le reste de la page ne change pas.
+- `src/harness_lab/web/static/diagnostic.html` -- Ajouter la même `nav.page-tabs` en haut (« Diagnostic » courant), additive. Le reste de la page ne change pas.
 - `tools/e2e/fake_local_server.py` -- `tags` : ajouter `details: {family: "qwen3", parameter_size: "0.6B"}` au faux modèle Ollama. Le tri et l'éditeur deviennent observables sans vrai Ollama.
 - `tools/e2e/run_e2e.py`, `tools/e2e/README.md` --
   - Mettre à jour les libellés figés : faux Ollama « Local · Ollama · faux-ollama:latest · 0.6B (incompatible) ». `LLAMA_OPTION` et les libellés cloud restent inchangés (taille inconnue).
@@ -213,7 +213,7 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
 - Given la page `/models`, when on lit les lignes, then :
   - `faux-llama-server.gguf` : éditeur « Qwen (Alibaba) », outils « oui », raisonnement « activable », fenêtre « 4 096 tokens » ;
   - le faux modèle R : « toujours » ;
-  - `wavestack-fake` : « jamais » ;
+  - `harness-lab-fake` : « jamais » ;
   - `faux-ollama:latest` : « inconnu », avec une raison visible qui contient « introuvable » ;
   - chaque ligne réseau montre « RÉSEAU » ;
   - la ligne du modèle actif dit « actif ».
@@ -225,12 +225,12 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
 ## Review Triage Log
 
 ### 2026-09-29 — Review pass
-- verdicts: 19 findings — high 0, medium 3, low 12, false 1, maybe-false 3 (écarts de l'auditeur d'intention : regroupement Local/Réseau × éditeur plutôt que par canal de service, tri par paramètres puis octets, page dédiée, « toujours » réservé aux déclarations cloud, correspondance par test de parité — conformes aux décisions par défaut ; les groupes réseau Mistral et gpt-oss issus des préréglages de `wavestack.toml` sont consignés ici à la place du critère d'acceptation)
+- verdicts: 19 findings — high 0, medium 3, low 12, false 1, maybe-false 3 (écarts de l'auditeur d'intention : regroupement Local/Réseau × éditeur plutôt que par canal de service, tri par paramètres puis octets, page dédiée, « toujours » réservé aux déclarations cloud, correspondance par test de parité — conformes aux décisions par défaut ; les groupes réseau Mistral et gpt-oss issus des préréglages de `harness-lab.toml` sont consignés ici à la place du critère d'acceptation)
 - findings:
   - `[low]` `[patch]` (vérif. + blind) repli de `/api/diagnostic` quand le catalogue échoue non testé — test ajouté.
   - `[medium]` `[patch]` (blind + edge) modèle sans gabarit affiché « disponible » et sélectionnable, chargement refusé ensuite — non utilisable, raison affichée.
   - `[low]` `[patch]` (blind + edge) fichiers incompatibles absents de la table et du sélecteur — listés grisés avec leur raison.
-  - `[low]` `[patch]` (blind) onglet « Ouvrir WaveStack » hors de la garde de disponibilité du diagnostic — gardé.
+  - `[low]` `[patch]` (blind) onglet « Ouvrir HarnessLab » hors de la garde de disponibilité du diagnostic — gardé.
   - `[low]` `[patch]` (blind) colonne Hébergement construite en français dans le navigateur — libellé envoyé par la session.
   - `[low]` `[defer]` (blind) aides recopiées (`size_fr`, `_fr_int`, `_text`, `_positive`, taille de fichier) — mise en commun à faire.
   - `[low]` `[patch]` (blind) CSS des onglets recopiée et divergente — feuille commune.
@@ -252,7 +252,7 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
 - Un `<select>` natif n'imbrique pas les `optgroup` : le niveau hébergement passe dans le libellé du groupe (« Sur ce poste · Qwen (Alibaba) »), et l'option garde le préfixe complet. On garde le `select` natif, accessible au clavier, avec le modèle « noter puis Charger » de la story 17.
 - Légende en option désactivée : visible exactement quand la liste est ouverte, sautée par les flèches du clavier, et sans place à trouver dans la barre haute foncée de la story 33.
 - L'éditeur passe d'abord par l'architecture, puis par le nom. L'architecture `llama` sert aussi à Mistral 7B et à SmolLM : Llama (Meta) se reconnaît donc au nom seul. « llama-server » ne ressemble pas à `llama[-_. ]?\d`.
-- La fenêtre de la table est celle que WaveStack utiliserait au chargement (`window_for`, `cloud_window`) ; la native passe en infobulle. La story 26 (fenêtre réglable) n'aura qu'à changer `configured`.
+- La fenêtre de la table est celle que HarnessLab utiliserait au chargement (`window_for`, `cloud_window`) ; la native passe en infobulle. La story 26 (fenêtre réglable) n'aura qu'à changer `configured`.
 - Exemple de `ModelEntry` : `{value: "server:llama_server/faux-llama-server.gguf", prefix_fr: "Local · llama-server", label_fr: "Local · llama-server · faux-llama-server.gguf", publisher_fr: "Qwen (Alibaba)", params_label: null, size_bytes: 1500000000, window: 4096, tools: true, tools_fr: "oui (hermes)", reasoning: "toggle", reasoning_fr: "activable"}`.
 
 ## Verification
@@ -261,7 +261,7 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
 - `uv run ruff check .` -- expected: aucun problème
 - `uv run ruff format --check .` -- expected: aucun fichier à reformater
 - `uv run pytest -q` -- expected: tout vert, `test_model_catalog.py` compris
-- `node --check src/wavestack/web/static/app.js` -- expected: pas d'erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: pas d'erreur
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` -- expected: aucun FAIL ; `s_model_catalog` passe ; captures de `tools/e2e/screenshots` mises à jour et commitées
 
 **Manual checks (if no CLI):**
@@ -272,7 +272,7 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
 - **Page dédiée plutôt qu'un onglet dans `diagnostic.html`.** L'onglet « Modèles » est une page `/models`, reliée au diagnostic par une barre d'onglets commune. Raisons : la page de diagnostic (640 px, style en ligne) est modifiée par la story 24 et figée par l'E2E, et un tableau à huit colonnes demande de la largeur.
 - **Regroupement et tri côté Python, livrés dans `/api/diagnostic`.** Une seule réponse sert le sélecteur et la page, les règles sont testables par `pytest` (AD-1), et aucun appel HTTP ne s'ajoute.
 - **Deux niveaux dans un seul libellé de groupe.** « Sur ce poste · {éditeur} », parce que le `select` natif n'imbrique pas les groupes. On garde le `select` natif plutôt que d'écrire une liste personnalisée : accessibilité, E2E existant, portée de la story.
-- **Même préfixe pour toutes les options.** « Local · fichier » (y compris un blob Ollama chargé par WaveStack), « Local · Ollama », « Local · llama-server », « RÉSEAU · {fournisseur} ». L'indicateur de modèle garde ses textes actuels : hors périmètre, et figé par l'E2E.
+- **Même préfixe pour toutes les options.** « Local · fichier » (y compris un blob Ollama chargé par HarnessLab), « Local · Ollama », « Local · llama-server », « RÉSEAU · {fournisseur} ». L'indicateur de modèle garde ses textes actuels : hors périmètre, et figé par l'E2E.
 - **Légende en option désactivée**, doublée de l'infobulle du sélecteur et d'un paragraphe de la page `/models` : aucune place dans la barre haute.
 - **Taille** : le libellé de paramètres (`general.size_label`, puis `parameter_size` d'Ollama, puis le nom), sinon les octets. Le sélecteur n'affiche que les paramètres ; la table montre les deux. Tri : paramètres connus d'abord, puis octets, puis nom.
 - **Ollama : `/api/tags` seul.** `details.family` et `parameter_size` suffisent, sans N requêtes `/api/show` à chaque diagnostic.
@@ -286,7 +286,7 @@ Numéros de ligne indicatifs : les stories 33, 23, 34, 32 et 24 modifient `app.j
 
 ## À vérifier sur PC
 
-- **Geste** : Qwen3.5-2B et 4B en GGUF dans `models\`, Ollama lancé avec au moins `llama3.2:3b` et un modèle Qwen ; lancer WaveStack, ouvrir « Changer de modèle… » dans Chrome puis dans Edge. — **Attendu** : groupes « Sur ce poste · Qwen (Alibaba) » puis « Sur ce poste · Llama (Meta) », 2B avant 4B, préfixes « Local · fichier » et « Local · Ollama », légende lisible en tête de liste. — **Critère** : ordre et libellés exacts, aucun modèle dans « Autres éditeurs » parmi Qwen, Llama et Gemma ; légende entière visible sans troncature dans les deux navigateurs. — **Moyen** : Claude in Chrome ; Edge à la main.
+- **Geste** : Qwen3.5-2B et 4B en GGUF dans `models\`, Ollama lancé avec au moins `llama3.2:3b` et un modèle Qwen ; lancer HarnessLab, ouvrir « Changer de modèle… » dans Chrome puis dans Edge. — **Attendu** : groupes « Sur ce poste · Qwen (Alibaba) » puis « Sur ce poste · Llama (Meta) », 2B avant 4B, préfixes « Local · fichier » et « Local · Ollama », légende lisible en tête de liste. — **Critère** : ordre et libellés exacts, aucun modèle dans « Autres éditeurs » parmi Qwen, Llama et Gemma ; légende entière visible sans troncature dans les deux navigateurs. — **Moyen** : Claude in Chrome ; Edge à la main.
 - **Geste** : cliquer « Tableau des modèles et de leurs capacités… » puis « Ouvrir le tableau ». — **Attendu** :
   - Qwen3.5-2B et 4B : outils « oui », raisonnement « activable » ;
   - `llama3.2:3b` : outils « non », avec la raison, et raisonnement « jamais » ;
@@ -307,7 +307,7 @@ Statut : done (2026-09-29, orchestrateur de nuit ; étapes 1 à 4 menées par l'
 
 **Fichiers :** `models/{catalog.py (nouveau),capabilities.py,servers.py,discovery.py}`, `context/window.py`, `session/app_session.py`, `web/app.py`, `web/static/{app.js,models.html (nouveau),diagnostic.html,pages.css (nouveau)}`, `content/models/publishers.yaml` (nouveau), `tests/test_model_catalog.py` (nouveau) et tests associés, `tools/e2e/{run_e2e.py,fake_*,README.md}`, EXPERIENCE.md, DESIGN.md, SPEC.md (CAP-34, CAP-35), README, ARCHITECTURE-SPINE.md, captures 43 et 44.
 
-**Revue :** 19 constats — 13 corrigés (3 medium, 10 low), 4 différés, 1 rejeté (false), 1 regroupé ; voir le triage. Écart consigné : l'E2E voit aussi les groupes réseau « Mistral » et « gpt-oss » issus des préréglages de `wavestack.toml`. Revue de suivi recommandée : false.
+**Revue :** 19 constats — 13 corrigés (3 medium, 10 low), 4 différés, 1 rejeté (false), 1 regroupé ; voir le triage. Écart consigné : l'E2E voit aussi les groupes réseau « Mistral » et « gpt-oss » issus des préréglages de `harness-lab.toml`. Revue de suivi recommandée : false.
 
 **Vérification :** ruff check et format verts ; pytest : 1133 passés, 3 ignorés ; E2E complet : 545 PASS, 0 FAIL.
 

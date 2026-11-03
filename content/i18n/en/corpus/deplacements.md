@@ -1,6 +1,6 @@
 # Business travel and expense claims at Exemplia
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: these rates describe no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: these rates describe no real company. -->
 
 All business travel is approved in advance by the manager in the Voyagex booking tool, which automatically applies the rules below. A booking made outside Voyagex is reimbursed only as an exception, with a written justification.
 

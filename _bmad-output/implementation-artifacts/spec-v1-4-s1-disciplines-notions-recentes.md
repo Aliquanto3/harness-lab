@@ -5,12 +5,12 @@ created: '2026-10-24'
 status: 'review'
 route: ''
 review_loop_iteration: 0
-context: ['_bmad-output/specs/spec-wavestack-etat-de-l-art-harnais/SPEC.md']
+context: ['_bmad-output/specs/spec-harness-lab-etat-de-l-art-harnais/SPEC.md']
 ---
 
 ## Intent
 
-CAP-1 et CAP-2 de la V1.4. « Raisonnement » passe en harness engineering (`bricks/registry.py`, `category_text` fr/en/de) ; « Garde-fous » affiche « harness engineering » comme les autres briques. `guide_harnais.md` (fr/en/de) gagne la section 10 : emboîtement prompt ⊂ contexte ⊂ harnais, guides et capteurs (Böckeler), calculé ou déduit, rappel d'une ligne de ce que WaveStack ne montre pas.
+CAP-1 et CAP-2 de la V1.4. « Raisonnement » passe en harness engineering (`bricks/registry.py`, `category_text` fr/en/de) ; « Garde-fous » affiche « harness engineering » comme les autres briques. `guide_harnais.md` (fr/en/de) gagne la section 10 : emboîtement prompt ⊂ contexte ⊂ harnais, guides et capteurs (Böckeler), calculé ou déduit, rappel d'une ligne de ce que HarnessLab ne montre pas.
 
 ## Réalisation
 

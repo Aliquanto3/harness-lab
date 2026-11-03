@@ -20,39 +20,39 @@ from test_mcp import enable, loop, mcp_session, wait_for  # noqa: F401 - fixture
 from test_tools import QWEN, _segments, call
 from test_turn import _run
 
-from wavestack import config, messages
-from wavestack import hooks as hooks_module
-from wavestack import memory as memory_file
-from wavestack.agent_eval.cases import load_provided_cases
-from wavestack.bricks.contract import load_brick_content, load_default_system_prompt
-from wavestack.cloud import load_cloud_content
-from wavestack.compression.port import load_compression_content
-from wavestack.context.segments import load_labels
-from wavestack.hooks import date_fr, date_text, load_hooks_content
-from wavestack.mcp import lab as mcp_lab
-from wavestack.mcp.connection import McpConnection
-from wavestack.mcp.servers import (
+from harness_lab import config, messages
+from harness_lab import hooks as hooks_module
+from harness_lab import memory as memory_file
+from harness_lab.agent_eval.cases import load_provided_cases
+from harness_lab.bricks.contract import load_brick_content, load_default_system_prompt
+from harness_lab.cloud import load_cloud_content
+from harness_lab.compression.port import load_compression_content
+from harness_lab.context.segments import load_labels
+from harness_lab.hooks import date_fr, date_text, load_hooks_content
+from harness_lab.mcp import lab as mcp_lab
+from harness_lab.mcp.connection import McpConnection
+from harness_lab.mcp.servers import (
     LOCAL,
     McpServer,
     load_local_primitives,
     load_local_tools,
     load_mcp_content,
 )
-from wavestack.models.catalog import load_publishers
-from wavestack.rag import diagnosis
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import load_rag_content, load_rag_questions
-from wavestack.scenarios import load_scenarios
-from wavestack.session import app_session as app_session_module
-from wavestack.session import llm_lab
-from wavestack.session.app_session import SendRefused
-from wavestack.skills import load_skills_content
-from wavestack.subagent import load_subagent_content
-from wavestack.tools.registry import load_tools_content
-from wavestack.trace.catalog import LanguageChangedPayload
-from wavestack.trace.journal import get_journal
-from wavestack.ui_texts import load_ui_texts
-from wavestack.web.app import LanguageIntention
+from harness_lab.models.catalog import load_publishers
+from harness_lab.rag import diagnosis
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import load_rag_content, load_rag_questions
+from harness_lab.scenarios import load_scenarios
+from harness_lab.session import app_session as app_session_module
+from harness_lab.session import llm_lab
+from harness_lab.session.app_session import SendRefused
+from harness_lab.skills import load_skills_content
+from harness_lab.subagent import load_subagent_content
+from harness_lab.tools.registry import load_tools_content
+from harness_lab.trace.catalog import LanguageChangedPayload
+from harness_lab.trace.journal import get_journal
+from harness_lab.ui_texts import load_ui_texts
+from harness_lab.web.app import LanguageIntention
 
 CONTENT = config.content_dir()
 TRANSLATED = ("en", "de")
@@ -113,9 +113,9 @@ CORPUS = sorted(
 WORKSHOPS = ("llm_lab.yaml", "rag_lab.yaml", "mcp_lab.yaml", *(f"corpus/{c}" for c in CORPUS))
 _TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2})?")
 PROMPTS = {
-    "fr": "Tu es l'assistant de démonstration de WaveStack. Réponds en français",
-    "en": "You are WaveStack's demonstration assistant. Answer in English",
-    "de": "Du bist der Demo-Assistent von WaveStack. Antworte auf Deutsch",
+    "fr": "Tu es l'assistant de démonstration de HarnessLab. Réponds en français",
+    "en": "You are HarnessLab's demonstration assistant. Answer in English",
+    "de": "Du bist der Demo-Assistent von HarnessLab. Antworte auf Deutsch",
 }
 _PLACEHOLDER = re.compile(r"\{[a-z_]+\}")
 
@@ -448,7 +448,7 @@ def test_translated_file_mirrors_the_french_one(lang, rel):
             )
             assert tr_case.title_text != fr_case.title_text
     elif rel == "rag_evaluation.yaml":  # V1.2 story 15: same verdicts, ranks and labels
-        from wavestack.rag import evaluation as rag_evaluation
+        from harness_lab.rag import evaluation as rag_evaluation
 
         fr, tr = rag_evaluation.load_evaluation("fr"), rag_evaluation.load_evaluation(lang)
 
@@ -475,7 +475,7 @@ def test_translated_file_mirrors_the_french_one(lang, rel):
             }
             assert (fr_trap.kind, fr_trap.causes) == (tr_trap.kind, tr_trap.causes)
     elif rel == "rag_attack.yaml":  # V1.2 story 17: the same scenarios, roles, verdicts, graph
-        from wavestack.rag import attack as rag_attack
+        from harness_lab.rag import attack as rag_attack
 
         fr, tr = rag_attack.load_attack("fr"), rag_attack.load_attack(lang)
 
@@ -512,7 +512,7 @@ def test_translated_file_mirrors_the_french_one(lang, rel):
 
         assert shape(raw[lang]["texts"]) == shape(raw["fr"]["texts"])
         if rel == "rag_erasure.yaml":
-            from wavestack.rag import erasure
+            from harness_lab.rag import erasure
 
             fr, tr = erasure.load_erasure("fr"), erasure.load_erasure(lang)
             texts = {"label_text", "update_text", "unit_text", "measured_on_text", "text"}
@@ -525,7 +525,7 @@ def test_translated_file_mirrors_the_french_one(lang, rel):
             assert raw[lang]["rewrite"]["doc_id"] == raw["fr"]["rewrite"]["doc_id"]
             assert raw[lang]["question_id"] == raw["fr"]["question_id"]
     elif rel == "rag_sheets.yaml":  # V1.2 story 19: same ids, levels, classes, links; texts differ
-        from wavestack.rag import sheets
+        from harness_lab.rag import sheets
 
         fr, tr = sheets.load_sheets("fr"), sheets.load_sheets(lang)
         assert set(tr.texts) == set(fr.texts)
@@ -543,7 +543,7 @@ def test_translated_file_mirrors_the_french_one(lang, rel):
             assert bool(f.no_source_text) == bool(t.no_source_text)
             assert t.purpose_text != f.purpose_text
     elif rel == "rag_mcp.yaml":  # V1.2 story 20: same keys and limits, the descriptions translated
-        from wavestack.rag import exposed
+        from harness_lab.rag import exposed
 
         fr, tr = exposed.load_texts("fr"), exposed.load_texts(lang)
         assert len(tr.describe.limits) == len(fr.describe.limits)
@@ -597,7 +597,7 @@ def test_the_local_mcp_server_is_started_in_the_sessions_language():
     assert connection._transport(None).args[-1] == "fr"
     config.save_setting("language", "de")  # the setting is not what the process gets
     connection = McpConnection(server, no_loop, connect_timeout=1, call_timeout=1, language="en")
-    assert connection._transport(None).args == ["-m", "wavestack.mcp.local_server", "en"]
+    assert connection._transport(None).args == ["-m", "harness_lab.mcp.local_server", "en"]
 
 
 def test_the_demo_files_are_the_same_in_every_language():
@@ -615,7 +615,7 @@ def test_every_per_language_table_has_exactly_the_languages():
     assert set(app_session_module._LANGUAGE_LOCKED) == languages
     assert set(get_args(LanguageIntention.model_fields["language"].annotation)) == languages
     assert set(get_args(LanguageChangedPayload.model_fields["language"].annotation)) == languages
-    static = config.repo_root() / "src" / "wavestack" / "web" / "static"
+    static = config.repo_root() / "src" / "harness_lab" / "web" / "static"
     # Story 2 (2026-09-30): the picker is in « Affichage ▾ » of the shared bar, on every page.
     for name in ("index", "llm", "rag", "diagnostic"):  # lot 3 of 2026-10-04: no /models page
         html = (static / f"{name}.html").read_text(encoding="utf-8")
@@ -973,7 +973,7 @@ def test_the_real_local_server_answers_in_english_after_the_change(loop):  # noq
     assert ended and ended[-1]["status"] == "ok"
     events = _run(session, "What is a harness?")
     catalog = "".join(s["text"] for s in _segments(events["context_rendered"][0], "tool_catalog"))
-    assert "Gives the definition of a notion of the WaveStack demonstrator" in catalog
+    assert "Gives the definition of a notion of the HarnessLab demonstrator" in catalog
     assert "Donne la définition" not in catalog
     (result,) = events["tool_ended"]
     assert result["status"] == "ok"

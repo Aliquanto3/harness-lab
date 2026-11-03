@@ -11,10 +11,10 @@ import importlib.util
 
 import pytest
 
-from wavestack import config
-from wavestack.rag import raptor as r
-from wavestack.rag.contexts import fingerprint
-from wavestack.rag.corpus import DocText, chunk_documents, load_rag_content, read_documents
+from harness_lab import config
+from harness_lab.rag import raptor as r
+from harness_lab.rag.contexts import fingerprint
+from harness_lab.rag.corpus import DocText, chunk_documents, load_rag_content, read_documents
 
 LANGS = ("fr", "en", "de")
 SIZE = 700
@@ -211,7 +211,7 @@ def test_the_file_refuses_a_measure_on_the_shipped_tree_and_an_unknown_child(tre
 
 
 def test_the_search_reads_every_level_without_a_model(trees):
-    from wavestack.rag.corpus import load_rag_questions  # noqa: PLC0415
+    from harness_lab.rag.corpus import load_rag_questions  # noqa: PLC0415
 
     questions = {q.id: q for q in load_rag_questions("fr")}
     picks = r.select(trees["fr"], questions["q_global_rh"].question_text, "fr")

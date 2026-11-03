@@ -29,15 +29,15 @@ from test_rag import (
 )
 from test_tools import QWEN, call
 
-from wavestack import config
-from wavestack.config import RerankerModel
-from wavestack.models import discovery
-from wavestack.models.load_registry import RERANKER, ModelChoice
-from wavestack.models.reranker import LlamaCppReranker, fit, pair_tokens, sigmoid
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.config import RerankerModel
+from harness_lab.models import discovery
+from harness_lab.models.load_registry import RERANKER, ModelChoice
+from harness_lab.models.reranker import LlamaCppReranker, fit, pair_tokens, sigmoid
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 RERANK_FILE = "reranker/fake.gguf"
 RERANK_SIZE = 500

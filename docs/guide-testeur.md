@@ -1,13 +1,13 @@
-# Guide du testeur (WaveStack 1.1)
+# Guide du testeur (HarnessLab 1.1)
 
-WaveStack est un démonstrateur pédagogique. Il montre ce qu'un harnais (outils, mémoire, RAG, MCP…) ajoute à un petit LLM qui tourne en local sur CPU. **La qualité des réponses du modèle est secondaire** : ce qu'on teste, c'est la clarté de la démonstration et la robustesse de l'appli.
+HarnessLab est un démonstrateur pédagogique. Il montre ce qu'un harnais (outils, mémoire, RAG, MCP…) ajoute à un petit LLM qui tourne en local sur CPU. **La qualité des réponses du modèle est secondaire** : ce qu'on teste, c'est la clarté de la démonstration et la robustesse de l'appli.
 
 ## Installer (10 à 15 min)
 
 Windows 10 ou 11, sans droits administrateur, 3 Go de disque et 4 Go de RAM libres. Dans **PowerShell** (pas CMD) :
 
 ```powershell
-irm https://raw.githubusercontent.com/Aliquanto3/wavestack/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/Aliquanto3/harness-lab/main/install.ps1 | iex
 ```
 
 Sur un réseau d'entreprise, tapez d'abord `$env:UV_SYSTEM_CERTS = "1"`. En cas de blocage, voir [l'installation détaillée](installation.md). L'appli s'ouvre dans le navigateur ; Ctrl+C dans le terminal l'arrête.

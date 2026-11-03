@@ -1,4 +1,4 @@
-"""End-to-end run of WaveStack's tier 1 in a headless Chromium, on the fake OpenAI model.
+"""End-to-end run of HarnessLab's tier 1 in a headless Chromium, on the fake OpenAI model.
 
     uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py [--only NAME ...] [--keep]
 
@@ -48,12 +48,12 @@ from stack import (  # noqa: E402
     running_stack,
 )
 
-from wavestack.models.candidates import distribution as live_distribution  # noqa: E402
-from wavestack.models.candidates import dropped_by as live_dropped_by  # noqa: E402
-from wavestack.models.engine import Sampling  # noqa: E402
-from wavestack.rag import index as rag_index  # noqa: E402
-from wavestack.session import llm_lab  # noqa: E402
-from wavestack.trace.envelope import Envelope  # noqa: E402
+from harness_lab.models.candidates import distribution as live_distribution  # noqa: E402
+from harness_lab.models.candidates import dropped_by as live_dropped_by  # noqa: E402
+from harness_lab.models.engine import Sampling  # noqa: E402
+from harness_lab.rag import index as rag_index  # noqa: E402
+from harness_lab.session import llm_lab  # noqa: E402
+from harness_lab.trace.envelope import Envelope  # noqa: E402
 
 SHOTS = Path(__file__).resolve().parent / "screenshots"
 REPO = Path(__file__).resolve().parents[2]
@@ -85,7 +85,7 @@ class Events:
                             with self._lock:
                                 self.items.append(envelope)
         except httpx.HTTPError:
-            pass  # WaveStack stopped at the end of the run
+            pass  # HarnessLab stopped at the end of the run
 
     def mark(self) -> int:
         with self._lock:
@@ -426,9 +426,9 @@ def s_diagnostic(r: Run) -> None:
     page = r.page
     _goto_diagnostic(r)
     # Lot 3 of 2026-10-04: a card, unfolded by a click on its head.
-    row = _unfold(_cloud_card(r, "wavestack-fake"))
+    row = _unfold(_cloud_card(r, "harness-lab-fake"))
     r.check(
-        "Clé fournie par la variable WAVESTACK_FAKE_API_KEY" in row.inner_text(),
+        "Clé fournie par la variable HARNESS_LAB_FAKE_API_KEY" in row.inner_text(),
         "la carte du faux modèle, dépliée, indique la clé lue dans key_env",
     )
     r.check("e2e-fake-key" not in page.content(), "la valeur de la clé n'apparaît pas dans la page")
@@ -452,23 +452,23 @@ def s_diagnostic(r: Run) -> None:
         "« Utiliser ce modèle » : la carte passe à « Actif », bordure épaisse, toujours dépliée",
     )
     _diagnostic_cards(r)
-    # Story 2 (2026-09-30): « Ouvrir WaveStack » gave way to « Atelier » of the shared bar.
+    # Story 2 (2026-09-30): « Ouvrir HarnessLab » gave way to « Atelier » of the shared bar.
     ok, took = r.poll(lambda: bool(r.api("GET", "/api/diagnostic").json().get("ready")), 20)
     r.check(ok, "diagnostic prêt", f"{took:.1f} s")
     page.locator('.site-nav > a[href="/"]:not(.site-nav-brand)').click()
     page.wait_for_url(f"{r.stack.app_url}/", timeout=10_000)
-    expect(page.locator("#model-indicator")).to_contain_text("wavestack-fake", timeout=20_000)
+    expect(page.locator("#model-indicator")).to_contain_text("harness-lab-fake", timeout=20_000)
     r.check(True, "l'indicateur de modèle de la barre de l'atelier montre le faux modèle")
     # Lot 1 of 2026-10-04 (D2): « Harnais » current, the full title in <title> and in a
     # visually hidden h1 (no height taken).
     h1 = page.locator("h1")
     r.check(
-        page.title() == "WaveStack — Atelier Harnais"
+        page.title() == "HarnessLab — Atelier Harnais"
         and h1.count() == 1
         and h1.text_content() == "Atelier Harnais"
         and (h1.bounding_box() or {"height": 0})["height"] <= 1
         and page.locator('.site-nav a[aria-current="page"]').inner_text() == "Harnais",
-        "atelier : titre « WaveStack — Atelier Harnais », h1 masqué, onglet « Harnais » courant",
+        "atelier : titre « HarnessLab — Atelier Harnais », h1 masqué, onglet « Harnais » courant",
         page.title(),
     )
     r.wait_idle()
@@ -658,7 +658,7 @@ def _show_reasoning_option(r: Run) -> None:
             f"blocs Vue humain {chat_blocks.count()}, "
             f"réflexions Contexte LLM {ctx_reasoning.count()}",
         )
-        stored = r.page.evaluate("() => localStorage.getItem('wavestack.showReasoning')")
+        stored = r.page.evaluate("() => localStorage.getItem('harness_lab.showReasoning')")
         r.reload_app()
         still, _ = r.poll(
             lambda: r.page.locator("#chat .bubble-model").count() > 0 and chat_blocks.count() == 0,
@@ -1936,7 +1936,7 @@ def _log_catalog(r: Run) -> None:
     """E031: every kind of the catalog (`trace/catalog.py`) has its label in `fr`, `en` and
     `de`, and a summary in the `eventSummary` the page loaded (the gaps noted by story 6 were
     closed on 2026-10-02)."""
-    from wavestack.trace.catalog import PAYLOAD_MODELS
+    from harness_lab.trace.catalog import PAYLOAD_MODELS
 
     unlabelled: set[str] = set()
     for lang in ("fr", "en", "de"):
@@ -2015,28 +2015,28 @@ def s_malformed(r: Run) -> None:
     )
 
 
-def _on_vivid_both_themes(r: Run, locator, prop: str = "color") -> list[str]:
-    """Story 31: `prop` of `locator` against --color-on-vivid, in light then in dark (the
+def _on_status_both_themes(r: Run, locator, prop: str = "color") -> list[str]:
+    """Story 31: `prop` of `locator` against --color-on-status, in light then in dark (the
     attribute set by hand, then removed): the text on red, explicit in both themes."""
     seen = []
     for theme in (None, "dark"):
         if theme:
             r.page.evaluate("() => document.documentElement.setAttribute('data-theme', 'dark')")
-        seen.append((theme or "clair", r.css(locator, prop), r.token_color("--color-on-vivid")))
+        seen.append((theme or "clair", r.css(locator, prop), r.token_color("--color-on-status")))
         r.page.evaluate("() => document.documentElement.removeAttribute('data-theme')")
     return [f"{theme} : {got} ≠ {want}" for theme, got, want in seen if got != want]
 
 
-def _error_tile_on_vivid(r: Run) -> None:
-    """Story 31: a model call that ended in error: its tile red, its letter in on-vivid."""
+def _error_tile_on_status(r: Run) -> None:
+    """Story 31: a model call that ended in error: its tile red, its letter in on-status."""
     step = r.page.locator(
         "#orch-scroll .turn-step.tone-error",
         has=r.page.locator(".turn-step-title", has_text="Appelle le modèle"),
     ).last
     expect(step).to_be_attached(timeout=5000)
-    wrong = _on_vivid_both_themes(r, step.locator(".turn-step-tile"))
+    wrong = _on_status_both_themes(r, step.locator(".turn-step-tile"))
     r.check(
-        not wrong, "appel au modèle en erreur : lettre de la tuile en --color-on-vivid", str(wrong)
+        not wrong, "appel au modèle en erreur : lettre de la tuile en --color-on-status", str(wrong)
     )
 
 
@@ -2069,10 +2069,10 @@ def s_provider_errors(r: Run) -> None:
         if trigger == "[erreur429]":
             r.shot("07-erreur-fournisseur-429")
         if trigger == "[erreur500]":
-            _error_tile_on_vivid(r)
+            _error_tile_on_status(r)
     _quota0_refusal(r)
     ended = r.send("Bonjour")
-    r.check(ended["payload"]["status"] == "completed", "WaveStack reste utilisable ensuite")
+    r.check(ended["payload"]["status"] == "completed", "HarnessLab reste utilisable ensuite")
     seq = r.ev.mark()
     ended = r.send("Explique [coupé]")
     r.check(
@@ -2095,7 +2095,7 @@ def _quota0_refusal(r: Run) -> None:
     `outbound_response` between `outbound_request` and `model_call_ended`: its status, the
     quota headers in clear, the request id masked. The log labels and summarizes it,
     Orchestration does not show it, and D6's message is unchanged. The `[quota0]` model call
-    is traced despite the loopback by the graft of `wavestack_e2e.py`; the conversation is
+    is traced despite the loopback by the graft of `harness_lab_e2e.py`; the conversation is
     cleared after, so no later request carries the mark."""
     try:
         seq = r.ev.mark()
@@ -2558,7 +2558,7 @@ def _holidays_outbound(r: Run, seq: int) -> None:
         "Données sortantes",
         "GET https://calendrier.api.gouv.fr/jours-feries/",
         "En-têtes",
-        "User-Agent: WaveStack/0.1 (demonstrateur pedagogique; ",
+        "User-Agent: HarnessLab/0.1 (demonstrateur pedagogique; ",
         "Aucun corps : seule l'adresse sort du poste.",
     ]
     missing = [e for e in expected if e not in text]
@@ -2634,7 +2634,7 @@ def _reveal_from_schema(r: Run) -> None:
             "Données sortantes",
             "GET https://fr.wikipedia.org/api/rest_v1/page/summary/",
             "En-têtes",
-            "User-Agent: WaveStack/0.1 (demonstrateur pedagogique; ",
+            "User-Agent: HarnessLab/0.1 (demonstrateur pedagogique; ",
             "Accept: */*",
         ],
         "clic sur le nœud Wikipédia : Orchestration montrée, étape dépliée, bloc ouvert et à "
@@ -2670,7 +2670,7 @@ def _reveal_from_schema(r: Run) -> None:
     _revealed(
         r,
         _outbound_step(r, "Exécute l'outil hors du poste · Jours fériés"),
-        ["Données sortantes", "GET https://calendrier.api.gouv.fr/", "User-Agent: WaveStack/0.1"],
+        ["Données sortantes", "GET https://calendrier.api.gouv.fr/", "User-Agent: HarnessLab/0.1"],
         "clic sur le nœud Jours fériés : tour replié déplié, étape dépliée, bloc ouvert et à "
         "l'écran",
     )
@@ -3052,7 +3052,7 @@ def s_disciplines(r: Run) -> None:
 
 # ---------- story 31: the dark theme ----------
 
-THEME_KEY = "wavestack.theme"
+THEME_KEY = "harness_lab.theme"
 _PANES = ("bricks", "human", "ctx", "orch", "schema")
 
 # For every visible element that carries text: its first opaque background up the tree, the
@@ -3533,7 +3533,7 @@ def _themes(r: Run, errors: list[str]) -> None:
     time.sleep(0.3)
     r.check(
         _theme_attr(r) == "dark" and _stored_theme(r) == "dark",
-        '« Sombre » : <html data-theme="dark">, wavestack.theme mémorisé',
+        '« Sombre » : <html data-theme="dark">, harness_lab.theme mémorisé',
         f"{_theme_attr(r)} / {_stored_theme(r)}",
     )
     fill = _design_rgb("ink-fill-dark")
@@ -3685,7 +3685,7 @@ def _themes(r: Run, errors: list[str]) -> None:
     r.reload_app()
     r.check(
         _theme_attr(r) is None and page.locator("#theme-picker").input_value() == "system",
-        "wavestack.theme = « violet » : pas d'attribut, sélecteur sur « Système »",
+        "harness_lab.theme = « violet » : pas d'attribut, sélecteur sur « Système »",
     )
 
     # No storage: « Système », a choice for the page only, no error.
@@ -3794,7 +3794,7 @@ def _turn_rendered_ended(r: Run, turn_id: str | None = None, timeout: float = 10
 
 # ---------- restes différés, story 6 (E033): resizing the panes, their layout remembered ----------
 
-_PANES_KEY = "wavestack.panes"
+_PANES_KEY = "harness_lab.panes"
 _PANE_IDS = ["bricks", "human", "ctx", "orch", "schema"]
 _PANE_SIZES_JS = """() => {
   const box = (node) => {
@@ -3822,7 +3822,7 @@ def _stored_panes(r: Run) -> Any:
 
 
 def _reload_with_panes(r: Run, value: str | None) -> None:
-    """`localStorage["wavestack.panes"]` set to `value` (removed when `None`), then a reload."""
+    """`localStorage["harness_lab.panes"]` set to `value` (removed when `None`), then a reload."""
     r.page.evaluate(
         "([key, value]) => value === null ? localStorage.removeItem(key)"
         " : localStorage.setItem(key, value)",
@@ -5066,7 +5066,7 @@ def _mcp_server_switch(r: Run) -> None:
     connection line, after the turn, is paired with its own end (« connecté », with the « MCP »
     badge); the server's node lists its tools in its tooltip. E030: « Vider la conversation »
     hides that line too."""
-    label = "Glossaire WaveStack"
+    label = "Glossaire HarnessLab"
     off = _intention_toggle(r, "/api/intentions/mcp_server", "MCP", label, False)
     seq = r.ev.mark()
     on = _intention_toggle(r, "/api/intentions/mcp_server", "MCP", label, True)
@@ -5383,7 +5383,7 @@ def s_subagent(r: Run) -> None:
         str({k: figures.get(k) for k in ("context_tokens", "result_tokens", "saved_tokens")}),
     )
     bodies = r.fake_calls()[before:]
-    sub_bodies = [b for b in bodies if "sous-agent de WaveStack" in json.dumps(b["messages"][0])]
+    sub_bodies = [b for b in bodies if "sous-agent de HarnessLab" in json.dumps(b["messages"][0])]
     r.check(len(sub_bodies) == 2, "deux appels du sous-agent au modèle", str(len(sub_bodies)))
     guide = "## 8. Le sous-agent"
     r.check(
@@ -5436,7 +5436,7 @@ def s_subagent(r: Run) -> None:
     text = ctx.inner_text()
     r.check(
         sub_tab.get_attribute("aria-selected") == "true"
-        and "sous-agent de WaveStack" in text
+        and "sous-agent de HarnessLab" in text
         and "Résultats d'outils" in text
         and "Sous-agent sub" in text,
         "onglet du sous-agent : son prompt, la tâche, le résultat d'outil, son total",
@@ -5481,7 +5481,7 @@ def s_subagent(r: Run) -> None:
     body.get_by_role("button", name="Voir le contexte du sous-agent").click()
     r.check(
         sub_tab.get_attribute("aria-selected") == "true"
-        and "sous-agent de WaveStack" in ctx.inner_text(),
+        and "sous-agent de HarnessLab" in ctx.inner_text(),
         "« Voir le contexte du sous-agent » sélectionne son onglet",
     )
     r.shot("19-sous-agent-delegation")
@@ -5623,7 +5623,7 @@ def _datagouv_node_reveals_its_connection(r: Run) -> None:
     _revealed(
         r,
         _outbound_step(r, "data.gouv.fr", ".harness-prep"),
-        ["Données sortantes", "mcp.data.gouv.fr", "User-Agent: WaveStack/0.1"],
+        ["Données sortantes", "mcp.data.gouv.fr", "User-Agent: HarnessLab/0.1"],
         "clic sur le nœud data.gouv.fr : Orchestration montrée, préparation et connexion "
         "dépliées, bloc ouvert et à l'écran",
     )
@@ -5649,7 +5649,7 @@ def _datagouv_connection_outbound(r: Run, seq: int) -> None:
     time.sleep(0.3)
     payload = line.last.locator(".outbound-payload")
     text = payload.inner_text() if payload.count() else ""
-    expected = ["Données sortantes", "mcp.data.gouv.fr", "En-têtes", "User-Agent: WaveStack/0.1"]
+    expected = ["Données sortantes", "mcp.data.gouv.fr", "En-têtes", "User-Agent: HarnessLab/0.1"]
     missing = [e for e in expected if e not in text]
     r.check(
         not missing,
@@ -6241,8 +6241,10 @@ def s_global_memory(r: Run) -> None:
         "« Oui, tout effacer » : bouton danger, fond de la couleur danger",
         f"{look} · danger {danger}",
     )
-    wrong = _on_vivid_both_themes(r, confirm)
-    r.check(not wrong, "« Oui, tout effacer » : texte en --color-on-vivid sur le rouge", str(wrong))
+    wrong = _on_status_both_themes(r, confirm)
+    r.check(
+        not wrong, "« Oui, tout effacer » : texte en --color-on-status sur le rouge", str(wrong)
+    )
     r.check(len(_memory_file(r)) == 5, "« Tout effacer » demande d'abord confirmation")
     seq = r.ev.mark()
     drawer.get_by_role("button", name="Oui, tout effacer").click()
@@ -6562,7 +6564,7 @@ def _rerank_wait_failure(r: Run, seq: int) -> str:
     return " ".join(text.split())
 
 
-RERANK_FAILURE_MARK = "[reranker-en-panne]"  # as `wavestack_e2e.RERANK_FAILURE_MARK`
+RERANK_FAILURE_MARK = "[reranker-en-panne]"  # as `harness_lab_e2e.RERANK_FAILURE_MARK`
 
 
 def _fake_post(r: Run, path: str, body: dict[str, Any]) -> None:
@@ -6996,7 +6998,7 @@ def _mcp_lab(r: Run, errors: list[str]) -> None:
     panes = page.locator("#layout .pane").evaluate_all("ps => ps.map(p => p.dataset.pane)")
     r.check(
         page.locator("nav.site-nav a[aria-current=page]").inner_text() == "MCP"
-        and page.title() == "WaveStack — Atelier MCP"
+        and page.title() == "HarnessLab — Atelier MCP"
         and page.locator("h1").inner_text() == "Atelier MCP"
         and panes == ["servers", "seq", "model", "arch"]
         and not _site_nav_problems(r),
@@ -7810,7 +7812,7 @@ def _mcp_fake_failures(seq: int) -> list[dict[str, Any]]:
                 "exchange": "connect",
                 "server": "local",
                 "transport": "stdio",
-                "launch_text": "lance le serveur : python -m wavestack.mcp.local_server fr",
+                "launch_text": "lance le serveur : python -m harness_lab.mcp.local_server fr",
             },
         ),
         (
@@ -8231,12 +8233,14 @@ def s_busy_and_stop(r: Run) -> None:
         "« Aucun appel : contexte dépassé. »",
         f"{ended['payload']['status']} · {calls[-1]['head'] if calls else '—'}",
     )
-    # Story 31: the overflow's red pill: its text in on-vivid (formerly white, 3.7:1).
+    # Story 31: the overflow's red pill: its text in on-status (formerly white, 3.7:1).
     figures = r.page.locator("#gauge.is-overflow #gauge-figures")
     expect(figures).to_be_visible(timeout=5000)
-    wrong = _on_vivid_both_themes(r, figures)
+    wrong = _on_status_both_themes(r, figures)
     r.check(
-        not wrong, "dépassement : chiffres de la jauge en --color-on-vivid sur le rouge", str(wrong)
+        not wrong,
+        "dépassement : chiffres de la jauge en --color-on-status sur le rouge",
+        str(wrong),
     )
 
 
@@ -8267,7 +8271,7 @@ def _reset_keeps_prep_and_folds(r: Run) -> None:
     """E043 and E047 (story 5 of the deferred leftovers), after « Réinitialiser »: the harness
     preparation keeps the MCP connection seen before the turns; no option list stays open."""
     prep = r.page.locator("#orch-scroll .harness-prep")
-    ok, _ = r.poll(lambda: prep.count() == 1 and "Glossaire WaveStack" in prep.inner_text(), 5)
+    ok, _ = r.poll(lambda: prep.count() == 1 and "Glossaire HarnessLab" in prep.inner_text(), 5)
     r.check(
         ok,
         "E043 : après « Réinitialiser », la préparation du harnais garde la connexion MCP",
@@ -8328,8 +8332,8 @@ def s_reload_and_reset(r: Run) -> None:
         f"[largeur, hauteur] de « Réinitialiser », « Volets », jauge : {before} puis {after}",
     )
     r.check(
-        "WaveStack réinitialisé" in r.page.locator("#top-status").inner_text(),
-        "message « WaveStack réinitialisé : LLM nu. »",
+        "HarnessLab réinitialisé" in r.page.locator("#top-status").inner_text(),
+        "message « HarnessLab réinitialisé : LLM nu. »",
     )
     ok, took = r.poll(lambda: r.page.locator("#top-status").inner_text() == "", 10)
     r.check(ok, "le message de réinitialisation s'efface de lui-même (A4)", f"{took:.1f} s")
@@ -8375,8 +8379,8 @@ def s_reload_and_reset(r: Run) -> None:
 
 # ---------- languages (1/5): the language picker and the defaults sent to the model ----------
 
-_PROMPT_EN = "You are WaveStack's demonstration assistant. Answer in English"
-_PROMPT_FR = "Tu es l'assistant de démonstration de WaveStack. Réponds en français"
+_PROMPT_EN = "You are HarnessLab's demonstration assistant. Answer in English"
+_PROMPT_FR = "Tu es l'assistant de démonstration de HarnessLab. Réponds en français"
 
 
 def _html_lang(r: Run) -> str:
@@ -9484,7 +9488,7 @@ def s_model_switch(r: Run) -> None:
     """Story 17: the hot switch from the top bar (warning, stopwatch, conversation kept, model
     line, replay, compare), then back from the diagnostic, with no « relancez »."""
     page = r.page
-    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake"
+    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
     b_label = f"☁️ RÉSEAU · Faux fournisseur B (e2e) · {SECOND_MODEL}"
     r.launch("short_memory")
     r.send("Je m'appelle Pascal.")
@@ -9497,12 +9501,12 @@ def s_model_switch(r: Run) -> None:
         list(options)[-1] == "Autre fichier ou clé API…",
         "sélecteur : dernière entrée « Autre fichier ou clé API… »",
     )
-    # Story 11b's texts, gone with the hot switch. Other « relancez WaveStack » stay true (a
+    # Story 11b's texts, gone with the hot switch. Other « relancez HarnessLab » stay true (a
     # file read at launch only, e.g. the Compression card without the extra installed).
     body = page.inner_text("body")
     r.check(
-        "Prochain lancement" not in body and "relancez WaveStack pour l'utiliser" not in body,
-        "aucune mention « Prochain lancement » ni « relancez WaveStack pour l'utiliser »",
+        "Prochain lancement" not in body and "relancez HarnessLab pour l'utiliser" not in body,
+        "aucune mention « Prochain lancement » ni « relancez HarnessLab pour l'utiliser »",
     )
 
     seq = r.ev.mark()
@@ -9526,7 +9530,7 @@ def s_model_switch(r: Run) -> None:
     time.sleep(0.5)
     r.check(
         not r.ev.since(seq, "model_load_started")
-        and "wavestack-fake" in page.inner_text("#model-indicator"),
+        and "harness-lab-fake" in page.inner_text("#model-indicator"),
         "« Annuler » : aucun changement",
     )
 
@@ -9567,7 +9571,7 @@ def s_model_switch(r: Run) -> None:
     r.check(r.fake_calls()[-1].get("model") == SECOND_MODEL, "l'appel part avec le nouveau modèle")
     lines = page.locator("#chat .model-switch-line").all_inner_texts()
     r.check(
-        lines == ["Modèle : wavestack-fake", f"Modèle : {SECOND_MODEL}"],
+        lines == ["Modèle : harness-lab-fake", f"Modèle : {SECOND_MODEL}"],
         "« Modèle : … » sur le premier tour, puis au changement",
         str(lines),
     )
@@ -9583,7 +9587,7 @@ def s_model_switch(r: Run) -> None:
     time.sleep(0.3)
     models = page.locator(".turn-compare-model").all_inner_texts()
     r.check(
-        models == ["Modèle : wavestack-fake", f"Modèle : {SECOND_MODEL}"],
+        models == ["Modèle : harness-lab-fake", f"Modèle : {SECOND_MODEL}"],
         "« Comparer » affiche le modèle de chaque colonne",
         str(models),
     )
@@ -9594,19 +9598,19 @@ def s_model_switch(r: Run) -> None:
     row_b = _cloud_card(r, SECOND_MODEL)
     expect(row_b.locator(".model-card-head .state-pill")).to_have_text("Actif", timeout=10_000)
     r.check(True, "diagnostic : le modèle actif est lu dans la session applicative")
-    row_a = _unfold(_cloud_card(r, "wavestack-fake"))
+    row_a = _unfold(_cloud_card(r, "harness-lab-fake"))
     row_a.get_by_role("button", name="Choisir ce modèle…").click()
     page.click("#cloud-warning-confirm")
     expect(row_a.locator(".card-status").last).to_have_text(
-        "wavestack-fake est actif.", timeout=20_000
+        "harness-lab-fake est actif.", timeout=20_000
     )
     expect(row_a.locator(".model-card-head .state-pill")).to_have_text("Actif", timeout=10_000)
     expect(row_b.locator(".model-card-head .state-pill")).not_to_have_text("Actif")
     r.check(True, "diagnostic : « Choisir » change de modèle sans relance, issue affichée")
     body = page.inner_text("body")
-    r.check("relancez WaveStack pour l'utiliser" not in body, "diagnostic : jamais « relancez »")
+    r.check("relancez HarnessLab pour l'utiliser" not in body, "diagnostic : jamais « relancez »")
     page.goto(f"{r.stack.app_url}/")
-    expect(page.locator("#model-indicator")).to_contain_text("wavestack-fake", timeout=10_000)
+    expect(page.locator("#model-indicator")).to_contain_text("harness-lab-fake", timeout=10_000)
     r.wait_idle()
 
     # Lot E (E4): « Arrêter » during the slow load of B (`launch_app.py`): A comes back.
@@ -9632,7 +9636,7 @@ def s_model_switch(r: Run) -> None:
     ended = r.ev.wait("model_load_ended", seq, timeout=30)["payload"]
     r.check(
         ended["status"] == "cancelled"
-        and ended["reason_text"] == "Chargement arrêté : wavestack-fake est de nouveau actif.",
+        and ended["reason_text"] == "Chargement arrêté : harness-lab-fake est de nouveau actif.",
         "« Arrêter » : chargement arrêté, le modèle précédent est de nouveau actif",
         f"{ended['status']} · {ended['reason_text']}",
     )
@@ -9642,7 +9646,7 @@ def s_model_switch(r: Run) -> None:
     except AssertionError:
         ok = False
     r.check(ok, "barre de l'atelier : issue « Chargement arrêté »", top.inner_text())
-    expect(page.locator("#model-indicator")).to_contain_text("wavestack-fake", timeout=10_000)
+    expect(page.locator("#model-indicator")).to_contain_text("harness-lab-fake", timeout=10_000)
     active = r.state()["active_model"] or {}
     r.check(active.get("ref") == MODEL_ENTRY_ID, "le modèle précédent est actif", str(active))
     r.wait_idle()
@@ -9687,7 +9691,7 @@ def _slow_probe_stopped(r: Run) -> None:
     budget = r.api("GET", "/api/diagnostic").json()["memory_budget_bytes"]
     budget_mo = f"{round(budget / 1024**2):,}".replace(",", "\u202f")
     r.check(
-        "%" in text and "RAM" in text and f"Budget mémoire de WaveStack : {budget_mo} Mo" in text,
+        "%" in text and "RAM" in text and f"Budget mémoire de HarnessLab : {budget_mo} Mo" in text,
         "diagnostic : « Budget mémoire » avec son calcul, le budget des refus de la session",
         f"{budget_mo} Mo · " + text.replace("\n", " · "),
     )
@@ -9726,7 +9730,7 @@ def _slow_probe_stopped(r: Run) -> None:
         )
         r.check(
             ended["status"] == "cancelled"
-            and ended["reason_text"] == "Chargement arrêté : wavestack-fake est de nouveau actif."
+            and ended["reason_text"] == "Chargement arrêté : harness-lab-fake est de nouveau actif."
             and elapsed < 3,
             "« Arrêter » pendant la sonde : arrêt en moins de 3 s, modèle précédent rétabli",
             f"{ended['status']} · {ended['reason_text']} · {elapsed:.1f} s",
@@ -9842,7 +9846,7 @@ def s_local_server(r: Run) -> None:
     expect(indicator).to_contain_text("Local · llama-server", timeout=10_000)
     title = indicator.get_attribute("title") or ""
     r.check(
-        "processus distinct de WaveStack" in title and address in title,
+        "processus distinct de HarnessLab" in title and address in title,
         "indicateur : « Local · llama-server », infobulle processus distinct",
         title,
     )
@@ -9975,12 +9979,14 @@ def s_local_server(r: Run) -> None:
     # Back to the cloud fake model: `relaunch` expects it saved.
     r.wait_idle()
     seq = r.ev.mark()
-    page.select_option("#model-picker", label="☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake")
+    page.select_option(
+        "#model-picker", label="☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
+    )
     page.click("#model-picker-apply")
     page.click("#cloud-warning-confirm")
     ended = r.ev.wait("model_load_ended", seq, timeout=30)
     r.check(ended["payload"]["status"] == "ok", "retour au modèle cloud depuis le modèle servi")
-    expect(page.locator("#model-indicator")).to_contain_text("wavestack-fake", timeout=10_000)
+    expect(page.locator("#model-indicator")).to_contain_text("harness-lab-fake", timeout=10_000)
     r.wait_idle()
 
     # The served model from the top bar's picker, then back again. The warning's dialog gave
@@ -10002,11 +10008,13 @@ def s_local_server(r: Run) -> None:
     expect(page.locator("#model-indicator")).to_contain_text("Local · llama-server", timeout=10_000)
     r.wait_idle()
     seq = r.ev.mark()
-    page.select_option("#model-picker", label="☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake")
+    page.select_option(
+        "#model-picker", label="☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
+    )
     page.click("#model-picker-apply")
     page.click("#cloud-warning-confirm")
     r.ev.wait("model_load_ended", seq, timeout=30)
-    expect(page.locator("#model-indicator")).to_contain_text("wavestack-fake", timeout=10_000)
+    expect(page.locator("#model-indicator")).to_contain_text("harness-lab-fake", timeout=10_000)
     r.wait_idle()
 
 
@@ -10475,7 +10483,7 @@ def s_model_catalog(r: Run) -> None:
     groups = _picker_groups(r)
     labels = [g["label"] for g in groups]
     # Three fake cloud models have no known publisher; the fourth is named as Gemini, with
-    # the Gemini preset; the presets of wavestack.toml (Gemma, Gemini, Mistral, Groq's
+    # the Gemini preset; the presets of harness-lab.toml (Gemma, Gemini, Mistral, Groq's
     # gpt-oss, Claude since native providers 3/5, GPT since 4/5),
     # declared without a key, come in the table's order before.
     expected = [
@@ -10546,7 +10554,7 @@ def s_model_catalog(r: Run) -> None:
     r.check(
         current.inner_text() == "🛠️ Modèles"
         and page.locator('.site-nav a[href="/models"]').count() == 0
-        and page.title() == "WaveStack — Modèles"
+        and page.title() == "HarnessLab — Modèles"
         and page.locator("h1").inner_text() == "Modèles",
         "« Tableau des modèles… » : la page « Modèles », « 🛠️ Modèles » courant",
         current.inner_text(),
@@ -10593,7 +10601,7 @@ def s_model_catalog(r: Run) -> None:
         str({k: v for k, v in gemma.items() if k != "text"}),
     )
     fake_a = _models_row(r, f"cloud:{MODEL_ENTRY_ID}")
-    r.check(fake_a.get("reasoning") == "jamais", "carte : wavestack-fake « jamais »")
+    r.check(fake_a.get("reasoning") == "jamais", "carte : harness-lab-fake « jamais »")
     r.check(fake_a.get("state") == "active", "carte : celle du modèle actif dit « Actif »")
     ollama = _models_row(r, "server:ollama/faux-ollama:latest")
     r.check(
@@ -10633,7 +10641,7 @@ def s_model_catalog(r: Run) -> None:
     # One truth: the reasoning card after the load and the table say the same.
     r.goto_app()
     r.launch("bare_llm")
-    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake"
+    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
     try:
         _pick_model(r, f"☁️ RÉSEAU · Faux fournisseur R (e2e) · {REASONING_MODEL}")
         card = r.card("Raisonnement")
@@ -10757,7 +10765,7 @@ def _models_page_language(r: Run) -> None:
         r.check(r.state()["language"] == "fr", "nettoyage : retour au français")
 
 
-A_LABEL = "☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake"
+A_LABEL = "☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
 
 
 def _window_panel(r: Run) -> None:
@@ -11021,7 +11029,7 @@ def s_relaunch(r: Run) -> None:
     r.earlier_events += r.ev.items  # kept for the run's summary
     r.ev = Events(r.stack.app_url)  # a new process: a new journal, from seq 1
     # The tab left open reconnects on its own (streamEvents, every second); the trainer
-    # types in it, as he would after « relancez WaveStack pour l'utiliser ».
+    # types in it, as he would after « relancez HarnessLab pour l'utiliser ».
     time.sleep(4)
     reloaded = r.page.evaluate("() => window.__e2eBeforeRelaunch !== true")
     r.check(reloaded, "onglet resté ouvert : la page se recharge d'elle-même à la reconnexion (A1)")
@@ -11045,7 +11053,7 @@ def s_relaunch(r: Run) -> None:
         + r.page.locator("#chat .bubble-model").last.inner_text()[:80].replace("\n", " "),
     )
     r.goto_app()
-    expect(r.page.locator("#model-indicator")).to_contain_text("wavestack-fake", timeout=30_000)
+    expect(r.page.locator("#model-indicator")).to_contain_text("harness-lab-fake", timeout=30_000)
     r.wait_idle()
     r.check(True, "relance : le faux modèle est repris sans passer par le diagnostic")
     ended = r.send("Bonjour")
@@ -11077,7 +11085,7 @@ def s_reasoning_locked(r: Run) -> None:
     """Story 33: a model that always reasons locks the Reasoning card (🔒, « Imposé par ce
     modèle »); back on entry A, the lock goes."""
     r.launch("bare_llm")
-    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake"
+    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
     try:
         _pick_model(r, f"☁️ RÉSEAU · Faux fournisseur R (e2e) · {REASONING_MODEL}")
         card = r.card("Raisonnement")
@@ -11115,7 +11123,7 @@ def s_reasoning_dropped(r: Run) -> None:
     its figure « historique réécrit », at both levels; the log's summary « {reason} · {path} »."""
     page = r.page
     r.launch("subagent")
-    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake"
+    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
     try:
         _pick_model(r, f"☁️ RÉSEAU · {ANTHROPIC_PROVIDER} · {ANTHROPIC_MODEL}")
         seq = r.ev.mark()
@@ -11287,9 +11295,9 @@ def _gemini_costs(r: Run, calls: list[dict]) -> None:
     cap_text = f"{cap:g}".replace(".", ",") if cap is not None else "?"
     # The reset sentence counts the totals shown (spend, footprint), never the cap's.
     reset = (
-        "Seul un relancement de WaveStack remet ces totaux à zéro."
+        "Seul un relancement de HarnessLab remet ces totaux à zéro."
         if spend.get("impact_calls", 0) > 0
-        else "Seul un relancement de WaveStack remet ce total à zéro."
+        else "Seul un relancement de HarnessLab remet ce total à zéro."
     )
     r.check(
         cap is not None
@@ -11445,9 +11453,9 @@ def _local_footprint(r: Run, calls: list[dict]) -> None:
     """GreenOps: the fake llama-server runs in another process: CodeCarbon on the whole
     machine, « poste entier » in the tooltip; without the `greenops` extra, « indisponible »
     and the command that installs it."""
-    # `--no-greenops`: WaveStack plays the extra absent (`wavestack_e2e.py`).
+    # `--no-greenops`: HarnessLab plays the extra absent (`harness_lab_e2e.py`).
     installed = (
-        os.environ.get("WAVESTACK_E2E_NO_GREENOPS") != "1"
+        os.environ.get("HARNESS_LAB_E2E_NO_GREENOPS") != "1"
         and importlib.util.find_spec("codecarbon") is not None
     )
     spend = r.state().get("consumption_updated") or {}
@@ -11735,7 +11743,7 @@ def _llm_screen(r: Run) -> None:
     )
     r.check(
         page.locator("h1").inner_text() == "Atelier LLM : l'intérieur du modèle"
-        and page.title() == "WaveStack — Atelier LLM"
+        and page.title() == "HarnessLab — Atelier LLM"
         and page.locator("nav.site-nav a[aria-current=page]").inner_text() == "LLM"
         and not _site_nav_problems(r),
         "/llm : titre « Atelier LLM », barre commune entière, « LLM » courant",
@@ -12947,7 +12955,7 @@ def _llm_loop_first_load(r: Run) -> None:
     draw one step; real columns and real bars, badges « Réel », the OUTPUT left on its first
     step; the INPUT's cut still shown step by step."""
     page = r.page
-    page.evaluate("t => localStorage.setItem('wavestack.llm.prompt', t)", _LOOP_TEXT)
+    page.evaluate("t => localStorage.setItem('harness_lab.llm.prompt', t)", _LOOP_TEXT)
     live = _LoopLab(exact=True)
     routes = [
         ("**/api/llm_lab", live.lab),
@@ -12965,8 +12973,8 @@ def _llm_loop_first_load(r: Run) -> None:
         for name, value in _LOOP_SAMPLING.items():  # the step's settings, saved by the page
             page.evaluate(
                 "([k, v]) => { const s = JSON.parse(localStorage.getItem("
-                "'wavestack.llm.sampling') || '{}'); s[k] = v; "
-                "localStorage.setItem('wavestack.llm.sampling', JSON.stringify(s)); }",
+                "'harness_lab.llm.sampling') || '{}'); s[k] = v; "
+                "localStorage.setItem('harness_lab.llm.sampling', JSON.stringify(s)); }",
                 [name, value],
             )
         _goto_lab(r)
@@ -14264,7 +14272,7 @@ def s_rag_lab_views(r: Run) -> None:
     try:
         _rag_lab_tabs(r)
     finally:
-        page.evaluate("localStorage.removeItem('wavestack.ragLab.pin')")
+        page.evaluate("localStorage.removeItem('harness_lab.ragLab.pin')")
         r.goto_app()
 
 
@@ -14400,7 +14408,7 @@ def s_rag_lab_query(r: Run) -> None:
     try:
         _rag_lab_query(r)
     finally:
-        page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+        page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
         r.goto_app()
 
 
@@ -14482,7 +14490,7 @@ def s_rag_lab_chunking(r: Run) -> None:
     try:
         _rag_lab_chunking(r)
     finally:
-        page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+        page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
         r.goto_app()
 
 
@@ -14601,7 +14609,7 @@ def s_rag_lab_context(r: Run) -> None:
     try:
         _rag_lab_context(r, headroom)
     finally:
-        page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+        page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
         r.goto_app()
         if headroom:
             r.set_brick("Compression", False)
@@ -14621,7 +14629,7 @@ def s_rag_lab_decision(r: Run) -> None:
     try:
         _rag_lab_decision(r)
     finally:
-        page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+        page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
         r.goto_app()
 
 
@@ -15569,7 +15577,7 @@ def s_rag_lab_mcp(r: Run) -> None:
         page.remove_listener("request", listener)
         try:
             r.api("POST", "/api/intentions/rag_mcp_stop", {})
-            page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+            page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
         except Exception as exc:  # noqa: BLE001 - reported, the scenario's own error kept
             r.check(False, "carte MCP : arrêt et chaîne livrée rétablie", repr(exc))
         r.goto_app()
@@ -15577,7 +15585,7 @@ def s_rag_lab_mcp(r: Run) -> None:
 
 def _rag_lab_tabs(r: Run) -> None:
     page = r.page
-    page.evaluate("localStorage.removeItem('wavestack.ragLab.pin')")
+    page.evaluate("localStorage.removeItem('harness_lab.ragLab.pin')")
     _goto_rag_lab(r)
     page.locator("#rag-reset-chain").click()
     tabs = page.locator('#rag-tabs [role="tab"]')
@@ -15864,7 +15872,7 @@ def _rag_lab(r: Run, errors: list[str]) -> None:
     link.click()
     page.wait_for_url("**/rag")
     expect(page.locator("body[data-rag-ready]")).to_be_attached(timeout=10_000)
-    page.evaluate("() => localStorage.removeItem('wavestack.ragLab.mode')")
+    page.evaluate("() => localStorage.removeItem('harness_lab.ragLab.mode')")
     page.reload()
     expect(page.locator("body[data-rag-ready]")).to_be_attached(timeout=10_000)
     r.check(
@@ -16004,7 +16012,7 @@ def _rag_lab(r: Run, errors: list[str]) -> None:
     )
     r.check(
         page.locator("nav.site-nav a[aria-current=page]").inner_text() == "RAG"
-        and page.title() == "WaveStack — Atelier recherche documentaire"
+        and page.title() == "HarnessLab — Atelier recherche documentaire"
         and page.locator("h1").inner_text().startswith("Atelier recherche documentaire")
         and page.locator("select[data-theme-picker]").count() == 1
         and not page.locator("#rag-compare, #rag-chain-b, #rag-comparison").count()
@@ -16674,7 +16682,7 @@ def _rag_lab_hybrid(r: Run) -> None:
     time.sleep(0.4)
     fusion_row = _seq_row(r, "fusion")
     expect(fusion_row.locator(".rag-chain-refusal")).to_be_visible(timeout=5000)
-    chain = page.evaluate("() => JSON.parse(localStorage.getItem('wavestack.ragLab')).pipelines")
+    chain = page.evaluate("() => JSON.parse(localStorage.getItem('harness_lab.ragLab')).pipelines")
     refused = r.api(
         "POST", "/api/intentions/rag_lab_run", {"question": RAG_LAB_QUESTION, "pipelines": chain}
     )
@@ -17158,7 +17166,7 @@ def _rag_lab_compare(r: Run) -> None:
     # A page of before lot 5a saved two chains (A and B), each label named `label_fr`
     # (languages 2/5): A is read again, B is dropped.
     page.evaluate(
-        "() => { const key = 'wavestack.ragLab';"
+        "() => { const key = 'harness_lab.ragLab';"
         " const saved = JSON.parse(localStorage.getItem(key));"
         " const [a] = saved.pipelines.map(({ label_text: _, ...rest }) => rest);"
         " const b = JSON.parse(JSON.stringify(a));"
@@ -17187,7 +17195,7 @@ def _rag_lab_compare(r: Run) -> None:
     row = _seq_row(r, "vector_search")
     expect(row.locator(".rag-chain-refusal")).to_be_visible(timeout=5000)
     said = row.locator(".rag-chain-refusal").inner_text()
-    chain = page.evaluate("() => JSON.parse(localStorage.getItem('wavestack.ragLab')).pipelines")
+    chain = page.evaluate("() => JSON.parse(localStorage.getItem('harness_lab.ragLab')).pipelines")
     refused = r.api(
         "POST", "/api/intentions/rag_lab_run", {"question": RAG_LAB_QUESTION, "pipelines": chain}
     )
@@ -17570,7 +17578,7 @@ def s_cache_bilan(r: Run) -> None:
 
 # A journal of the session as `/api/security_journal` would give it after flux 1's GitHub
 # merge refusal (ux/EXPERIENCE.md, étape 4) : the RSSI's row (étape 7), the fusion refused by
-# the WaveStack policy, explicit about what never reached GitHub.
+# the HarnessLab policy, explicit about what never reached GitHub.
 SECURITY_FAKE_JOURNAL = {
     "entries": [
         {
@@ -18003,7 +18011,7 @@ def s_claude_cache(r: Run) -> None:
     r.goto_app()
     r.wait_idle()
     r.launch("system_prompt")
-    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake"
+    a_label = "☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
     try:
         _pick_model(r, f"☁️ RÉSEAU · {ANTHROPIC_PROVIDER} · {ANTHROPIC_MODEL}")
         group = page.locator("#claude-cache")
@@ -18591,7 +18599,7 @@ def s_cache_module(r: Run) -> None:
     )
     # The cache gauge reads the fake llama-server (local): switch to it, back to the cloud fake
     # model at the end (`relaunch` expects it saved).
-    cloud = "☁️ RÉSEAU · Faux fournisseur (e2e) · wavestack-fake"
+    cloud = "☁️ RÉSEAU · Faux fournisseur (e2e) · harness-lab-fake"
     page.locator("#model-picker").blur()
     seq = r.ev.mark()
     page.select_option("#model-picker", label=LLAMA_OPTION)
@@ -18786,8 +18794,8 @@ def s_rag_lab_no_index(r: Run) -> None:
         r.check(
             ended["payload"]["status"] == "ok"
             and generation.get("status") == "ok"
-            and facts.get("Modèle") == "wavestack-fake"
-            and "wavestack-fake" in _option_label(r, "generation")
+            and facts.get("Modèle") == "harness-lab-fake"
+            and "harness-lab-fake" in _option_label(r, "generation")
             and r.state().get("active_model") == before,
             "génération par le cloud A choisi dans l'étape : le modèle de la séance ne change pas",
             f"{generation.get('status')} · {facts.get('Modèle')} · "
@@ -18905,7 +18913,7 @@ def s_rag_lab_no_index(r: Run) -> None:
         try:
             page.keyboard.press("Escape")
             r.goto_app()
-            page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+            page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
             r.api("POST", "/api/rag_lab/copy/reset")
             if (r.state().get("active_model") or {}).get("ref") != MODEL_ENTRY_ID:
                 _pick_model(r, A_LABEL)
@@ -19141,7 +19149,7 @@ def s_rag_lab_agentic(r: Run) -> None:
             r.api("POST", "/api/rag_lab/copy/reset")
             r.api("POST", "/api/rag_lab/pageindex/reset")
             r.goto_app()
-            page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+            page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
             if (r.state().get("active_model") or {}).get("ref") != MODEL_ENTRY_ID:
                 _pick_model(r, A_LABEL)
             if (r.state().get("context_window_state") or {}).get("configured") != 4096:
@@ -19357,7 +19365,7 @@ def s_rag_lab_graphrag(r: Run) -> None:
             r.api("POST", "/api/rag_lab/copy/reset")
             r.api("POST", "/api/rag_lab/graph/reset")
             r.goto_app()
-            page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+            page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
             if (r.state().get("active_model") or {}).get("ref") != MODEL_ENTRY_ID:
                 _pick_model(r, A_LABEL)
             if (r.state().get("context_window_state") or {}).get("configured") != 4096:
@@ -19550,7 +19558,7 @@ def s_rag_lab_raptor_crag(r: Run) -> None:
             r.api("POST", "/api/rag_lab/copy/reset")
             r.api("POST", "/api/rag_lab/raptor/reset")
             r.goto_app()
-            page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+            page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
             if (r.state().get("active_model") or {}).get("ref") != MODEL_ENTRY_ID:
                 _pick_model(r, A_LABEL)
             if (r.state().get("context_window_state") or {}).get("configured") != 4096:
@@ -19715,7 +19723,7 @@ def s_rag_lab_wiki(r: Run) -> None:
             r.api("POST", "/api/rag_lab/copy/reset")
             r.api("POST", "/api/rag_lab/wiki/reset")
             r.goto_app()
-            page.evaluate("localStorage.removeItem('wavestack.ragLab')")
+            page.evaluate("localStorage.removeItem('harness_lab.ragLab')")
             if (r.state().get("active_model") or {}).get("ref") != MODEL_ENTRY_ID:
                 _pick_model(r, A_LABEL)
             if (r.state().get("context_window_state") or {}).get("configured") != 4096:
@@ -20162,7 +20170,7 @@ SCENARIOS: list[tuple[str, Callable[[Run], None]]] = [
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Test de bout en bout de WaveStack (palier 1).")
+    parser = argparse.ArgumentParser(description="Test de bout en bout de HarnessLab (palier 1).")
     parser.add_argument("--only", nargs="*", help="scénarios à jouer (diagnostic toujours)")
     parser.add_argument("--keep", action="store_true", help="garder le dossier de données")
     parser.add_argument("--headed", action="store_true")
@@ -20173,30 +20181,30 @@ def main() -> int:
     parser.add_argument(
         "--no-rag-alt",
         action="store_true",
-        help="WaveStack comme sans l'extra rag-alt (FAISS et LanceDB indisponibles)",
+        help="HarnessLab comme sans l'extra rag-alt (FAISS et LanceDB indisponibles)",
     )
     parser.add_argument(
         "--no-greenops",
         action="store_true",
-        help="WaveStack comme sans l'extra greenops (empreinte locale indisponible)",
+        help="HarnessLab comme sans l'extra greenops (empreinte locale indisponible)",
     )
     parser.add_argument(
         "--no-headroom",
         action="store_true",
-        help="WaveStack comme sans l'extra compression (le scénario compression est sauté)",
+        help="HarnessLab comme sans l'extra compression (le scénario compression est sauté)",
     )
     args = parser.parse_args()
-    if args.no_headroom:  # read by `wavestack_e2e.py` through the stack's environment
-        os.environ["WAVESTACK_E2E_NO_HEADROOM"] = "1"
+    if args.no_headroom:  # read by `harness_lab_e2e.py` through the stack's environment
+        os.environ["HARNESS_LAB_E2E_NO_HEADROOM"] = "1"
     if args.no_greenops:  # GreenOps, likewise
-        os.environ["WAVESTACK_E2E_NO_GREENOPS"] = "1"
+        os.environ["HARNESS_LAB_E2E_NO_GREENOPS"] = "1"
     if args.no_rag_alt:  # story 30, likewise
-        os.environ["WAVESTACK_E2E_NO_RAG_ALT"] = "1"
+        os.environ["HARNESS_LAB_E2E_NO_RAG_ALT"] = "1"
     chosen = [s for s in SCENARIOS if not args.only or s[0] in args.only or s[0] == "diagnostic"]
 
     console: list[str] = []
     with running_stack(keep=args.keep) as stack, sync_playwright() as p:
-        print(f"WaveStack {stack.app_url} · faux modèle {stack.fake_url} · {stack.data_dir}")
+        print(f"HarnessLab {stack.app_url} · faux modèle {stack.fake_url} · {stack.data_dir}")
         if args.channel:  # E125 (restes différés, story 6): e.g. Edge, as on the target PC
             try:
                 browser = p.chromium.launch(headless=not args.headed, channel=args.channel)

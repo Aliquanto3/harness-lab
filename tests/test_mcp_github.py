@@ -9,8 +9,8 @@ import time
 from test_mcp import McpWeb, loop, mcp_session, web  # noqa: F401
 from test_mcp_lab import connect, lab_call
 
-from wavestack.mcp import github_auth
-from wavestack.trace.journal import get_journal
+from harness_lab.mcp import github_auth
+from harness_lab.trace.journal import get_journal
 
 GITHUB_TOOLS = [
     {

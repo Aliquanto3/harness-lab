@@ -13,12 +13,12 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from wavestack import config
-from wavestack.rag import agent_tools, workcopy
-from wavestack.rag.agent_tools import Action, Workspace, parse_action
-from wavestack.rag.corpus import DocText, load_rag_content
-from wavestack.tools import native
-from wavestack.tools.registry import ToolError
+from harness_lab import config
+from harness_lab.rag import agent_tools, workcopy
+from harness_lab.rag.agent_tools import Action, Workspace, parse_action
+from harness_lab.rag.corpus import DocText, load_rag_content
+from harness_lab.tools import native
+from harness_lab.tools.registry import ToolError
 
 DOCS = {
     "teletravail": (

@@ -4,7 +4,7 @@
     "deterministic": true,
     "max_gap": 0.0
   },
-  "guard": "wavestack.net.guard",
+  "guard": "harness_lab.net.guard",
   "id": "slm_juge",
   "peak_before_load_mb": 1933,
   "probabilistic": true,

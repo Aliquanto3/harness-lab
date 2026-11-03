@@ -36,7 +36,7 @@ deferred: []
 - **D11 = valider** (E080) et **D15 = valider** (E093) — retirer « à valider » d'AD-4 (H-1) et d'AD-21 dans ARCHITECTURE-SPINE ; fermer les entrées.
 - **D17 = consigne** (E124) — la consigne du scénario Raisonnement annonce qu'un petit modèle réfléchit jusqu'au budget même pour un message simple.
 - **D18 = réponses mesurées** (E126) — `tests/test_program.py` (`fits`) simule l'historique cumulé avec des réponses de la taille relevée au lot K (`resultats-lot-k-2026-09-29.md:127`, ≈ 500 tokens au plus) au lieu de la réserve ; le commentaire « deferred (spec of lot K) » est retiré.
-- **D19 = accepter** (E139) — commentaire dans `wavestack.toml` et README : `hosting_text` et `notes_text` sont saisis par l'opérateur et affichés tels quels, dans toutes les langues.
+- **D19 = accepter** (E139) — commentaire dans `harness-lab.toml` et README : `hosting_text` et `notes_text` sont saisis par l'opérateur et affichés tels quels, dans toutes les langues.
 - Tout texte nouveau en `fr`, `en`, `de`.
 
 **Never:**
@@ -51,17 +51,17 @@ deferred: []
 Préalable vérifié : `SPEC.md:67-89`, « Tranchées le 2026-10-01 : Anaël suit les dix-neuf recommandations » ; chaque Dn de la colonne « Décision » est l'option ci-dessus.
 
 - `_bmad-output/implementation-artifacts/deferred-work.md` -- entrées C par leur `summary` (les numéros de ligne de `triage.md` ont glissé) : E007 « Détail de la jauge » (l. 31), E010 « Repli hors ligne de `fetch_page` » (44), E038 « L'interrupteur « Afficher les actions forcées » » (168), E045 « Le tour du scénario « MCP en documentation complète » dépasse » (199), E051 « Aucune attribution visible » (225), E052 « Mistral répond 429 » (229), E060 « Le tiroir de la mémoire globale n'affiche pas » (263), E061 « Aucun ajout d'entrée depuis le tiroir » (267), E062 « Une mémoire globale pleine » (271), E079 « AD-13 : `transform_context` » (349), E080 « H-1 de la story 20 » (353), E081 « `compress()` de Headroom » (357), E087 « SOC : le garde-fou » (386), E088 « IAM et Souveraineté sans réseau » (390), E093 « AD-21 amendé » (412), E124 « Avec le 2B, le raisonnement » (562), E126 « Le test `fits` ne simule que l'échange précédent » (569, pas l'entrée close de la l. 450), E139 « L'avertissement et le bandeau d'un modèle cloud » (623). E121 (l. 549) n'est pas touchée.
-- `src/wavestack/web/static/app.js` -- D3 : `forcedToggle()` (l. 1582), `brickOptions()` (l. 1481 ; clé d'ouverture `options:${brick.id}` dans `store.openExplanations`), `forceButton()` (l. 1626 : `null` sans libellé `FORCE_LABELS[brick.id]`, et pour MCP hors lazy sauf `option.calls`), appel dans `renderBricks()` (l. 1148). D5 : `renderChat()` (l. 2933, bulle `.bubble-model` reconstruite à chaque rendu, focus rendu par `data-focus-key`), `turn.steps` (étape `type === "tool"`, `started.tool`, `started.source`), clé de ligne d'Orchestration `${turn.id}:${i}` (`stepRows`, l. 5062), `toolLabel()` (l. 4833), `stepLinks()` (l. 5049), modèle d'ouverture `revealOutbound()` (l. 5711 : volet Orchestration montré, tour déplié, vue figée, `userOpen`, `selected`, `renderSteps`). D7 : `renderMemoryDrawer()` (l. 2090, en-tête `memory-entry-head`), `dateTimeFormat` déjà importé de `i18n.js` (locale `fr-FR`/`en-GB`/`de-DE`, fuseau du navigateur).
-- `src/wavestack/web/static/app.css` -- `.force-toggle` (l. 2525), `.brick-group-title` (l. 2307) à réutiliser pour le titre ; `.memory-entry-head` / `.memory-entry-source` (l. 2826-2839).
+- `src/harness_lab/web/static/app.js` -- D3 : `forcedToggle()` (l. 1582), `brickOptions()` (l. 1481 ; clé d'ouverture `options:${brick.id}` dans `store.openExplanations`), `forceButton()` (l. 1626 : `null` sans libellé `FORCE_LABELS[brick.id]`, et pour MCP hors lazy sauf `option.calls`), appel dans `renderBricks()` (l. 1148). D5 : `renderChat()` (l. 2933, bulle `.bubble-model` reconstruite à chaque rendu, focus rendu par `data-focus-key`), `turn.steps` (étape `type === "tool"`, `started.tool`, `started.source`), clé de ligne d'Orchestration `${turn.id}:${i}` (`stepRows`, l. 5062), `toolLabel()` (l. 4833), `stepLinks()` (l. 5049), modèle d'ouverture `revealOutbound()` (l. 5711 : volet Orchestration montré, tour déplié, vue figée, `userOpen`, `selected`, `renderSteps`). D7 : `renderMemoryDrawer()` (l. 2090, en-tête `memory-entry-head`), `dateTimeFormat` déjà importé de `i18n.js` (locale `fr-FR`/`en-GB`/`de-DE`, fuseau du navigateur).
+- `src/harness_lab/web/static/app.css` -- `.force-toggle` (l. 2525), `.brick-group-title` (l. 2307) à réutiliser pour le titre ; `.memory-entry-head` / `.memory-entry-source` (l. 2826-2839).
 - `content/ui.yaml`, `content/i18n/{en,de}/ui.yaml` -- `main.force` (l. 162), `main.memory` (l. 193), `main.chat` ; parité stricte des clés et variables (`tests/test_ui_texts.py`), guillemets “…” / „…“ en `en` / `de`, « Sie ».
-- `src/wavestack/models/openai_chat.py` -- `_refused()`, branche 429 (l. 488-526) ; `_text`, `_error`, `_BACK_TO_LOCAL_FR` ; docstring de `pace()` (l. 201) inchangée (l'espacement ne lit toujours pas les en-têtes).
+- `src/harness_lab/models/openai_chat.py` -- `_refused()`, branche 429 (l. 488-526) ; `_text`, `_error`, `_BACK_TO_LOCAL_FR` ; docstring de `pace()` (l. 201) inchangée (l'espacement ne lit toujours pas les en-têtes).
 - `content/messages.yaml` (+ `en`, `de`) -- `models.openai_chat.quota_refused` (l. 1148) : nouvelle clé voisine ; parité stricte (`tests/test_backend_messages.py`, `tests/test_i18n.py`).
 - `tests/test_cloud.py` -- modèle : `test_unknown_quota_names_the_three_scopes` (l. 861), `_cloud_session`, `Provider`, `_turn`, `_of`.
 - `_bmad-output/implementation-artifacts/spec-11b-corrections-test-manuel-story-11.md` -- l. 63 et Never l. 80.
 - `content/scenarios.yaml` (+ `en`, `de`) -- `reasoning.description_text` (l. 70-80), `mcp_full.description_text` (l. 189-204).
 - `ARCHITECTURE-SPINE.md` -- AD-4, l. 212 (« *Décision provisoire, à valider (story 20, H-1)…* ») ; AD-21, l. 607 (« *Décision provisoire, à valider (story 16, hypothèse 1)…* »). Ne pas toucher l. 289 (story 24, hors périmètre) ni l. 481/854.
 - `tests/test_program.py` -- commentaire l. 76-84, docstring l. 604-609, boucle l. 663-682 (`history = prompt + kept + reserve + EXCHANGE_TEMPLATE`).
-- `wavestack.toml` (`[cloud]`, l. 238-242) et `README.md` (« Ajouter un modèle », l. 832-860).
+- `harness-lab.toml` (`[cloud]`, l. 238-242) et `README.md` (« Ajouter un modèle », l. 832-860).
 - `EXPERIENCE.md` -- l. 161 (bouton Forcer), l. 162 (tiroir d'édition, mémoire globale), l. 165 (messages de la Vue humain).
 - `tools/e2e/run_e2e.py` -- `s_forced_native` (l. 3701), `s_global_memory` (l. 3800, tiroir l. 3892-3903), `Run.show_forced` (l. 303), `_step` (l. 2191).
 
@@ -78,7 +78,7 @@ Préalable vérifié : `SPEC.md:67-89`, « Tranchées le 2026-10-01 : Anaël sui
 - [x] `tests/test_scenarios.py` -- D4 et D17 : les consignes des trois langues portent l'annonce (durée de `mcp_full`, réflexion jusqu'au budget).
 - [x] `ARCHITECTURE-SPINE.md` -- D11, D15 : les deux mentions deviennent « Décision validée par Anaël le 2026-10-01 (… D11 / D15) ».
 - [x] `tests/test_program.py` -- D18 : réponses à la taille mesurée (`MEASURED_ANSWERS = (500, 250)`) au lieu de la réserve ; l'historique cumule chaque échange (`prompt + kept + answer + EXCHANGE_TEMPLATE`) au tokenizer du GGUF, l'échange précédent seul à l'estimation de 2 caractères par token (voir Spec Change Log) ; commentaire et docstring réécrits, « deferred » retiré.
-- [x] `wavestack.toml`, `README.md` -- D19 : commentaire et phrase.
+- [x] `harness-lab.toml`, `README.md` -- D19 : commentaire et phrase.
 - [x] `EXPERIENCE.md` -- D3, D5, D7.
 - [x] `tools/e2e/run_e2e.py` -- contrôles écrits, non lancés : D3 dans `s_forced_native` (liste « Outils » ouverte sans clic après l'interrupteur, titre et ✋ présents), D5 dans `s_forced_native` (ligne et bouton « Calculatrice » sous la réponse, clic → étape dépliée ; « Bonjour » sans outil → aucune ligne), D7 dans `s_global_memory` (chaque entrée du tiroir porte un `time` dont `datetime` vaut `created_at` de `memory.json`).
 - [x] `deferred-work.md` -- `resolution:` pour D1, D2, D8, D9, D10, D12, D13, D14 ; `closed: 2026-10-01 (story 3 des restes différés) — <preuve>` pour D3, D4, D5, D6, D7, D11, D15, D17, D18, D19. E121 intacte.
@@ -86,7 +86,7 @@ Préalable vérifié : `SPEC.md:67-89`, « Tranchées le 2026-10-01 : Anaël sui
 **Acceptance Criteria:**
 - Given les 18 entrées C hors E121, when on lit `deferred-work.md`, then chacune porte `closed:` ou `resolution:` qui cite sa décision.
 - Given un modèle cloud qui répond 429 avec `x-ratelimit-limit-req-minute: 0`, when un tour part, then `harness_error` dit « aucun quota actif sur ce compte : vérifiez le plan dans la console du fournisseur », sans indice d'attente ni d'espacement, et une seule requête est partie.
-- Given `tests/test_program.py` sans `WAVESTACK_TEST_GGUF`, when le test `fits` tourne, then chaque prompt tient avec l'échange précédent à réponse mesurée ; avec `WAVESTACK_TEST_GGUF` (PC, story 7), avec l'historique cumulé à réponses mesurées.
+- Given `tests/test_program.py` sans `HARNESS_LAB_TEST_GGUF`, when le test `fits` tourne, then chaque prompt tient avec l'échange précédent à réponse mesurée ; avec `HARNESS_LAB_TEST_GGUF` (PC, story 7), avec l'historique cumulé à réponses mesurées.
 
 ## Implementation Notes
 
@@ -112,7 +112,7 @@ Préalable vérifié : `SPEC.md:67-89`, « Tranchées le 2026-10-01 : Anaël sui
 | 2 | aveugle, cas limites | D3 ne déplie pas après rechargement (interrupteur mémorisé), après « Réinitialiser », ni pour des appels MCP arrivés ensuite | low | Réel, mais l'intention dit « passe à vrai » et l'animateur qui a déjà allumé l'interrupteur connaît les boutons ; le correctif ajoute un état (`forcedUnfolded`). Rejeté (low, correctif non direct) ; signalé comme choix de nuit dans l'entrée E038. |
 | 3 | aveugle, écarts de vérification | `closed:` sur D3, D5, D7 avec des contrôles E2E non joués | medium | Contraire à « une entrée n'est fermée qu'avec sa preuve » ; corrigé (patch) : `resolution: … preuve E2E en attente`, fermeture sur le résultat de la batterie finale. |
 | 4 | aveugle, écarts de vérification, cas limites | D18 affaiblit le test par défaut (réponse 500/250 au lieu de la réserve en estimation) | medium | Vrai pour p3 et suivants ; corrigé (patch) : en estimation, échange précédent à la réserve comme avant. |
-| 5 | écarts de vérification | D18 : cumul vérifié seulement avec `WAVESTACK_TEST_GGUF` | medium (non vérifié) | Le mode exact demande le 2B sur le PC ; reporté (defer) : nouvelle entrée de `deferred-work.md`, et E126 passe en `resolution:` qui se ferme sur ce passage (story 7). |
+| 5 | écarts de vérification | D18 : cumul vérifié seulement avec `HARNESS_LAB_TEST_GGUF` | medium (non vérifié) | Le mode exact demande le 2B sur le PC ; reporté (defer) : nouvelle entrée de `deferred-work.md`, et E126 passe en `resolution:` qui se ferme sur ce passage (story 7). |
 | 6 | aveugle | Ligne D19 collée à l'entrée suivante sans ligne vide | false | Préexistant : l'entrée E139 et la suivante n'étaient déjà séparées par aucune ligne vide ; l'insertion n'a rien changé à la séparation. |
 | 7 | aveugle | D1 non reporté dans EXPERIENCE.md et DESIGN.md (`context-gauge-detail` toujours à construire) | low | Réel ; corrigé (patch) : les deux mentions disent « abandonné (D1) ; ne pas construire » (frontmatter de DESIGN.md non touché). |
 | 8 | aveugle | Ligne « Bouton Forcer » d'EXPERIENCE.md sans les outils ni « Forcer l'appel » | low | Réel ; corrigé (patch) : emplacements et libellés complétés, section « au-dessus des deux groupes de cartes ». |
@@ -143,7 +143,7 @@ Préalable vérifié : `SPEC.md:67-89`, « Tranchées le 2026-10-01 : Anaël sui
 - `uv run ruff check <fichiers touchés>` et `uv run ruff format --check <fichiers touchés>` -- expected: aucun écart.
 - `uv run pytest -q tests/test_cloud.py tests/test_ui_texts.py tests/test_backend_messages.py tests/test_i18n.py tests/test_scenarios.py tests/test_content_language.py` -- expected: tout passe.
 - `uv run pytest -q tests/test_program.py` -- expected: tout passe (2 caractères par token, sans GGUF).
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur de syntaxe.
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur de syntaxe.
 
 **Manual checks (if no CLI):**
 - E2E (avec l'accord d'Anaël, batterie finale) : tranches `forced_native`, `global_memory`, `cloud`, `ui_language` -- 0 échec, contrôles D3, D5, D7 compris.

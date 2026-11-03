@@ -133,7 +133,7 @@ J'ai lu chaque FR, NFR, UJ, ligne du tableau des risques (§9), hypothèse du §
 
 - **Référence PRD.** NFR-8 (« Aucune défaillance du modèle ne fait planter l'application »), FR-33 (modèle inconnu), FR-34 (blobs d'Ollama, dont le chargement n'est pas vérifié selon le memlog), SM-6.
 - **Constat.** AD-16 ne contient que les exceptions Python. Un `GGML_ASSERT`, une architecture non prise en charge, un GGUF corrompu ou un manque de mémoire à l'allocation font avorter llama.cpp. Comme le moteur tourne dans le processus, l'avortement emporte le serveur web et la session en pleine démonstration. Le risque augmente précisément avec les fichiers découverts (AD-7).
-- **Correction proposée.** AD-7 et AD-8 : tout GGUF qui n'a jamais été chargé avec succès est d'abord ouvert dans un processus enfant de sonde (`sys.executable -m wavestack.models.probe <chemin>`, avec `vocab_only` puis un chargement complet). La sonde vérifie `general.architecture`, le gabarit et la mémoire résidente mesurée, qui alimente AD-8. Un succès est mémorisé dans `settings.json` (chemin, taille, date de modification). Un échec rend le fichier « incompatible », avec la raison. Ce plafond de la protection (un crash reste possible en cours d'inférence) est à noter dans AD-16.
+- **Correction proposée.** AD-7 et AD-8 : tout GGUF qui n'a jamais été chargé avec succès est d'abord ouvert dans un processus enfant de sonde (`sys.executable -m harness_lab.models.probe <chemin>`, avec `vocab_only` puis un chargement complet). La sonde vérifie `general.architecture`, le gabarit et la mémoire résidente mesurée, qui alimente AD-8. Un succès est mémorisé dans `settings.json` (chemin, taille, date de modification). Un échec rend le fichier « incompatible », avec la raison. Ce plafond de la protection (un crash reste possible en cours d'inférence) est à noter dans AD-16.
 
 ### R-07 — Serveurs externes : fenêtre, troncature, mémoire — moyenne
 
@@ -141,7 +141,7 @@ J'ai lu chaque FR, NFR, UJ, ligne du tableau des risques (§9), hypothèse du §
 - **Constat.**
   - AD-9 charge le modèle avec `n_ctx` égal à la fenêtre, ce qui ne vaut que pour le mode en processus.
     - Pour Ollama, sans `options.num_ctx`, le serveur garde sa propre taille de contexte et peut tronquer le prompt en silence. Le contexte affiché deviendrait alors faux.
-    - Pour llama-server, `n_ctx` est fixé au lancement du serveur (divisé par `--parallel`) et WaveStack ne peut pas le changer.
+    - Pour llama-server, `n_ctx` est fixé au lancement du serveur (divisé par `--parallel`) et HarnessLab ne peut pas le changer.
   - AD-8 libère le modèle en processus en mode serveur. Mais en revenant au mode en processus, le modèle d'Ollama reste chargé (`keep_alive`) : on a alors deux modèles en mémoire.
 - **Correction proposée.**
   - AD-5 et AD-9 : la fenêtre effective vaut le minimum de la fenêtre configurée, du contexte natif et du contexte du serveur (lu par `/props` pour llama-server, fixé par `options.num_ctx` pour Ollama). `ollama_raw` envoie toujours `num_ctx`. Chaque adaptateur vérifie que le nombre de tokens d'entrée renvoyé par le serveur (`prompt_eval_count` pour Ollama, `tokens_evaluated` pour llama-server) est égal au compte du harnais. Un écart émet `harness_error` avec le message « transparence réduite ».
@@ -149,9 +149,9 @@ J'ai lu chaque FR, NFR, UJ, ligne du tableau des risques (§9), hypothèse du §
 
 ### R-08 — Périmètre du budget mémoire — moyenne
 
-- **Référence PRD.** NFR-2 (« le périmètre mesuré couvre les processus de WaveStack (harnais, modèle, serveurs MCP locaux, index RAG) »), §11 (hypothèse à mesurer).
+- **Référence PRD.** NFR-2 (« le périmètre mesuré couvre les processus de HarnessLab (harnais, modèle, serveurs MCP locaux, index RAG) »), §11 (hypothèse à mesurer).
 - **Constat.** Le `LoadRegistry` d'AD-8 ne compte que les composants lourds, estimés d'après les fichiers. Il oublie deux postes du périmètre de NFR-2, qui pèsent chacun plusieurs dizaines à centaines de Mo : le socle du processus Python (FastAPI, pydantic, la bibliothèque `mcp`, Jinja2) et le processus enfant du serveur MCP local. Pourtant `psutil` figure déjà dans la stack.
-- **Correction proposée.** AD-8 : le budget se calcule ainsi : mémoire résidente mesurée du processus WaveStack et de ses enfants (`psutil`), plus les estimations des composants à charger. Le refus porte sur ce total. Le diagnostic (FR-37) affiche la même mesure. L'hypothèse de NFR-2 est ainsi rendue mesurable par l'application elle-même.
+- **Correction proposée.** AD-8 : le budget se calcule ainsi : mémoire résidente mesurée du processus HarnessLab et de ses enfants (`psutil`), plus les estimations des composants à charger. Le refus porte sur ce total. Le diagnostic (FR-37) affiche la même mesure. L'hypothèse de NFR-2 est ainsi rendue mesurable par l'application elle-même.
 
 ### R-09 — Cache KV entre les appels d'un tour — moyenne
 
@@ -169,7 +169,7 @@ J'ai lu chaque FR, NFR, UJ, ligne du tableau des risques (§9), hypothèse du §
 ### R-10 — Confinement des outils locaux — moyenne
 
 - **Référence PRD.** FR-13 (lecture de fichier « dans un dossier de démonstration » ; calculatrice), FR-27 (H1), NFR-4, NFR-11.
-- **Constat.** Les arguments viennent du modèle, donc d'une source non fiable. Si seul H1 empêche de sortir du dossier, désactiver H1 (ce que FR-27 permet) ouvre tout le disque du formateur : `C:\Users\...` ou `%LOCALAPPDATA%\WaveStack\settings.json`. Le contenu lu peut ensuite partir vers un serveur MCP public. H1 doit rester une démonstration, pas la seule protection.
+- **Constat.** Les arguments viennent du modèle, donc d'une source non fiable. Si seul H1 empêche de sortir du dossier, désactiver H1 (ce que FR-27 permet) ouvre tout le disque du formateur : `C:\Users\...` ou `%LOCALAPPDATA%\HarnessLab\settings.json`. Le contenu lu peut ensuite partir vers un serveur MCP public. H1 doit rester une démonstration, pas la seule protection.
 - **Correction proposée.** AD-14 : l'outil `read_file` résout le chemin (`Path.resolve()`) et refuse tout ce qui sort de `content/demo_files/`. Ce refus est une erreur de l'outil, pas un hook. H1 protège le sous-dossier confidentiel qui se trouve *à l'intérieur* de la zone autorisée. La calculatrice passe par un évaluateur d'expressions arithmétiques fondé sur `ast` (liste blanche d'opérateurs), jamais par `eval`. Un test couvre chacun de ces deux cas.
 
 ### R-11 — API locale : CSRF et DNS rebinding — moyenne
@@ -186,8 +186,8 @@ J'ai lu chaque FR, NFR, UJ, ligne du tableau des risques (§9), hypothèse du §
 
 ### R-12 — Identité des composants, modèle et fichiers dans le schéma — moyenne
 
-- **Référence PRD.** FR-3 (« le composant en cours d'action est mis en évidence » ; composants actifs : modèle, harnais, briques, serveurs MCP, données), FR-4 (un segment met en évidence « la brique et le composant correspondants »), FR-34 (« le schéma d'architecture montre le modèle comme un processus local distinct de WaveStack »), FR-12, FR-16, FR-27 (H2).
-- **Constat.** L'enveloppe d'AD-2 porte `brick` mais pas de composant. Deux serveurs MCP publics, deux fichiers (mémoire et journal d'audit) ou le modèle ne peuvent donc pas être distingués pour la mise en évidence. AD-12 dérive le schéma des déclarations *de briques*. Le modèle et le harnais ne sont pas des briques, et le lieu d'hébergement du modèle change avec l'adaptateur : dans le processus WaveStack, ou processus local distinct.
+- **Référence PRD.** FR-3 (« le composant en cours d'action est mis en évidence » ; composants actifs : modèle, harnais, briques, serveurs MCP, données), FR-4 (un segment met en évidence « la brique et le composant correspondants »), FR-34 (« le schéma d'architecture montre le modèle comme un processus local distinct de HarnessLab »), FR-12, FR-16, FR-27 (H2).
+- **Constat.** L'enveloppe d'AD-2 porte `brick` mais pas de composant. Deux serveurs MCP publics, deux fichiers (mémoire et journal d'audit) ou le modèle ne peuvent donc pas être distingués pour la mise en évidence. AD-12 dérive le schéma des déclarations *de briques*. Le modèle et le harnais ne sont pas des briques, et le lieu d'hébergement du modèle change avec l'adaptateur : dans le processus HarnessLab, ou processus local distinct.
 - **Correction proposée.**
   - AD-2 : ajouter `component: str | null` à l'enveloppe, et `component` aux segments d'AD-4.
   - AD-12 : les composants du socle (navigateur, harnais, modèle) sont déclarés par `session` et `models`. L'adaptateur de moteur déclare son lieu d'hébergement (`in_process` ou `local_process` pour `ollama_raw` et `llama_server`). Les fichiers d'AD-20 et l'index RAG sont déclarés comme composants `local_file` par leur brique, avec leur chemin.
@@ -253,12 +253,12 @@ J'ai lu chaque FR, NFR, UJ, ligne du tableau des risques (§9), hypothèse du §
 
 - **Référence PRD.** FR-13 (taille maximale, repli hors ligne sur un long fichier de démonstration, conversion en texte), NFR-11 et addendum (page jamais copiée dans le dépôt ; l'adresse change, on la teste au démarrage).
 - **Constat.** AD-15 couvre la liste d'adresses autorisées. La coupe à une taille maximale, la substitution hors ligne, la conversion en texte (sans bibliothèque dans la stack) et l'interdiction de mise en cache ne figurent nulle part.
-- **Correction proposée.** AD-14 (outil `fetch_page`) : taille maximale en octets et en tokens dans `wavestack.toml`. Sans réseau, l'outil lit un fichier de `content/demo_files/` et l'indique dans son résultat. Conversion avec `html.parser` de la bibliothèque standard, ou lecture directe des pages `.md`. Aucune écriture sur disque du contenu lu.
+- **Correction proposée.** AD-14 (outil `fetch_page`) : taille maximale en octets et en tokens dans `harness-lab.toml`. Sans réseau, l'outil lit un fichier de `content/demo_files/` et l'indique dans son résultat. Conversion avec `html.parser` de la bibliothèque standard, ou lecture directe des pages `.md`. Aucune écriture sur disque du contenu lu.
 
 ### R-20 — Reprise d'un serveur MCP public — faible
 
 - **Référence PRD.** FR-20, §9 (pas de réseau en salle ; le Wi-Fi arrive souvent après le lancement).
-- **Constat.** Avec AD-16, un serveur qui ne répond pas au démarrage reste indisponible jusqu'au redémarrage. Pendant une session, le formateur devrait relancer WaveStack.
+- **Constat.** Avec AD-16, un serveur qui ne répond pas au démarrage reste indisponible jusqu'au redémarrage. Pendant une session, le formateur devrait relancer HarnessLab.
 - **Correction proposée.** AD-16 : l'intention `retry_network` refait la sonde et la poignée de main, entre deux tours. La même sonde est refaite à l'activation de la brique MCP.
 
 ### R-21 — Réinitialisation et journal — faible
@@ -302,7 +302,7 @@ J'ai lu chaque FR, NFR, UJ, ligne du tableau des risques (§9), hypothèse du §
 | O-2 | FR-31 (titre), §3 « Compression du contexte », §4.10, UJ-7, §7.1 palier 2, §1 | « démontrée avec Headroom » ; « (Headroom) » | AD-22 : port `Compressor` ; headroom-ai en dépendance optionnelle, à condition de passer le test préalable ; sinon compresseur maison | « Compression du contexte, démontrée avec Headroom si le test préalable le valide (hors ligne, dans le budget), sinon avec un compresseur minimal du harnais. » Rendre le titre de FR-31 neutre : « Compression du contexte ». |
 | O-3 | §3 « Sous-agent » | « une seconde instance du modèle, dotée de son propre contexte » | AD-11 : même instance du moteur, contexte distinct, à tour de rôle | « un second agent, qui réutilise le modèle déjà chargé avec son propre contexte ». Le mot « instance » crée l'ambiguïté avec NFR-2. |
 | O-4 | §9, ligne « installation » | « Dépendances Python pures privilégiées » | Roues précompilées à DLL non signées acceptées (llama-cpp-python, sqlite-vec) ; risque AppLocker ou WDAC vérifié en session pilote (Deferred) | « Roues précompilées, sans compilation ni exécutable à installer ; DLL non signées acceptées, vérifiées lors de la session pilote. » |
-| O-5 | FR-33 (dernière puce) | « Pour un modèle inconnu, les capacités sont lues dans son fichier » | AD-6 : le raisonnement et la taille de contexte se lisent dans le GGUF, mais l'appel d'outils exige une famille connue du registre (parseur) | Ajouter : « L'appel d'outils n'est disponible que pour les familles dont le format d'appel est connu de WaveStack. » |
+| O-5 | FR-33 (dernière puce) | « Pour un modèle inconnu, les capacités sont lues dans son fichier » | AD-6 : le raisonnement et la taille de contexte se lisent dans le GGUF, mais l'appel d'outils exige une famille connue du registre (parseur) | Ajouter : « L'appel d'outils n'est disponible que pour les familles dont le format d'appel est connu de HarnessLab. » |
 | O-6 | FR-20 (3ᵉ puce) | « s'il ne répond pas au démarrage […] il est indisponible » | AD-16 : indisponible « jusqu'au redémarrage » | Aligner après R-20 : « indisponible jusqu'à une nouvelle tentative ». |
 | O-7 | Addendum « Budget mémoire » | Embedding et reranker « de quelques centaines de Mo au plus » | Candidats de 639 Mo et 438 Mo, via llama-cpp-python ; repli sur fastembed | Mettre à jour l'ordre de grandeur, ou fixer un plafond cumulé (par exemple 1,1 Go) vérifié par AD-8. |
 | O-8 | Addendum « Pistes » (brief) | « NiceGUI ou Streamlit », « ChromaDB ou sqlite-vec », « Ollama plus simple : à arbitrer » | FastAPI, SSE et JS natif ; sqlite-vec ; llama-cpp-python en processus | Marquer ces trois pistes « tranchées le 2026-09-23 (architecture) », comme la piste UX. |

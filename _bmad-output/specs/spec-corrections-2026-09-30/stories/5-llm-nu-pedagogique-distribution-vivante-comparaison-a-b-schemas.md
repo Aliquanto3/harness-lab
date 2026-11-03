@@ -20,7 +20,7 @@ deferred:
     evidence: |-
       Revue du 2026-10-01 (IA1, IA5, VG5, BH11) : l'E2E n'a pas de moteur en processus, seule la branche « indisponible » est vue. Faisable sans moteur : `page.route` simulant `/api/llm_lab` (distribution.tokens > 0, candidates.available) et `/api/llm_lab/distribution`, puis des `llm_token` rejoués ; à lancer avec l'accord d'Anaël (E2E).
     location: >-
-      src/wavestack/web/static/llm.js (fetchDistribution, renderDistribution, renderWindow, windowToken) ; tools/e2e/run_e2e.py
+      src/harness_lab/web/static/llm.js (fetchDistribution, renderDistribution, renderWindow, windowToken) ; tools/e2e/run_e2e.py
     severity: medium
     closed: >-
       2026-10-01 (lot des restes, spec-restes-2026-10-01.md) — nouveau scénario E2E `llm_live` (`tools/e2e/run_e2e.py`, `_LiveLab`) : `page.route` sur `/api/llm_lab` (candidats disponibles, réglages tous permis), `/api/llm_lab/distribution` (vraie `candidates.distribution`) et `/api/stream` (un `llm_generation_started` et des `llm_token` rejoués par lots, validés par `Envelope`). Vérifié : barres du premier token (largeurs = `p` et chance), curseur top-k à 2 (trois grisés, `p` inchangé), trois mouvements rapides (les barres finales sont celles du dernier réglage ; une réponse arrivée dans le désordre, que le ticket de `fetchDistribution` écarte, n'est pas éprouvée : la route simulée répond dans l'ordre), température 1 → 0,3 (la chance bouge, pas `p`), prompt à 250/1 000 de sa part, réponse à 1/500 puis 3/500 de la réserve, clic sur la puce n° 3 (requête `index: 2`, en-tête, puce marquée), aucune erreur JS ; capture `65-llm-nu-distribution-vivante`. Tranche `llm_screen llm_live bare_llm annex_language` : 98/98.
@@ -76,26 +76,26 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/models/candidates.py:28-81` -- `candidates_from_logits(logits, sampling, chosen_id, n=5)` : `p` softmax T=1 sur tout le vocabulaire, `kept` (top-k, top-p renormalisé `searchsorted(cum, top_p, 'left')+1`, min-p `logit >= max + ln(min_p)`), `p_sampled` softmax de `logits/T` sur les gardés ; à étendre : top 100 `p` + `tail`, et `distribution(...)` pure.
-- `src/wavestack/models/engine.py` -- `Sampling` l.23-31, `DEFAULT_SAMPLING` l.36, `SAMPLING_BOUNDS` l.38-43 ; `LlamaCppEngine.complete(..., sampling, candidates)` l.332-378, `_candidates` l.380-395 (`llama_get_logits_ith(ctx,-1)`) ; `Fragment.candidates` l.73-75.
-- `src/wavestack/session/app_session.py` -- `CANDIDATES = 5` l.323 ; `lab_state()` l.7590-7609 ; `llm_generate` l.7849-7883 (refus hors `idle`, `state="llm_lab"`) ; `_candidates_info` l.7892-7903 ; `_run_lab` l.7905-8106 (`llm_generation_started` avec `reserve`, `usable`, `prompt_tokens` l.8005-8017 ; `llm_token` l.7938) ; `_lab_cloud_call` l.8108-8148 ; `_save_main_state`/`_lab_restore` l.8031, 8150 ; fil unique l.726.
-- `src/wavestack/trace/catalog.py` -- `SamplingTrace` l.355, `LlmGenerationStartedPayload` l.1057, `LlmCandidate` l.1084, `LlmTokenPayload` l.1097, `LlmGenerationEndedPayload` l.1111.
-- `src/wavestack/web/app.py:167-183,351-384` -- `SamplingIntention`, `LlmGenerateIntention`, routes du LLM nu.
-- `src/wavestack/session/llm_lab.py` -- `_Strict` l.33, `LabSections` l.42, `LabContent` l.175-191, `load_lab_content(lang)` l.201 ; `content/llm_lab.yaml` (sections l.17-51, candidates l.170-183) et `content/i18n/{en,de}/llm_lab.yaml`.
-- `src/wavestack/web/static/llm.html` -- sections `#sec-tokenization` l.66-86 (schéma d'embedding existant), `#sec-sampling` l.88-97, `#sec-loading`, `#sec-reading` l.110-122, `#sec-generation` l.124-148, `#sec-reasoning` l.150-165, `#candidates-popover` l.168-172.
-- `src/wavestack/web/static/llm.js` -- `renderDiagram` l.233-304, `renderSampling` l.364-427 (gestionnaires `input` l.397-409 : point d'accroche du redessin), `samplingToSend` l.436, génération l.568-595, `showCandidates` l.725-784, `applyEnvelope` l.795-864 (routage par `request_id`), `streamEvents` l.867-914, `refresh` l.916-951 ; `llm.css:643-750` (barres de candidats).
+- `src/harness_lab/models/candidates.py:28-81` -- `candidates_from_logits(logits, sampling, chosen_id, n=5)` : `p` softmax T=1 sur tout le vocabulaire, `kept` (top-k, top-p renormalisé `searchsorted(cum, top_p, 'left')+1`, min-p `logit >= max + ln(min_p)`), `p_sampled` softmax de `logits/T` sur les gardés ; à étendre : top 100 `p` + `tail`, et `distribution(...)` pure.
+- `src/harness_lab/models/engine.py` -- `Sampling` l.23-31, `DEFAULT_SAMPLING` l.36, `SAMPLING_BOUNDS` l.38-43 ; `LlamaCppEngine.complete(..., sampling, candidates)` l.332-378, `_candidates` l.380-395 (`llama_get_logits_ith(ctx,-1)`) ; `Fragment.candidates` l.73-75.
+- `src/harness_lab/session/app_session.py` -- `CANDIDATES = 5` l.323 ; `lab_state()` l.7590-7609 ; `llm_generate` l.7849-7883 (refus hors `idle`, `state="llm_lab"`) ; `_candidates_info` l.7892-7903 ; `_run_lab` l.7905-8106 (`llm_generation_started` avec `reserve`, `usable`, `prompt_tokens` l.8005-8017 ; `llm_token` l.7938) ; `_lab_cloud_call` l.8108-8148 ; `_save_main_state`/`_lab_restore` l.8031, 8150 ; fil unique l.726.
+- `src/harness_lab/trace/catalog.py` -- `SamplingTrace` l.355, `LlmGenerationStartedPayload` l.1057, `LlmCandidate` l.1084, `LlmTokenPayload` l.1097, `LlmGenerationEndedPayload` l.1111.
+- `src/harness_lab/web/app.py:167-183,351-384` -- `SamplingIntention`, `LlmGenerateIntention`, routes du LLM nu.
+- `src/harness_lab/session/llm_lab.py` -- `_Strict` l.33, `LabSections` l.42, `LabContent` l.175-191, `load_lab_content(lang)` l.201 ; `content/llm_lab.yaml` (sections l.17-51, candidates l.170-183) et `content/i18n/{en,de}/llm_lab.yaml`.
+- `src/harness_lab/web/static/llm.html` -- sections `#sec-tokenization` l.66-86 (schéma d'embedding existant), `#sec-sampling` l.88-97, `#sec-loading`, `#sec-reading` l.110-122, `#sec-generation` l.124-148, `#sec-reasoning` l.150-165, `#candidates-popover` l.168-172.
+- `src/harness_lab/web/static/llm.js` -- `renderDiagram` l.233-304, `renderSampling` l.364-427 (gestionnaires `input` l.397-409 : point d'accroche du redessin), `samplingToSend` l.436, génération l.568-595, `showCandidates` l.725-784, `applyEnvelope` l.795-864 (routage par `request_id`), `streamEvents` l.867-914, `refresh` l.916-951 ; `llm.css:643-750` (barres de candidats).
 - `content/ui.yaml:852-875` (section `llm`) ; `content/messages.yaml:448-451` (raisons d'indisponibilité des candidats).
 - `tests/test_llm_lab.py` -- oracle des candidats l.672-719, l.721, l.740, l.757 ; `tests/fake_engine.py:100-146` (candidats scriptés, sans logits : ajouter des logits scriptés).
-- `tools/e2e/run_e2e.py:7315-7619` -- `s_llm_screen`/`_llm_screen` (cloud A puis faux llama-server ; aucune voie E2E n'a de moteur en processus), `_candidates_unavailable` l.7592, `_set_lab_sampling` l.7609, `_lab_generate` l.7619 ; `tools/e2e/wavestack_e2e.py:30` (précédent : `FakeReranker` substitué dans la pile).
+- `tools/e2e/run_e2e.py:7315-7619` -- `s_llm_screen`/`_llm_screen` (cloud A puis faux llama-server ; aucune voie E2E n'a de moteur en processus), `_candidates_unavailable` l.7592, `_set_lab_sampling` l.7609, `_lab_generate` l.7619 ; `tools/e2e/harness_lab_e2e.py:30` (précédent : `FakeReranker` substitué dans la pile).
 - DESIGN.md l.1032-1039 ; EXPERIENCE.md l.35, 141-147, 224 ; ARCHITECTURE-SPINE AD-1 l.75-85, l.120, 137, 144, 231-232, 504, 529-535.
 
 ## Tasks & Acceptance
 
 **Execution (incrément 1, puis 2, puis 3 ; chacun complet et testé avant le suivant) :**
-- `src/wavestack/models/candidates.py` -- top 100 + `tail`, `distribution()` pure.
-- `src/wavestack/session/app_session.py`, `src/wavestack/web/app.py` -- mémoire de la dernière génération, route `/api/llm_lab/distribution` ; intention `llm_compare`.
-- `src/wavestack/web/static/llm.html`, `llm.js`, `llm.css` -- barres vivantes, choix du token, colonnes A/B, questions, schéma de fenêtre.
-- `src/wavestack/session/llm_lab.py`, `content/llm_lab.yaml` et surcouches, `content/ui.yaml` et surcouches, `content/messages.yaml` et surcouches.
+- `src/harness_lab/models/candidates.py` -- top 100 + `tail`, `distribution()` pure.
+- `src/harness_lab/session/app_session.py`, `src/harness_lab/web/app.py` -- mémoire de la dernière génération, route `/api/llm_lab/distribution` ; intention `llm_compare`.
+- `src/harness_lab/web/static/llm.html`, `llm.js`, `llm.css` -- barres vivantes, choix du token, colonnes A/B, questions, schéma de fenêtre.
+- `src/harness_lab/session/llm_lab.py`, `content/llm_lab.yaml` et surcouches, `content/ui.yaml` et surcouches, `content/messages.yaml` et surcouches.
 - `tests/test_llm_lab.py`, `tests/fake_engine.py` -- `distribution()` contre l'oracle et la matrice ; route (404, bornes, index hors plage) ; mémoire effacée par une nouvelle génération ; `llm_compare` (deux `request_id`, verrou tenu entre A et B, refus hors `idle`, arrêt).
 - `tools/e2e/run_e2e.py` -- `_llm_screen` : A/B sur le faux llama-server (deux colonnes remplies, `request_id` a puis b) ; distribution : message d'indisponibilité sur serveur et cloud. Si la pile E2E peut substituer un moteur en processus factice avec des logits (comme `FakeReranker`), l'E2E vérifie aussi le redessin des barres au curseur ; sinon le noter en `deferred`.
 - DESIGN.md, EXPERIENCE.md, ARCHITECTURE-SPINE -- mis à jour.
@@ -113,7 +113,7 @@ deferred:
 
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucun écart.
-- `node --check src/wavestack/web/static/llm.js` -- expected: aucune erreur.
+- `node --check src/harness_lab/web/static/llm.js` -- expected: aucune erreur.
 - `uv run pytest -q tests/test_llm_lab.py tests/test_i18n.py tests/test_ui_texts.py tests/test_web_tokens.py tests/test_annex_language.py` -- expected: tout passe.
 - E2E (orchestrateur) : `--only llm_screen bare_llm annex_language` -- expected: 0 échec.
 
@@ -125,7 +125,7 @@ deferred:
   - **Top-k au-delà des 100 lus** (seulement si le vocabulaire en a moins de 100, la borne étant 100) : `distribution` le traite comme désactivé, sur tout le vocabulaire (`tail` compris).
   - **Mémoire** : clé `index` de `llm_token`, gardée avec le moteur qui l'a lue (un changement de modèle la rend caduque, `lab_state().distribution.tokens` vaut alors 0) ; une génération sans candidats l'efface aussi. La route rend aussi `kept_count` et `tokens` ; `index` hors plage : 404 lisible (`session.llm_lab.distribution.out_of_range`).
   - **Page, distribution** : dix barres au plus, puis « Reste du vocabulaire » ; anti-rebond de 80 ms, un ticket par requête (la dernière envoyée gagne) ; la page ne demande la distribution que si la session garde quelque chose (`distribution.tokens` ou un `llm_token` avec candidats), pour éviter un 404 dans la console ; serveur et cloud : `candidates.reason_text`. Le clic sur une puce garde l'encart des candidats (story 29) et choisit aussi le token de la section 2.
-  - **A/B** : les événements de A remplissent la colonne A et aussi les sections 4 à 6 et les puces de la section 5 (pour choisir un token de la distribution, qui est celle de A) ; ceux de B ne remplissent que la colonne B. Réglages B au premier affichage : ceux du harnais à température 1,2, gardés par le navigateur (`wavestack.llm.sampling_b`). Si « Arrêter » survient pendant A, B émet seulement `llm_generation_ended{status: cancelled}` (sans `llm_generation_started`), et la session revient en `idle` une fois.
+  - **A/B** : les événements de A remplissent la colonne A et aussi les sections 4 à 6 et les puces de la section 5 (pour choisir un token de la distribution, qui est celle de A) ; ceux de B ne remplissent que la colonne B. Réglages B au premier affichage : ceux du harnais à température 1,2, gardés par le navigateur (`harness_lab.llm.sampling_b`). Si « Arrêter » survient pendant A, B émet seulement `llm_generation_ended{status: cancelled}` (sans `llm_generation_started`), et la session revient en `idle` une fois.
   - **Schéma de la fenêtre** en section 4 ; `llm_generation_started` gagne `usable` et `figures_text.window` ; largeurs posées en CSS (`flex-grow`, `calc`) à partir des valeurs reçues.
   - **E2E** : `_distribution_unavailable` (cloud A, llama-server), `_lab_questions_and_window`, `_lab_compare` (capture `64-llm-nu-comparaison`, numéro choisi hors de 60 à 62 réservés) ; le contrôle « l'atelier refuse un envoi » est fait pendant A, en supposant que le faux llama-server laisse le temps de l'appel (risque de course si la génération est très rapide).
   - Variables des textes en français (`{gardes}`, `{lus}`, `{reste}`, `{texte}`, `{fenetre}`, `{utilisables}`), comme le reste de `llm_lab.yaml`.
@@ -158,7 +158,7 @@ deferred:
   - `[low]` `[patch]` BH9 : les deux pourcentages d'une ligne sans nom accessible — chaque valeur précédée de son nom de colonne en texte masqué (`.llm-sr-only`, `llm.css`).
   - `[medium]` `[patch]` BH10 : tests manquants (top-p avec tail, modèle changé, arrêt pendant B, cloud) — groupé avec VG1 et VG3 (ajoutés) ; arrêt pendant B et cloud différés avec IA3.
   - `[medium]` `[defer]` BH11 : pas d'E2E positif des barres ni de capture — groupé avec VG5.
-  - `[low]` `[patch]` BH12 : ARCHITECTURE-SPINE se contredit sur l'état du navigateur — phrase de l'écran corrigée (brouillon et réglages), paragraphe « État du navigateur » complété (`wavestack.llm.prompt`, `.sampling`, `.sampling_b`).
+  - `[low]` `[patch]` BH12 : ARCHITECTURE-SPINE se contredit sur l'état du navigateur — phrase de l'écran corrigée (brouillon et réglages), paragraphe « État du navigateur » complété (`harness_lab.llm.prompt`, `.sampling`, `.sampling_b`).
   - `[low]` `[patch]` BH13 : la fin de A écrit « Réponse terminée. » sous « Générer » pendant B — le statut de « Générer » est vidé au début et à la fin de A (la comparaison a le sien).
   - `[low]` `[reject]` BH14 : softmax plein vocabulaire calculé deux fois par token — une exponentielle vectorisée sur ~150 000 flottants, négligeable devant un token sur CPU ; fusionner les deux fonctions toucherait l'oracle.
   - `[false]` `[reject]` BH15 : B = A sans le dire quand le modèle ne règle pas la température — `samplingRow` désactive le réglage et affiche sa raison (`sampling-row-reason`) dans les réglages B comme en section 2 ; l'absence de remise à zéro n'est pas un défaut.

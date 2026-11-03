@@ -1,6 +1,6 @@
 """Compose the README demo from drive.py's screenshots: captions, highlights, title and end cards.
 
-Writes `docs/assets/wavestack-demo.gif` and `.mp4` with ffmpeg (the `PATH`'s, else the binary of
+Writes `docs/assets/harness-lab-demo.gif` and `.mp4` with ffmpeg (the `PATH`'s, else the binary of
 the `imageio-ffmpeg` package when it is installed), and the guide's
 `docs/assets/atelier.jpg`. Fonts: Segoe UI and Segoe UI Emoji (Windows). A highlight is either
 named (measured by drive.py on each screenshot) or a box in the 1600 × 900 pixels of the
@@ -22,7 +22,7 @@ ASSETS = ROOT / "docs" / "assets"
 W, SCREEN_H, BAR = 1280, 720, 72
 H = SCREEN_H + BAR
 SCALE = W / 1600
-PRIMARY, DEEP, ACCENT, ORANGE, LAVENDER = "#451DC7", "#250F6B", "#04F06A", "#E0762B", "#D9D0F6"
+PRIMARY, DEEP, ACCENT, ORANGE, LAVENDER = "#0B6B78", "#084E58", "#B4500F", "#E0762B", "#D9D0F6"
 FONTS = Path("C:/Windows/Fonts")
 EMOJI = ImageFont.truetype(str(FONTS / "seguiemj.ttf"), 109)  # bitmap strike, scaled after
 
@@ -139,7 +139,7 @@ class Film:
 def build(frames: Path) -> Film:
     film = Film(frames)
     title = [
-        ("WaveStack", "segoeuib.ttf", 96, "white"),
+        ("HarnessLab", "segoeuib.ttf", 96, "white"),
         ("Ce qu'un harnais agentique ajoute à un LLM nu,", "seguisb.ttf", 38, "white"),
         ("brique par brique", "seguisb.ttf", 38, ACCENT),
     ]
@@ -354,7 +354,7 @@ def build(frames: Path) -> Film:
     )
 
     end = [
-        ("uv run wavestack", "consolab.ttf", 64, ACCENT),
+        ("uv run harness-lab", "consolab.ttf", 64, ACCENT),
         ("9 modules de formation · 7 h 45 · 3 ateliers", "seguisb.ttf", 36, "white"),
         (
             "Raisonnement · mémoire · outils · RAG · MCP · skills · hooks · sous-agent",
@@ -396,8 +396,8 @@ def render(film: Film, work: Path) -> None:
         "fps=10,split[a][b];[a]palettegen=max_colors=256:stats_mode=diff[p];"
         "[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle"
     )
-    gif = ASSETS / "wavestack-demo.gif"
-    mp4 = ASSETS / "wavestack-demo.mp4"
+    gif = ASSETS / "harness-lab-demo.gif"
+    mp4 = ASSETS / "harness-lab-demo.mp4"
     subprocess.run([*source, "-vf", palette, "-loop", "0", str(gif)], check=True)
     video = ["-vf", "fps=25,format=yuv420p", "-c:v", "libx264", "-crf", "23", "-preset", "slow"]
     subprocess.run([*source, *video, "-movflags", "+faststart", str(mp4)], check=True)

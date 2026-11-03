@@ -1,0 +1,801 @@
+# Configuration par défaut de HarnessLab.
+# Surchargée par settings.json (dans le dossier de données, AD-20), jamais l'inverse.
+
+[server]
+port = 8420
+
+[net]
+# Hôtes autorisés pour toute sortie réseau (AD-15). Les suffixes "*.host" sont acceptés.
+allowed_hosts = [
+    "huggingface.co",
+    "*.hf.co",
+    # Outils réseau (story 5b).
+    "fr.wikipedia.org",
+    "calendrier.api.gouv.fr",
+    # Serveurs MCP publics (story 6).
+    "mcp.data.gouv.fr",
+    "learn.microsoft.com",
+    # GitHub, OAuth App HarnessLab par code (story 3, V1.1 vague 2, CAP-4).
+    "github.com",
+    "api.githubcopilot.com",
+    # API de décision, option cloud de System One dans l'atelier (V1.2 story 8, CAP-6) :
+    # appelée seulement avec une clé OPENROUTER_API_KEY et une option cloud choisie.
+    "openrouter.ai",
+]
+# Contact envoyé dans l'User-Agent à chaque service sortant : la politique robots de Wikimedia
+# l'exige (403 sans lui). Une URL ou une adresse électronique, en ASCII ; valeur par défaut si
+# absent ou invalide.
+contact = "https://github.com/Aliquanto3/harness-lab"
+# Adresse fixe utilisée par la sonde de connectivité du diagnostic (CAP-39).
+connectivity_probe_host = "huggingface.co"
+
+[net.loopback_ports]
+# Serveurs locaux déjà lancés, sondés jamais lancés (AD-7).
+ollama = 11434
+llama_server = 8080
+
+[otel]
+# Export OpenTelemetry de l'arbre des étapes de l'atelier RAG (V1.2 story 16, CAP-12), vers le
+# Langfuse ou le Phoenix du formateur. Aucun service n'est embarqué : il faut l'extra
+# `uv sync --extra otel` et une URL OTLP/HTTP ici (ou dans settings.json, puis redémarrer :
+# son hôte devient alors autorisé, AD-15). Vide : rien ne sort du poste.
+# Ex. Phoenix local : "http://localhost:6006" ; Langfuse : "https://cloud.langfuse.com/api/public/otel".
+endpoint = ""
+# Les textes (question, prompts, passages, réponses) ne partent que si ceci vaut true.
+capture_content = false
+# Nom d'une variable d'environnement dont la valeur est l'en-tête Authorization du collecteur
+# (Langfuse : "Basic <clé publique:clé secrète en base64>"). Jamais la valeur elle-même ici.
+auth_env = ""
+
+[model_servers]
+# Serveurs locaux déjà lancés par l'utilisateur (story 18) : Ollama et llama-server, jamais
+# lancés ni arrêtés par HarnessLab. Délais en secondes : connexion, puis lecture de la réponse
+# (le premier appel d'Ollama charge le modèle, d'où une lecture longue).
+connect_timeout_s = 2
+read_timeout_s = 300
+
+[context]
+# Fenêtre de contexte, en tokens (AD-9) : 4 096 par défaut, la taille pour laquelle les
+# scénarios sont conçus. Elle se règle aussi dans l'interface (« Fenêtre ▾ » de la barre haute :
+# 4 096, 8 192 ou 16 384), et ce choix, écrit dans settings.json ("context": {"window": …}),
+# prend le pas sur cette valeur aux lancements suivants. Une autre valeur mise ici reste lue,
+# mais le panneau ne la propose pas. Donnez à llama-server un `-c` égal à la fenêtre choisie
+# (réglage de l'interface, sinon cette valeur).
+window = 4096
+near_limit_ratio = 0.8
+# Compaction (V1.4) : sortie du résumé des anciens échanges, en tokens (64 à 512), et nombre
+# d'échanges récents que la compaction et la fenêtre glissante gardent quand on les demande hors
+# débordement, par le bouton « Compacter ▾ » (1 à 5). Au débordement, le harnais garde autant
+# d'échanges récents que la fenêtre en accepte.
+compaction_max_tokens = 256
+compaction_keep = 2
+
+[memory]
+# Budget mémoire de HarnessLab (AD-8, NFR-2) : un changement de modèle est refusé si ce
+# qu'occupe HarnessLab sans le modèle actif, plus le coût du nouveau, dépasse ce budget. Sans le
+# modèle actif : la mémoire mesurée (HarnessLab et ses processus enfants) moins la part du
+# modèle, jamais sous la mémoire mesurée juste avant la création de son moteur. Le modèle actif reste alors chargé. Le modèle d'embedding du RAG
+# (story 15) et le reranker (story 16) sont refusés de même, avec la brique ou sa sous-option
+# indisponible. Story 24 : le budget est calculé une seule fois, au lancement ; le diagnostic
+# (ligne « memory ») et chaque refus donnent le budget retenu et son calcul.
+# Mode du budget : "dynamic" (défaut, et pour toute valeur inconnue) ou "fixed".
+#   dynamic : min(budget_mb, budget_ram_ratio × RAM disponible au lancement), jamais sous
+#             512 Mo ; si la RAM est illisible, budget_mb. Fermer des applications puis relancer HarnessLab l'agrandit,
+#             jusqu'au plafond.
+#   fixed   : budget_mb, quelle que soit la RAM du poste.
+budget_mode = "dynamic"
+# En Mo : le plafond du budget en mode "dynamic", la valeur du budget en mode "fixed".
+budget_mb = 4096
+# Part de la RAM disponible au lancement retenue en mode "dynamic" (0,6 ; bornée de 0,1 à 0,9 ;
+# une valeur illisible vaut 0,6).
+budget_ram_ratio = 0.6
+# Marge ajoutée au coût estimé de chaque modèle local (poids, cache KV à la fenêtre ; pour
+# l'embedding, sa taille quand aucune mesure n'est déclarée), en Mo.
+load_margin_mb = 256
+
+[rag]
+# RAG simple (story 15, AD-22). L'index sqlite-vec est construit hors ligne par
+# `uv run python scripts/build_rag_index.py` ; un chemin relatif part de la racine du dépôt.
+index_path = "data/rag_index.sqlite"
+# Extraits placés dans le contexte à chaque tour, les plus proches de la question, sans seuil
+# (de 1 à 20).
+top_k = 3
+# Taille maximale d'un extrait au découpage, en caractères (reconstruisez l'index après
+# l'avoir changée).
+chunk_max_chars = 700
+# Reranking (story 16, sous-option de la brique RAG) : candidats retenus par l'embedding, puis
+# réordonnés par le reranker, qui n'en garde que top_k. Un passage du reranker par candidat :
+# à baisser si l'étape « Reranking » est trop lente sur le poste (NFR-1). De top_k à 20.
+rerank_candidates = 8
+
+[rag.embedding]
+# Le seul endroit qui nomme le modèle d'embedding : valeurs du verdict de la story 12
+# (provisoire, mesure sur le PC cible à faire). `id` est écrit dans l'index : un autre
+# modèle rend la brique indisponible jusqu'à la reconstruction de l'index.
+id = "granite-embedding-107m-multilingual-q8_0"
+backend = "llama_cpp"
+label_text = "Granite Embedding 107M multilingue (IBM, GGUF Q8_0)"
+license = "Apache-2.0"
+dims = 384        # carte HF : hidden_size 384, pooling CLS lu dans le GGUF
+max_tokens = 512  # carte HF : max_position_embeddings 514 (XLM-RoBERTa)
+query_prefix = "" # aucun préfixe sur la carte IBM
+passage_prefix = ""
+# Relatif au dossier des modèles (models/ dans le dossier de données).
+load_path = "embedding/granite-embedding-107m-multilingual-Q8_0.gguf"
+# Banc de la story 12 sur le PC cible (2026-09-27) : pic 481 Mo, base 53 Mo.
+measured_rss_mb = 430
+# sha256 et commit relevés sur le PC cible (2026-09-27), identiques à l'oid LFS de Hugging Face.
+files = [
+    { url = "https://huggingface.co/bartowski/granite-embedding-107m-multilingual-GGUF/resolve/52fed1c818636b7cb8c4e4e3ae73189efeb78081/granite-embedding-107m-multilingual-Q8_0.gguf", path = "embedding/granite-embedding-107m-multilingual-Q8_0.gguf", size = 121020096, sha256 = "15691dfe830257f569a1e3521977351d16eac18e48e414908dc98ed9b8455e07" },
+]
+
+[rag.reranker]
+# Le seul endroit qui nomme le modèle de reranking (story 16) : valeurs du verdict de la
+# story 12 (provisoire, mesure sur le PC cible à faire). Chargé par llama.cpp en pooling RANK,
+# une paire question-extrait par passage ; le score est ramené entre 0 et 1 (sigmoïde).
+id = "bge-reranker-v2-m3-q4_k_m"
+backend = "llama_cpp"
+label_text = "BGE Reranker v2 M3 (BAAI, GGUF Q4_K_M)"
+license = "Apache-2.0"
+max_tokens = 1024  # longueur d'une paire question + extrait, en tokens (extrait tronqué au-delà)
+# Relatif au dossier des modèles (models/ dans le dossier de données).
+load_path = "reranker/bge-reranker-v2-m3-Q4_K_M.gguf"
+# Banc de la story 12 sur le PC cible (2026-09-27) : pic 789 Mo, base 53 Mo.
+measured_rss_mb = 740
+# sha256 et commit relevés sur le PC cible (2026-09-27), identiques à l'oid LFS de Hugging Face.
+files = [
+    { url = "https://huggingface.co/gpustack/bge-reranker-v2-m3-GGUF/resolve/3093af03b1a635e67b084b1d8c03c5f5e020fd05/bge-reranker-v2-m3-Q4_K_M.gguf", path = "reranker/bge-reranker-v2-m3-Q4_K_M.gguf", size = 438376864, sha256 = "e186a244ed455b4ab66ec64339ce7427a6ae13f5c0b5e544de96e50f0f8b3673" },
+]
+
+
+[rag_lab]
+# Atelier RAG (story 30) : un bac à sable, à côté de la brique RAG. Ses vecteurs et ses index
+# se construisent à la demande dans le dossier de données (rag_lab/), jamais dans le dépôt.
+# Un modèle fastembed (ONNX) peut s'y ajouter comme option d'embedding, s'il est installé et
+# présent hors ligne sous models/fastembed : HarnessLab ne le télécharge jamais. Déclarez-le
+# dans settings.json, par exemple :
+#   "rag_lab": {"fastembed": {"model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+#               "dims": 384, "label_text": "MiniLM multilingue (fastembed)"}}
+# FAISS et LanceDB (extra `rag-alt`) : mémoire comptée par le budget à leur premier import, à vie
+# (un module Python ne se décharge pas), en Mo. Mesuré sous Linux : +16 à 37 Mo et +104 à 121 Mo.
+faiss_cost_mb = 60
+lancedb_cost_mb = 180
+# fastembed et onnxruntime, comptés à leur premier import comme FAISS et LanceDB (à mesurer
+# sur le PC cible) ; le modèle lui-même est compté à part, par la taille de ses fichiers.
+fastembed_cost_mb = 150
+
+# Lot 5c-1 : les modèles d'embedding que l'atelier propose en plus de celui de la brique
+# ([rag.embedding], option « Modèle d'embedding de la brique RAG ») et de fastembed. Même schéma
+# que [rag.embedding] ; fichiers sous embedding/ (jamais proposés comme modèles de conversation),
+# sha256 vérifié au chargement. `id` : unique, 32 caractères au plus, ni « declared » ni
+# « fastembed » ni l'id de la brique ; une entrée invalide est écartée, les autres restent.
+# Lus dans ce fichier seulement (jamais dans settings.json). Un fichier absent rend l'option
+# indisponible, avec son chemin sous models/ ; « Télécharger » dans l'étape (Composer) le
+# récupère à l'adresse déclarée, sha256 vérifié.
+# Valeurs de l'essai du 2026-10-05 (essai-modeles-5c.md) ; RSS mesuré sur le PC de
+# développement, à remesurer sur le PC cible.
+[[rag_lab.embeddings]]
+id = "multilingual-e5-small"
+backend = "llama_cpp"
+label_text = "multilingual-e5-small (intfloat, GGUF Q8_0)"
+license = "MIT"
+dims = 384        # pooling MEAN lu dans le GGUF
+max_tokens = 512
+query_prefix = "query: "      # convention d'e5 : un préfixe pour la question, un pour les passages
+passage_prefix = "passage: "
+load_path = "embedding/multilingual-e5-small-q8_0.gguf"
+measured_rss_mb = 440
+files = [
+    { url = "https://huggingface.co/TwinSunsLLC/multilingual-e5-small-gguf/resolve/b6cac9615d4ecce28d7f22539b7322d695fc2886/multilingual-e5-small-q8_0.gguf", path = "embedding/multilingual-e5-small-q8_0.gguf", size = 132439008, sha256 = "e011debc1208e31bf7b6aebee2d9fc8bd2ca11694a77ed66ac9d0c9d0a877c93" },
+]
+
+[[rag_lab.embeddings]]
+id = "qwen3-embedding-0.6b"
+backend = "llama_cpp"
+label_text = "Qwen3-Embedding 0.6B (Qwen, GGUF Q8_0)"
+license = "Apache-2.0"
+dims = 1024        # pooling LAST lu dans le GGUF
+max_tokens = 2048  # le RSS ci-dessous est mesuré à cette fenêtre
+query_prefix = "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:"
+passage_prefix = ""
+load_path = "embedding/Qwen3-Embedding-0.6B-Q8_0.gguf"
+measured_rss_mb = 1055
+files = [
+    { url = "https://huggingface.co/Qwen/Qwen3-Embedding-0.6B-GGUF/resolve/370f27d7550e0def9b39c1f16d3fbaa13aa67728/Qwen3-Embedding-0.6B-Q8_0.gguf", path = "embedding/Qwen3-Embedding-0.6B-Q8_0.gguf", size = 639150592, sha256 = "06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439" },
+]
+
+# Lot 5c-2 : les modèles de reranking que l'atelier propose en plus de celui de la brique
+# ([rag.reranker], option « Modèle de reranking de la brique RAG »). Même schéma que
+# [rag.reranker] ; fichiers sous reranker/, sha256 vérifié au chargement ; mêmes règles d'id que
+# [[rag_lab.embeddings]] (unique, 32 caractères au plus, ni « declared » ni l'id de la brique).
+# Lus dans ce fichier seulement. Le format de la paire se lit dans l'en-tête du GGUF : un
+# reranker d'architecture LLM (Qwen3-Reranker) passe par son gabarit
+# tokenizer.chat_template.rerank et rend déjà une probabilité (pas de sigmoïde) ; un
+# cross-encoder BERT à identifiants de segment (token_type_count ≥ 2, ms-marco MiniLM) est
+# refusé : llama.cpp ne les transmet pas. Un fichier absent rend l'option indisponible, avec
+# son chemin sous models/ ; « Télécharger » dans l'étape (Composer) le récupère à l'adresse
+# déclarée, sha256 vérifié.
+# Valeurs de l'essai du 2026-10-05 (essai-modeles-5c.md) ; RSS mesuré sur le PC de
+# développement, à remesurer sur le PC cible.
+[[rag_lab.rerankers]]
+id = "qwen3-reranker-0.6b"
+backend = "llama_cpp"
+label_text = "Qwen3-Reranker 0.6B (Qwen, GGUF Q8_0)"
+license = "Apache-2.0"
+max_tokens = 1024  # une paire passée par le gabarit, en tokens (l'extrait est coupé au-delà)
+load_path = "reranker/qwen3-reranker-0.6b-q8_0.gguf"
+measured_rss_mb = 937
+files = [
+    { url = "https://huggingface.co/ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF/resolve/a02f48bb4f057028298c21fa033da2b30d7742d5/qwen3-reranker-0.6b-q8_0.gguf", path = "reranker/qwen3-reranker-0.6b-q8_0.gguf", size = 639153184, sha256 = "22c9979ce4fbcdc5acdc310c6641c32797eff1aa980b8f7a2db8a8ea23429a48" },
+]
+
+# V1.2 story 8 (CAP-6) : la couche de décision System One de l'atelier (routeur, filtre de
+# passages, contrôle d'ancrage). Option cloud : l'API de décision d'OpenRouter
+# (/api/alpha/decisions, endpoint alpha), clé dans la variable OPENROUTER_API_KEY (ou le
+# registre utilisateur HKCU\Environment), jamais affichée ni écrite ; sans clé, l'option est
+# grisée. Modèle de chaque rôle : le choix du banc de la story 2 (rapport-banc-system-one.md).
+[rag_lab.decision]
+router_model = "typesafe/jev-1.14"  # non mesuré par le banc en routage
+filter_model = "perplexity/pplx-decider-flash-v1.2"
+grounding_model = "typesafe/jev-1.14"
+
+# Le classifieur local du routeur et du contrôle d'ancrage (le filtre local relit le score du
+# reranker de la brique) : deberta_xsmall, NLI zero-shot en ONNX quantifié, lu par l'extra
+# `decision` (onnxruntime, tokenizers ; uv sync --extra decision). Fichiers sous decision/,
+# « Télécharger » dans l'étape, sha256 vérifiés ; révision épinglée du banc. Tailles et sha256
+# relevés le 2026-10-25 sur les fichiers de cette révision. RAM ajoutée mesurée par le banc :
+# 351 Mo (SLM chargé, PC de développement).
+[rag_lab.decision.classifier]
+id = "deberta-v3-xsmall-zeroshot"
+backend = "onnx"
+label_text = "DeBERTa-v3 xsmall zero-shot (MoritzLaurer, ONNX quantifié)"
+license = "MIT"
+max_tokens = 512
+load_path = "decision/deberta-v3-xsmall-zeroshot/onnx/model_quantized.onnx"
+tokenizer_path = "decision/deberta-v3-xsmall-zeroshot/tokenizer.json"
+config_path = "decision/deberta-v3-xsmall-zeroshot/config.json"
+measured_rss_mb = 351
+files = [
+    { url = "https://huggingface.co/MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33/resolve/262ae02f29173eec1c250f90804dc7edc677dcff/config.json", path = "decision/deberta-v3-xsmall-zeroshot/config.json", size = 1017, sha256 = "dc6de98193d85d4c45f96724e6dd3672b897af3f1592e02625b9a71be795887b" },
+    { url = "https://huggingface.co/MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33/resolve/262ae02f29173eec1c250f90804dc7edc677dcff/tokenizer.json", path = "decision/deberta-v3-xsmall-zeroshot/tokenizer.json", size = 8656646, sha256 = "05402ffae6dd382a8491b1d29bfc139bec5d332662e86a026f433ce54c25c202" },
+    { url = "https://huggingface.co/MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33/resolve/262ae02f29173eec1c250f90804dc7edc677dcff/onnx/model_quantized.onnx", path = "decision/deberta-v3-xsmall-zeroshot/onnx/model_quantized.onnx", size = 87246195, sha256 = "1fbf78872ceab4e8003eaa0696896008c019d5a239be734c5d6230f312ad480e" },
+]
+
+[tools]
+# Bornes de la boucle de tour (AD-10), affichées sur la carte de la brique outils.
+# Appels au modèle par tour, dont les nouveaux essais après un appel mal formé.
+max_calls = 6
+max_retries = 2
+# Outil fetch_page : https uniquement, vers ces hôtes seulement (aussi présents dans
+# [net] allowed_hosts). Le texte de la page est coupé à fetch_page_max_chars caractères.
+fetch_page_hosts = ["fr.wikipedia.org", "calendrier.api.gouv.fr"]
+fetch_page_max_chars = 4000
+# Borne d'un résultat d'outil, en tokens, pour les outils réseau et MCP (locaux compris),
+# dans le tour et le sous-agent ; jamais les outils natifs locaux comme
+# read_file, ni un message d'erreur, ni le résultat du sous-agent (delegate). Le harnais coupe
+# au plus près de la borne, au dernier saut de ligne s'il tombe dans la seconde moitié du
+# texte gardé, avant la compression, et le signale au modèle et dans Orchestration.
+# Plancher 200.
+result_max_tokens = 1200
+
+[reasoning]
+# Budget de raisonnement (lot C, décision N4), en mode local seulement : quand la réflexion
+# atteint budget_tokens tokens sans s'être fermée, le harnais arrête la génération, ferme
+# lui-même la réflexion (le </think> du gabarit) et relance le modèle, qui garde le reste de la
+# réserve de sortie (1 536 tokens avec le raisonnement) pour la réponse. Les modèles cloud gèrent
+# leur propre effort de raisonnement. Borné entre 128 et 1 408 (1 536 − 128). Mesuré sur le PC
+# cible (2026-09-27, Qwen3.5-2B, ≈ 9,5 tokens/s) sur le prompt du train : 127 à 134 s avec 1 024,
+# 111 s avec 768, pour une réponse visée en moins de 120 s. Baissez-le si les réponses arrivent
+# trop tard.
+budget_tokens = 768
+
+[compression]
+# Compression du contexte (story 20, AD-22) par Headroom, dépendance optionnelle installée
+# par `uv sync --extra compression`. Un résultat d'outil ou un extrait RAG plus court que
+# min_chars caractères n'est pas compressé. cost_mb : mémoire ajoutée par Headroom, en Mo,
+# contrôlée par le budget [memory] au chargement. 84 Mo ajoutés au pic sur le PC cible
+# (2026-09-27, banc headroom, comptage gpt-4), plus 30 %, arrondi : 110 (lot J), au-dessus des
+# 107 Mo mesurés au pic sous Linux.
+min_chars = 300
+cost_mb = 110
+
+[subagent]
+# Sous-agent (story 19, AD-10, AD-11) : les outils qu'il peut utiliser, s'ils sont activés
+# dans la brique Outils (un nom inconnu est signalé au lancement), et ses appels au modèle
+# par délégation. Ses nouveaux essais après un appel refusé suivent [tools] max_retries et
+# comptent dans ces appels. Il ne raisonne pas (la brique Raisonnement ne contribue qu'au
+# contexte principal), sauf un modèle cloud qui raisonne toujours.
+tools = ["read_file", "fetch_page"]
+max_calls = 4
+
+[mcp]
+# Serveurs MCP (story 6) : un serveur n'est contacté qu'à l'activation de sa sous-option.
+# Délai de connexion (initialize puis tools/list) et délai d'un appel d'outil, en secondes.
+connect_timeout_s = 15
+call_timeout_s = 30
+# Écart à l'instantané (AD-9) : à la connexion d'un serveur public qui a un instantané dans
+# content/mcp_snapshots/ (scripts/snapshot_mcp.py), HarnessLab compare sa liste d'outils
+# (tools/list) à l'instantané. Au-delà de ce seuil, un avertissement qui nomme le serveur
+# s'affiche sur la carte MCP : la jauge prévue pour les scénarios MCP peut ne plus tenir. Écart =
+# le plus grand de deux rapports : outils ajoutés ou retirés sur le nombre d'outils de
+# l'instantané, et variation du poids de leur documentation (description et schéma, en
+# caractères). 0.2 = 20 % (borné de 0 à 10) ; sans instantané, aucune comparaison.
+snapshot_drift_threshold = 0.2
+
+[mcp.urls]
+# Serveurs publics en Streamable HTTP ; leurs hôtes sont aussi dans [net] allowed_hosts.
+datagouv = "https://mcp.data.gouv.fr/mcp"
+mslearn = "https://learn.microsoft.com/api/mcp"
+
+[finops]
+# Estimateur FinOps : le coût de chaque appel cloud se calcule à partir des prix déclarés par
+# l'entrée [[cloud.models]] (pricing), en dollars, la devise de facturation. Le total de la
+# séance est aussi converti en euros à ce taux (euros pour un dollar ; 0,86 par défaut, borné
+# de 0,5 à 2 ; une valeur illisible, nan ou inf, vaut 0,86). Taux relevé le 2026-09-30, à
+# mettre à jour avec les prix.
+# Un appel arrêté (« Arrêter ») compte son entrée telle qu'envoyée, et la sortie reçue avant
+# l'arrêt. L'estimation suit le prix catalogue. Les tokens d'entrée lus ou écrits dans le cache
+# du fournisseur sont comptés à leurs prix quand l'entrée les déclare (pricing :
+# cache_read_usd_per_mtok, cache_write_usd_per_mtok), au prix d'entrée sinon. Prix par palier
+# ou pour les longs contextes, prix du traitement par lots (batch) et offres gratuites ne sont
+# pas pris en compte.
+eur_per_usd = 0.86
+# Plafond de dépense de la séance, en dollars (5 par défaut ; une valeur illisible, nan, inf,
+# négative ou booléenne vaut 5 ; aucune valeur ne le désactive, et 0 refuse tout appel tarifé).
+# Quand le total de la séance (tous les appels tarifés : tours, sous-agent, « Tester », « LLM
+# nu ») l'a atteint, un appel à un modèle qui déclare ses prix n'est pas envoyé ; les modèles
+# sans prix (local, Gemma) restent utilisables. Les appels déjà en cours ne sont jamais
+# interrompus : le total peut dépasser le plafond du coût de chacun d'eux (la prime d'écriture
+# du cache de Claude, 1,25 ou 2 fois l'entrée, y est comptée, mais pas estimée d'avance). Pour le relever :
+# settings.json, HarnessLab arrêté, puis relancer (le total ne revient à zéro qu'au relancement).
+max_session_usd = 5
+
+[greenops]
+# Estimateur GreenOps : l'énergie (Wh) et les émissions (g CO₂e) estimées de chaque appel au
+# modèle, sans aucun appel réseau.
+# - Modèle cloud : méthode EcoLogits (bibliothèque ecologits, cœur seul, hors ligne ;
+#   ecologits.ai), à partir des tokens de sortie (raisonnement compris) et de la durée de
+#   l'appel, sous les noms que déclare le champ impacts de l'entrée [[cloud.models]]. Une
+#   fourchette (min–max) quand EcoLogits en donne une ; cycle de vie compris (fabrication des
+#   serveurs et usage).
+# - Modèle local : CodeCarbon hors ligne (extra greenops : uv sync --extra greenops ;
+#   codecarbon.io), autour de chaque génération : le processus de HarnessLab pour le moteur
+#   intégré, le poste entier pour Ollama et llama-server. Sous Windows sans RAPL ni droits
+#   administrateur, CodeCarbon estime la puissance (TDP × charge) : c'est une estimation, pas
+#   une mesure. Seule son énergie est gardée (ni GPU, ni fichier emissions.csv).
+# Intensité carbone de l'électricité d'un appel local, en g CO₂e par kWh (0 à 2 000 ; une
+# valeur illisible, nan ou inf, vaut 41,4) : 41,4 par défaut, le facteur du mix France
+# d'EcoLogits (production de l'électricité en cycle de vie). Pour comparaison, RTE (bilan
+# électrique 2025) : 19,6 g en émissions directes, environ 29 g en cycle de vie.
+# Attention, les deux chiffres ne couvrent pas le même périmètre : en local, l'électricité
+# consommée seulement (kWh × intensité, sans la fabrication du poste) ; en cloud, le cycle de
+# vie d'EcoLogits (l'électricité des serveurs et une part de leur fabrication).
+local_gco2e_per_kwh = 41.4
+# Mémoire de CodeCarbon (et de pandas), comptée par le budget une seule fois, à vie, à son
+# premier usage (un module Python ne se décharge pas), en Mo : environ 70 Mo mesurés. Refusée
+# par le budget, l'empreinte locale est indisponible, avec la raison.
+codecarbon_cost_mb = 80
+
+[cloud]
+# Modèles cloud compatibles OpenAI (story 11, AD-4, AD-5, AD-20). Aucune clé ici : la clé
+# se saisit au diagnostic et reste dans api_keys.json, dans le dossier de données, ou vient
+# de la variable d'environnement que nomme key_env (jamais sa valeur ici). Une clé saisie
+# passe avant la variable.
+# hosting_text et notes_text d'une entrée [[cloud.models]] sont saisis par l'opérateur et
+# affichés tels quels dans l'avertissement et le bandeau du modèle, quelle que soit la langue
+# de l'interface (fr, en ou de), même après un changement de langue en cours de séance : ils
+# n'ont pas de traduction. Pour une séance dans une autre langue que le français, redéclarez-
+# les dans settings.json (même id) dans cette langue (décision d'Anaël du 2026-10-01).
+# Tokens estimés en mode chat : caractères / chars_per_token, puis corrigés par le ratio
+# réel usage.prompt_tokens / estimation (borné à [0,8 ; 1,5], initialisé à estimate_ratio).
+# Cache de prompt de Claude (V1.3, api = "anthropic_messages" seulement) : "off" (défaut), "5m"
+# ou "1h". Réglable dans le panneau (settings.json, cloud.claude_cache) ; toute autre valeur
+# vaut "off". L'écriture coûte 1,25 fois l'entrée (5m) ou 2 fois (1h), la lecture 0,1 fois.
+claude_cache = "off"
+chars_per_token = 4
+estimate_ratio = 1.0
+# Délais de l'appel au modèle cloud, en secondes : connexion, puis lecture du flux.
+connect_timeout_s = 10
+read_timeout_s = 60
+# Marqueurs de gabarit neutralisés dans tout texte du harnais (AD-4, étape 2).
+neutralize_markers = [
+    "<|im_start|>", "<|im_end|>", "<|endoftext|>", "<|start|>", "<|end|>", "<|message|>",
+    "<|channel|>", "<|return|>", "<|call|>", "<|begin_of_text|>", "<|eot_id|>",
+    "<|start_header_id|>", "<|end_header_id|>", "[INST]", "[/INST]", "<s>", "</s>",
+]
+
+# Préréglage Groq : le plus rapide ; tous ses modèles gèrent l'appel d'outils.
+# gpt-oss raisonne toujours : réserve de 1 536 tokens. Quota de 8 000 tokens par minute :
+# fenêtre de 4 000 (tpm // 2), donc 2 464 tokens utilisables.
+[[cloud.models]]
+id = "groq"
+provider = "Groq"
+base_url = "https://api.groq.com/openai/v1"
+model = "openai/gpt-oss-120b"
+stream_usage = true
+tools = true
+context = 131072
+tpm = 8000
+hosting_text = "États-Unis (Groq)"
+training = "no"
+notes_text = "Aucune rétention des entrées et sorties par défaut, 30 jours au plus pour le débogage ou la lutte contre les abus. Quotas à lire dans la console Groq."
+reasoning = { format = "field", always = true, on = { reasoning_effort = "low" }, resend = false }
+key_env = "GROQ_API_KEY"
+# Écran « LLM nu » (story 29) : les réglages d'échantillonnage que l'API compatible OpenAI
+# accepte ; top-k et min-p ne sont jamais envoyés à un fournisseur. Les tours de l'atelier
+# n'en envoient aucun (réglés par le fournisseur).
+sampling = ["temperature", "top_p"]
+# FinOps : prix catalogue en dollars par million de tokens, relevés sur groq.com/pricing.
+pricing = { input_usd_per_mtok = 0.15, output_usd_per_mtok = 0.60, checked = "2026-09-29" }
+# GreenOps : EcoLogits ne connaît pas Groq ; gpt-oss-120b y figure chez Hugging Face, le plus
+# proche (centres de données aux États-Unis). note_text est ajoutée à l'infobulle de chaque appel.
+impacts = { provider = "huggingface_hub", model = "openai/gpt-oss-120b", note_text = "EcoLogits ne connaît pas Groq (puces LPU) : estimation par gpt-oss-120b sur GPU chez Hugging Face" }
+
+# Préréglage Mistral : fournisseur français, plan gratuit « Experiment » (décision du
+# 2026-09-25 : mistral-small-latest). Un plan, gratuit ou payant, s'active dans la console
+# avant le premier appel : sans lui, chaque appel répond 429 (quota nul, recette du 02/10).
+[[cloud.models]]
+id = "mistral"
+provider = "Mistral AI"
+base_url = "https://api.mistral.ai/v1"
+model = "mistral-small-latest"
+stream_usage = false
+tools = true
+context = 131072
+hosting_text = "Mistral AI, France (hébergement dans l'UE plausible, non confirmé)"
+training = "opt_out"
+notes_text = "Avant le premier appel, activez un plan dans la console Mistral : « Experiment », gratuit, ou payant ; sans plan, le compte n'a aucun quota et chaque appel répond 429. Sur le plan gratuit, les prompts servent à l'entraînement par défaut : décochez l'option dans Admin Console > Privacy. Quotas à lire dans la console Mistral. Coût réel nul sur le plan gratuit seulement : le prix affiché est le prix catalogue, facturé sur un plan payant."
+# Story 7 des restes différés (E055, 2026-10-03) : `resend = true`. Mistral accepte ses blocs
+# `thinking` renvoyés (200) ; sans eux, brique Raisonnement allumée, il rappelle le même outil
+# jusqu'à la limite d'étapes (mesuré sur le PC cible).
+reasoning = { format = "content_blocks", on = { reasoning_effort = "high" }, off = { reasoning_effort = "none" }, resend = true }
+key_env = "MISTRAL_API_KEY"
+# Écran « LLM nu » (story 29) : température et top-p réglables, comme chez Groq.
+sampling = ["temperature", "top_p"]
+# Le plan gratuit refuse (429) deux requêtes à moins d'une seconde : au moins 1 s entre deux
+# envois à ce modèle (tour ou « Tester »). Augmentez la valeur si des 429 persistent.
+min_interval_s = 1
+# FinOps : prix catalogue de Mistral Small 4, relevés sur mistral.ai/pricing (nuls en réalité
+# sur le plan gratuit, facturés sur un plan payant, voir notes_text).
+pricing = { input_usd_per_mtok = 0.15, output_usd_per_mtok = 0.60, checked = "2026-09-29" }
+# GreenOps : le modèle tel qu'EcoLogits le connaît chez Mistral AI (zone du fournisseur).
+impacts = { provider = "mistralai", model = "mistral-small-latest" }
+
+# Préréglage Gemini (Google AI Studio, API compatible OpenAI ; vérifié sur ai.google.dev le
+# 2026-09-29, conditions relues le 2026-09-30). Offre payante obligatoire, clause EEE : « You
+# may use only Paid Services when making API Clients available to users in the European
+# Economic Area, Switzerland, or the United Kingdom » (un « API Client » : site, application ou
+# service). Données : sur l'offre payante, rien ne sert à l'entraînement ; sur l'offre
+# gratuite, les contenus servent à améliorer les produits Google et peuvent être lus par des
+# relecteurs humains, sauf pour les utilisateurs de l'EEE, de Suisse et du Royaume-Uni, à qui
+# Google applique les règles de l'offre payante sur tous les services, quota gratuit compris.
+# gemini-3.5-flash-lite (stable) : 1 048 576 tokens en entrée, 65 536 en sortie ; niveaux de
+# raisonnement minimal (par défaut), low, medium et high ; 0,30 $ / 2,50 $ par million de
+# tokens (entrée / sortie), aucune hausse annoncée pour ce modèle.
+# Raisonnement : allumé, thinking_level "high" avec include_thoughts, seule façon de
+# recevoir le texte du raisonnement (à "low", le modèle ne réfléchit pas sur des questions
+# simples ni sur le prompt du scénario Raisonnement : recette réelle du 2026-09-30 ; à
+# "medium", le résumé de la réflexion manque souvent en streaming quand elle reste courte :
+# sonde du 2026-10-03, 3 fois sur 8 contre 4 sur 4 à "high"), que
+# Gemini écrit dans content entre <thought> et </thought> (relevé sur l'API réelle le
+# 2026-09-29 ; s'il change, changez tags ou format dans settings.json) ; éteint,
+# reasoning_effort "minimal". reasoning_effort et thinking_config ne se combinent pas. Son
+# usage.completion_tokens ne compte pas les tokens de réflexion : HarnessLab lit total_tokens −
+# prompt_tokens.
+# Gemini 3.x signe une réponse qui appelle des outils (une signature de pensée, sur le premier
+# appel seulement quand il y en a plusieurs en parallèle, relevé le 2026-09-29) et refuse (400)
+# un appel du tour en cours rejoué sans elle ; HarnessLab la renvoie telle quelle, à Gemini
+# seulement.
+# Secours, dans settings.json (fusion par id, champ par champ). null ne retire qu'une clé de
+# premier niveau de reasoning.on ou reasoning.off (extra_body, reasoning_effort) : un null
+# plus profond est envoyé tel quel, et tags à null rend l'entrée invalide.
+# - gemini-3.6-flash accepte aussi minimal : {"id": "gemini", "model": "gemini-3.6-flash"}
+#   (0,75 $ / 3,75 $, puis 1,50 $ / 7,50 $ au 2027-01-01). Les 3.7 et 3.8 Flash n'ont pas
+#   minimal : il faudrait "off": {"reasoning_effort": "low"}, et le modèle raisonnerait alors
+#   même brique Raisonnement éteinte (réflexion facturée, invisible, prise sur la réserve de
+#   512 tokens de la réponse).
+# - gemini-2.5-flash, réservé aux projets qui l'ont déjà utilisé : "model": "gemini-2.5-flash"
+#   et "reasoning": {"on": {"extra_body": null, "reasoning_effort": "low"}, "off":
+#   {"reasoning_effort": "none"}} (1 024 tokens de raisonnement, dans la réserve de 1 536).
+# - extra_body refusé : "on": {"extra_body": null, "reasoning_effort": "low"} ; le modèle
+#   raisonne alors sans montrer son raisonnement.
+[[cloud.models]]
+id = "gemini"
+provider = "Google AI Studio"
+base_url = "https://generativelanguage.googleapis.com/v1beta/openai"
+model = "gemini-3.5-flash-lite"
+stream_usage = true
+tools = true
+context = 1048576
+hosting_text = "Google (hébergement non précisé)"
+training = "no"
+notes_text = "Offre payante obligatoire (clause EEE : un client d'API mis à disposition d'utilisateurs de l'EEE, de Suisse ou du Royaume-Uni doit utiliser l'offre payante). Sur l'offre payante, rien n'est utilisé pour l'entraînement ; ces règles de données s'appliquent aussi aux utilisateurs de l'EEE sur le quota gratuit (conditions relues le 2026-09-30). Prix à vérifier dans la console : hausse au 2027-01-01 pour les 3.6 à 3.8 Flash."
+key_env = "GEMINI_API_KEY"
+# FinOps : prix de gemini-3.5-flash-lite, relevés sur ai.google.dev/pricing (offre payante).
+# Les tokens de réflexion sont facturés comme sortie.
+pricing = { input_usd_per_mtok = 0.30, output_usd_per_mtok = 2.50, checked = "2026-09-29" }
+# GreenOps : architecture non publiée et multimodale, d'où une large fourchette d'EcoLogits.
+impacts = { provider = "google_genai", model = "gemini-3.5-flash-lite" }
+
+[cloud.models.reasoning]
+format = "think_tags"
+tags = ["<thought>", "</thought>"]
+on = { extra_body = { google = { thinking_config = { thinking_level = "high", include_thoughts = true } } } }
+off = { reasoning_effort = "minimal" }
+always = false
+resend = false
+
+# Gemma 4 sur Google AI Studio (relevé sur l'API réelle le 2026-09-30) : modèles ouverts de
+# Google, servis seulement sur l'offre gratuite (aucun prix, aucune offre payante, aucun quota
+# publié). Même hôte, même clé et même signature de pensée sur les appels d'outils que Gemini.
+# gemma-4-26b-a4b-it (MoE, 4 milliards de paramètres actifs) : 262 144 tokens en entrée,
+# 32 768 en sortie. Il réfléchit par défaut et montre sa pensée par défaut, dans content entre
+# <thought> et </thought> (fragments marqués extra_content.google.thought), même sans
+# include_thoughts ; reasoning_effort "minimal" l'éteint (0 token de réflexion) ; thinking_level,
+# thinking_budget et les autres valeurs de reasoning_effort sont refusés (400 « not supported
+# for this model »). Conditions (voir Gemini) : Google réserve l'offre payante aux clients
+# d'API mis à disposition d'utilisateurs de l'EEE, et Gemma n'en a pas : usage personnel de la
+# clé sur son poste, pas une mise à disposition. Données : la page tarifaire dit que les
+# contenus de l'offre gratuite servent à améliorer les produits Google, mais les utilisateurs
+# de l'EEE, de Suisse et du Royaume-Uni ont les règles de l'offre payante, quota gratuit
+# compris : d'où training = "no", et trial = true (offre gratuite seule, quota non publié).
+# La clé saisie au diagnostic est propre à chaque ligne ; GEMINI_API_KEY sert aux deux.
+# Secours, dans settings.json : gemma-4-31b-it (dense, plus lent, même API), avec son
+# empreinte : {"id": "gemma", "model": "gemma-4-31b-it",
+#   "impacts": {"provider": "google_genai", "model": "gemma-4-31b-it"}}.
+[[cloud.models]]
+id = "gemma"
+provider = "Google AI Studio"
+base_url = "https://generativelanguage.googleapis.com/v1beta/openai"
+model = "gemma-4-26b-a4b-it"
+stream_usage = true
+tools = true
+context = 262144
+hosting_text = "Google (hébergement non précisé)"
+training = "no"
+trial = true
+notes_text = "Modèle ouvert servi seulement sur l'offre gratuite de Google AI Studio (aucun prix, aucun quota publié), et Google réserve l'offre payante aux clients d'API mis à disposition d'utilisateurs de l'EEE : usage personnel de votre clé sur votre poste, pas une mise à disposition. Données : la page tarifaire dit que l'offre gratuite sert à améliorer les produits Google, mais les utilisateurs de l'EEE, de Suisse et du Royaume-Uni ont les règles de l'offre payante, quota gratuit compris (conditions relues le 2026-09-30) : rien n'est utilisé pour l'entraînement. Même clé que Gemini : à saisir aussi sur cette ligne, ou GEMINI_API_KEY."
+key_env = "GEMINI_API_KEY"
+# FinOps : pas de pricing, le modèle est gratuit ; aucun coût n'est estimé ni affiché.
+# GreenOps : EcoLogits connaît les deux Gemma 4 chez google_genai (architecture publiée).
+impacts = { provider = "google_genai", model = "gemma-4-26b-a4b-it" }
+
+[cloud.models.reasoning]
+format = "think_tags"
+tags = ["<thought>", "</thought>"]
+on = { extra_body = { google = { thinking_config = { include_thoughts = true } } } }
+off = { reasoning_effort = "minimal" }
+always = false
+resend = false
+
+# Fournisseurs natifs 3/5 : Claude d'Anthropic par l'API Messages (api = "anthropic_messages",
+# HTTP brut, sans SDK ; la couche compatible OpenAI d'Anthropic ne renvoie pas la réflexion).
+# Prix relevés sur platform.claude.com/docs/en/about-claude/pricing le 2026-10-03 : cache lu
+# à 0,1 fois l'entrée, écrit (5 minutes) à 1,25 fois, écrit (1 heure) à 2 fois. Le cache de
+# prompt est off par défaut ; le réglage claude_cache de [cloud] (« off », « 5m » ou « 1h »,
+# ou le panneau) ajoute un cache_control aux outils, au system et au dernier message.
+# Conditions relevées le 2026-10-03 : les données de l'API ne servent pas à l'entraînement
+# sans permission expresse ; suppression sous 30 jours ; inférence « global » par défaut (ou
+# « us » à 1,1 fois le prix, inference_geo, Claude 4.6 et après seulement), stockage aux
+# États-Unis : pas de résidence dans l'UE.
+# En-têtes fixes : anthropic-version, et la bêta thinking-binding-controls-2026-08-01 qui
+# permet block_binding. HarnessLab réécrit l'historique par conception (fenêtre, troncature,
+# compression, mémoire, briques changées) : avec prefix_mismatch_behavior = "drop_block",
+# Anthropic jette la réflexion devenue invalide au lieu de refuser l'appel (400), et le journal
+# le dit (événement reasoning_dropped). Haiku 4.5 et Sonnet 5 ne font pas ce contrôle
+# d'historique (propre à Opus 5.5 et Fable 5.1, seuls à pouvoir produire cet
+# événement) : l'en-tête leur est envoyé quand même.
+# block_binding n'est déclaré que dans reasoning.on : avec { type = "disabled" }, Anthropic le
+# refuse (400 « thinking.disabled.block_binding: Extra inputs are not permitted », mesuré sur
+# les deux modèles le 2026-10-03), et sans réflexion aucun bloc n'est renvoyé.
+# Réflexion : renvoyée telle quelle, signature comprise (resend, format thinking_blocks), au
+# seul modèle qui l'a produite ; sans elle, une boucle d'outils avec réflexion est refusée.
+# La clé vient de ANTHROPIC_API_KEY ou se saisit au diagnostic (en-tête x-api-key).
+# Haiku 4.5 : réflexion manuelle, budget de 1 024 tokens, sous la réserve de 1 536 (512 restent
+# à la réponse) ; température réglable au « LLM nu », réflexion éteinte seulement (Anthropic
+# la refuse avec la réflexion). Pas de top-p : Haiku 4.5 refuse temperature et top_p ensemble
+# (400, guide de migration d'Anthropic relu le 2026-10-03).
+[[cloud.models]]
+id = "claude_haiku"
+provider = "Anthropic"
+base_url = "https://api.anthropic.com/v1"
+model = "claude-haiku-4-5"
+api = "anthropic_messages"
+auth_header = { name = "x-api-key", scheme = "" }
+extra_headers = { "anthropic-version" = "2023-06-01", "anthropic-beta" = "thinking-binding-controls-2026-08-01" }
+tools = true
+context = 200000
+hosting_text = "Anthropic, États-Unis (inférence « global » par défaut ; pas de résidence dans l'UE)"
+training = "no"
+notes_text = "Les données envoyées par l'API ne servent pas à l'entraînement sans permission expresse et sont supprimées sous 30 jours (conditions relevées le 2026-10-03). Prix et quotas à lire dans la console Anthropic."
+key_env = "ANTHROPIC_API_KEY"
+sampling = ["temperature"]
+pricing = { input_usd_per_mtok = 1.0, output_usd_per_mtok = 5.0, cache_read_usd_per_mtok = 0.10, cache_write_usd_per_mtok = 1.25, cache_write_1h_usd_per_mtok = 2.0, checked = "2026-10-03" }
+# GreenOps : EcoLogits 0.11.2 connaît claude-haiku-4-5 chez anthropic.
+impacts = { provider = "anthropic", model = "claude-haiku-4-5" }
+
+[cloud.models.reasoning]
+format = "thinking_blocks"
+on = { thinking = { type = "enabled", budget_tokens = 1024, block_binding = { prefix_mismatch_behavior = "drop_block" } } }
+off = { thinking = { type = "disabled" } }
+always = false
+resend = true
+
+# Sonnet 5 : réflexion adaptative (le modèle décide s'il réfléchit et combien), résumée
+# (display "summarized" : sans elle, le texte de la réflexion arrive vide) ; budget_tokens est
+# refusé (400). Fenêtre native de 1 000 000 tokens au prix standard. Aucun réglage
+# d'échantillonnage (température et top-p refusés par Sonnet 5).
+[[cloud.models]]
+id = "claude_sonnet"
+provider = "Anthropic"
+base_url = "https://api.anthropic.com/v1"
+model = "claude-sonnet-5"
+api = "anthropic_messages"
+auth_header = { name = "x-api-key", scheme = "" }
+extra_headers = { "anthropic-version" = "2023-06-01", "anthropic-beta" = "thinking-binding-controls-2026-08-01" }
+tools = true
+context = 1000000
+hosting_text = "Anthropic, États-Unis (inférence « global » par défaut, ou « us » ; pas de résidence dans l'UE)"
+training = "no"
+notes_text = "Les données envoyées par l'API ne servent pas à l'entraînement sans permission expresse et sont supprimées sous 30 jours (conditions relevées le 2026-10-03). Prix et quotas à lire dans la console Anthropic."
+key_env = "ANTHROPIC_API_KEY"
+pricing = { input_usd_per_mtok = 2.0, output_usd_per_mtok = 10.0, cache_read_usd_per_mtok = 0.20, cache_write_usd_per_mtok = 2.50, cache_write_1h_usd_per_mtok = 4.0, checked = "2026-10-03" }
+# GreenOps : EcoLogits 0.11.2 connaît claude-sonnet-5 chez anthropic.
+impacts = { provider = "anthropic", model = "claude-sonnet-5" }
+
+[cloud.models.reasoning]
+format = "thinking_blocks"
+on = { thinking = { type = "adaptive", display = "summarized", block_binding = { prefix_mismatch_behavior = "drop_block" } } }
+off = { thinking = { type = "disabled" } }
+always = false
+resend = true
+
+# Claude Opus 5.5 (non activé : à recopier dans settings.json, enabled = true) : 4 $ / 20 $ par
+# million de tokens, cache lu 0,20 $, écrit 5 $ ; 1 000 000 tokens. Sa réflexion ne s'éteint
+# pas (disabled et budget_tokens refusés, 400) : always = true, l'effort seul la règle
+# (output_config.effort, medium ici). Une entrée always n'envoie que on, brique Raisonnement
+# éteinte comprise : pas de bloc off. Il fait le contrôle
+# d'historique de la réflexion conservée : block_binding et l'en-tête bêta y sont nécessaires.
+# impacts : vérifier qu'EcoLogits connaît claude-opus-5-5 (sinon le retirer, ou estimer par
+# un modèle proche avec note_text).
+# {"id": "claude_opus", "provider": "Anthropic", "base_url": "https://api.anthropic.com/v1",
+#  "model": "claude-opus-5-5", "api": "anthropic_messages",
+#  "auth_header": {"name": "x-api-key", "scheme": ""},
+#  "extra_headers": {"anthropic-version": "2023-06-01",
+#    "anthropic-beta": "thinking-binding-controls-2026-08-01"},
+#  "enabled": true, "tools": true, "context": 1000000, "key_env": "ANTHROPIC_API_KEY",
+#  "hosting_text": "Anthropic, États-Unis (inférence « global » par défaut ; pas de résidence dans l'UE)",
+#  "training": "no",
+#  "notes_text": "Les données envoyées par l'API ne servent pas à l'entraînement sans permission expresse et sont supprimées sous 30 jours (conditions relevées le 2026-10-03). Prix et quotas à lire dans la console Anthropic.",
+#  "impacts": {"provider": "anthropic", "model": "claude-opus-5-5"},
+#  "pricing": {"input_usd_per_mtok": 4.0, "output_usd_per_mtok": 20.0,
+#    "cache_read_usd_per_mtok": 0.20, "cache_write_usd_per_mtok": 5.0, "checked": "2026-10-03"},
+#  "reasoning": {"format": "thinking_blocks", "always": true, "resend": true,
+#    "on": {"thinking": {"type": "adaptive", "display": "summarized",
+#      "block_binding": {"prefix_mismatch_behavior": "drop_block"}},
+#      "output_config": {"effort": "medium"}}}}
+
+# Fournisseurs natifs 4/5 : GPT-6 Luna d'OpenAI par l'API Responses (api = "openai_responses",
+# HTTP brut, sans SDK). Par Chat Completions, GPT-6 n'appelle d'outils que raisonnement éteint
+# (Luna ; Sol jamais) et ne renvoie jamais son raisonnement : d'où l'API Responses, sans état
+# (store = false toujours, jamais previous_response_id) ; l'historique entier part à chaque
+# appel, comme pour les autres fournisseurs. Clé dans l'en-tête Authorization: Bearer (défaut).
+# Prix lus sur la fiche du modèle le 2026-10-03 (la page des prix d'OpenAI a répondu 403 : à
+# revérifier sur celle-ci) : 0,10 $ / 0,50 $ par million
+# de tokens, cache lu 0,01 $ (le cache d'OpenAI est automatique, sans écriture facturée) ; les
+# tokens de raisonnement sont facturés comme sortie.
+# Conditions relevées le 2026-10-03 : les données de l'API ne servent pas à l'entraînement par
+# défaut ; journaux de lutte contre les abus gardés jusqu'à 30 jours, même avec store = false ;
+# cache de prompt gardé 24 heures par défaut (prompt_cache_retention = "24h" relevé sur l'API) ;
+# résidence dans l'UE seulement par un projet dédié et l'hôte eu.api.openai.com (non préréglé).
+# Raisonnement : les items reasoning reçus (chiffrés, encrypted_content, demandés par include)
+# repartent tels quels au seul modèle qui les a produits (resend, format reasoning_items) ; le
+# résumé (summary = "auto") s'affiche au canal Raisonnement. Luna n'a pas d'effort « minimal » :
+# éteint, effort « none ».
+[[cloud.models]]
+id = "openai_luna"
+provider = "OpenAI"
+base_url = "https://api.openai.com/v1"
+model = "gpt-6-luna"
+api = "openai_responses"
+max_tokens_field = "max_output_tokens"
+tools = true
+context = 1050000
+hosting_text = "OpenAI, États-Unis (résidence dans l'UE seulement par un projet dédié et eu.api.openai.com)"
+training = "no"
+notes_text = "Les données envoyées par l'API ne servent pas à l'entraînement par défaut ; journaux de lutte contre les abus gardés jusqu'à 30 jours, même sans stockage des réponses ; cache de prompt gardé 24 heures par défaut (conditions relevées le 2026-10-03). Prix et quotas à lire dans la console OpenAI."
+key_env = "OPENAI_API_KEY"
+# Température et top-p réglables au « LLM nu », raisonnement éteint seulement : mesuré le
+# 2026-10-03, OpenAI les accepte avec l'effort « none » et les refuse avec « low » (400
+# « Unsupported parameter: 'temperature' is not supported with this model »).
+sampling = ["temperature", "top_p"]
+pricing = { input_usd_per_mtok = 0.10, output_usd_per_mtok = 0.50, cache_read_usd_per_mtok = 0.01, checked = "2026-10-03" }
+# GreenOps : EcoLogits 0.11.2 connaît gpt-6-luna chez openai.
+impacts = { provider = "openai", model = "gpt-6-luna" }
+
+[cloud.models.reasoning]
+format = "reasoning_items"
+on = { reasoning = { effort = "low", summary = "auto" } }
+off = { reasoning = { effort = "none" } }
+always = false
+resend = true
+
+# GPT-6.1 Sol (non activé : à recopier dans settings.json, enabled = true) : 2 $ / 10 $ par
+# million de tokens, cache lu 0,10 $ ; 1 050 000 tokens. Il raisonne toujours (always = true) :
+# effort « medium », brique Raisonnement allumée ou éteinte (une entrée always n'envoie que on,
+# pas de bloc off). impacts : vérifier qu'EcoLogits connaît
+# gpt-6.1-sol (sinon le retirer, ou estimer par un modèle proche avec note_text).
+# {"id": "openai_sol", "provider": "OpenAI", "base_url": "https://api.openai.com/v1",
+#  "model": "gpt-6.1-sol", "api": "openai_responses", "max_tokens_field": "max_output_tokens",
+#  "enabled": true, "tools": true, "context": 1050000, "key_env": "OPENAI_API_KEY",
+#  "hosting_text": "OpenAI, États-Unis (résidence dans l'UE seulement par un projet dédié et eu.api.openai.com)",
+#  "training": "no",
+#  "notes_text": "Les données envoyées par l'API ne servent pas à l'entraînement par défaut ; journaux de lutte contre les abus gardés jusqu'à 30 jours, même sans stockage des réponses ; cache de prompt gardé 24 heures par défaut (conditions relevées le 2026-10-03). Prix et quotas à lire dans la console OpenAI.",
+#  "impacts": {"provider": "openai", "model": "gpt-6.1-sol"},
+#  "pricing": {"input_usd_per_mtok": 2.0, "output_usd_per_mtok": 10.0,
+#    "cache_read_usd_per_mtok": 0.10, "checked": "2026-10-03"},
+#  "reasoning": {"format": "reasoning_items", "always": true, "resend": true,
+#    "on": {"reasoning": {"effort": "medium", "summary": "auto"}}}}
+
+# Mistral Large 4 par l'API Responses (non activé : à recopier dans settings.json, enabled =
+# true). Essai réel du 2026-11-03 : store: false, include et reasoning.summary sont acceptés et
+# ignorés (pas de 422) ; Mistral diffuse son raisonnement en clair (response.reasoning_text.delta)
+# et son item reasoning, sans encrypted_content, est renvoyé tel quel au tour suivant (200) ;
+# l'effort « none » est refusé (400) et, sans champ reasoning, il raisonne quand même, d'où
+# always = true (effort « low », jamais de bloc off). Ni pricing ni impacts : non relevés ;
+# context = 131072 à vérifier pour Large 4. Pas de sampling : jamais envoyé quand le modèle
+# raisonne (toujours ici). Une clé
+# à saisir pour cet id, distinct de `mistral` (même variable MISTRAL_API_KEY si définie).
+# {"id": "mistral_responses", "provider": "Mistral AI", "base_url": "https://api.mistral.ai/v1",
+#  "model": "mistral-large-4", "api": "openai_responses", "max_tokens_field": "max_output_tokens",
+#  "enabled": true, "tools": true, "context": 131072, "key_env": "MISTRAL_API_KEY",
+#  "min_interval_s": 1, "training": "opt_out",
+#  "hosting_text": "Mistral AI, France (hébergement dans l'UE plausible, non confirmé)",
+#  "notes_text": "Avant le premier appel, activez un plan dans la console Mistral : « Experiment », gratuit, ou payant ; sans plan, le compte n'a aucun quota et chaque appel répond 429. Sur le plan gratuit, les prompts servent à l'entraînement par défaut : décochez l'option dans Admin Console > Privacy. Quotas à lire dans la console Mistral. Coût réel nul sur le plan gratuit seulement : le prix affiché est le prix catalogue, facturé sur un plan payant.",
+#  "reasoning": {"format": "reasoning_items", "always": true, "resend": true,
+#    "on": {"reasoning": {"effort": "low"}}}}
+
+# Exemples à recopier dans settings.json (entrée complète, enabled = true), avec leur
+# avertissement. Leur hôte rejoint alors la liste d'adresses autorisées.
+# Champs facultatifs de toute entrée : key_env (nom d'une variable d'environnement qui
+# fournit la clé, par exemple "OPENROUTER_API_KEY"), min_interval_s (secondes au moins entre
+# deux envois au même modèle, de 0 exclu à 60), sampling (story 29 : les réglages que
+# l'écran « LLM nu » peut envoyer, parmi "temperature" et "top_p" ; vide par défaut, réglés
+# par le fournisseur) et pricing (FinOps : prix
+# d'entrée et de sortie en dollars par million de tokens, avec la date du relevé, et, facultatifs,
+# cache_read_usd_per_mtok, cache_write_usd_per_mtok et cache_write_1h_usd_per_mtok (écriture
+# gardée 1 heure ; absent : 2 fois le prix d'entrée), prix des tokens d'entrée lus ou écrits
+# dans le cache du fournisseur, au prix d'entrée s'ils manquent ; sans pricing, aucun coût n'est
+# estimé ni affiché pour ce modèle, et le plafond [finops] max_session_usd ne le bloque jamais)
+# et impacts (GreenOps : provider et model
+# tels qu'EcoLogits les connaît, zone facultative, code ISO à trois lettres du mix électrique,
+# par défaut celui du fournisseur dans EcoLogits ; note_text facultative, ajoutée à l'infobulle ;
+# sans lui, aucune empreinte n'est estimée).
+#
+# NVIDIA : offre d'essai, « limited trial purposes only », hors production ; les contenus
+# sont collectés (§3.3 des conditions).
+# [[cloud.models]]
+# id = "nvidia"
+# provider = "NVIDIA"
+# base_url = "https://integrate.api.nvidia.com/v1"
+# model = "meta/llama-3.3-70b-instruct"
+# tools = true
+# context = 131072
+# hosting_text = "NVIDIA (hébergement non précisé)"
+# training = "yes"
+# trial = true
+# notes_text = "Offre d'essai réservée à l'évaluation interne, pas à un usage durable. Environ 40 requêtes par minute."
+#
+# OpenRouter : le catalogue « :free » change presque chaque jour, et la politique de
+# données dépend du fournisseur vers lequel la requête est routée. 50 requêtes par jour
+# sans crédits achetés.
+# [[cloud.models]]
+# id = "openrouter"
+# provider = "OpenRouter"
+# base_url = "https://openrouter.ai/api/v1"
+# model = "meta-llama/llama-3.3-70b-instruct:free"
+# tools = true
+# context = 131072
+# hosting_text = "Selon le fournisseur routé par OpenRouter"
+# training = "yes"
+# notes_text = "Catalogue gratuit instable : vérifiez le nom du modèle avant la séance. Politique de données propre à chaque fournisseur routé. 50 requêtes par jour sans crédits."

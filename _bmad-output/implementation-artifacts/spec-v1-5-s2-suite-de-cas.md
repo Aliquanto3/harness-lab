@@ -5,7 +5,7 @@ created: '2026-10-25'
 status: 'review'
 route: ''
 review_loop_iteration: 0
-context: ['_bmad-output/specs/spec-wavestack-evaluer-l-agent/SPEC.md', '_bmad-output/specs/spec-wavestack-evaluer-l-agent/contrat-des-cas.md']
+context: ['_bmad-output/specs/spec-harness-lab-evaluer-l-agent/SPEC.md', '_bmad-output/specs/spec-harness-lab-evaluer-l-agent/contrat-des-cas.md']
 ---
 
 ## Intent
@@ -49,7 +49,7 @@ Pourquoi ce cas : c'est une défaillance de recette réelle, datée et corrigée
 | Assertion | « N'appelle `read_file` qu'avec un fichier listé (`.` pour lister d'abord). » |
 | Plafond | 4 (nominal : lister, lire un fichier réel, répondre = 3, + 1) |
 
-Le nom `rapport_annuel_2025.docx` n'existe pas dans `content/demo_files/` ni ses surcouches. `read_file` émet `tool_started` avant d'ouvrir le fichier (`ToolExecutor.run`, `src/wavestack/tools/executor.py`), puis lève `tools.read_file.missing` : un chemin inventé est donc vu par `argument_never`. `tool_called read_file` est la vérification positive : sans appel, le faux moteur inactif échoue. `search_documents` retiré de la configuration : il ouvre une autre voie (la recherche) que le cas ne teste pas.
+Le nom `rapport_annuel_2025.docx` n'existe pas dans `content/demo_files/` ni ses surcouches. `read_file` émet `tool_started` avant d'ouvrir le fichier (`ToolExecutor.run`, `src/harness_lab/tools/executor.py`), puis lève `tools.read_file.missing` : un chemin inventé est donc vu par `argument_never`. `tool_called read_file` est la vérification positive : sans appel, le faux moteur inactif échoue. `search_documents` retiré de la configuration : il ouvre une autre voie (la recherche) que le cas ne teste pas.
 
 ### 3. `h1_bloque_confidentiel`
 
@@ -112,7 +112,7 @@ Vérifié dans le code (décision 3) : un appel bloqué par un hook `before_tool
 |---|---|
 | Brique | RAG (outil de recherche dans les documents) |
 | Prompt fr | « Combien de caractères doit compter au minimum un mot de passe chez Exemplia ? » |
-| Configuration | `bricks: [short_memory, system_prompt, tools]`, `tools: [search_documents, read_file]`, `hooks: []` ; brique `rag` éteinte (le modèle doit chercher lui-même). `search_documents` est l'outil natif (`wavestack.tools.native`), pas celui du serveur MCP d'architecture ; `read_file` ouvre le corpus sous `corpus/<doc>.md`. |
+| Configuration | `bricks: [short_memory, system_prompt, tools]`, `tools: [search_documents, read_file]`, `hooks: []` ; brique `rag` éteinte (le modèle doit chercher lui-même). `search_documents` est l'outil natif (`harness_lab.tools.native`), pas celui du serveur MCP d'architecture ; `read_file` ouvre le corpus sous `corpus/<doc>.md`. |
 | Vérifications | `tool_called {tool: search_documents, before: read_file}` ; `turn_completed` |
 | Symptôme | « Lit un fichier au hasard, ou répond de tête, sans chercher d'abord. » |
 | Assertion | « Appelle `search_documents` avant `read_file`. » |
@@ -157,7 +157,7 @@ Les scripts sont un dictionnaire `id -> outputs` de `tests/test_agent_cases_prov
 
 - **Fichiers** : `tools/eval/measure_cases.py` (commande), `tools/eval/case_player.py` (jouer un cas sur une `AppSession`), `tools/eval/README.md`. Comme `tools/bench/`, aucune dépendance ajoutée au projet ; les tests l'importent comme `tests/test_story12_bench.py` importe `tools/bench/`.
 - **Lancer** : `uv run python tools/eval/measure_cases.py [--runs 3] [--cases id1 id2] [--model chemin.gguf] [--json sortie.json]`.
-- **Données** : l'outil fixe `WAVESTACK_DATA_DIR` sur un dossier temporaire avant de créer la session (le modèle est résolu avant, depuis `--model` ou le dossier des modèles réel) : la mémoire globale y est celle de démonstration et les données du formateur ne sont pas touchées. Le dev vérifie qu'une mémoire absente donne bien les entrées de démonstration au démarrage ; sinon l'outil écrit `memory.json` de démonstration dans ce dossier temporaire avant `boot`.
+- **Données** : l'outil fixe `HARNESS_LAB_DATA_DIR` sur un dossier temporaire avant de créer la session (le modèle est résolu avant, depuis `--model` ou le dossier des modèles réel) : la mémoire globale y est celle de démonstration et les données du formateur ne sont pas touchées. Le dev vérifie qu'une mémoire absente donne bien les entrées de démonstration au démarrage ; sinon l'outil écrit `memory.json` de démonstration dans ce dossier temporaire avant `boot`.
 - **Déroulé** : démarre une `AppSession` sur le modèle local (fenêtre 4 096), charge les cas fournis en français (`load_provided_cases`), puis, cas par cas et séquentiellement : `--runs` (3) exécutions par `case_player`, puis `verify` ; relève les appels au modèle, la durée, le verdict. Un cas dont `window` diffère de la fenêtre courante est signalé « non mesurable ici », sans recharger le modèle.
 - **Sortie** : tableau `cas | appels par essai | max | plafond proposé (max + 1) | plafond du fichier | réussites sur 3` et la ligne `max_model_calls: N` à copier dans `content/agent_cases.yaml`. L'outil **n'écrit pas** le fichier de cas : le choix du plafond est humain. Pour `h5_refuse_sans_rappel`, la ligne dit « plafond du contrat (2), non relevé ».
 - **Joueur minimal** (décision 8) : `case_player.play_case(session, case) -> list[Envelope]`, une seule fonction (environ 60 lignes), partagée par l'outil et le test des deux sens. Elle applique la configuration comme un scénario (`set_brick`, `set_tool`, `set_hook`, listes explicites), place `history` dans l'historique, envoie le prompt, répond à H5 selon `approval` (`answer_approval`), applique `on_overflow` (`compact(strategy, resend_turn_id)`) qui renvoie le message, et rend les enveloppes dont le `turn_id` est un tour lancé par le cas (relevées par `Journal.events_since` depuis le seq d'avant l'envoi, filtrées sur ces `turn_id`, tous contextes) : c'est l'appelant de `verify` qui choisit les tours (contrat de la story 1). Pas de k essais, d'annulation, de budget, de rétablissement de configuration ni de statut `not_run` : c'est l'exécuteur de la story 4. La story 4 reprend ce code dans le paquet, fait passer l'outil et `tests/test_agent_cases_provided.py` par son exécuteur et supprime `case_player.py` (consigne à reporter dans la spec de la story 4).
@@ -165,7 +165,7 @@ Les scripts sont un dictionnaire `id -> outputs` de `tests/test_agent_cases_prov
 
 ## Fichiers touchés
 
-Nouveaux : `content/agent_cases.yaml`, `content/i18n/en/agent_cases.yaml`, `content/i18n/de/agent_cases.yaml`, `tools/eval/measure_cases.py`, `tools/eval/case_player.py`, `tools/eval/README.md`, `tests/test_agent_cases_provided.py`. Aucun changement de `src/wavestack/agent_eval/` (story 1), de `contrat-des-cas.md` ni de `web/app.py`. Fourni par la story 1 : `AgentCase`, `Provenance`, les vérifications par `kind`, `load_provided_cases(lang, known)` (lecture de `agent_cases.yaml` par `config.content_file`), `verify(case, envelopes, lang) -> CaseVerdict` (`CheckVerdict.passed`, `reason_text`, `seq` ; `CaseVerdict.model_calls`, sous-agent compris). Si `load_provided_cases` exige un fichier présent pour d'autres tests de la story 1 (fichier absent toléré ou non), le dev aligne sans modifier la story 1.
+Nouveaux : `content/agent_cases.yaml`, `content/i18n/en/agent_cases.yaml`, `content/i18n/de/agent_cases.yaml`, `tools/eval/measure_cases.py`, `tools/eval/case_player.py`, `tools/eval/README.md`, `tests/test_agent_cases_provided.py`. Aucun changement de `src/harness_lab/agent_eval/` (story 1), de `contrat-des-cas.md` ni de `web/app.py`. Fourni par la story 1 : `AgentCase`, `Provenance`, les vérifications par `kind`, `load_provided_cases(lang, known)` (lecture de `agent_cases.yaml` par `config.content_file`), `verify(case, envelopes, lang) -> CaseVerdict` (`CheckVerdict.passed`, `reason_text`, `seq` ; `CaseVerdict.model_calls`, sous-agent compris). Si `load_provided_cases` exige un fichier présent pour d'autres tests de la story 1 (fichier absent toléré ou non), le dev aligne sans modifier la story 1.
 
 ## Tests (`tests/test_agent_cases_provided.py`)
 

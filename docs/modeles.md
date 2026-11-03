@@ -2,7 +2,7 @@
 
 [← Retour au README](../README.md)
 
-WaveStack utilise au choix un petit modèle local (un fichier GGUF), le modèle d'un serveur que
+HarnessLab utilise au choix un petit modèle local (un fichier GGUF), le modèle d'un serveur que
 vous avez lancé (Ollama, llama-server) ou un modèle cloud. Pour obtenir le modèle recommandé, voir
 [l'installation](installation.md#le-modèle-local).
 
@@ -15,7 +15,7 @@ vous avez lancé (Ollama, llama-server) ou un modèle cloud. Pour obtenir le mod
 
 ## Changer de modèle
 
-Le modèle se change sans relancer WaveStack, entre deux tours (pas pendant un tour ni une
+Le modèle se change sans relancer HarnessLab, entre deux tours (pas pendant un tour ni une
 validation) :
 - **Barre du bas** : le sélecteur « Changer de modèle… », à droite de l'indicateur de modèle,
   liste les fichiers GGUF du poste, les modèles d'un serveur local déjà lancé et les modèles
@@ -27,7 +27,7 @@ validation) :
 
 **Plusieurs modèles locaux.** Qwen3.5-2B (recommandé), puis Qwen3.5-0.8B et MiniCPM5-2B
 (facultatifs, voir [le modèle local](installation.md#le-modèle-local)) peuvent coexister dans `models/`. Sans choix
-mémorisé, WaveStack charge Qwen3.5-2B, sans l'enregistrer ; un choix mémorisé (MiniCPM5 par
+mémorisé, HarnessLab charge Qwen3.5-2B, sans l'enregistrer ; un choix mémorisé (MiniCPM5 par
 exemple) est repris au redémarrage. Avec plusieurs fichiers dont aucun n'est Qwen3.5-2B, le
 démarrage attend votre choix.
 
@@ -43,16 +43,16 @@ fichier, pas d'après son nom.
 | Granite 4.0 350M | `hermes` (`<tool_call>` JSON) | non | 0,2 Go |
 
 Un gabarit qui annonce `<tool_call>` sans `<function=` reçoit le lecteur `hermes` s'il passe
-l'aller-retour : WaveStack lui fait rendre un appel passé et son résultat, puis vérifie que le
+l'aller-retour : HarnessLab lui fait rendre un appel passé et son résultat, puis vérifie que le
 lecteur relit ce même appel. Sinon, le modèle reste sans outils (SmolLM3, Falcon-H1 et Hunyuan
 n'affichent pas l'appel passé, ou pas en JSON). Les variantes hybrides Granite 4.0-H passent
 l'aller-retour et sont donc reconnues, mais ni proposées par l'installateur ni recommandées.
 
 **Lire le sélecteur.** Chaque option commence par une icône, 🏠 (sur ce poste) ou ☁️ (réseau).
 Sa deuxième ligne est une légende, qui dit où tourne le modèle, puis qui le sert :
-- « Local · fichier » : un fichier GGUF chargé par WaveStack lui-même (blob Ollama compris) ;
+- « Local · fichier » : un fichier GGUF chargé par HarnessLab lui-même (blob Ollama compris) ;
 - « Local · Ollama », « Local · llama-server » : un serveur déjà lancé sur ce poste, processus
-  distinct de WaveStack ;
+  distinct de HarnessLab ;
 - « RÉSEAU · {fournisseur} » : un modèle cloud, hors du poste.
 
 Les modèles sont regroupés par hébergement puis par éditeur (« Sur ce poste · Qwen (Alibaba) »,
@@ -68,13 +68,13 @@ capacités… » (bouton « Ouvrir le tableau »), ouvre la page « Modèles »
 qu'Ollama sert, une copie dans le cache Hugging Face et dans LM Studio…) n'a qu'une carte,
 « 2 sources », et chaque source garde son « Choisir cette source » dans la carte dépliée ; le
 sélecteur, lui, garde une option par source. Un clic déplie la carte. Pour chaque modèle : éditeur, taille
-(paramètres et octets), hébergement, fenêtre de contexte que WaveStack utiliserait, appel d'outils (oui, non, inconnu) et
+(paramètres et octets), hébergement, fenêtre de contexte que HarnessLab utiliserait, appel d'outils (oui, non, inconnu) et
 raisonnement (jamais, toujours, activable ou inconnu), avec la raison. Ces capacités sont lues
 comme au chargement, par les mêmes règles que les cartes des briques, sans charger ni sonder le
 modèle : l'en-tête du fichier GGUF (lu une fois, puis mémorisé), le gabarit de llama-server, la
 déclaration d'un modèle cloud. « Inconnu » veut dire que rien ne permet de le dire avant le
 chargement : un modèle Ollama dont le fichier est introuvable, un gabarit sans variable de
-raisonnement qui contient `<think>` (le modèle raisonne peut-être de lui-même, WaveStack ne sait
+raisonnement qui contient `<think>` (le modèle raisonne peut-être de lui-même, HarnessLab ne sait
 ni l'allumer ni l'éteindre).
 
 Pendant le chargement, la barre du bas et la Vue humain affichent « Chargement du modèle… » avec
@@ -85,34 +85,34 @@ premier tour d'un autre modèle, et « Comparer » affiche le modèle de chaque 
 qui exigent une capacité absente (appel d'outils, raisonnement) passent indisponibles avec leur
 raison, et redeviennent disponibles au retour à un modèle qui l'offre. Un scénario qui en veut
 une le signale sous sa consigne, avec la raison : par exemple, la famille Llama (Llama 3.2 via
-Ollama) n'a pas de format d'appel d'outils connu de WaveStack, donc pas d'outils, de MCP, de
+Ollama) n'a pas de format d'appel d'outils connu de HarnessLab, donc pas d'outils, de MCP, de
 skills ni de sous-agent.
 
 Le choix est mémorisé pour les lancements suivants une fois le chargement réussi. Si le nouveau
-modèle ne se charge pas (fichier incompatible, erreur), WaveStack recharge le modèle précédent et
+modèle ne se charge pas (fichier incompatible, erreur), HarnessLab recharge le modèle précédent et
 l'explique.
 
 ### Budget mémoire
 
 Un seul modèle est en mémoire à la fois : l'ancien est libéré avant le
 chargement du nouveau (et avant la sonde d'un fichier jamais chargé). Avant de libérer quoi que
-ce soit, WaveStack estime le coût du nouveau modèle (mémoire mesurée par la sonde, sinon taille
+ce soit, HarnessLab estime le coût du nouveau modèle (mémoire mesurée par la sonde, sinon taille
 du fichier, plus son cache de contexte et une marge) et refuse le changement, chiffres à
 l'appui, s'il dépasse le budget ; le modèle actif reste alors chargé. La sonde charge le
 fichier une fois, dans un processus à part, avec un contexte de la taille de la fenêtre, et lui
 fait lire un premier lot de 512 tokens : la mémoire qu'elle mesure comprend ses poids, le cache
 de contexte de toute la fenêtre (llama.cpp le réserve et l'initialise en créant le contexte) et
 les tampons de calcul d'un lot. Cela prend quelques dizaines de secondes de plus, une seule fois
-par fichier ; un fichier sondé par une version précédente de WaveStack est mesuré de nouveau au
+par fichier ; un fichier sondé par une version précédente de HarnessLab est mesuré de nouveau au
 lancement s'il est le modèle enregistré, sinon quand on le choisit. Une sonde à court de
 mémoire ou de temps n'est pas retenue contre le fichier. Avec le budget de 4 Go, Qwen3.5-4B
 devrait être refusé : 4,27 Go mesurés après 3 000 tokens lors du test du 2026-09-27 (à vérifier
 sur PC avec la nouvelle sonde). Pour l'utiliser malgré tout : fermez des applications,
 relevez `budget_mb` (le plafond) et au besoin `budget_ram_ratio`, ou passez en
-`budget_mode = "fixed"` avec un `budget_mb` suffisant, puis relancez WaveStack (le budget est
+`budget_mode = "fixed"` avec un `budget_mb` suffisant, puis relancez HarnessLab (le budget est
 calculé au lancement).
 
-Le refus dit aussi ce qu'occupe WaveStack sans le modèle actif : la mémoire mesurée juste avant
+Le refus dit aussi ce qu'occupe HarnessLab sans le modèle actif : la mémoire mesurée juste avant
 la création de son moteur (après la libération du précédent), ou davantage si d'autres
 composants se sont chargés depuis (embedding, reranker). Les poids d'un modèle sont projetés en
 mémoire depuis le fichier et peuvent être bien moins présents que ce que la sonde a mesuré :
@@ -130,17 +130,17 @@ complet (« plafond [memory] budget_mb de 4 096 Mo, plus petit que 60 % des 9 60
 disponibles au lancement (5 760 Mo), sur 16 071 Mo »). Le budget ne descend jamais sous
 512 Mo. Quand la RAM
 disponible fait descendre le budget sous le plafond, le diagnostic l'avertit (sans bloquer) :
-fermez des applications (navigateur, messagerie, visioconférence) puis relancez WaveStack. Si
+fermez des applications (navigateur, messagerie, visioconférence) puis relancez HarnessLab. Si
 la RAM ne peut pas être lue, le budget est le plafond. `budget_mode = "fixed"` garde un budget
 fixe de `budget_mb`, quelle que soit la RAM (« valeur fixe » dans le calcul) ; le diagnostic
 avertit s'il dépasse la RAM disponible.
 
 « Arrêter » (à droite du champ de message) interrompt un chargement en cours. Pendant la sonde
 d'un fichier jamais chargé, il arrête le processus de la sonde aussitôt : rien n'est retenu
-contre le fichier, et le modèle précédent revient. Pendant un chargement dans WaveStack, il
+contre le fichier, et le modèle précédent revient. Pendant un chargement dans HarnessLab, il
 prend effet à la fin de l'étape (libération ou chargement, que llama.cpp ne sait pas
-interrompre), puis WaveStack recharge le modèle précédent. La sonde du diagnostic de lancement,
-elle, n'a pas de bouton « Arrêter ». Le budget se règle dans `wavestack.toml` (ou
+interrompre), puis HarnessLab recharge le modèle précédent. La sonde du diagnostic de lancement,
+elle, n'a pas de bouton « Arrêter ». Le budget se règle dans `harness-lab.toml` (ou
 `settings.json`) :
 
 ```toml
@@ -169,7 +169,7 @@ choix et pour le modèle actif, ce que la fenêtre coûte :
   `-c` de llama-server, le quota par minute d'un fournisseur (`tpm`), ou la fenêtre qu'une
   déclaration cloud fixe (`window` : le réglage est alors désactivé) ;
 - **le verdict du budget mémoire** : « Tient dans le budget », ou le refus chiffré (ce que
-  demanderait le modèle avec cette fenêtre, ce qu'occupe WaveStack sans lui, le budget et son
+  demanderait le modèle avec cette fenêtre, ce qu'occupe HarnessLab sans lui, le budget et son
   calcul).
 
 « Appliquer », entre deux tours seulement : un modèle local (fichier ou Ollama) est rechargé avec
@@ -187,9 +187,9 @@ la main dans `[context] window` reste lue, mais n'est pas proposée par le panne
 
 ## Utiliser un serveur déjà lancé (Ollama, llama-server)
 
-WaveStack peut faire tourner le modèle d'un serveur local que **vous** avez lancé : Ollama ou
-llama-server (llama.cpp). WaveStack ne lance, n'installe ni n'arrête jamais ces serveurs ; il
-les interroge sur la boucle locale (`127.0.0.1`, sans proxy), aux ports de `wavestack.toml` :
+HarnessLab peut faire tourner le modèle d'un serveur local que **vous** avez lancé : Ollama ou
+llama-server (llama.cpp). HarnessLab ne lance, n'installe ni n'arrête jamais ces serveurs ; il
+les interroge sur la boucle locale (`127.0.0.1`, sans proxy), aux ports de `harness-lab.toml` :
 
 ```toml
 [net.loopback_ports]
@@ -201,10 +201,10 @@ connect_timeout_s = 2   # connexion au serveur
 read_timeout_s = 300    # lecture de la réponse (le premier appel d'Ollama charge le modèle)
 ```
 
-Lancez le serveur avant WaveStack, par exemple `ollama serve`, ou
+Lancez le serveur avant HarnessLab, par exemple `ollama serve`, ou
 `llama-server -m C:\modeles\Qwen3.5-2B-Q4_K_M.gguf --port 8080 -np 1 -c 4096`. **Donnez
 toujours à llama-server un `-c` égal à la fenêtre choisie** (4 096 par défaut ; 8 192 ou
-16 384 si vous l'avez choisie dans « Fenêtre ▾ », voir [Fenêtre de contexte](#fenêtre-de-contexte)) : WaveStack ne relance
+16 384 si vous l'avez choisie dans « Fenêtre ▾ », voir [Fenêtre de contexte](#fenêtre-de-contexte)) : HarnessLab ne relance
 jamais llama-server, et une fenêtre plus grande que son `-c` est bornée à celui-ci. Sans `-c`,
 il prend tout le contexte natif du modèle (262 144 tokens pour Qwen3.5) et réserve dès son
 lancement la mémoire de ce contexte entier, quelle que soit la longueur des conversations
@@ -219,7 +219,7 @@ d'office ; un choix mémorisé est repris au lancement si le serveur le sert enc
 
 ### Obtenir llama-server sans droits d'administrateur (Windows)
 
-WaveStack n'installe pas
+HarnessLab n'installe pas
 llama-server. Sur un poste sans droits d'administrateur, prenez l'archive CPU officielle de
 llama.cpp, `llama-bNNNNN-bin-win-cpu-x64.zip`, publiée sur `github.com/ggml-org/llama.cpp`,
 décompressez-la dans votre profil (`%LOCALAPPDATA%\llama.cpp\<version>`, un dossier par
@@ -238,7 +238,7 @@ Invoke-WebRequest -UseBasicParsing @px $asset.browser_download_url -OutFile $zip
 if ($asset.digest) { if (("sha256:" + (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()) -ne $asset.digest) { throw "Empreinte SHA-256 différente de celle publiée par GitHub : archive refusée." } else { "Empreinte SHA-256 vérifiée." } }
 Expand-Archive $zip -DestinationPath $dest -Force; Get-ChildItem $dest -Recurse | Unblock-File
 $llama = "$dest\llama-server.exe"; & $llama --version
-& $llama -m "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096
+& $llama -m "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096
 ```
 
 La première ligne ne sert qu'à Windows PowerShell 5.1 ; `$asset.name` donne le nom de
@@ -290,14 +290,14 @@ Si ça bloque encore :
   Aucune autre source : ni winget, ni Chocolatey, ni installeur.
 - **Exécutable bloqué** (AppLocker, SmartScreen, ou « VCRUNTIME140.dll » ou « MSVCP140.dll »
   introuvable) : relevez le message exact et transmettez-le au support, sans contourner le
-  blocage. WaveStack reste utilisable avec son moteur intégré ou avec Ollama.
+  blocage. HarnessLab reste utilisable avec son moteur intégré ou avec Ollama.
 - Gardez `llama-server.exe` avec ses DLL : ne le copiez pas seul, et ne le décompressez pas dans
   `Program Files`.
 
 ### Ce que reçoit le serveur
 
 **Le harnais construit toujours le texte.** Le gabarit de conversation du modèle est appliqué
-par WaveStack, comme pour un fichier : le serveur reçoit le texte déjà rendu, jamais des
+par HarnessLab, comme pour un fichier : le serveur reçoit le texte déjà rendu, jamais des
 messages au format chat. L'échantillonnage est celui du modèle en processus (température 0,7,
 `top_p` 0,8, `top_k` 20, sans pénalité de répétition, graine aléatoire), envoyé à chaque appel.
 - **llama-server** reçoit les tokens du prompt (`/completion`) et tokenise lui-même
@@ -306,14 +306,14 @@ messages au format chat. L'échantillonnage est celui du modèle en processus (t
   emplacement du serveur : avec plusieurs emplacements (`-np`), llama-server partage `-c`
   entre eux, d'où une fenêtre « serveur » plus petite que `-c`. Lancez-le avec `-np 1`.
 - **Ollama** reçoit le texte en mode `raw` (`/api/generate`), avec `num_ctx` égal à la fenêtre
-  effective. WaveStack compte les tokens avec le tokenizer lu dans le fichier GGUF du modèle,
+  effective. HarnessLab compte les tokens avec le tokenizer lu dans le fichier GGUF du modèle,
   dans le dossier d'Ollama (`OLLAMA_MODELS`), par llama-cpp-python : un modèle sans GGUF
   lisible y est « incompatible », et un tokenizer que llama-cpp-python ne sait pas lire est
   refusé avec la raison, le modèle précédent restant actif. Qwen3.5 (`qwen3.5:2b`) passe avec un
   Ollama récent (test du 2026-09-27). Avec un Ollama trop ancien pour servir l'architecture
   `qwen35`, le modèle est accepté (seul son tokenizer est lu au choix), puis le premier tour
   échoue : l'erreur dit qu'Ollama ne connaît pas cette architecture et propose de mettre Ollama
-  à jour ou de servir ce modèle avec llama-server, et WaveStack revient aussitôt au modèle
+  à jour ou de servir ce modèle avec llama-server, et HarnessLab revient aussitôt au modèle
   précédent (enregistré comme choix). Aucune requête légère ne permet de le savoir plus tôt :
   seul un vrai chargement par Ollama révèle le refus. Si Ollama lit plus
   de tokens que le harnais n'en a comptés, ou renvoie un raisonnement séparé (`thinking`), une
@@ -321,24 +321,24 @@ messages au format chat. L'échantillonnage est celui du modèle en processus (t
   cache (début du prompt identique à l'appel précédent), noté pour information. Le tour
   continue dans les deux cas.
 
-**Mémoire.** En mode serveur, aucun modèle ne reste chargé dans WaveStack (seul le tokenizer
+**Mémoire.** En mode serveur, aucun modèle ne reste chargé dans HarnessLab (seul le tokenizer
 d'un modèle Ollama y est ouvert, sans les poids). Le budget `[memory]` compte le modèle servi :
 - déjà en mémoire (le modèle de llama-server, un modèle qu'Ollama a déjà chargé) : compté pour
   ce qu'il occupe, jamais refusé, puisque le choisir n'ajoute rien. Pour llama-server, c'est la
   taille de son fichier plus son cache de contexte pour tout son contexte (`n_ctx`, lu dans
   `/props`), la taille d'un token du cache étant lue dans l'en-tête du fichier GGUF (sans les
-  poids, sans llama.cpp) ; si WaveStack ne peut pas lire ce fichier, le chiffre affiché le dit
+  poids, sans llama.cpp) ; si HarnessLab ne peut pas lire ce fichier, le chiffre affiché le dit
   et ne compte que la taille du fichier. Pour Ollama, la mémoire qu'il annonce (`/api/ps`) ;
 - pas encore chargé par Ollama : compté pour la taille de son fichier plus son cache de
   contexte (f16) à la fenêtre, lu dans l'en-tête du fichier (la ligne du diagnostic), plus la
   marge `load_margin_mb` au moment du choix (elle couvre aussi le tokenizer), et refusé,
   chiffres à l'appui, s'il dépasse le budget. Jamais la mémoire mesurée par la sonde de son
-  fichier : elle mesure llama-cpp-python dans un processus de WaveStack (tampons de calcul
+  fichier : elle mesure llama-cpp-python dans un processus de HarnessLab (tampons de calcul
   compris), pas Ollama. Par exemple `llama3.2:3b` (2,0 Go) : ≈ 2,3 Go au diagnostic, ≈ 2,6 Go
   avec la marge, sous un budget de 4 096 Mo. Un cache quantifié ou `OLLAMA_NUM_PARALLEL` > 1
   dans Ollama changent sa mémoire réelle (à vérifier sur PC).
 
-En quittant un modèle Ollama (changement de modèle ou fermeture de WaveStack), WaveStack demande
+En quittant un modèle Ollama (changement de modèle ou fermeture de HarnessLab), HarnessLab demande
 à Ollama de le décharger (`keep_alive: 0`), seulement s'il l'a fait charger : un modèle
 qu'Ollama avait déjà en mémoire (utilisé par un autre programme) n'est jamais déchargé. Le
 schéma d'architecture dessine le modèle servi hors du cadre Harnais, sur le poste de travail :
@@ -349,7 +349,7 @@ c'est un processus distinct.
 Un modèle cloud compatible OpenAI peut remplacer le SLM local : plus rapide, meilleur avec les
 outils, et il montre un vrai appel hors du poste. Les préréglages Groq (`openai/gpt-oss-120b`),
 Mistral (`mistral-small-latest`), Gemini (`gemini-3.5-flash-lite`) et Gemma
-(`gemma-4-26b-a4b-it`, tous deux sur Google AI Studio) sont déclarés dans `wavestack.toml` ;
+(`gemma-4-26b-a4b-it`, tous deux sur Google AI Studio) sont déclarés dans `harness-lab.toml` ;
 NVIDIA et OpenRouter y figurent en exemples commentés, avec leur avertissement.
 
 ### Clé, test et choix
@@ -359,7 +359,7 @@ NVIDIA et OpenRouter y figurent en exemples commentés, avec leur avertissement.
    seulement (`api_keys.json` dans le dossier de données), jamais affichée ni tracée, et envoyée au
    seul hôte déclaré. Si l'adresse du fournisseur change, la clé est à ressaisir. Une clé
    enregistrée ou changée ici s'applique tout de suite, y compris au modèle cloud déjà actif dans
-   le harnais : inutile de relancer WaveStack (une variable d'environnement, elle, demande une
+   le harnais : inutile de relancer HarnessLab (une variable d'environnement, elle, demande une
    relance, voir ci-dessous).
 
    **Mistral : un plan d'abord.** Avant le premier appel, activez un plan dans la console
@@ -376,7 +376,7 @@ NVIDIA et OpenRouter y figurent en exemples commentés, avec leur avertissement.
    ```
 
    `setx` n'agit que sur les **nouveaux** terminaux : fermez celui-ci, ouvrez-en un autre, puis
-   `uv run wavestack`. La ligne du modèle indique alors « Clé fournie par la variable
+   `uv run harness-lab`. La ligne du modèle indique alors « Clé fournie par la variable
    GROQ_API_KEY » (le nom seul, jamais la valeur). Une clé saisie sur la page Modèles passe avant la
    variable ; une variable vide compte comme absente.
 
@@ -411,9 +411,9 @@ console (relevé le 2026-09-29 : 0,30 $ / 2,50 $ par million de tokens pour
 brique : allumé, `thinking_level` « high » et le texte de la réflexion (entre `<thought>` et
 `</thought>`) ; éteint, `reasoning_effort` « minimal ». Gemini 3.x signe une réponse qui appelle
 des outils (sur le premier appel seulement quand il y en a plusieurs en parallèle) et refuse un
-appel rejoué sans cette signature : WaveStack la lui renvoie telle quelle, et à lui seul. Si la forme réelle diffère (balises, `minimal` ou `extra_body` refusés), corrigez
+appel rejoué sans cette signature : HarnessLab la lui renvoie telle quelle, et à lui seul. Si la forme réelle diffère (balises, `minimal` ou `extra_body` refusés), corrigez
 l'entrée `gemini` dans `settings.json`, sans toucher au code : les secours sont décrits en
-commentaire dans `wavestack.toml`. `null` n'y retire qu'une clé de premier niveau de
+commentaire dans `harness-lab.toml`. `null` n'y retire qu'une clé de premier niveau de
 `reasoning.on` ou `reasoning.off` (par exemple `"extra_body": null`) : un `null` plus profond
 est envoyé tel quel, et `tags` à `null` rend l'entrée invalide.
 
@@ -428,7 +428,7 @@ tarifaire dit que l'offre gratuite sert à améliorer les produits Google, mais 
 de l'EEE ont les règles de l'offre payante, quota gratuit compris, d'où `training = "no"` avec la
 nuance dans la note. Relevé sur l'API réelle le 2026-09-30 : 262 144 tokens en entrée, 32 768 en
 sortie ; le modèle réfléchit et montre sa pensée par défaut (entre `<thought>` et `</thought>`).
-Brique Raisonnement allumée, WaveStack envoie `include_thoughts` seul (explicite, et distinct du
+Brique Raisonnement allumée, HarnessLab envoie `include_thoughts` seul (explicite, et distinct du
 corps éteint) ; éteinte, `reasoning_effort` « minimal » supprime la réflexion ; `thinking_level`
 et `thinking_budget` sont refusés. Les appels d'outils portent la même signature de pensée que
 Gemini, rejouée de la même façon. Un 429 vient du quota gratuit, non publié : s'il survient
@@ -450,7 +450,7 @@ permission expresse et sont supprimées sous 30 jours ; inférence « global » 
 Haiku raisonne avec un budget de 1 024 tokens, Sonnet en mode adaptatif (il décide s'il
 raisonne), raisonnement résumé ; le résumé s'affiche au canal Raisonnement. Les blocs de
 raisonnement reçus repartent tels quels, signature comprise, au seul modèle qui les a produits.
-WaveStack réécrivant l'historique par conception (fenêtre, troncature, compression, mémoire,
+HarnessLab réécrivant l'historique par conception (fenêtre, troncature, compression, mémoire,
 briques changées), chaque requête demande à Anthropic de jeter un raisonnement devenu invalide
 plutôt que de refuser l'appel ; quand il le fait, le journal le dit (« Raisonnement jeté », avec
 la cause). Seuls les modèles qui font ce contrôle d'historique (Opus 5.5, Fable 5.1) peuvent
@@ -458,7 +458,7 @@ produire cette ligne : avec les préréglages actifs, Haiku 4.5 et Sonnet 5, ell
 La température (Atelier LLM, Haiku seulement) ne part que raisonnement éteint : Anthropic la
 refuse avec le raisonnement. Pas de top-p : Haiku 4.5 refuse la température et le top-p
 ensemble. Le cache de prompt d'Anthropic
-n'est jamais activé. Opus 5.5 figure en commentaire dans `wavestack.toml` (son raisonnement ne
+n'est jamais activé. Opus 5.5 figure en commentaire dans `harness-lab.toml` (son raisonnement ne
 s'éteint pas). Un compte sans crédit est refusé avec « le crédit du compte est épuisé » :
 ajoutez du crédit dans la console Anthropic (forme de l'erreur lue dans la documentation
 d'Anthropic, non mesurée).
@@ -466,7 +466,7 @@ d'Anthropic, non mesurée).
 **GPT-6 Luna (OpenAI, API Responses).** `openai_luna` (`gpt-6-luna`, 1 050 000 tokens,
 0,10 $ / 0,50 $ par million de tokens, cache lu 0,01 $) passe par l'API Responses d'OpenAI
 (`api = "openai_responses"`) : par Chat Completions, GPT-6 n'appelle d'outils que raisonnement
-éteint et ne renvoie jamais son raisonnement. WaveStack l'utilise sans état (`store: false`,
+éteint et ne renvoie jamais son raisonnement. HarnessLab l'utilise sans état (`store: false`,
 jamais `previous_response_id`) : tout l'historique part à chaque appel, comme pour les autres
 fournisseurs. Clé : `OPENAI_API_KEY` ou saisie sur la page Modèles (en-tête `Authorization: Bearer`).
 Conditions relevées le 2026-10-03 : les données de l'API ne servent pas à l'entraînement par
@@ -481,7 +481,7 @@ d'envoyer les résumés de raisonnement : sans elle, le canal Raisonnement reste
 et top-p (Atelier LLM) ne partent que raisonnement éteint : OpenAI les refuse avec le
 raisonnement. Un compte sans crédit est refusé avec « le crédit du compte est épuisé » :
 ajoutez du crédit dans la console OpenAI.
-GPT-6.1 Sol figure en commentaire dans `wavestack.toml` (il raisonne toujours).
+GPT-6.1 Sol figure en commentaire dans `harness-lab.toml` (il raisonne toujours).
 
 ### Revenir au modèle local
 
@@ -496,8 +496,8 @@ Sur le réseau de l'entreprise : `api.groq.com`, `api.mistral.ai`,
 
 ### Ajouter ou modifier un modèle
 
-Les exemples NVIDIA et OpenRouter de `wavestack.toml` sont en TOML :
-recopiez-en les champs, en JSON, dans `settings.json` (dossier de données, WaveStack arrêté). Une
+Les exemples NVIDIA et OpenRouter de `harness-lab.toml` sont en TOML :
+recopiez-en les champs, en JSON, dans `settings.json` (dossier de données, HarnessLab arrêté). Une
 entrée nouvelle doit être complète :
 
 ```json
@@ -526,7 +526,7 @@ avant la version multilingue reste lu : les anciennes clés `hosting_fr`, `notes
 (de `impacts`) et `label_fr` (de `[rag.embedding]`, `[rag.reranker]` ou `[rag_lab.fastembed]`)
 valent `hosting_text`, `notes_text`, `note_text` et `label_text`.
 
-`hosting_text` et `notes_text` sont saisis par l'opérateur, dans `wavestack.toml` ou
+`hosting_text` et `notes_text` sont saisis par l'opérateur, dans `harness-lab.toml` ou
 `settings.json`, et affichés tels quels dans l'avertissement et le bandeau du modèle cloud,
 dans toutes les langues de l'interface, y compris après un changement de langue en cours de
 séance : ils n'ont pas de traduction. Ceux des préréglages sont

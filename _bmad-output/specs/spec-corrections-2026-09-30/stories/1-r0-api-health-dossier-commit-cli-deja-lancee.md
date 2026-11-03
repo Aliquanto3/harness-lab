@@ -17,7 +17,7 @@ deferred: []
 
 ## Intent
 
-**Problem:** Le 2026-09-30, un serveur lancé depuis un autre working tree occupait le port 8420 ; `wavestack` a ouvert le navigateur dessus sans rien dire, et quatre « bugs » n'étaient que ce décalage. Rien ne dit quel dossier ni quel commit sert la page (CAP-1 de `SPEC.md`).
+**Problem:** Le 2026-09-30, un serveur lancé depuis un autre working tree occupait le port 8420 ; `harness-lab` a ouvert le navigateur dessus sans rien dire, et quatre « bugs » n'étaient que ce décalage. Rien ne dit quel dossier ni quel commit sert la page (CAP-1 de `SPEC.md`).
 
 **Approach:** `GET /api/health` rend en plus le dossier du projet et le commit courant (ou `null`). Quand le CLI réutilise une instance saine, il imprime une ligne « déjà lancée depuis {dossier} ({commit}) » par `msg()`, et une seconde ligne d'avertissement si ce dossier n'est pas le sien.
 
@@ -50,10 +50,10 @@ deferred: []
 
 ## Code Map
 
-- `src/wavestack/web/app.py:288` -- route `health()` dans `create_app` ; y ajouter `root` et `commit` calculés une fois à la création de l'app.
-- `src/wavestack/config.py:50` -- `repo_root()` : racine du dépôt (où vit `wavestack.toml`).
-- `src/wavestack/cli.py:103` -- `_existing_instance_healthy(port) -> bool` : à faire rendre le corps (`dict | None`) ; `main()` (ligne ~150) l'utilise dans la branche `reserved is None` ; `TERMINAL_LANGUAGE = "en"`, `msg` déjà importé.
-- `src/wavestack/session/diagnostic.py:83` -- exemple d'appel `subprocess` avec délai dans le projet.
+- `src/harness_lab/web/app.py:288` -- route `health()` dans `create_app` ; y ajouter `root` et `commit` calculés une fois à la création de l'app.
+- `src/harness_lab/config.py:50` -- `repo_root()` : racine du dépôt (où vit `harness-lab.toml`).
+- `src/harness_lab/cli.py:103` -- `_existing_instance_healthy(port) -> bool` : à faire rendre le corps (`dict | None`) ; `main()` (ligne ~150) l'utilise dans la branche `reserved is None` ; `TERMINAL_LANGUAGE = "en"`, `msg` déjà importé.
+- `src/harness_lab/session/diagnostic.py:83` -- exemple d'appel `subprocess` avec délai dans le projet.
 - `content/messages.yaml:1073` -- section `cli` (`description`, `port_help`, `port_taken`) ; `content/i18n/en/messages.yaml:155` et `content/i18n/de/messages.yaml` -- surcouches.
 - `tests/test_cli_launch.py` -- tests de `main` avec `monkeypatch` de `_try_reserve_port`, `_existing_instance_healthy`, `_existing_instance_ready` ; `_Answer` pour simuler `urlopen`.
 - `tests/test_cli_diagnostic.py:53` -- `test_health_endpoint`.
@@ -62,15 +62,15 @@ deferred: []
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/web/app.py` -- fonction `_git_commit(root)` (subprocess, délai 2 s, toute erreur → `None`) et `health()` enrichi -- CAP-1.
-- `src/wavestack/cli.py` -- `_existing_instance_health(port) -> dict | None` (remplace `_existing_instance_healthy`, corps JSON ou `{}` si 200 illisible, `None` si injoignable) ; impression des lignes avant l'ouverture du navigateur -- CAP-1.
+- `src/harness_lab/web/app.py` -- fonction `_git_commit(root)` (subprocess, délai 2 s, toute erreur → `None`) et `health()` enrichi -- CAP-1.
+- `src/harness_lab/cli.py` -- `_existing_instance_health(port) -> dict | None` (remplace `_existing_instance_healthy`, corps JSON ou `{}` si 200 illisible, `None` si injoignable) ; impression des lignes avant l'ouverture du navigateur -- CAP-1.
 - `content/messages.yaml`, `content/i18n/en/messages.yaml`, `content/i18n/de/messages.yaml` -- clés `cli.already_running`, `cli.already_running_no_commit`, `cli.already_running_unknown`, `cli.other_tree` -- trois langues.
 - `tests/test_cli_launch.py` -- les tests existants suivent le renommage ; un test par ligne de la matrice (sortie capturée par `capsys`).
 - `tests/test_cli_diagnostic.py` -- `test_health_endpoint` vérifie `root` et `commit` (chaîne ou `None`) ; test où `_git_commit` échoue (`FileNotFoundError`, `TimeoutExpired`) → `None`.
 
 **Acceptance Criteria:**
-- Given WaveStack lancé depuis ce dépôt, when `GET /api/health`, then la réponse contient `root` égal au dossier du dépôt et `commit` égal à `git rev-parse --short HEAD`.
-- Given une instance saine sur le port, when `uv run wavestack` depuis un autre dossier, then le terminal dit d'où elle a été lancée et qu'elle vient d'un autre dossier, et le navigateur s'ouvre comme avant.
+- Given HarnessLab lancé depuis ce dépôt, when `GET /api/health`, then la réponse contient `root` égal au dossier du dépôt et `commit` égal à `git rev-parse --short HEAD`.
+- Given une instance saine sur le port, when `uv run harness-lab` depuis un autre dossier, then le terminal dit d'où elle a été lancée et qu'elle vient d'un autre dossier, et le navigateur s'ouvre comme avant.
 
 ## Verification
 
@@ -110,7 +110,7 @@ deferred: []
 ## Auto Run Result
 
 - Changement : `/api/health` rend `root` et `commit` (lu une fois par `git rev-parse --short HEAD`, 2 s, `None` sans `.git` ni git) ; le CLI qui réutilise une instance imprime d'où elle a été lancée (`cli.already_running`, `…_no_commit`, `…_unknown`) et avertit si elle vient d'un autre dossier (`cli.other_tree`).
-- Fichiers : `src/wavestack/web/app.py` (`_git_commit`, route), `src/wavestack/cli.py` (`_existing_instance_health`, `_same_folder`, `_say_already_running`), `content/messages.yaml` et `content/i18n/{en,de}/messages.yaml` (4 clés), `tests/test_cli_launch.py`, `tests/test_cli_diagnostic.py`.
+- Fichiers : `src/harness_lab/web/app.py` (`_git_commit`, route), `src/harness_lab/cli.py` (`_existing_instance_health`, `_same_folder`, `_say_already_running`), `content/messages.yaml` et `content/i18n/{en,de}/messages.yaml` (4 clés), `tests/test_cli_launch.py`, `tests/test_cli_diagnostic.py`.
 - Revue : 7 correctifs appliqués (2 medium, 5 low, regroupés en 5 changements), 0 reporté, 13 rejetés (raisons ci-dessus).
 - Revue de suivi recommandée : non (deux medium corrigés relèvent d'une même cause, l'exception de transport, désormais testée).
 - Vérification : `ruff check`, `ruff format --check` OK ; 5 fichiers de tests : 3 288 passés avant correctifs, 3 290 passés après.

@@ -47,20 +47,20 @@ context:
 
 ## Code Map
 
-- `src/wavestack/web/static/app.js` -- `applyEnvelope` (l.108) : projection par tour déjà complète (`turn.steps` de types `call`, `tool`, `hook`, `tool_call_malformed`, `limit_reached`, `prefix_not_reused`, plus `turn.overflow`, `turn.status`) et `store.offTurn` (connexions MCP, `afterTurn`, `seq`, `outbound`). À réutiliser tel quel ; seuls des champs d'UI s'ajoutent au store.
+- `src/harness_lab/web/static/app.js` -- `applyEnvelope` (l.108) : projection par tour déjà complète (`turn.steps` de types `call`, `tool`, `hook`, `tool_call_malformed`, `limit_reached`, `prefix_not_reused`, plus `turn.overflow`, `turn.status`) et `store.offTurn` (connexions MCP, `afterTurn`, `seq`, `outbound`). À réutiliser tel quel ; seuls des champs d'UI s'ajoutent au store.
 - `app.js` `renderSteps` (l.1143) et cartes `modelCallCards` (l.869, qui découpe déjà un appel en description des outils, réinjection, appel, demande d'outil), `toolCard`, `connectCard`, `hookCard`, `approvalTrace`, `malformedCard`, `outboundPayload` : réutiliser comme corps d'étape. `approvalCard` et `renderChat` (Vue humain) ne changent pas.
 - `app.js` `renderJournal` (l.1257) : à remplacer. `boot` (l.1547) : `setInterval` de 250 ms qui appelle `renderSteps`. `CLEARED_FR` (l.385) : texte à aligner sur A5 (« journal des événements (replié, en bas d'Orchestration) »).
 - `turn_ended.payload` : `status` (`completed`, `cancelled`, `limit`, `overflow`, `error`, `blocked`) et `duration_ms` ; `turn_started.payload.message`. Hooks : `payload.hook` (`h1`, `h2`, `h3`, `h5`).
-- `src/wavestack/web/static/index.html` (l.100-115) : en-tête et corps du volet `orch`.
-- `src/wavestack/web/static/app.css` (l.467-640) : styles `.steps`, `.step`, `.journal` à remplacer ; garder `.harness-event`, `.overflow-card`, `.outbound-payload`, `.trigger-badge-model`.
+- `src/harness_lab/web/static/index.html` (l.100-115) : en-tête et corps du volet `orch`.
+- `src/harness_lab/web/static/app.css` (l.467-640) : styles `.steps`, `.step`, `.journal` à remplacer ; garder `.harness-event`, `.overflow-card`, `.outbound-payload`, `.trigger-badge-model`.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/web/static/index.html` -- en-tête d'Orchestration : indicateur de travail et bouton « ● Suivre le direct » (masqué en direct) ; corps : zone défilante (préparation + rail) puis `event-log` en bas -- A9.
-- [x] `src/wavestack/web/static/app.js` -- réécrire `renderSteps` en `harness-prep` + `turn-rail` / `turn-group` / `turn-step` ; état d'UI (`live`, étapes et tours ouverts par l'utilisateur, étape sélectionnée) dans le store ; nœuds de ligne gardés d'un rendu à l'autre par clé stable -- A2, A3, A4, A10.
-- [x] `src/wavestack/web/static/app.js` -- réécrire `renderJournal` : en-tête repliable « Journal des événements (N) », lignes rendues seulement une fois déplié (heure, nom français par table `kind → libellé`, nom technique, résumé d'une ligne), JSON par ligne à la demande -- A3.
-- [x] `src/wavestack/web/static/app.css` -- styles selon DESIGN.md (filet vertical 2 px `{colors.line}`, tuile `{rounded.sm}`, point vert, sélection violet doux, journal sans couleur d'état, JSON sur crème) -- A8.
+- [x] `src/harness_lab/web/static/index.html` -- en-tête d'Orchestration : indicateur de travail et bouton « ● Suivre le direct » (masqué en direct) ; corps : zone défilante (préparation + rail) puis `event-log` en bas -- A9.
+- [x] `src/harness_lab/web/static/app.js` -- réécrire `renderSteps` en `harness-prep` + `turn-rail` / `turn-group` / `turn-step` ; état d'UI (`live`, étapes et tours ouverts par l'utilisateur, étape sélectionnée) dans le store ; nœuds de ligne gardés d'un rendu à l'autre par clé stable -- A2, A3, A4, A10.
+- [x] `src/harness_lab/web/static/app.js` -- réécrire `renderJournal` : en-tête repliable « Journal des événements (N) », lignes rendues seulement une fois déplié (heure, nom français par table `kind → libellé`, nom technique, résumé d'une ligne), JSON par ligne à la demande -- A3.
+- [x] `src/harness_lab/web/static/app.css` -- styles selon DESIGN.md (filet vertical 2 px `{colors.line}`, tuile `{rounded.sm}`, point vert, sélection violet doux, journal sans couleur d'état, JSON sur crème) -- A8.
 
 **Acceptance Criteria:**
 - Given le lancement, when Orchestration s'affiche, then aucun JSON ni texte brut n'est déplié et le journal ne s'ouvre jamais seul.
@@ -75,11 +75,11 @@ Icônes (doublées du titre) : appel au modèle 🤖, demande d'outil 🗨, exé
 ## Verification
 
 **Commands:**
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 - `uv run ruff check .` et `uv run pytest` -- expected: tout passe (aucun fichier Python touché)
 
 **Manual checks:**
-- `uv run wavestack` : lancement avec MCP actif (serveur local et public) ; tour avec outil réseau et H5 ; tour bloqué par H1 ; deux tours puis clic sur le premier ; « Suivre le direct » ; « Vider la conversation » ; rechargement en cours de tour ; volet étroit (troncature).
+- `uv run harness-lab` : lancement avec MCP actif (serveur local et public) ; tour avec outil réseau et H5 ; tour bloqué par H1 ; deux tours puis clic sur le premier ; « Suivre le direct » ; « Vider la conversation » ; rechargement en cours de tour ; volet étroit (troncature).
 
 ## Implementation Notes
 
@@ -88,8 +88,8 @@ Icônes (doublées du titre) : appel au modèle 🤖, demande d'outil 🗨, exé
 - La ligne est une grille : la colonne du titre (`minmax(2.5em, 1fr)`) prend ce qui reste, puis l'hôte (`minmax(0, auto)`) se réduit ; marqueur RÉSEAU, acteur et chiffre clé gardent leur largeur. Sous 460 px de rail (grille à 5 volets par défaut en 1280 px), tout ne tient pas sur une ligne : le chiffre clé passe sous le titre (container query) plutôt que d'être coupé.
 - L'étape courante (dernière ligne du dernier tour affiché) garde son point vert tant que le tour tourne ; en direct, elle reste dépliée après la fin, pour que la réponse ne se replie pas sous les yeux.
 - Icônes ajoutées hors Design Notes : description des outils 🧰, chargement de documentation 📖, chargement de skill 📘, borne non bloquante ⏹, préfixe non réutilisé ℹ.
-- Vérifié par `node --check`, `ruff`, `pytest` (266 passés) et dans Chrome contre un rejeu SSE scripté (MCP local, public et indisponible ; tour calculatrice ; outil réseau avec H5 ; blocage H1, appel mal formé et borne `retries` ; connexion entre deux tours ; dépassement ; rechargement en cours de tour ; clic et Entrée sous le rafraîchissement de 250 ms ; vidage ; fusion du journal). Pas lancé contre `uv run wavestack` avec un vrai modèle.
-- Audit de la matrice : le projet n'a pas de harnais de test JavaScript et la spec interdit toute nouvelle dépendance ; les six lignes de la matrice sont couvertes par le rejeu SSE scripté dans Chrome ci-dessus, pas par un test automatisé du dépôt. Reste à faire : le test manuel sous `uv run wavestack` (Verification).
+- Vérifié par `node --check`, `ruff`, `pytest` (266 passés) et dans Chrome contre un rejeu SSE scripté (MCP local, public et indisponible ; tour calculatrice ; outil réseau avec H5 ; blocage H1, appel mal formé et borne `retries` ; connexion entre deux tours ; dépassement ; rechargement en cours de tour ; clic et Entrée sous le rafraîchissement de 250 ms ; vidage ; fusion du journal). Pas lancé contre `uv run harness-lab` avec un vrai modèle.
+- Audit de la matrice : le projet n'a pas de harnais de test JavaScript et la spec interdit toute nouvelle dépendance ; les six lignes de la matrice sont couvertes par le rejeu SSE scripté dans Chrome ci-dessus, pas par un test automatisé du dépôt. Reste à faire : le test manuel sous `uv run harness-lab` (Verification).
 
 ## Spec Change Log
 

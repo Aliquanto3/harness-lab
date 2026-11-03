@@ -7,12 +7,12 @@ from fake_engine import FakeEngine, booted_session
 from test_bricks import HEADERS, _client
 from test_tools import QWEN, call
 
-from wavestack import config
-from wavestack.agent_eval import store
-from wavestack.messages import msg
-from wavestack.session.app_session import AppSession
-from wavestack.trace import journal as journal_module
-from wavestack.trace.journal import Journal, get_journal
+from harness_lab import config
+from harness_lab.agent_eval import store
+from harness_lab.messages import msg
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace import journal as journal_module
+from harness_lab.trace.journal import Journal, get_journal
 
 NOT_CALLED = {"kind": "tool_not_called", "tool": "get_datetime"}
 CALLED = {"kind": "tool_called", "tool": "get_datetime"}
@@ -327,7 +327,7 @@ def test_a_compaction_turn_is_a_409():
 
 # ---------- the texts of the form ----------
 
-STATIC = config.repo_root() / "src" / "wavestack" / "web" / "static"
+STATIC = config.repo_root() / "src" / "harness_lab" / "web" / "static"
 
 
 def _ui(lang: str) -> dict:

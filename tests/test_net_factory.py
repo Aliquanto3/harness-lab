@@ -17,14 +17,14 @@ import httpx
 import httpx2
 import pytest
 
-from wavestack.config import (
+from harness_lab.config import (
     DEFAULT_NET_CONTACT,
     PUBLIC_RESPONSE_HEADERS,
     PUBLIC_RESPONSE_PREFIXES,
     load_config,
 )
-from wavestack.net import guard
-from wavestack.net.factory import (
+from harness_lab.net import guard
+from harness_lab.net.factory import (
     MASKED,
     PUBLIC_HEADERS,
     _proxy_map,
@@ -32,9 +32,9 @@ from wavestack.net.factory import (
     create_async_client,
     create_client,
 )
-from wavestack.net.guard import NetworkBlocked
-from wavestack.trace.journal import get_journal
-from wavestack.trace.scope import TraceScope
+from harness_lab.net.guard import NetworkBlocked
+from harness_lab.trace.journal import get_journal
+from harness_lab.trace.scope import TraceScope
 
 
 def test_loopback_requests_are_not_traced():
@@ -87,7 +87,7 @@ def test_trace_carries_the_exact_body_before_sending():
         "body": '{"q": "Paris"}',
     }
     assert sent[0].content == b'{"q": "Paris"}'
-    assert sent[0].headers["user-agent"].startswith("WaveStack/")
+    assert sent[0].headers["user-agent"].startswith("HarnessLab/")
 
 
 def test_every_redirect_hop_is_checked_again():
@@ -112,7 +112,7 @@ _CONTACT = re.compile(r"https://\S+|[\w.+-]+@[\w-]+\.[\w.-]+")
 
 
 def _assert_user_agent_has_a_contact(user_agent: str) -> None:
-    assert user_agent.startswith("WaveStack/")
+    assert user_agent.startswith("HarnessLab/")
     assert user_agent.isascii()
     assert _CONTACT.search(user_agent), user_agent
 
@@ -125,7 +125,7 @@ def _sent_user_agent() -> str:
 
 
 def _set_contact(value: object) -> None:
-    path = Path(os.environ["WAVESTACK_DATA_DIR"]) / "settings.json"
+    path = Path(os.environ["HARNESS_LAB_DATA_DIR"]) / "settings.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps({"net": {"contact": value}}), encoding="utf-8")
 
@@ -219,7 +219,7 @@ def test_get_traces_its_headers_in_the_order_sent_with_the_contact():
     assert headers["Host"] == ("calendrier.api.gouv.fr", False)
     assert headers["Accept"] == ("*/*", False)
     user_agent, masked = headers["User-Agent"]
-    assert not masked and user_agent.startswith("WaveStack/0.1 (demonstrateur pedagogique; ")
+    assert not masked and user_agent.startswith("HarnessLab/0.1 (demonstrateur pedagogique; ")
     assert DEFAULT_NET_CONTACT in user_agent
     assert not any(masked for _, _, masked in _headers_of(event))
 
@@ -392,7 +392,7 @@ def test_an_error_response_from_the_loopback_is_not_traced():
 
 def test_both_hooks_ask_the_same_predicate(monkeypatch):
     """`_traced` decides for the request and its error response alike (the E2E graft)."""
-    from wavestack.net import factory
+    from harness_lab.net import factory
 
     monkeypatch.setattr(factory, "_traced", lambda request: True)
     before = get_journal().last_seq()

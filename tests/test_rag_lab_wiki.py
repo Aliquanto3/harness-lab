@@ -21,11 +21,11 @@ from test_rag_lab import ended, run, stage, wait_idle
 from test_rag_lab_agentic import Stopping
 from test_rag_lab_no_index import cloud, lab, preset, presets, summary, update
 
-from wavestack import config
-from wavestack.rag import lab as rag_lab
-from wavestack.rag import wiki, workcopy
-from wavestack.session.app_session import SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag import wiki, workcopy
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace.journal import get_journal
 
 QUESTION = "Combien de jours de télétravail par semaine ?"
 
@@ -88,7 +88,7 @@ def test_the_preset_joins_the_structure_family_with_an_empty_segment(index):
 
 
 def render_text(message) -> str:  # noqa: ANN001
-    from wavestack.messages import render
+    from harness_lab.messages import render
 
     return render(message, "fr")
 

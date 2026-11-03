@@ -8,7 +8,7 @@ from collections.abc import Callable, Sequence
 
 from fake_embedder import _STOP, _WORD
 
-from wavestack.models.reranker import RerankCancelled, RerankScore
+from harness_lab.models.reranker import RerankCancelled, RerankScore
 
 MODEL_ID = "fake-reranker"
 

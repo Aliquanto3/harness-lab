@@ -1,6 +1,6 @@
 # Register der Unterauftragnehmer von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Register beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Register beschreibt kein reales Unternehmen. -->
 
 Dieses von der Dienstleister-Einheit geführte und im Klauselmuster genannte Register listet jeden Unterauftragnehmer, den ein Dienstleister von Exemplia einsetzt: seinen Namen, seine Funktion, das Land, in dem er Daten hostet oder verarbeitet, und die Stufe des beauftragenden Dienstleisters.
 

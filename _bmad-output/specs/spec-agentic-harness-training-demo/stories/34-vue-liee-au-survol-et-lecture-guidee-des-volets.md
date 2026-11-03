@@ -91,7 +91,7 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/web/static/app.js`, par symbole :
+- `src/harness_lab/web/static/app.js`, par symbole :
   - État et sélection : `store` (`selection`), `select`, `paneOfComponent`, `render`, `renderChips` (puce « lié »), `renderPaneVisibility` (`.pane.is-selected`). Les écritures directes de `store.selection` dans `ragBody`, `rerankBody` et `compressionBody` passent désormais par `setSelection`.
   - Clavier : l'écouteur `keydown` sur Escape dans `boot` (ordre : dialogues, tiroirs, menu, focus). La boucle de 250 ms dans `boot` rafraîchit `renderChat` et `renderSteps` sans passer par `render`.
   - Cartes : `renderBricks`. `label.brick-head` contient l'interrupteur et `.brick-name` : un clic sur le nom bascule la brique. On y trouve aussi `disciplineLegend` (story 33).
@@ -100,21 +100,21 @@ deferred:
   - Orchestration : `turnRows`, `stepRows` (lignes `:catalog`, `:reinject`, `:call`, `:ask`, outil, hook, rag…), `rowDiscipline` et `brickCategory` (story 33), `delegateRow`, `connectRow`, `stepNode` (`.turn-step-tile`, `.turn-step-title` = `.turn-step-name` + `.turn-step-note`, `.turn-step-actor`, `net-mark`, `net-host`, `.turn-step-figure`), `ACTORS`, `toggleStep` (`o.selected`), `renderSteps`, `turnNumber`, `turnName`, `allSteps`, `hostOf`.
   - Schéma : `schemaButton` (`data-component`, `select`), `renderSchema` (clé de reconstruction, remplacement des robots), `buildSchema` (cadre `core.harness`, `.arch-cloud-model`, `.arch-server-model`), `robot`, `schemaNode` (pastille « non contacté » tirée de `node.contact`), `hookStrip`.
   - Données sortantes (story 23) : `case "outbound_request"` (entrées `step.outbound`, avec `component` depuis la 23).
-- `src/wavestack/web/static/index.html` -- en-têtes `.pane-heading` (titres et sous-titres actuels), `#gauge-bar` (`role="img"`), `.top-bar` (où placer le bouton), `.pane-body-schema` (où placer le bilan).
-- `src/wavestack/web/static/app.css` -- `.pane-chip.is-linked`, `.pane.is-selected`, `.turn-step-line` (grille `tile title trigger actor mark host figure chevron`, enfants en `pointer-events: none`), `.turn-step-tile`, `.arch .is-selected`, les deux blocs `prefers-reduced-motion`, et les `font-size` en px bruts (`9px`, `10px`, `11px`, `13px`, `14px`) hors jetons.
-- `src/wavestack/web/static/tokens.css` -- rampe `--typography-*-font-size` (corps 14 px) et `--spacing-top-bar-height`. `tests/test_web_tokens.py` exige que ce fichier soit le miroir exact du frontmatter de DESIGN.md : aucun second bloc ici.
-- `src/wavestack/trace/catalog.py` -- `ArchitectureNode` (ajouter `sends_fr`). `ActiveModel` (`hosting`, `provider`, `kind`), lu dans `turn.model`.
-- `src/wavestack/tools/registry.py` -- `ToolText` ; `src/wavestack/mcp/servers.py` -- `ServerText`.
+- `src/harness_lab/web/static/index.html` -- en-têtes `.pane-heading` (titres et sous-titres actuels), `#gauge-bar` (`role="img"`), `.top-bar` (où placer le bouton), `.pane-body-schema` (où placer le bilan).
+- `src/harness_lab/web/static/app.css` -- `.pane-chip.is-linked`, `.pane.is-selected`, `.turn-step-line` (grille `tile title trigger actor mark host figure chevron`, enfants en `pointer-events: none`), `.turn-step-tile`, `.arch .is-selected`, les deux blocs `prefers-reduced-motion`, et les `font-size` en px bruts (`9px`, `10px`, `11px`, `13px`, `14px`) hors jetons.
+- `src/harness_lab/web/static/tokens.css` -- rampe `--typography-*-font-size` (corps 14 px) et `--spacing-top-bar-height`. `tests/test_web_tokens.py` exige que ce fichier soit le miroir exact du frontmatter de DESIGN.md : aucun second bloc ici.
+- `src/harness_lab/trace/catalog.py` -- `ArchitectureNode` (ajouter `sends_fr`). `ActiveModel` (`hosting`, `provider`, `kind`), lu dans `turn.model`.
+- `src/harness_lab/tools/registry.py` -- `ToolText` ; `src/harness_lab/mcp/servers.py` -- `ServerText`.
 - `content/tools.yaml` (`public_holidays`, `wikipedia_summary`, `fetch_page`) et `content/mcp.yaml` (`datagouv`, `mslearn`).
-- `src/wavestack/session/app_session.py` -- `_emit_architecture` (branche `is_tool and hosting == "network"`) et `_mcp_node`.
-- `src/wavestack/net/factory.py` -- `_check_and_trace` ne trace jamais la boucle locale. Le faux cloud des E2E (`127.0.0.1`) n'émet donc pas d'`outbound_request{origin: model}`.
+- `src/harness_lab/session/app_session.py` -- `_emit_architecture` (branche `is_tool and hosting == "network"`) et `_mcp_node`.
+- `src/harness_lab/net/factory.py` -- `_check_and_trace` ne trace jamais la boucle locale. Le faux cloud des E2E (`127.0.0.1`) n'émet donc pas d'`outbound_request{origin: model}`.
 - `tests/test_tools.py`, `tests/test_mcp.py` -- nœuds réseau de `architecture_changed`.
 - `tools/e2e/run_e2e.py` -- `Run` (`shot`, `shot_element`, `css`, `token_color`, `card`), `s_native_tools`, `s_network_tools`, `s_disciplines` (tuiles repérées par `.turn-step-name`, « Appel au modèle », « Description des outils », « Résumé Wikipédia »), `s_local_server`, `SCENARIOS`. Lignes d'actions repérées par titre : `s_subagent`, `_memory_step`, `_rag_step`, `_rerank_step`, `_compression_step`. `tools/e2e/stack.py` (faux cloud en boucle locale).
 
 ## Tasks & Acceptance
 
 **Execution:**
-1. `src/wavestack/trace/catalog.py`, `tools/registry.py`, `mcp/servers.py`, `content/tools.yaml`, `content/mcp.yaml`, `session/app_session.py` -- Ajouter `sends_fr: str | None = None` à `ToolText`, `ServerText` et `ArchitectureNode`. Textes :
+1. `src/harness_lab/trace/catalog.py`, `tools/registry.py`, `mcp/servers.py`, `content/tools.yaml`, `content/mcp.yaml`, `session/app_session.py` -- Ajouter `sends_fr: str | None = None` à `ToolText`, `ServerText` et `ArchitectureNode`. Textes :
    - `public_holidays` : « l'année demandée » ;
    - `wikipedia_summary` : « le titre de l'article » ;
    - `fetch_page` : « l'adresse de la page » ;
@@ -155,7 +155,7 @@ deferred:
 8. `index.html`, `app.js`, `app.css` (bilan) -- Ajouter `p#schema-outbound.schema-outbound` après `#schema`. `renderOutboundSummary()`, appelée par `render`, porte sur le dernier tour de `shownTurns()` (voir la note).
    - `schemaNode` remplace la pastille des nœuds réseau par « contacté » ou « non contacté », pour ce tour, avec l'infobulle « Au tour N : contacté. ». Sans tour affiché, il retombe sur `node.contact`. « indisponible » l'emporte toujours.
    Raison : le point (4).
-9. `index.html`, `app.js`, `app.css` (projection) -- Ajouter `button#projection-toggle` (« Mode projection », `aria-pressed`) avant « Réinitialiser ». Il bascule `document.documentElement.classList` `projection`, mémorisé sous `wavestack.projection` (lecture et écriture dans un try/catch).
+9. `index.html`, `app.js`, `app.css` (projection) -- Ajouter `button#projection-toggle` (« Mode projection », `aria-pressed`) avant « Réinitialiser ». Il bascule `document.documentElement.classList` `projection`, mémorisé sous `harness_lab.projection` (lecture et écriture dans un try/catch).
    - Dans `app.css`, `:root.projection` redéfinit les `--typography-*-font-size` par 9/7, arrondis : 19→24, 13→17, 18→23, 16→21, 14→18, 12→15, 20→26. Il agrandit aussi `--spacing-top-bar-height` pour que la barre tienne sur une ligne.
    - Les tailles en px bruts passent en `em` ou en jeton.
    - `scheduleWires()` est appelé après la bascule.
@@ -282,7 +282,7 @@ Exemple : « Au tour 2, les données ont quitté le poste 3 fois : vers le modè
 ## À vérifier sur PC
 
 - **Vue liée pendant la génération**
-  - **Geste** : dans Edge puis Chrome, lancer `uv run wavestack` (PowerShell) avec Qwen3.5-4B (GGUF), choisir le scénario « Outils natifs », envoyer « Combien font 12*37 ? », et pendant la génération survoler la carte Outils, puis le nœud Calculatrice.
+  - **Geste** : dans Edge puis Chrome, lancer `uv run harness-lab` (PowerShell) avec Qwen3.5-4B (GGUF), choisir le scénario « Outils natifs », envoyer « Combien font 12*37 ? », et pendant la génération survoler la carte Outils, puis le nœud Calculatrice.
   - **Attendu** : éclairage immédiat, sans clignotement, pendant que le texte arrive.
   - **Critère** : l'éclairage suit le pointeur en moins de 100 ms, et le CPU ne dépasse pas celui d'un tour sans survol de plus de 5 points (Gestionnaire des tâches).
   - **Moyen** : Claude in Chrome, et à la main pour le CPU.
@@ -302,7 +302,7 @@ Exemple : « Au tour 2, les données ont quitté le poste 3 fois : vers le modè
   - **Critère** : Anaël lit les sous-titres et la frise à 3 m ; aucun texte coupé dans la barre haute.
   - **Moyen** : à la main (œil humain).
 - **Mouvement réduit Windows**
-  - **Geste** : Paramètres, Accessibilité, Effets visuels, désactiver « Effets d'animation », recharger WaveStack, survoler une carte.
+  - **Geste** : Paramètres, Accessibilité, Effets visuels, désactiver « Effets d'animation », recharger HarnessLab, survoler une carte.
   - **Attendu** : l'estompage est instantané, sans fondu.
   - **Critère** : aucune transition visible, et l'éclairage reste identique.
   - **Moyen** : à la main.

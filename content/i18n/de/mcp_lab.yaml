@@ -14,10 +14,10 @@ servers_help_text: >-
   Die drei Server des MCP-Bausteins. Das Glossar ist ein Python-Prozess, den der Host auf diesem
   Arbeitsplatz startet und über Standardein- und -ausgabe (die Textkanäle, über die ein Programm
   liest und schreibt) anspricht; die beiden anderen sind öffentliche Dienste, über HTTP (das
-  Standardprotokoll des Webs) erreicht, hinter dem Netzwerkschutz von WaveStack (dem Filter, der
+  Standardprotokoll des Webs) erreicht, hinter dem Netzwerkschutz von HarnessLab (dem Filter, der
   jede Adresse außerhalb der erlaubten Liste sperrt).
 handshake_help_text: >-
-  Wie im Restaurant: „Guten Tag, ich bin die Bedienung von WaveStack“ (initialize); „Guten Tag,
+  Wie im Restaurant: „Guten Tag, ich bin die Bedienung von HarnessLab“ (initialize); „Guten Tag,
   das servieren wir: Gerichte à la carte, was wir auf den Tisch stellen, Menüs“ (Fähigkeiten:
   Tools, Ressourcen, Prompts); „Verstanden“ (notifications/initialized); „Die Karte, bitte“
   (tools/list, resources/list, prompts/list). Erst dann wird bestellt.
@@ -93,9 +93,9 @@ columns:
     name_cloud_text: "Cloud-LLM"
     explain_cloud_text: "Ein LLM (großes Sprachmodell), das bei einem Cloud-Anbieter läuft. Auch dieses Modell spricht nie mit dem MCP-Server: Es liest die Tools in seinem Kontext und bittet den Host um einen Aufruf, der über den Client läuft."
   host:
-    name_text: "WaveStack-Host"
+    name_text: "HarnessLab-Host"
     sub_text: "der Harness"
-    explain_text: "Die Anwendung, die das Modell und die MCP-Clients beherbergt: hier der WaveStack-Harness. Er entscheidet, welche Tools das Modell sieht, und führt seine Anfragen aus."
+    explain_text: "Die Anwendung, die das Modell und die MCP-Clients beherbergt: hier der HarnessLab-Harness. Er entscheidet, welche Tools das Modell sieht, und führt seine Anfragen aus."
   client:
     name_text: "MCP-Client"
     sub_text: "einer pro Server"
@@ -114,7 +114,7 @@ phases:
     why_label_text: "Warum ein Handshake?"
     why_text: >-
       Der Handshake ist der Eröffnungsaustausch, in dem sich Client und Server vorstellen. Wie
-      im Restaurant: „Guten Tag, ich bin die Bedienung von WaveStack“ (initialize); „Guten
+      im Restaurant: „Guten Tag, ich bin die Bedienung von HarnessLab“ (initialize); „Guten
       Tag, das servieren wir: Gerichte à la carte, was wir auf den Tisch stellen, Menüs“
       (Fähigkeiten: Tools, Ressourcen, Prompts); „Verstanden“ (notifications/initialized); „Die
       Karte, bitte“ (tools/list, resources/list, prompts/list). Erst dann wird bestellt.

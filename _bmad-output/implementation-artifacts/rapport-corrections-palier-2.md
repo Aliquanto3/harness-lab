@@ -43,7 +43,7 @@ Point de départ : 771 réussis, 4 sautés.
 - Quiz du sous-agent : premier token sous 15 s.
 - `prefix_not_reused` ne doit apparaître qu'avec une cause attendue.
 - Taille de la copie d'état (`subagent_ended.state_saved_bytes`).
-- Restauration de l'état récurrent de Qwen3.5 : lancer les tests `model` avec `WAVESTACK_TEST_GGUF`.
+- Restauration de l'état récurrent de Qwen3.5 : lancer les tests `model` avec `HARNESS_LAB_TEST_GGUF`.
 - Deux tours avec le raisonnement.
 
 **Décisions par défaut.**
@@ -56,7 +56,7 @@ Point de départ : 771 réussis, 4 sautés.
 - B1 (N3) : les résultats des outils réseau et MCP (locaux compris) sont bornés à `[tools] result_max_tokens = 1200`, avant la compression. Cela vaut dans le tour, dans le sous-agent et pour les actions forcées.
 - La coupe est visible par le modèle (mention) et dans Orchestration (« Résultat tronqué par le harnais : N tokens sur M »). En mode chat, la borne tient compte du ratio réel du fournisseur.
 - B2 : la cause d'un débordement est tirée de tous les segments, et ne cite plus à tort les descriptions d'outils.
-- B3 : le test `fits` compte à 2 caractères par token, ou avec le vrai tokenizer via `WAVESTACK_TEST_GGUF`, et réserve la place du premier résultat borné.
+- B3 : le test `fits` compte à 2 caractères par token, ou avec le vrai tokenizer via `HARNESS_LAB_TEST_GGUF`, et réserve la place du premier résultat borné.
 
 **Tests ajoutés.** `tests/test_tool_result_bound.py`, et le test `fits` renforcé (`tests/test_program.py`).
 
@@ -88,7 +88,7 @@ Point de départ : 771 réussis, 4 sautés.
 
 **Fait.**
 - D1 : l'User-Agent porte un contact tiré de `[net] contact` (défaut : l'URL du dépôt, réglable pour GitLab).
-- D2 : le lanceur E2E coupe lui-même le réseau sortant de WaveStack. Il fait pointer ses proxys vers un port de boucle locale fermé et laisse la boucle locale contournée. La requête est donc tracée, puis échoue « Service injoignable », sur un poste connecté comme hors ligne. `stack.py --network` garde le vrai réseau pour explorer à la main.
+- D2 : le lanceur E2E coupe lui-même le réseau sortant de HarnessLab. Il fait pointer ses proxys vers un port de boucle locale fermé et laisse la boucle locale contournée. La requête est donc tracée, puis échoue « Service injoignable », sur un poste connecté comme hors ligne. `stack.py --network` garde le vrai réseau pour explorer à la main.
 
 **Tests ajoutés.** `tests/test_e2e_stack.py` (dont un faux proxy qui enregistre le `CONNECT`), tests d'User-Agent.
 
@@ -103,7 +103,7 @@ Point de départ : 771 réussis, 4 sautés.
 **Fait.**
 - E1 : un modèle servi par llama-server est compté avec le KV de tout son contexte. Le KV est lu par un lecteur d'en-tête GGUF en Python pur, qui gère les tableaux par couche des modèles hybrides, sans llama.cpp dans le processus principal. Le diagnostic conseille `-np 1 -c 4096`.
 - E2 : la sonde mesure la RSS de pointe après l'évaluation d'un lot complet, au contexte de la fenêtre. Les anciennes entrées sont resondées (au lancement pour le modèle enregistré, les autres au moment du choix). Un échec passager n'est plus mémorisé comme incompatibilité. Le délai de la sonde passe à 300 s.
-- E3 : le refus donne la vraie mémoire de WaveStack, en Mo sous 1 Go.
+- E3 : le refus donne la vraie mémoire de HarnessLab, en Mo sous 1 Go.
 - E4 : « Arrêter » agit pendant un chargement, aux points d'étape, et le modèle précédent revient.
 - E5 : les briques du scénario indisponibles avec le modèle actif sont signalées au lancement, avec leur raison.
 - E6 : les raisons d'incompatibilité sont en français, et le message brut reste en cause technique.
@@ -147,15 +147,15 @@ Point de départ : 771 réussis, 4 sautés.
 **Fait.**
 - G1 : les tests d'index remplacé ont une variante portable, où la connexion est fermée avant la reconstruction. La variante « remplacé encore ouvert » reste active hors Windows.
 - Un index tenu par un autre programme donne `IndexInUse`, avec un message clair pour le script et pour la carte. Les autres refus gardent leur erreur d'origine.
-- Garde facultative `WAVESTACK_TEST_WINDOWS_FILES=1` : elle applique à la suite, sous Linux, la règle de fichiers de Windows. Sans échec.
-- G2 : `WAVESTACK_TEST_MODELS_DIR` pour les tests `model` du RAG, et comparaison sur `s.score`.
+- Garde facultative `HARNESS_LAB_TEST_WINDOWS_FILES=1` : elle applique à la suite, sous Linux, la règle de fichiers de Windows. Sans échec.
+- G2 : `HARNESS_LAB_TEST_MODELS_DIR` pour les tests `model` du RAG, et comparaison sur `s.score`.
 - G3 : fait au lot I.
 
 **Tests ajoutés.** Refus en français (index, script, carte), cas lecture seule, sérialisation, garde simulée.
 
 **À vérifier sur PC.**
 - `uv run pytest -q` sous Windows : 0 échec.
-- `-m model` avec `WAVESTACK_TEST_MODELS_DIR` et `WAVESTACK_TEST_GGUF`.
+- `-m model` avec `HARNESS_LAB_TEST_MODELS_DIR` et `HARNESS_LAB_TEST_GGUF`.
 
 ## Lot I — Guide de test et documentation
 
@@ -179,5 +179,5 @@ La revue du lot I a relevé deux textes de code contradictoires : la phrase « m
 - N6 (moteur conseillé pour Qwen3.5) : à trancher après la mesure du lot A sur le PC.
 - Mesures sur le PC : voir la section 5 du guide (`guide-test-pc-palier-2.md`).
 - Nouvelle entrée ouverte dans `deferred-work.md` : avec un Ollama trop ancien pour servir `qwen35`, le modèle est accepté, puis le premier tour échoue avec une erreur brute « HTTP 500 », sans raison en français ni retour au modèle précédent. Un correctif de code est à planifier.
-- Relecture complémentaire recommandée sur le lot E : le lecteur d'en-tête GGUF (`src/wavestack/models/gguf_meta.py`), à confirmer sur le vrai fichier Qwen3.5.
+- Relecture complémentaire recommandée sur le lot E : le lecteur d'en-tête GGUF (`src/harness_lab/models/gguf_meta.py`), à confirmer sur le vrai fichier Qwen3.5.
 - Proposition, non faite : pour un modèle hybride, toute divergence coûte une relecture complète. Des points de reprise de l'état (sauvegarde au début de la dernière question, comme les « context checkpoints » de llama-server) rendraient ces relectures partielles. C'est à envisager si la mesure du lot A ne suffit pas, avant de trancher N6.

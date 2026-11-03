@@ -11,9 +11,9 @@ from test_mcp_lazy import exact
 from test_tools import QWEN, _segments, call
 from test_turn import _run
 
-from wavestack import config
-from wavestack.bricks.registry import SKILLS
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.bricks.registry import SKILLS
+from harness_lab.trace.journal import get_journal
 
 CAVEMAN = "Réponds en style télégraphique"  # the start of Caveman's body
 WINDOW = 16384  # the fake engine counts one token per byte: every body loaded fits

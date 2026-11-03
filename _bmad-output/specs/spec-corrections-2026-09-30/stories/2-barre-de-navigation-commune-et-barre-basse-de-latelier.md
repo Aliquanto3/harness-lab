@@ -26,10 +26,10 @@ deferred:
 ## Boundaries & Constraints
 
 **Always:**
-- **Barre commune** `nav.site-nav` (balisage identique dans les cinq HTML, au seul `aria-current="page"` près) : marque « WaveStack » (lien vers `/`), puis `/` Atelier, `/llm` LLM nu, `/rag` Atelier RAG, `/diagnostic` Diagnostic, `/models` Modèles, puis le menu `#display-menu` (« Affichage ▾ ») poussé à droite. Elle garde `data-i18n-aria-label="common.links.pages"` et `data-i18n-links` ; le lien `/` prend une clé nouvelle `common.links.home` (« Atelier », « Workshop », « Werkstatt ») ajoutée à `LINK_NAMES` de `i18n.js`. Le HTML garde son texte français.
+- **Barre commune** `nav.site-nav` (balisage identique dans les cinq HTML, au seul `aria-current="page"` près) : marque « HarnessLab » (lien vers `/`), puis `/` Atelier, `/llm` LLM nu, `/rag` Atelier RAG, `/diagnostic` Diagnostic, `/models` Modèles, puis le menu `#display-menu` (« Affichage ▾ ») poussé à droite. Elle garde `data-i18n-aria-label="common.links.pages"` et `data-i18n-links` ; le lien `/` prend une clé nouvelle `common.links.home` (« Atelier », « Workshop », « Werkstatt ») ajoutée à `LINK_NAMES` de `i18n.js`. Le HTML garde son texte français.
 - **Menu « Affichage ▾ » sur toutes les pages** : thème (`#theme-picker`, `data-theme-picker`, géré par `theme.js`) et langue (`#language-picker`, même verrou, même infobulle, même refus qu'aujourd'hui) partout ; `#projection-toggle` seulement sur l'atelier (seul `app.js` applique la projection). La logique du menu et du sélecteur de langue sort de `app.js` dans un module partagé `site-nav.js`, chargé par les cinq pages après `i18n.js` ; `app.js` l'importe au lieu de la dupliquer. Mêmes identifiants qu'aujourd'hui (`#display-menu`, `#display-menu-toggle`, `#display-menu-panel`, `#theme-picker`, `#language-picker`, `#language-picker-code`, `#projection-toggle`).
 - **Atelier** : la barre `header.top-bar` (scénario, jauge, consommation, fenêtre, volets, modèle, statut, réinitialiser) passe **sous** les volets, en bas de l'écran ; elle garde sa classe et ses identifiants (nom historique conservé pour limiter la casse, noté dans DESIGN.md). Elle perd `.top-bar-title`, `#llm-link`, `#rag-link` et `#display-menu`. Ses panneaux déroulants (`.window-panel`, `.pane-menu-list`, `.top-status`) s'ouvrent vers le haut.
-- `#open-link` (« Ouvrir WaveStack ») disparaît des pages Diagnostic et Modèles : le lien `/` de la barre commune le remplace. `#back-link` (« ← Atelier ») disparaît de `/llm` et `/rag` ; `llm.js` et `rag.js` cessent de l'écrire (`back_text` reste dans les contenus, inutilisé, noté en `deferred`).
+- `#open-link` (« Ouvrir HarnessLab ») disparaît des pages Diagnostic et Modèles : le lien `/` de la barre commune le remplace. `#back-link` (« ← Atelier ») disparaît de `/llm` et `/rag` ; `llm.js` et `rag.js` cessent de l'écrire (`back_text` reste dans les contenus, inutilisé, noté en `deferred`).
 - **Titres de volets** : `typography.pane-title` passe de 19 px à 18 px (24 px → 23 px en projection, rampe ×9/7), dans `tokens.css` et DESIGN.md ensemble (`test_web_tokens` les compare).
 - **Tenue** : en `fr` et en `de`, à 1 280 et 1 600 px, en mode normal et en projection, aucun contrôle de la barre commune ni de la barre basse n'est tronqué ou réduit à deux lettres suivies de « … » (`_bar_fits` étendu aux deux barres). Les paliers de `app.css` qui visaient la navigation (`.screen-link*`, `.top-bar-title`, `.display-menu*` dans la barre) sont retirés ou déplacés sur `.site-nav`.
 - Textes nouveaux par `ui.yaml` (`common.links.home`, et tout autre libellé) dans les trois langues ; aucun libellé en dur.
@@ -44,7 +44,7 @@ deferred:
 
 ## Code Map
 
-Chemins relatifs à `src/wavestack/web/static/` sauf mention.
+Chemins relatifs à `src/harness_lab/web/static/` sauf mention.
 
 - `index.html:15-93` -- `header.top-bar` actuel : `.top-bar-title` (l.16), `#llm-link`/`#rag-link` (l.62-63), `#display-menu` (l.66-91), `#reset-button` (l.92). Volets `h2.pane-title` (l.97+). Charge `theme.js`, `i18n.js` (module), `fonts.css`, `tokens.css`, `app.css`, `app.js` (l.279).
 - `llm.html:16-27`, `rag.html:16-27`, `diagnostic.html:69-81`, `models.html:113-125` -- `nav.page-tabs` (ordres différents, `#back-link`, `#open-link` caché, `#theme-picker` nu). `diagnostic.html` a un `<style>` en ligne (`body { max-width: 640px }`) ; `models.html:23` `main, .page-tabs { max-width: 1500px }`.
@@ -66,7 +66,7 @@ Chemins relatifs à `src/wavestack/web/static/` sauf mention.
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/web/static/site-nav.js` (nouveau) -- menu « Affichage » (ouverture, fermeture au clic extérieur et à Échap, retour du focus), sélecteur de langue (rendu, verrou, `POST /api/intentions/language`, rechargement, refus affiché) sortis de `app.js` -- une seule implémentation pour cinq pages.
+- `src/harness_lab/web/static/site-nav.js` (nouveau) -- menu « Affichage » (ouverture, fermeture au clic extérieur et à Échap, retour du focus), sélecteur de langue (rendu, verrou, `POST /api/intentions/language`, rechargement, refus affiché) sortis de `app.js` -- une seule implémentation pour cinq pages.
 - `index.html`, `llm.html`, `rag.html`, `diagnostic.html`, `models.html` -- `nav.site-nav` identique en tête ; atelier : `header.top-bar` déplacé après les volets, sans titre, liens ni menu ; suppression de `#back-link`, `#open-link`, `.page-tabs`.
 - `pages.css` (chargé aussi par index.html), `app.css`, `llm.css`, `rag.css`, `tokens.css` -- styles `.site-nav` (tokens seulement), barre basse et panneaux vers le haut, paliers nettoyés, `pane-title` 18/23.
 - `app.js`, `llm.js`, `rag.js`, `diagnostic.html` et `models.html` (scripts en ligne), `i18n.js` -- import de `site-nav.js`, `topBarFits` sur la barre basse, plus d'écriture de `#back-link` ni `#open-link`, `LINK_NAMES["/"]`.
@@ -109,7 +109,7 @@ Chemins relatifs à `src/wavestack/web/static/` sauf mention.
   - `[medium]` `[patch]` (intent-alignment) barre commune en `de` à 1 280 px non vérifiée sur les pages annexes — `_site_nav_problems` en `de` à 1 280 et 1 600 px sur les quatre pages annexes.
   - `[low]` `[reject]` (intent-alignment) marque en mot et non en image — lecture défendable ; aucune image de logo n'existe.
   - `[low]` `[reject]` (intent-alignment) liens cliqués seulement pour trois pages — `href` vérifiés sur les cinq pages ; coût E2E sans gain.
-  - `[low]` `[reject]` (intent-alignment) « Ouvrir WaveStack » remplacé par un lien toujours visible — prescrit par la story.
+  - `[low]` `[reject]` (intent-alignment) « Ouvrir HarnessLab » remplacé par un lien toujours visible — prescrit par la story.
   - `[low]` `[reject]` (intent-alignment) changement de langue possible depuis les pages annexes — prescrit par la story (menu partout).
   - `[low]` `[reject]` (intent-alignment) `back_text` orphelin — noté en `deferred`.
   - `[low]` `[reject]` (intent-alignment) preuve E2E seulement en prose — l'orchestrateur rejoue les tranches.
@@ -134,7 +134,7 @@ Chemins relatifs à `src/wavestack/web/static/` sauf mention.
   - `[low]` `[reject]` (blind) `aria-haspopup="true"` du menu — préexistant (Langues 2).
   - `[low]` `[patch]` (blind) DESIGN.md `site-nav.min-height` différent du CSS — aligné.
   - `[low]` `[reject]` (blind) ~48 px de hauteur perdus par les volets — compromis de la décision ; capture de projection comparée, pas de régression visible.
-  - `[low]` `[patch]` (blind) libellés et commentaires E2E et docs périmés (« barre haute », « Ouvrir WaveStack ») — reformulés.
+  - `[low]` `[patch]` (blind) libellés et commentaires E2E et docs périmés (« barre haute », « Ouvrir HarnessLab ») — reformulés.
 
 ## Auto Run Result
 

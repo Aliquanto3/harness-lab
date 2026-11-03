@@ -9,7 +9,7 @@ Lancé le 2026-10-27 à la demande d'Anaël, après le run des retours du 27/10 
 | Dans le run | Epics 17 à 17 | epic 17 dans `sprint-status.yaml` ; story 17.N = id N de `stories.yaml` |
 | Hors run | CT-06 (Caveman avec un vrai modèle local) | pas de défaut noté |
 
-Spec : `_bmad-output/specs/spec-wavestack-recette-v1-7-0/` (SPEC.md, stories.yaml, stories/story-N.md).
+Spec : `_bmad-output/specs/spec-harness-lab-recette-v1-7-0/` (SPEC.md, stories.yaml, stories/story-N.md).
 
 Au plus 3 stories en développement à la fois (3,6 Go de RAM libre au départ ; les agents de dev ne lancent pas d'E2E, l'orchestrateur les lance un par un)
 
@@ -26,7 +26,7 @@ Au plus 3 stories en développement à la fois (3,6 Go de RAM libre au départ ;
 - Par story : `dev-story` (Sonnet) écrit `stories/story-N.md` puis code, `second-avis` (Haiku), `reviewer` (Opus, avec la liste du second avis, rebasé sur `origin/main`), PR, CI verte, fusion, vérification `MERGED`, journal.
 - Pas de relecture de spec par Anaël (constats précisés en amont).
 - Fichiers partagés (`content/ui.yaml`, `app.js`) : fusion l'une après l'autre, rebase avant revue.
-- Worktrees `../wavestack-r171-s<N>`, branches `fix/r171-story-N-…`.
+- Worktrees `../harness-lab-r171-s<N>`, branches `fix/r171-story-N-…`.
 - Chaque choix fait à la place d'Anaël : ligne `décision · à revoir`.
 
 ## Décisions
@@ -35,7 +35,7 @@ Au plus 3 stories en développement à la fois (3,6 Go de RAM libre au départ ;
 
 ## Reprise après /clear
 
-- Lire ce fichier, puis `sprint-status.yaml` ; l'état réel prime : `gh pr list --state open`, `git -C ../wavestack-r171-s<N> log -3 --oneline`.
+- Lire ce fichier, puis `sprint-status.yaml` ; l'état réel prime : `gh pr list --state open`, `git -C ../harness-lab-r171-s<N> log -3 --oneline`.
 - Run terminé le 2026-10-28 : 17.1 à 17.5 fusionnées, version 1.7.1.
 - Fin de run : rapport `rapport-run-recette-v1-7-0.md`, version 1.7.1, mémoire du projet, suppression des worktrees.
 

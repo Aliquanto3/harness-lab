@@ -15,7 +15,7 @@ explanation_text:
   - - "Gain: fewer tokens read, hence a faster first token and more room in the window."
     - >-
       Cost: what is cut is lost to the model. Headroom writes “Retrieve more” so that an
-      agent can fetch the rest, but WaveStack does not provide that retrieval tool: a
+      agent can fetch the rest, but HarnessLab does not provide that retrieval tool: a
       limit worth showing.
     - >-
       Data: Headroom runs inside the harness process, offline, without telemetry (no

@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from wavestack.net.guard import install
+from harness_lab.net.guard import install
 
 # This machine's proxy is removed as soon as conftest loads, before any test module is
-# collected: importing `wavestack.cli` installs the guard, whose first `install` copies
+# collected: importing `harness_lab.cli` installs the guard, whose first `install` copies
 # the proxy once and for all (story 1e). The guard's copy (`office_proxies`) thus stays
 # empty whatever the development machine, and the suite runs the same with or without
 # `HTTPS_PROXY`. The confiscation itself is covered by dedicated tests
@@ -31,23 +31,23 @@ def _network_guard() -> None:
 @pytest.fixture(autouse=True)
 def _isolated_data_dir(tmp_path, monkeypatch):
     """Never touch the real user data dir (AD-20) while testing."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "wavestack-data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "harness-lab-data"))
 
 
 @pytest.fixture
 def real_models_dir() -> Path:
     """Lot G (G2): the real models' folder, for the `model` tests of the RAG, named by
-    `WAVESTACK_TEST_MODELS_DIR` (the data dir stays isolated); skipped without it."""
-    value = os.environ.get("WAVESTACK_TEST_MODELS_DIR")
+    `HARNESS_LAB_TEST_MODELS_DIR` (the data dir stays isolated); skipped without it."""
+    value = os.environ.get("HARNESS_LAB_TEST_MODELS_DIR")
     if not value:
         pytest.skip(
-            "WAVESTACK_TEST_MODELS_DIR n'est pas posée : elle doit nommer le dossier des "
-            "modèles de WaveStack, par exemple : "
-            '$env:WAVESTACK_TEST_MODELS_DIR = "$env:LOCALAPPDATA\\WaveStack\\models"'
+            "HARNESS_LAB_TEST_MODELS_DIR n'est pas posée : elle doit nommer le dossier des "
+            "modèles de HarnessLab, par exemple : "
+            '$env:HARNESS_LAB_TEST_MODELS_DIR = "$env:LOCALAPPDATA\\HarnessLab\\models"'
         )
     path = Path(value)
     if not path.is_dir():
-        pytest.skip(f"WAVESTACK_TEST_MODELS_DIR ne nomme pas un dossier : {path}")
+        pytest.skip(f"HARNESS_LAB_TEST_MODELS_DIR ne nomme pas un dossier : {path}")
     return path
 
 
@@ -78,7 +78,7 @@ def windows_file_rules(monkeypatch):
     process holds open (descriptor or memory mapping, read in `/proc/self`). Without
     `/proc` (Windows applies its rules itself, macOS), nothing is patched.
 
-    Opt-in for the whole suite: `WAVESTACK_TEST_WINDOWS_FILES=1 uv run pytest`."""
+    Opt-in for the whole suite: `HARNESS_LAB_TEST_WINDOWS_FILES=1 uv run pytest`."""
     if not (_PROC / "fd").is_dir():
         return
 
@@ -107,8 +107,8 @@ def windows_file_rules(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def _windows_file_rules_opt_in(request):
-    """Lot G: `WAVESTACK_TEST_WINDOWS_FILES=1` puts every test under `windows_file_rules`."""
-    if os.environ.get("WAVESTACK_TEST_WINDOWS_FILES") == "1":
+    """Lot G: `HARNESS_LAB_TEST_WINDOWS_FILES=1` puts every test under `windows_file_rules`."""
+    if os.environ.get("HARNESS_LAB_TEST_WINDOWS_FILES") == "1":
         request.getfixturevalue("windows_file_rules")
 
 
@@ -116,7 +116,7 @@ def _windows_file_rules_opt_in(request):
 def _joined_header_warm_up(monkeypatch):
     """R1: the search's warm-up of the model table headers ends inside the test that started
     it: no thread left reading a temporary file during another test."""
-    from wavestack.models import catalog  # here: after the proxy is removed (above)
+    from harness_lab.models import catalog  # here: after the proxy is removed (above)
 
     real = catalog.warm_headers
 
@@ -128,13 +128,13 @@ def _joined_header_warm_up(monkeypatch):
     monkeypatch.setattr(catalog, "warm_headers", joined)
 
 
-# Every `key_env` the presets of wavestack.toml declare: a new preset's variable is removed
+# Every `key_env` the presets of harness-lab.toml declare: a new preset's variable is removed
 # without anyone having to think of it.
 _KEY_ENVS = sorted(
     {
         model["key_env"]
         for model in tomllib.loads(
-            (Path(__file__).resolve().parents[1] / "wavestack.toml").read_text("utf-8")
+            (Path(__file__).resolve().parents[1] / "harness-lab.toml").read_text("utf-8")
         )["cloud"]["models"]
         if model.get("key_env")
     }
@@ -151,7 +151,7 @@ def _no_cloud_key_variables(monkeypatch):
 @pytest.fixture(autouse=True)
 def _fresh_pacing():
     """Story 11b: the spacing of cloud sends starts afresh in each test."""
-    from wavestack.models import openai_chat
+    from harness_lab.models import openai_chat
 
     openai_chat._last_start.clear()
     openai_chat.reset_spend()  # FinOps: the session's spend starts at zero in each test
@@ -164,7 +164,7 @@ def _fresh_pacing():
 def _no_codecarbon(monkeypatch):
     """GreenOps: no real CodeCarbon tracker around a test's local calls (its first start takes
     seconds): CodeCarbon plays absent; `tests/test_greenops.py` plays it installed."""
-    from wavestack import greenops
+    from harness_lab import greenops
 
     monkeypatch.setattr(greenops, "_find_spec", lambda name: None)
 
@@ -175,7 +175,7 @@ def _no_local_model_server(monkeypatch):
     needs one passes its own `httpx.MockTransport`."""
     import httpx
 
-    from wavestack.models import servers
+    from harness_lab.models import servers
 
     def refuse(request: httpx.Request) -> httpx.Response:
         raise httpx.ConnectError("aucun serveur local en test", request=request)
@@ -187,7 +187,7 @@ def _no_local_model_server(monkeypatch):
 def _no_server_rss(monkeypatch):
     """Story 3 (LFM3): no test reads a real process's memory, a real llama-server of the
     machine running the suite would otherwise fake the fallback's numbers."""
-    from wavestack.models import servers
+    from harness_lab.models import servers
 
     monkeypatch.setattr(servers, "_server_rss", lambda url: None)
 
@@ -199,6 +199,6 @@ GIB = 1024**3
 def _fixed_system_memory(monkeypatch):
     """Story 24: the machine's RAM, pinned (16 Gio, 12 Gio available): the dynamic budget
     stays at its 4 096 Mo cap whatever the machine running the tests."""
-    from wavestack import config
+    from harness_lab import config
 
     monkeypatch.setattr(config, "system_memory", lambda: (16 * GIB, 12 * GIB))

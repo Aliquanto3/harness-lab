@@ -7,8 +7,8 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from wavestack.agent_eval.draft import CaseForm, DraftRefused, reconstitute_draft, to_case
-from wavestack.trace.envelope import Envelope
+from harness_lab.agent_eval.draft import CaseForm, DraftRefused, reconstitute_draft, to_case
+from harness_lab.trace.envelope import Envelope
 
 TS = datetime(2026, 10, 25, 9, 30, tzinfo=UTC)
 MODEL = {"id": "m1", "label": "Fake", "hosting": "local", "kind": "file"}

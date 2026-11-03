@@ -1,7 +1,7 @@
 ---
-title: "Recherche technique : un MCP en ligne pour l'onglet MCP de WaveStack"
+title: "Recherche technique : un MCP en ligne pour l'onglet MCP de HarnessLab"
 type: 'technical'
-topic: "MCP distant gratuit, OAuth réel, pour la démo WaveStack (vague 2, public RSSI)"
+topic: "MCP distant gratuit, OAuth réel, pour la démo HarnessLab (vague 2, public RSSI)"
 decision: "Choisir le serveur MCP distant à brancher sur l'onglet MCP, pour démontrer l'authentification OAuth et le refus d'autorisation devant un public RSSI"
 source: 'recherche web (ici), sans accès au dépôt privé de recherche BMAD complet'
 status: draft
@@ -9,9 +9,9 @@ created: '2026-10-15'
 updated: '2026-10-15'
 ---
 
-# Recherche technique : un MCP en ligne pour WaveStack
+# Recherche technique : un MCP en ligne pour HarnessLab
 
-**Décision que cette recherche sert :** quel serveur MCP distant brancher sur l'onglet MCP de WaveStack pour la démo (actuellement deux serveurs publics configurés : `datagouv` et `mslearn`, cf. `src/wavestack/mcp/servers.py`), en vue de la vague 2 qui ouvre la démo aux RSSI. Le serveur doit être gratuit, avec une authentification OAuth réelle (pas une clé API statique), des outils compréhensibles par un non-ingénieur, une stabilité et des versions épinglables, et des conditions d'usage claires. Chaque candidat doit permettre de montrer un appel que l'autorisation refuse (pour illustrer la sécurité).
+**Décision que cette recherche sert :** quel serveur MCP distant brancher sur l'onglet MCP de HarnessLab pour la démo (actuellement deux serveurs publics configurés : `datagouv` et `mslearn`, cf. `src/harness_lab/mcp/servers.py`), en vue de la vague 2 qui ouvre la démo aux RSSI. Le serveur doit être gratuit, avec une authentification OAuth réelle (pas une clé API statique), des outils compréhensibles par un non-ingénieur, une stabilité et des versions épinglables, et des conditions d'usage claires. Chaque candidat doit permettre de montrer un appel que l'autorisation refuse (pour illustrer la sécurité).
 
 **Méthode :** recherches web ciblées (pas d'accès à un rapport de recherche externe fourni par l'utilisateur), croisant la documentation officielle de chaque fournisseur et des guides tiers récents (2026). Les affirmations tierces non confirmées par la documentation officielle sont signalées comme telles.
 
@@ -31,7 +31,7 @@ updated: '2026-10-15'
 - **Stabilité / versions épinglables :** le dépôt `github/github-mcp-server` est public avec des releases ; au 15/10/2026 le statut exact (preview ou GA) de la version *distante* n'est pas confirmé par une annonce officielle trouvée — une page de politique datée de juillet 2025 indique que le passage en GA est encore attendu à cette date, ce qui est une information à vérifier avant la démo [github/github-mcp-server, policies-and-governance.md, consulté le 15/10/2026](https://github.com/github/github-mcp-server/blob/main/docs/policies-and-governance.md). Le serveur local (binaire) est, lui, versionné par tag Git — préférable si un épinglage strict est exigé.
 - **Conditions d'usage :** celles du compte GitHub (CGU GitHub standard) ; aucune clause MCP spécifique trouvée au-delà de la politique de gouvernance ci-dessus.
 - **Scénario de démo :** connecter le compte GitHub de démo (lecture seule sur un dépôt public), demander au modèle « y a-t-il des alertes de sécurité ouvertes sur ce dépôt ? » → `list_secret_scanning_alerts` / `list_dependabot_alerts` renvoie une liste lisible, sans jargon réseau.
-- **Appel refusé (sécurité) :** demander au modèle de fusionner une pull request ou de supprimer une branche protégée sur un dépôt où le compte de démo n'a que la lecture → l'appel `merge_pull_request` (ou équivalent) échoue côté GitHub avec une erreur de permission (403), que l'onglet « Autorisation » de WaveStack peut aussi intercepter en amont si l'outil est marqué comme une action d'écriture non accordée. Cela illustre à la fois l'OAuth à portée limitée côté fournisseur et le filtrage applicatif côté WaveStack.
+- **Appel refusé (sécurité) :** demander au modèle de fusionner une pull request ou de supprimer une branche protégée sur un dépôt où le compte de démo n'a que la lecture → l'appel `merge_pull_request` (ou équivalent) échoue côté GitHub avec une erreur de permission (403), que l'onglet « Autorisation » de HarnessLab peut aussi intercepter en amont si l'outil est marqué comme une action d'écriture non accordée. Cela illustre à la fois l'OAuth à portée limitée côté fournisseur et le filtrage applicatif côté HarnessLab.
 
 ## 2. Atlassian MCP Server (Jira + Confluence) — rang 2
 
@@ -51,13 +51,13 @@ updated: '2026-10-15'
 - **Stabilité / versions épinglables :** pas de version de protocole figée documentée par Notion pour le serveur hébergé ; une alternative auto-hébergée existe (`mcp-notion-server` côté communauté) si un épinglage de version précis est requis, mais elle sort du périmètre « gratuit et sans administration » recherché ici.
 - **Conditions d'usage :** CGU Notion standard. Point de vigilance pour la démo RSSI : selon une analyse tierce, le serveur hébergé n'a qu'une seule portée OAuth « par défaut » donnant accès à l'ensemble de l'espace de travail autorisé, sans portée « lecture seule » garantie par le fournisseur — Notion recommande en pratique de créer un compte d'intégration dédié et de limiter manuellement les outils actifs dans les réglages de l'agent, plutôt que de compter sur une portée OAuth restreinte [synthèse tierce 2026, non confirmée par Notion elle-même, consulté le 15/10/2026](https://www.truefoundry.com/blog/notion-mcp-server) ; [Notion, sécurité, consulté le 15/10/2026](https://www.notion.com/help/security-best-practices-for-agent-connections).
 - **Scénario de démo :** demander « cherche la page "Compte-rendu" dans cet espace de démo » → `notion-search` renvoie un résultat lisible sans jargon.
-- **Appel refusé (sécurité) :** demander la suppression/l'archivage d'une page via un outil étiqueté « Destructive » → si le client MCP honore l'annotation `destructiveHint: true`, il demande confirmation ; dans WaveStack, c'est l'onglet « Autorisation » qui peut bloquer cet appel avant exécution — bon exemple de défense en profondeur quand le fournisseur ne garantit pas lui-même un mode lecture seule.
+- **Appel refusé (sécurité) :** demander la suppression/l'archivage d'une page via un outil étiqueté « Destructive » → si le client MCP honore l'annotation `destructiveHint: true`, il demande confirmation ; dans HarnessLab, c'est l'onglet « Autorisation » qui peut bloquer cet appel avant exécution — bon exemple de défense en profondeur quand le fournisseur ne garantit pas lui-même un mode lecture seule.
 
 ## Limites de cette recherche
 
 - Recherche faite uniquement via web (pas de rapport externe fourni, pas d'essai réel de connexion aux trois serveurs — aucune connexion n'a été établie, conformément à la consigne « pas de serveur lancé »).
-- Plusieurs points (statut GA exact de GitHub MCP, URL `v1`/`v2` d'Atlassian, nombre exact d'outils Notion) varient selon les sources tierces consultées et devront être revérifiés au moment du branchement effectif dans WaveStack, idéalement sur la documentation officielle du jour.
-- Le contexte local lu (`src/wavestack/mcp/servers.py`) montre que WaveStack attend un couple `(id, url)` par serveur public et un fichier `content/mcp.yaml` pour les textes affichés ; aucun des trois candidats n'a été testé contre le code WaveStack lui-même.
+- Plusieurs points (statut GA exact de GitHub MCP, URL `v1`/`v2` d'Atlassian, nombre exact d'outils Notion) varient selon les sources tierces consultées et devront être revérifiés au moment du branchement effectif dans HarnessLab, idéalement sur la documentation officielle du jour.
+- Le contexte local lu (`src/harness_lab/mcp/servers.py`) montre que HarnessLab attend un couple `(id, url)` par serveur public et un fichier `content/mcp.yaml` pour les textes affichés ; aucun des trois candidats n'a été testé contre le code HarnessLab lui-même.
 
 ## Sources
 

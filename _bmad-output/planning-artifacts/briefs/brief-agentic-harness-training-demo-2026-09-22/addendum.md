@@ -4,7 +4,7 @@ Contenu complémentaire au brief : détails techniques, options envisagées, et 
 
 ## Repo de référence : wavelocalai
 
-`https://github.com/Aliquanto3/wavelocalai` — proof-of-concept Wavestone sur l'IA locale responsable (perf vs cloud, souveraineté, impact carbone), Streamlit, 4 modules (Hardware/Green IT, Inference Arena, RAG Knowledge, Agent Lab).
+`https://github.com/Aliquanto3/wavelocalai` — proof-of-concept sur l'IA locale responsable (perf vs cloud, souveraineté, impact carbone), Streamlit, 4 modules (Hardware/Green IT, Inference Arena, RAG Knowledge, Agent Lab).
 
 **Exécution SLM locale** : Ollama (SDK `ollama` + `langchain-ollama`), modèles type `qwen2.5:1.5b`, CPU-friendly par défaut, GPU détecté mais optionnel (`GPUtil`, `py-cpuinfo`).
 

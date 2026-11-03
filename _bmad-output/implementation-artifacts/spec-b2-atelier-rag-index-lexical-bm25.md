@@ -44,10 +44,10 @@ context:
 
 ## Code Map
 
-- `src/wavestack/rag/lab.py` -- `COMPONENTS` (l.103) : `lexical_index` (`data`, icône, `None`) après `vector_store`. `SequenceStep` (l.117) : champ `part: str | None` (la partie de l'étape dont la ligne montre les événements) ; `STEPS` (l.133) : `lexical_index` après `vector_store` = `SequenceStep("build", "lexical_search", own=False, part="index", reads=("chunks",), writes=("lexical_index",))` ; `lexical_search` lit `("lexical_index", "question")`. `_views()` (l.565) : `"part"` dans chaque step. `bm25()` (l.2355) découpé en `LexicalIndex` (dataclass : comptes par chunk, longueurs, df, moyenne, `n`, `vocabulary`, `occurrences`), `lexical_index(documents, lang)` et `bm25_scores(index, query, lang)` ; `bm25()` = les deux. `_Chain` (l.1377) : `lexical: LexicalIndex | None`. `_run_chain` (l.1502) : avant la première étape hors `FIXED_HEAD`, si la chaîne a `lexical_search`, `_lexical_index_part` (événements via `_emit` / `_ended`, step_id `{run}.s{i}.index`, annulation, `stopped`). `_lexical_search` (l.2089) lit `chain.lexical` (construit à la volée s'il manque).
+- `src/harness_lab/rag/lab.py` -- `COMPONENTS` (l.103) : `lexical_index` (`data`, icône, `None`) après `vector_store`. `SequenceStep` (l.117) : champ `part: str | None` (la partie de l'étape dont la ligne montre les événements) ; `STEPS` (l.133) : `lexical_index` après `vector_store` = `SequenceStep("build", "lexical_search", own=False, part="index", reads=("chunks",), writes=("lexical_index",))` ; `lexical_search` lit `("lexical_index", "question")`. `_views()` (l.565) : `"part"` dans chaque step. `bm25()` (l.2355) découpé en `LexicalIndex` (dataclass : comptes par chunk, longueurs, df, moyenne, `n`, `vocabulary`, `occurrences`), `lexical_index(documents, lang)` et `bm25_scores(index, query, lang)` ; `bm25()` = les deux. `_Chain` (l.1377) : `lexical: LexicalIndex | None`. `_run_chain` (l.1502) : avant la première étape hors `FIXED_HEAD`, si la chaîne a `lexical_search`, `_lexical_index_part` (événements via `_emit` / `_ended`, step_id `{run}.s{i}.index`, annulation, `stopped`). `_lexical_search` (l.2089) lit `chain.lexical` (construit à la volée s'il manque).
 - `content/messages.yaml` ×3 (`rag_lab.lexical_index.*` : `input`, `output`, faits ; `lexical_search.input` : « dans l'index lexical »).
 - `content/rag_lab.yaml` ×3 : `steps.lexical_index` (label, action, explication : algorithme statistique, index inversé, reconstruit à chaque exécution), `components.lexical_index`, `stages.lexical_search.explain_text` (+ « sans modèle appris »).
-- `src/wavestack/web/static/rag.js` -- `applyEnvelope` (l.1301-1318) : événement à `part` rangé dans `stage.parts[part]` sans toucher le statut de l'étape ; `rag_lab_run_started` : `parts: {}`. `runStage` (l.883) : pour `step.part`, la partie. `stepStatus`, `focusRun` (avertissement, pied durée/mémoire), `playFrames`, `landing` : `step.own || step.part`.
+- `src/harness_lab/web/static/rag.js` -- `applyEnvelope` (l.1301-1318) : événement à `part` rangé dans `stage.parts[part]` sans toucher le statut de l'étape ; `rag_lab_run_started` : `parts: {}`. `runStage` (l.883) : pour `step.part`, la partie. `stepStatus`, `focusRun` (avertissement, pied durée/mémoire), `playFrames`, `landing` : `step.own || step.part`.
 - `_bmad-output/specs/spec-lot-5-atelier-rag-2026-10-04/vues-atelier-rag.md` §2, §4.
 - `tests/test_rag_lab.py` -- l.960-1031 (catalogue : 5 lignes BUILD possibles, `not own`, composants) ; nouveaux tests : `bm25()` = `bm25_scores(lexical_index())` (mêmes valeurs), chiffres de l'index, événements `lexical_index` d'un run hybride (ordre, `part`, statut skipped après arrêt), absent d'une chaîne sans BM25.
 - `tools/e2e/run_e2e.py` -- `_rag_lab_presets` (~l.14395) : après « RAG hybride », ligne `lexical_index` dans `#rag-seq-build`, tuile `lexical_index` dans Données ; après le run, focus de la ligne en Dérouler : termes distincts, durée.
@@ -55,9 +55,9 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/rag/lab.py` -- composant, étape, `part`, index + score, partie au BUILD.
+- [x] `src/harness_lab/rag/lab.py` -- composant, étape, `part`, index + score, partie au BUILD.
 - [x] `content/rag_lab.yaml`, `content/messages.yaml` ×3 -- textes.
-- [x] `src/wavestack/web/static/rag.js` -- parties, pastille, focus, Dérouler.
+- [x] `src/harness_lab/web/static/rag.js` -- parties, pastille, focus, Dérouler.
 - [x] `tests/test_rag_lab.py` -- catalogue mis à jour, nouveaux tests.
 - [x] `vues-atelier-rag.md` §2 et §4 ; `docs/guide.md` (Atelier RAG, BM25).
 - [x] `tools/e2e/run_e2e.py` -- préréglage hybride.

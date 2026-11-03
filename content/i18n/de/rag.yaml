@@ -3,7 +3,7 @@
 # content/i18n/de/corpus/, same names); only the titles change, and the index of this
 # language (data/rag_index.de.sqlite) holds them.
 notice_text: >-
-  Fiktive Texte, geschrieben für WaveStack: Exemplia ist eine erfundene Organisation,
+  Fiktive Texte, geschrieben für HarnessLab: Exemplia ist eine erfundene Organisation,
   ihre Regeln beschreiben kein reales Unternehmen.
 
 intro_text: >-

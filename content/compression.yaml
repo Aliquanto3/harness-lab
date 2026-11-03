@@ -10,7 +10,7 @@ rag_source_text: Extrait RAG n° {n}
 unchanged_text: >-
   Inchangé : Headroom ne raccourcit pas ce texte (de la prose, ou déjà court). Il part tel
   quel.
-# Ligne de la carte ; {min_chars} est le seuil de wavestack.toml ([compression] min_chars).
+# Ligne de la carte ; {min_chars} est le seuil de harness-lab.toml ([compression] min_chars).
 limits_text: >-
   Compressés : les résultats d'outils (natifs, réseau, MCP) et les extraits RAG d'au moins
   {min_chars} caractères, dans le contexte principal. Jamais : l'historique, les skills, le

@@ -13,9 +13,9 @@ context: []
 
 ## Intent
 
-**Problem:** WaveStack n'a qu'un exemple Gemini commenté (`gemini-2.5-flash`, sans raisonnement), inutilisable avec une clé AI Studio neuve. La démo du 2026-10-01 et l'usage durable demandent un vrai modèle Gemini, choisissable, avec un raisonnement qu'on allume et qu'on éteint.
+**Problem:** HarnessLab n'a qu'un exemple Gemini commenté (`gemini-2.5-flash`, sans raisonnement), inutilisable avec une clé AI Studio neuve. La démo du 2026-10-01 et l'usage durable demandent un vrai modèle Gemini, choisissable, avec un raisonnement qu'on allume et qu'on éteint.
 
-**Approach:** Déclarer une entrée `[[cloud.models]]` Gemini complète dans `wavestack.toml` et un éditeur « Gemini (Google) ». Rendre l'adaptateur `openai_chat` capable de ce que Gemini 3.x exige : les balises de raisonnement réglables, et le renvoi des signatures de pensée des appels d'outils. Le rendre aussi vérifiable (signature et deltas bruts tracés), puis livrer un prompt de recette pour le PC cible, qui a la clé.
+**Approach:** Déclarer une entrée `[[cloud.models]]` Gemini complète dans `harness-lab.toml` et un éditeur « Gemini (Google) ». Rendre l'adaptateur `openai_chat` capable de ce que Gemini 3.x exige : les balises de raisonnement réglables, et le renvoi des signatures de pensée des appels d'outils. Le rendre aussi vérifiable (signature et deltas bruts tracés), puis livrer un prompt de recette pour le PC cible, qui a la clé.
 
 ## Boundaries & Constraints
 
@@ -64,20 +64,20 @@ context: []
 
 ## Code Map
 
-- `wavestack.toml` -- section `[cloud]` : ajouter l'entrée après Mistral. Remplacer l'exemple Google commenté par un commentaire sur le secours 3.6 et la 2.5 (`on = {reasoning_effort="low"}` : 1 024 tokens dans la réserve de 1 536 ; `off = {reasoning_effort="none"}`). Mettre à jour la mention `key_env` (« GOOGLE_API_KEY »).
-- `src/wavestack/config.py:102 CloudReasoning` -- ajouter `tags`, deux chaînes non vides, `<think>`/`</think>` par défaut. `:141 CloudModel` -- ajouter `tool_call_extra: dict[str, Any] = {}`.
-- `src/wavestack/models/openai_chat.py` :
+- `harness-lab.toml` -- section `[cloud]` : ajouter l'entrée après Mistral. Remplacer l'exemple Google commenté par un commentaire sur le secours 3.6 et la 2.5 (`on = {reasoning_effort="low"}` : 1 024 tokens dans la réserve de 1 536 ; `off = {reasoning_effort="none"}`). Mettre à jour la mention `key_env` (« GOOGLE_API_KEY »).
+- `src/harness_lab/config.py:102 CloudReasoning` -- ajouter `tags`, deux chaînes non vides, `<think>`/`</think>` par défaut. `:141 CloudModel` -- ajouter `tool_call_extra: dict[str, Any] = {}`.
+- `src/harness_lab/models/openai_chat.py` :
   - `:419` : le `ChannelSplitter` prend `entry.reasoning.tags`.
   - `:505-537 _channels` : capturer `call["extra_content"]` (un dict) dans l'accumulateur, et envoyer le `content` marqué `extra_content.google.thought` au canal reasoning.
   - `:642` : ajouter `extra_content` à la trace `model_call_ended.tool_calls`, pour que la recette puisse le vérifier.
   - Les deltas bruts restent dans `raw_output`, masqués.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/session/app_session.py` :
   - `:454 _ModelOutput`, `:7001-7033 _call_model_chat` : une liste parallèle `extras`, vidée sur le chemin tronqué.
   - `:4557 _assistant_step` : `extra_content` et `extra_for` (l'`id` de l'entrée).
   - `:3517-3534 _step_messages`, branche `chat` : n'ajouter `extra_content` que si `extra_for == self._cloud.id`.
   - `:6245-6260` actions forcées : ajouter `entry.tool_call_extra` en mode chat.
   - L'historique vit en mémoire seulement, et `render.py` recopie tel quel un dict qui n'est pas un `Part`.
-- `src/wavestack/session/diagnostic.py:1047-1053` -- ajouter l'`extra_content` de `out.calls[0]` à l'appel rejoué.
+- `src/harness_lab/session/diagnostic.py:1047-1053` -- ajouter l'`extra_content` de `out.calls[0]` à l'appel rejoué.
 - `content/models/publishers.yaml` -- éditeur `gemini`, « Gemini (Google) », `names: ['gemini']`, juste après `gemma`.
 - `README.md:662,708` -- Gemini déclaré, clé `GEMINI_API_KEY`.
 - `tools/e2e/fake_openai.py` -- mode Gemini quand `model` commence par `gemini` :
@@ -89,17 +89,17 @@ context: []
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/config.py` -- ajouter `tags` et `tool_call_extra` -- le format Gemini et le contournement des appels fabriqués.
-- [x] `src/wavestack/models/openai_chat.py` -- balises réglables, capture et trace de `extra_content`, pensée marquée -- capture vérifiable.
-- [x] `src/wavestack/session/app_session.py`, `src/wavestack/session/diagnostic.py` -- rejouer la signature au même fournisseur ; `tool_call_extra` sur les actions forcées -- sinon Gemini 3.x répond 400.
-- [x] `wavestack.toml`, `content/models/publishers.yaml`, `README.md` -- l'entrée, l'éditeur, la doc.
+- [x] `src/harness_lab/config.py` -- ajouter `tags` et `tool_call_extra` -- le format Gemini et le contournement des appels fabriqués.
+- [x] `src/harness_lab/models/openai_chat.py` -- balises réglables, capture et trace de `extra_content`, pensée marquée -- capture vérifiable.
+- [x] `src/harness_lab/session/app_session.py`, `src/harness_lab/session/diagnostic.py` -- rejouer la signature au même fournisseur ; `tool_call_extra` sur les actions forcées -- sinon Gemini 3.x répond 400.
+- [x] `harness-lab.toml`, `content/models/publishers.yaml`, `README.md` -- l'entrée, l'éditeur, la doc.
 - [x] `tests/test_cloud.py` -- les lignes de la matrice, la sentinelle de clé, les listes d'ids mises à jour ; `tests/test_model_catalog.py` -- le groupe Gemini.
 - [x] `tools/e2e/*`, `tests/test_e2e_fake_openai.py` -- le mode Gemini du faux fournisseur et le scénario `gemini_shape` (tour outils, raisonnement allumé puis éteint, carte Raisonnement, corps relus par `/_e2e/requests`).
 - [x] `_bmad-output/implementation-artifacts/prompt-recette-gemini-2026-09-29.md` -- le prompt pour le Claude Code du PC cible (voir Design Notes).
 
 **Acceptance Criteria:**
 - Given la configuration livrée, when on ouvre le sélecteur ou `/models`, then « RÉSEAU · Google AI Studio · gemini-3.5-flash-lite » figure dans le groupe « Réseau · Gemini (Google) », avec un raisonnement « activable ». Sans clé, il est indisponible et la raison est donnée.
-- Given `GEMINI_API_KEY` définie, when on lance WaveStack, then l'entrée est choisissable sans rien saisir, et `generativelanguage.googleapis.com` fait partie des hôtes autorisés.
+- Given `GEMINI_API_KEY` définie, when on lance HarnessLab, then l'entrée est choisissable sans rien saisir, et `generativelanguage.googleapis.com` fait partie des hôtes autorisés.
 - Given une valeur réelle différente (format, `minimal` refusé, `extra_body` refusé), when la recette la constate, then elle se corrige par `settings.json` (fusion par `id`), sans modifier le code.
 
 ## Design Notes
@@ -114,7 +114,7 @@ context: []
 - lancer « Tester » au diagnostic ;
 - jouer le scénario « Outils natifs » avec ses trois prompts, raisonnement éteint puis allumé, en contrôlant pour chaque tour `outbound_request.body`, `model_call_ended` (`reasoning`, `text`, `tool_calls[].extra_content`, `raw_output`, `stop_reason`, `usage_source`) et la carte Raisonnement ;
 - relire le tableau `/models` ;
-- chercher la clé dans le journal (`/api/events`), `wavestack.log` et `audit.log` : zéro occurrence, 4 premiers et 4 derniers caractères compris ;
+- chercher la clé dans le journal (`/api/events`), `harness_lab.log` et `audit.log` : zéro occurrence, 4 premiers et 4 derniers caractères compris ;
 - appliquer les replis si besoin (tags, `reasoning_effort` pour allumer, `gemini-3.6-flash`) ;
 - consigner les résultats dans `resultats-recette-gemini-2026-09-29.md`.
 

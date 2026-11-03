@@ -24,15 +24,15 @@ from test_rag_lab import QUESTION, ended, run, run_status, stage, wait_idle
 from test_rag_rerank import Rerankers, place_reranker, rerank_config
 from test_turn import _run as chat
 
-from wavestack import config
-from wavestack.messages import number
-from wavestack.models import probe
-from wavestack.models.engine import CancelToken, common_prefix_len
-from wavestack.rag import diagnosis, workcopy
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import RagPassage, load_rag_content
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.messages import number
+from harness_lab.models import probe
+from harness_lab.models.engine import CancelToken, common_prefix_len
+from harness_lab.rag import diagnosis, workcopy
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import RagPassage, load_rag_content
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.trace.journal import get_journal
 
 SMALL = ("mots_de_passe", "teletravail", "classification")
 OTHER_QUESTION = "Quelle longueur pour un mot de passe ?"
@@ -48,7 +48,7 @@ def index(tmp_path) -> Path:
 
 
 class Rss:
-    """WaveStack's memory as the registry reads it (an outside measure), set by the test."""
+    """HarnessLab's memory as the registry reads it (an outside measure), set by the test."""
 
     def __init__(self, value: int = 100 * MIB) -> None:
         self.value = value
@@ -712,7 +712,7 @@ def test_an_estimate_over_the_budget_builds_nothing(index, tmp_path):
     engine = Counting()
     session = lab(index, engine, model=str(path), rss=rss)
     assert session.active_model() is not None
-    rss.value = 3900 * MIB  # WaveStack now near its 4 096 Mo budget
+    rss.value = 3900 * MIB  # HarnessLab now near its 4 096 Mo budget
     events = run(session, pipeline=preset(session, "cag"))
     assert run_status(events) == "ok"
     assert engine.prefills == [] and engine.clears == 0
@@ -758,7 +758,7 @@ def test_a_conversation_keeps_its_context_around_the_cag(index):
 
 
 def test_the_chat_gauge_ignores_the_workshops_calls():
-    source = (Path(__file__).parents[1] / "src/wavestack/web/static/app.js").read_text(
+    source = (Path(__file__).parents[1] / "src/harness_lab/web/static/app.js").read_text(
         encoding="utf-8"
     )
     case = source[source.index('case "model_call_ended":') :]
@@ -945,7 +945,7 @@ class Merging(FakeEngine):
 
 
 def test_the_prefix_stays_an_exact_prefix_with_a_merging_tokenizer():
-    from wavestack.context.render import RenderedContext
+    from harness_lab.context.render import RenderedContext
 
     engine = Merging()
     prompt = "Consigne\nCorpus entier\nQuestion ?"

@@ -32,7 +32,7 @@ from pathlib import Path
 
 HEADROOM_VERSION = "0.38.0"
 # Headroom's own token count, in both variants: the same model as the adapter
-# (`wavestack.compression.headroom_adapter.COUNTING_MODEL`, checked equal by
+# (`harness_lab.compression.headroom_adapter.COUNTING_MODEL`, checked equal by
 # `tests/test_story12_bench.py`; only the standard library is imported here).
 # `cl100k_base` is in every copy of litellm; `o200k_base` (`gpt-4o`) was missing
 # on the target PC, and tiktoken tried to download it (lot F).
@@ -582,19 +582,19 @@ def _record_and_guard(
 
         urllib.request.getproxies_registry = lambda: {}  # Windows registry proxy (story 1e)
     try:
-        from wavestack.net.guard import install, office_proxies
+        from harness_lab.net.guard import install, office_proxies
     except ImportError:
         return attempts, "absente (lancer depuis le dépôt avec uv run)"
     install(allowed_hosts=allowed_hosts)
     if not strip_proxy:
-        # Story 1e: the guard confiscates the proxy for WaveStack's factory alone; this
+        # Story 1e: the guard confiscates the proxy for HarnessLab's factory alone; this
         # bench downloads with `huggingface_hub` and `fastembed` directly, so it hands the
         # copy back to the environment, knowingly reopening the 1e hole for its own
         # downloads: behind a loopback proxy the guard sees 127.0.0.1 only, never the host
-        # the tunnel reaches. A developer's tool, never WaveStack itself (AD-15).
+        # the tunnel reaches. A developer's tool, never HarnessLab itself (AD-15).
         for scheme, url in office_proxies().items():
             os.environ[f"{scheme}_proxy"] = url
-    return attempts, "wavestack.net.guard"
+    return attempts, "harness_lab.net.guard"
 
 
 def _rss_mb() -> int:
@@ -660,7 +660,7 @@ def added_rss_mb(
 
 def _blocked_host(exc: BaseException) -> str | None:
     try:
-        from wavestack.net.guard import find_blocked
+        from harness_lab.net.guard import find_blocked
     except ImportError:
         return None
     blocked = find_blocked(exc)
@@ -722,7 +722,7 @@ def headroom_samples() -> list[dict]:
     logs = "\n".join(
         f"2026-09-26T10:{i // 60:02d}:{i % 60:02d} INFO worker-3 tâche {i} terminée en 12 ms"
         for i in range(150)
-    ).replace("tâche 97 terminée en 12 ms", "FATAL disque plein sur /var/lib/wavestack, tâche 97")
+    ).replace("tâche 97 terminée en 12 ms", "FATAL disque plein sur /var/lib/harness-lab, tâche 97")
     prose = " ".join(
         [
             "Un harnais agentique entoure le modèle de langage de tout ce qui lui manque :",
@@ -1248,7 +1248,7 @@ def measured_result(scores: list[list[float]], stats: dict, rss_after_run_mb: in
 def download_candidates(models_dir: Path, selected: list[Candidate]) -> dict:
     """Fetch the candidates into `models_dir`, under the guard (HF hosts only).
 
-    Same settings as WaveStack (AD-15): Xet and HF telemetry off, the system
+    Same settings as HarnessLab (AD-15): Xet and HF telemetry off, the system
     trust store (TLS inspection on the corporate network), the proxy kept.
     """
     os.environ["HF_HUB_DISABLE_XET"] = "1"
@@ -1405,7 +1405,7 @@ def main(argv: list[str] | None = None) -> int:
     p_head.add_argument("--no-strace", action="store_true")
     p_head.add_argument("--json", action="store_true")
     p_emb = sub.add_parser("embed", help="banc des modèles d'embedding et de reranking")
-    p_emb.add_argument("--models-dir", default=str(Path.home() / ".cache" / "wavestack-bench"))
+    p_emb.add_argument("--models-dir", default=str(Path.home() / ".cache" / "harness-lab-bench"))
     p_emb.add_argument("--download", action="store_true")
     p_emb.add_argument("--only", nargs="*")
     p_emb.add_argument("--json", action="store_true")

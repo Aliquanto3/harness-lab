@@ -11,7 +11,7 @@ uv run python tools/eval/measure_cases.py --model C:\chemin\modele.gguf
 ```
 
 - Le modèle est celui du dossier des modèles réel (ou `--model`). L'outil fixe ensuite
-  `WAVESTACK_DATA_DIR` sur un dossier temporaire : la mémoire globale est celle de
+  `HARNESS_LAB_DATA_DIR` sur un dossier temporaire : la mémoire globale est celle de
   démonstration, les réglages et les données du formateur ne sont pas touchés.
 - Sortie : un tableau (appels par essai, max, plafond proposé, plafond du fichier, réussites)
   et les lignes `max_model_calls: N` à recopier **à la main** dans `content/agent_cases.yaml` et

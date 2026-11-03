@@ -9,7 +9,7 @@ Lancé le 2026-10-27 à la demande d'Anaël, après le run V1.5 (archivé dans [
 | Dans le run | Epics 16 à 16 | epic 16 dans `sprint-status.yaml` ; story 16.N = id N de `stories.yaml` |
 | Hors run | Recette guidée des sous-onglets RAG | session dédiée après le lot |
 
-Spec : `_bmad-output/specs/spec-wavestack-retours-2026-10-27/` (SPEC.md, brownfield.md, stories.yaml). Specs de story dans `stories/story-N.md` du même dossier.
+Spec : `_bmad-output/specs/spec-harness-lab-retours-2026-10-27/` (SPEC.md, brownfield.md, stories.yaml). Specs de story dans `stories/story-N.md` du même dossier.
 
 Au plus 4 stories en développement à la fois (3 au départ, 4e créneau autorisé par Anaël le 2026-10-27 ; E2E lancés un par un par l'orchestrateur)
 
@@ -28,7 +28,7 @@ Au plus 4 stories en développement à la fois (3 au départ, 4e créneau autori
 - `spec_checkpoint` (16.1, 16.6, 16.8, 16.9) : `dev-story` écrit `stories/story-N.md` et s'arrête ; Anaël la relit (notification) ; le code attend son accord. Les specs de V1 et V2 sont écrites en avance pour grouper les relectures.
 - 16.4 : maquette HTML (bmad-ux, DESIGN.md existant) dans le dossier de spec ; 16.7 attend la validation d'Anaël.
 - Fichiers partagés (`app_session.py`, `content/ui.yaml`, `app.js`, `pages.css`) : fusion l'une après l'autre, rebase avant revue.
-- Local : ruff + tests ciblés ; la CI de branche sert de suite complète. Worktrees `../wavestack-r27-s<N>`, branches `feat/r27-story-N-…`.
+- Local : ruff + tests ciblés ; la CI de branche sert de suite complète. Worktrees `../harness-lab-r27-s<N>`, branches `feat/r27-story-N-…`.
 - Chaque choix fait à la place d'Anaël : ligne `décision · à revoir`.
 
 ## Contrats
@@ -45,7 +45,7 @@ Run terminé : epic 16 fusionné, version 1.7.0 publiée. Suite : recette de la 
 
 ## Reprise après /clear
 
-- Lire ce fichier, puis `sprint-status.yaml` ; l'état réel prime : `gh pr list --state open`, `git -C ../wavestack-r27-s<N> log -3 --oneline`.
+- Lire ce fichier, puis `sprint-status.yaml` ; l'état réel prime : `gh pr list --state open`, `git -C ../harness-lab-r27-s<N> log -3 --oneline`.
 - Une story dont le dev a commité sans rapport : relancer la chaîne à partir de `second-avis` sur son dernier commit.
 - Fin de run : `rapport-run-retours-2026-10-27.md`, version 1.7.0, mémoire du projet, suppression des worktrees.
 

@@ -16,7 +16,7 @@ explanation_text:
   - - "Nutzen: weniger gelesene Tokens, also ein schnelleres erstes Token und mehr Platz im Fenster."
     - >-
       Kosten: Was abgeschnitten wird, ist für das Modell verloren. Headroom schreibt
-      „Retrieve more“, damit ein Agent den Rest abrufen kann, aber WaveStack stellt dieses
+      „Retrieve more“, damit ein Agent den Rest abrufen kann, aber HarnessLab stellt dieses
       Abruf-Tool nicht bereit: eine Grenze, die es zu zeigen gilt.
     - >-
       Daten: Headroom läuft im Prozess des Harness, offline, ohne Telemetrie (keine

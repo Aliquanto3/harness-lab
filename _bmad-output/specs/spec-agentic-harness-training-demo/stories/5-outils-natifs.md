@@ -31,7 +31,7 @@ baseline_commit: '5a054744ffdfa266fda7360b2393f8d6ebac9719'
 
 **Décisions (2026-09-24) :**
 - Story scindée : outils réseau, fabrique AD-15 et données sortantes en 5b (voir `deferred-work.md`).
-- Bornes affichées seulement ; réglables dans `wavestack.toml` (`[tools] max_calls = 6`, `max_retries = 2`).
+- Bornes affichées seulement ; réglables dans `harness-lab.toml` (`[tools] max_calls = 6`, `max_retries = 2`).
 - Activer la brique active les outils hors ligne ; les outils réseau (5b) seront désactivés par défaut.
 
 **Never:**
@@ -57,16 +57,16 @@ baseline_commit: '5a054744ffdfa266fda7360b2393f8d6ebac9719'
 
 ## Code Map
 
-- `src/wavestack/tools/` (nouveau) -- `registry.py` (`ToolSpec`, `ToolRegistry`, définitions JSON pour la variable `tools`), `native.py` (trois outils ; `read_file` via `config.content_dir()/"demo_files"` et `Path.resolve().is_relative_to`), `parser.py` (formats `qwen3_coder` `<tool_call><function=…><parameter=…>` et `hermes` `<tool_call>{json}</tool_call>` ; valeurs converties selon le schéma), `executor.py` (validation, `tool_started`/`tool_ended`, `CancelToken`). N'importe pas `bricks`.
-- `src/wavestack/session/app_session.py` -- `_turn` (L572) devient la boucle bornée ; `_call_model` (L606) remplit `model_call_ended.tool_calls` ; `_messages` (L395) ajoute les messages du tour (`assistant` avec `tool_calls`, `tool`) et l'historique étendu ; `_render` (L427) passe `tools` ; `Exchange` (L93) garde les étapes intermédiaires ; `TurnState` (L103) gagne les outils effectifs ; `_pending_ids`/`_sent` (L204, L161) couvrent les sous-options ; `_emit_bricks`/`_emit_architecture` (L214, L175) ajoutent sous-options, bornes, nœuds `tools.{name}` et `file.demo_dir` ; `_availability` (L350) : libellé français de la capacité. Nouvelle intention `set_tool(name, enabled)`, classe (a).
-- `src/wavestack/context/render.py` -- `render_context` (L188) : accepter `tools` en `Part` (sentinelles sur les chaînes de la définition, étape 3) et les valeurs de `tool_calls` ; fusion des morceaux de gabarit enclavés par groupe. Rendu des messages existants inchangé.
-- `src/wavestack/models/capabilities.py` -- `tool_call_parser` (L21) déjà posé ; `ChannelSplitter` (L69) : canal `tool_call` pour `<tool_call>…</tool_call>`.
-- `src/wavestack/trace/catalog.py` -- nouveaux `kind` : `tool_started{tool, arguments, phase_label}`, `tool_ended{status, result, error_fr, duration_ms}`, `tool_call_malformed{raw, fragment, detail_fr, reaction}`, `limit_reached{limit}`, `prefix_not_reused{common_tokens}` ; `BrickState` + `options`, `limits_fr` ; `ArchitectureNode.kind` + `tool`, `file`.
-- `src/wavestack/bricks/registry.py` -- brique `tools` (`category=harness`, `capabilities=["tool_call_parser"]`, un composant par outil, `tools.read_file` → `file.demo_dir`).
-- `src/wavestack/web/app.py` -- POST `/api/intentions/tool` `{tool, enabled}` (404 si inconnu), calqué sur `/brick`.
-- `src/wavestack/web/static/app.js` -- `renderBricks` (L274) : sous-options ; `renderSteps` (L605) : étapes description / demande / exécution / réinjection / réponse et `harness-event`. `GROUP_COLORS` (L31) couvre déjà `tool_catalog`/`tool_result`.
+- `src/harness_lab/tools/` (nouveau) -- `registry.py` (`ToolSpec`, `ToolRegistry`, définitions JSON pour la variable `tools`), `native.py` (trois outils ; `read_file` via `config.content_dir()/"demo_files"` et `Path.resolve().is_relative_to`), `parser.py` (formats `qwen3_coder` `<tool_call><function=…><parameter=…>` et `hermes` `<tool_call>{json}</tool_call>` ; valeurs converties selon le schéma), `executor.py` (validation, `tool_started`/`tool_ended`, `CancelToken`). N'importe pas `bricks`.
+- `src/harness_lab/session/app_session.py` -- `_turn` (L572) devient la boucle bornée ; `_call_model` (L606) remplit `model_call_ended.tool_calls` ; `_messages` (L395) ajoute les messages du tour (`assistant` avec `tool_calls`, `tool`) et l'historique étendu ; `_render` (L427) passe `tools` ; `Exchange` (L93) garde les étapes intermédiaires ; `TurnState` (L103) gagne les outils effectifs ; `_pending_ids`/`_sent` (L204, L161) couvrent les sous-options ; `_emit_bricks`/`_emit_architecture` (L214, L175) ajoutent sous-options, bornes, nœuds `tools.{name}` et `file.demo_dir` ; `_availability` (L350) : libellé français de la capacité. Nouvelle intention `set_tool(name, enabled)`, classe (a).
+- `src/harness_lab/context/render.py` -- `render_context` (L188) : accepter `tools` en `Part` (sentinelles sur les chaînes de la définition, étape 3) et les valeurs de `tool_calls` ; fusion des morceaux de gabarit enclavés par groupe. Rendu des messages existants inchangé.
+- `src/harness_lab/models/capabilities.py` -- `tool_call_parser` (L21) déjà posé ; `ChannelSplitter` (L69) : canal `tool_call` pour `<tool_call>…</tool_call>`.
+- `src/harness_lab/trace/catalog.py` -- nouveaux `kind` : `tool_started{tool, arguments, phase_label}`, `tool_ended{status, result, error_fr, duration_ms}`, `tool_call_malformed{raw, fragment, detail_fr, reaction}`, `limit_reached{limit}`, `prefix_not_reused{common_tokens}` ; `BrickState` + `options`, `limits_fr` ; `ArchitectureNode.kind` + `tool`, `file`.
+- `src/harness_lab/bricks/registry.py` -- brique `tools` (`category=harness`, `capabilities=["tool_call_parser"]`, un composant par outil, `tools.read_file` → `file.demo_dir`).
+- `src/harness_lab/web/app.py` -- POST `/api/intentions/tool` `{tool, enabled}` (404 si inconnu), calqué sur `/brick`.
+- `src/harness_lab/web/static/app.js` -- `renderBricks` (L274) : sous-options ; `renderSteps` (L605) : étapes description / demande / exécution / réinjection / réponse et `harness-event`. `GROUP_COLORS` (L31) couvre déjà `tool_catalog`/`tool_result`.
 - `content/tools.yaml`, `content/bricks/tools.yaml`, `content/demo_files/` (nouveaux) -- descriptions, libellés, 2-3 fichiers texte en français dont un sous-dossier `confidentiel/` (cible H1, story 8).
-- `wavestack.toml` -- section `[tools]`.
+- `harness-lab.toml` -- section `[tools]`.
 - `tests/fake_engine.py` -- `FakeEngine` : sorties scriptées par appel et `architecture` réglable ; tests d'outils sur le gabarit `tests/fixtures/qwen3_5_chat_template.jinja` (architecture `qwen35` → `qwen3_coder`).
 
 ## Tasks & Acceptance
@@ -75,14 +75,14 @@ baseline_commit: '5a054744ffdfa266fda7360b2393f8d6ebac9719'
 - [x] `trace/catalog.py` -- nouveaux `kind` et champs -- AD-2
 - [x] `tools/`, `content/tools.yaml`, `content/demo_files/` -- registre, trois outils, analyseur, exécuteur, confinement -- AD-14, AD-19
 - [x] `context/render.py`, `models/capabilities.py` -- `tools` et `tool_calls` attribués, canal `tool_call` -- AD-4, AD-6
-- [x] `bricks/registry.py`, `content/bricks/tools.yaml`, `session/app_session.py`, `wavestack.toml` -- brique, sous-options, boucle bornée, historique, `prefix_not_reused`, schéma -- AD-3, AD-10, AD-12, AD-17
+- [x] `bricks/registry.py`, `content/bricks/tools.yaml`, `session/app_session.py`, `harness-lab.toml` -- brique, sous-options, boucle bornée, historique, `prefix_not_reused`, schéma -- AD-3, AD-10, AD-12, AD-17
 - [x] `web/app.py`, `web/static/*` -- intention `tool`, sous-options, 5 étapes, échecs -- AD-1, AD-18
 - [x] `tests/` -- les 10 lignes de la matrice ; analyseur des deux formats ; attribution (somme = total, un `tool_catalog` par outil) ; outil inconnu au 404
 
 **Acceptance Criteria:**
 - Given la brique outils activée avec un modèle Qwen3.5, when on demande « combien font 12 × 37 ? », then le volet Orchestration montre les 5 étapes et la réponse cite 444.
 - Given la brique outils activée, when on regarde la jauge, then le catalogue d'outils y apparaît en « Descriptions d'outils » avec ses tokens.
-- Given un appel mal formé, when le tour se poursuit, then l'échec, la partie fautive et la réaction du harnais sont visibles, et WaveStack reste utilisable.
+- Given un appel mal formé, when le tour se poursuit, then l'échec, la partie fautive et la réaction du harnais sont visibles, et HarnessLab reste utilisable.
 
 ## Implementation Notes
 
@@ -143,4 +143,4 @@ Réactions (AD-14) : erreur d'analyse, outil inconnu/désactivé ou arguments in
 - `uv run pytest` -- expected: tous les tests passent (tests `model` exclus)
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` avec Qwen3.5 : activer la brique outils, demander l'heure, un calcul, puis le contenu d'un fichier de démonstration ; vérifier les 5 étapes, la jauge et le schéma ; désactiver un outil et vérifier l'erreur réinjectée quand le modèle l'appelle.
+- `uv run harness-lab` avec Qwen3.5 : activer la brique outils, demander l'heure, un calcul, puis le contenu d'un fichier de démonstration ; vérifier les 5 étapes, la jauge et le schéma ; désactiver un outil et vérifier l'erreur réinjectée quand le modèle l'appelle.

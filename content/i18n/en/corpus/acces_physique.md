@@ -1,6 +1,6 @@
 # Exemplia physical access policy
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this policy describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this policy describes no real company. -->
 
 Each Exemplia site is divided into 3 zones: normal (reception, open space), restricted (sensitive meeting rooms, technical rooms) and secure (server room, crisis room). A personal badge, issued to every employee from their first day, grants access to the zones their role needs.
 

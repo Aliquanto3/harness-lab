@@ -1,6 +1,6 @@
 # Exemplia compensation grid
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this grid describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this grid describes no real company. -->
 
 This document describes Exemplia's compensation structure; it is classed confidential and its access is reserved to human resources and management.
 

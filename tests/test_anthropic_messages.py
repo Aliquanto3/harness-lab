@@ -17,17 +17,17 @@ import pytest
 from pydantic import SecretStr
 from test_cloud import SENTINEL, _journal_text, _no_sentinel, _of, _turn
 
-from wavestack import config
-from wavestack.cloud import chat_fields
-from wavestack.context import render as render_module
-from wavestack.context.render import render_chat_body
-from wavestack.context.segments import Part, SegmentKind
-from wavestack.models.anthropic_messages import AnthropicMessagesEngine
-from wavestack.models.cloud_api import create_cloud_engine
-from wavestack.models.cloud_base import ChatBody, ProviderError, reset_spend, run_call
-from wavestack.models.engine import DEFAULT_SAMPLING, CancelToken
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.cloud import chat_fields
+from harness_lab.context import render as render_module
+from harness_lab.context.render import render_chat_body
+from harness_lab.context.segments import Part, SegmentKind
+from harness_lab.models.anthropic_messages import AnthropicMessagesEngine
+from harness_lab.models.cloud_api import create_cloud_engine
+from harness_lab.models.cloud_base import ChatBody, ProviderError, reset_spend, run_call
+from harness_lab.models.engine import DEFAULT_SAMPLING, CancelToken
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 # A signature holding the key's last 4 characters: verbatim in the body sent, masked in the
 # events that do not trace the bytes sent (AD-15).
@@ -985,7 +985,7 @@ def test_a_provider_error_is_a_provider_error():
 
 def test_the_diagnostic_test_runs_through_the_messages_api():
     """« Tester » (CAP-2): the fixed tool call, then its reply, in Anthropic's own shapes."""
-    from wavestack.session.diagnostic import DiagnosticSession
+    from harness_lab.session.diagnostic import DiagnosticSession
 
     cfg = config.load_config()
     entry = _entry()
@@ -1152,7 +1152,7 @@ def test_an_entry_that_always_reasons_sends_its_thinking_back_with_the_brick_off
 def test_the_diagnostic_test_sends_the_thinking_back_for_an_entry_that_always_reasons(
     monkeypatch,
 ):
-    from wavestack.session.diagnostic import DiagnosticSession
+    from harness_lab.session.diagnostic import DiagnosticSession
 
     cfg = config.load_config()
     entry = _always(_entry())

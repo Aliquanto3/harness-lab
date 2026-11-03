@@ -20,13 +20,13 @@ deferred: []
 
 **Problem:** Sept comportements livrés ne sont protégés par aucun test (CAP-1 de `SPEC.md`) : une mutation nommée dans chaque entrée de `deferred-work.md` passerait pytest. La garde réseau (AD-15) laisse en outre passer une résolution par `socket.gethostbyname`/`gethostbyname_ex` et un envoi UDP par `socket.sendto`.
 
-**Approach:** Un test par entrée, écrit pour échouer sur la mutation qu'elle nomme ; ajouter les trois événements d'audit au hook de `src/wavestack/net/guard.py`, avec la même règle que `getaddrinfo` / `connect`.
+**Approach:** Un test par entrée, écrit pour échouer sur la mutation qu'elle nomme ; ajouter les trois événements d'audit au hook de `src/harness_lab/net/guard.py`, avec la même règle que `getaddrinfo` / `connect`.
 
 ## Boundaries & Constraints
 
 **Always:**
 - Entrées fermées (`closed: <date> (story 1 des restes différés) — <test>`) :
-  - **E008** — test marqué `model`, sauté sans `WAVESTACK_TEST_GGUF`, qui exerce `LlamaCppEngine.complete` sur un vrai GGUF : arrêt sur EOG, sortie coupée à exactement `max_tokens`, séquence d'arrêt jamais émise (ni son préfixe), annulation, décodage UTF-8 incrémental (caractère multi-octets coupé entre deux tokens).
+  - **E008** — test marqué `model`, sauté sans `HARNESS_LAB_TEST_GGUF`, qui exerce `LlamaCppEngine.complete` sur un vrai GGUF : arrêt sur EOG, sortie coupée à exactement `max_tokens`, séquence d'arrêt jamais émise (ni son préfixe), annulation, décodage UTF-8 incrémental (caractère multi-octets coupé entre deux tokens).
   - **E013** — `socket.gethostbyname`, `socket.gethostbyname_ex` et `socket.sendto` vers un hôte ou une IP hors liste sont refusés par la garde et tracés comme les autres refus ; boucle locale permise.
   - **E022** — test paramétré sur les vraies déclarations `skills`, `tools`, `mcp` (et `subagent` si elle déclare la capacité) de `bricks/registry.py` : sur un modèle sans `tool_call_parser`, chacune est indisponible avec sa raison.
   - **E025** — H2 : une écriture d'`audit.log` qui échoue en `after_tool` (échec ponctuel injecté) puis réussit en `on_turn_end` du même tour ; le fichier contient toutes les lignes, sans trou ni doublon.
@@ -53,21 +53,21 @@ deferred: []
 
 ## Code Map
 
-- `src/wavestack/net/guard.py` -- `install()` → `hook(event, args)` : `socket.getaddrinfo` passe par `check_host`, `socket.connect` par la règle « IP résolue pour un hôte permis, ou hôte permis » (`_resolved`, `is_host_allowed`). Garder intacts les ajouts de la story 1e (`_confiscate_proxies`, `office_proxies`, `_proxy_hosts`). Événements d'audit Python : `socket.gethostbyname(hostname)`, `socket.gethostbyname_ex(hostname)`, `socket.sendto(self, address)`.
+- `src/harness_lab/net/guard.py` -- `install()` → `hook(event, args)` : `socket.getaddrinfo` passe par `check_host`, `socket.connect` par la règle « IP résolue pour un hôte permis, ou hôte permis » (`_resolved`, `is_host_allowed`). Garder intacts les ajouts de la story 1e (`_confiscate_proxies`, `office_proxies`, `_proxy_hosts`). Événements d'audit Python : `socket.gethostbyname(hostname)`, `socket.gethostbyname_ex(hostname)`, `socket.sendto(self, address)`.
 - `tests/test_net_guard.py` -- `_run_guarded(body)` exécute un corps dans un processus enfant sous la garde (`allowed = fr.wikipedia.org, huggingface.co, *.hf.co`), aides `refused`, `connect`; liste paramétrée de `test_guard_connect_filter` à compléter. Le processus pytest a lui-même la garde (boucle locale seule, `conftest._network_guard`).
-- `src/wavestack/bricks/registry.py` -- `BRICKS` : `tools`, `mcp`, `skills`, `subagent` déclarent `capabilities=["tool_call_parser"]`, `reasoning` déclare `capabilities=["reasoning"]` ; aucune brique n'a de `requires`.
-- `src/wavestack/session/app_session.py` -- `_availability` / `_capability_reason` (point unique AD-12) ; `_hook` recopie les arguments modifiés dans le résultat `ask_human` (`replace(result, arguments=call.arguments …)`) ; `_apply_audit` n'émet `effect_applied` (curseur de H2) qu'après une écriture réussie. Ne pas modifier.
-- `src/wavestack/hooks.py` -- `audit` (H2) reprend après le dernier `effect_applied` de `file.audit`.
-- `src/wavestack/models/engine.py` -- `LlamaCppEngine.complete` (EOG, `count >= max_tokens`, `cut_stop`, `cancel.cancelled`, décodeur UTF-8 incrémental) ; attributs `_lib`, `_llm`, `_tokenizer`, `_last_evaluated`. Ne pas modifier.
+- `src/harness_lab/bricks/registry.py` -- `BRICKS` : `tools`, `mcp`, `skills`, `subagent` déclarent `capabilities=["tool_call_parser"]`, `reasoning` déclare `capabilities=["reasoning"]` ; aucune brique n'a de `requires`.
+- `src/harness_lab/session/app_session.py` -- `_availability` / `_capability_reason` (point unique AD-12) ; `_hook` recopie les arguments modifiés dans le résultat `ask_human` (`replace(result, arguments=call.arguments …)`) ; `_apply_audit` n'émet `effect_applied` (curseur de H2) qu'après une écriture réussie. Ne pas modifier.
+- `src/harness_lab/hooks.py` -- `audit` (H2) reprend après le dernier `effect_applied` de `file.audit`.
+- `src/harness_lab/models/engine.py` -- `LlamaCppEngine.complete` (EOG, `count >= max_tokens`, `cut_stop`, `cancel.cancelled`, décodeur UTF-8 incrémental) ; attributs `_lib`, `_llm`, `_tokenizer`, `_last_evaluated`. Ne pas modifier.
 - `tests/fake_engine.py` (`FakeEngine`, `CHATML`, `booted_session`), `tests/test_tools.py` (`QWEN`, `call`, fixture `web`), `tests/test_hooks.py` (`hooks_session`, `fake_hooks`, `run_asked`, `answer`, `audit_lines`, `HOLIDAYS`), `tests/test_model_switch.py` (`_booted`, `_switch`, `_events`) -- aides à réutiliser.
 - `_bmad-output/implementation-artifacts/deferred-work.md` -- fermer les sept entrées (E008 l. 34, E013 l. 57, E022 l. 98, E025 l. 110, E027 l. 119, E056 l. 244, E066 l. 289).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/net/guard.py` -- `hook` : `socket.gethostbyname` et `socket.gethostbyname_ex` → `check_host(args[0])` ; `socket.sendto` → même règle que `socket.connect` sur `args[1]` (factoriser) ; docstring du module à jour -- E013.
+- [x] `src/harness_lab/net/guard.py` -- `hook` : `socket.gethostbyname` et `socket.gethostbyname_ex` → `check_host(args[0])` ; `socket.sendto` → même règle que `socket.connect` sur `args[1]` (factoriser) ; docstring du module à jour -- E013.
 - [x] `tests/test_net_guard.py` -- cas paramétrés : `gethostbyname`/`gethostbyname_ex` d'un hôte hors liste refusés (`net.host_refused`), d'un hôte permis ou de `localhost` acceptés ; `sendto` UDP vers `203.0.113.5` ou vers un nom hors liste refusé (`net.address_refused`), vers `127.0.0.1` envoyé et reçu -- E013.
-- [x] `tests/test_llama_engine.py` (nouveau) -- les cinq comportements de `LlamaCppEngine.complete`, joués sur deux moteurs par une fixture paramétrée : `gguf` (marqué `model`, sauté sans `WAVESTACK_TEST_GGUF`, échantillonnage glouton) et `stub` (vrai `complete` sur un faux `llama_cpp` scripté) -- E008.
+- [x] `tests/test_llama_engine.py` (nouveau) -- les cinq comportements de `LlamaCppEngine.complete`, joués sur deux moteurs par une fixture paramétrée : `gguf` (marqué `model`, sauté sans `HARNESS_LAB_TEST_GGUF`, échantillonnage glouton) et `stub` (vrai `complete` sur un faux `llama_cpp` scripté) -- E008.
 - [x] `tests/test_bricks.py` -- test paramétré sur `skills`, `tools`, `mcp`, `subagent` des vraies `BRICKS`, modèle `FakeEngine()` sans analyseur : indisponible, raison « l'appel d'outils » -- E022.
 - [x] `tests/test_hooks.py` -- H2 : échec ponctuel injecté sur la première écriture (`config.audit_path` pointé sur un dossier le temps d'un appel de `_apply_audit`), puis quatre lignes dans l'ordre, une seule erreur tracée -- E025 ; hook `before_tool` qui modifie `year` + H5 + `public_holidays` : aperçu, `outbound_request` et requête envoyée portent `year` modifié -- E027.
 - [x] `tests/test_model_switch.py` -- Raisonnement voulue sur A (CHATML) : indisponible avec la raison ; passage à chaud vers B (gabarit Qwen) : disponible, carte `wanted` et `available`, réserve de raisonnement dans l'aperçu ; aucun `set_brick` entre les deux -- E056, E066.
@@ -75,7 +75,7 @@ deferred: []
 
 **Acceptance Criteria:**
 - Given chaque test ajouté, when la mutation de son entrée est appliquée à la main, then il échoue ; défaite, il passe (consigné dans Implementation Notes).
-- Given aucun `WAVESTACK_TEST_GGUF`, when on lance `tests/test_llama_engine.py`, then les cas `stub` passent et les cas `gguf` ne sont pas collectés (`-m 'not model'`) ou sont sautés.
+- Given aucun `HARNESS_LAB_TEST_GGUF`, when on lance `tests/test_llama_engine.py`, then les cas `stub` passent et les cas `gguf` ne sont pas collectés (`-m 'not model'`) ou sont sautés.
 - Given la garde installée, when un hôte permis est résolu par `gethostbyname`, then aucun refus (pas de régression sur les clients qui résolvent ainsi un hôte de la liste).
 
 ## Design Notes
@@ -94,7 +94,7 @@ E013 : un nom passé à `sendto` (résolu en C, sans `getaddrinfo`) suit la règ
 
 - Implémenté directement par l'agent de la story, sans sous-agent : la nuit, un autre agent tourne sur le même PC de 16 Go, et les règles du mode nuit (pas de réseau, pas de modèle, fichiers de tests touchés seulement) ne pouvaient pas passer par le seul texte de la spec.
 - E013 : `gethostbyname_ex` lève l'événement `socket.gethostbyname` (vérifié sous Python 3.13.5) ; il n'existe pas d'événement `socket.gethostbyname_ex`. `sendto` reçoit un nom déjà résolu en C avant l'événement : le test n'envoie que des IP en vrai, le cas « nom hors liste » passe par `sys.audit`. Les cas hors liste ajoutent après la garde un hook qui arrête l'appel à l'événement : sous une régression, rien ne part. ARCHITECTURE-SPINE (AD-15) mis à jour : quatre événements.
-- E008 : nouveau fichier `tests/test_llama_engine.py` plutôt que `test_render_reference.py` (celui-ci porte le rendu AD-4). La fixture `stub` bâtit un `LlamaCppEngine` par `__new__` avec un faux `_llm.generate`, `_tokenizer` et `_lib` : le vrai `complete` tourne sans modèle, ce qui permet de vérifier les mutations. Les cas `gguf` sont désélectionnés par défaut (`-m 'not model'`) et sautés sans `WAVESTACK_TEST_GGUF` (vérifié avec `-m model`) ; jamais lancés sur un vrai GGUF.
+- E008 : nouveau fichier `tests/test_llama_engine.py` plutôt que `test_render_reference.py` (celui-ci porte le rendu AD-4). La fixture `stub` bâtit un `LlamaCppEngine` par `__new__` avec un faux `_llm.generate`, `_tokenizer` et `_lib` : le vrai `complete` tourne sans modèle, ce qui permet de vérifier les mutations. Les cas `gguf` sont désélectionnés par défaut (`-m 'not model'`) et sautés sans `HARNESS_LAB_TEST_GGUF` (vérifié avec `-m model`) ; jamais lancés sur un vrai GGUF.
 - E027 : `public_holidays` attend un entier ; un hook qui passerait `"2027"` ferait échouer H5 (`TypeError` hors `ToolError`), tracé comme hook en échec. Le test passe `2027`.
 - Mutations appliquées à la main puis défaites (chaque fois : le test visé échoue, les autres passent ; défaite, tout passe) :
   - E013 : `_RESOLVE_EVENTS`/`_SEND_EVENTS` ramenés à `getaddrinfo`/`connect` → `gethostbyname-off-list` et `sendto-off-list` échouent.

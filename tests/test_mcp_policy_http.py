@@ -141,7 +141,7 @@ def test_github_connect_http_refuses_on_a_network_failure(loop):  # noqa: F811
 def test_github_disconnect_http_clears_the_token(loop):  # noqa: F811
     import time
 
-    from wavestack.mcp import github_auth
+    from harness_lab.mcp import github_auth
 
     session = mcp_session(loop)
     session._github._token = github_auth.GithubToken(
@@ -165,7 +165,7 @@ def test_a_proxy_page_never_breaks_the_mcp_page(loop, tmp_path):  # noqa: F811
     `GET /api/mcp_lab` stays a 200 while a device flow is pending."""
     import httpx
 
-    from wavestack.mcp import github_auth
+    from harness_lab.mcp import github_auth
 
     def proxy(request):  # noqa: ANN001, ANN202
         return httpx.Response(200, text="<html>proxy</html>")

@@ -10,12 +10,12 @@ Strasbourg, Berlin (en allemand). Mêmes phrases en anglais pour les rerankers.
 
 | Modèle | Fichier (dépôt @ commit) | Taille | sha256 (= oid LFS HF) | Résultat |
 | --- | --- | --- | --- | --- |
-| Granite Embedding 107M (référence) | bartowski/granite-embedding-107m-multilingual-GGUF @ 52fed1c | 121 020 096 | (déjà dans `wavestack.toml`) | OK, 384 dims, pooling CLS, cos 0,89 / 0,52 / 0,77, RSS +443 Mo |
+| Granite Embedding 107M (référence) | bartowski/granite-embedding-107m-multilingual-GGUF @ 52fed1c | 121 020 096 | (déjà dans `harness-lab.toml`) | OK, 384 dims, pooling CLS, cos 0,89 / 0,52 / 0,77, RSS +443 Mo |
 | multilingual-e5-small Q8_0 | TwinSunsLLC/multilingual-e5-small-gguf @ b6cac96, `multilingual-e5-small-q8_0.gguf` | 132 439 008 | e011debc1208e31bf7b6aebee2d9fc8bd2ca11694a77ed66ac9d0c9d0a877c93 | OK, 384 dims, pooling MEAN, licence MIT ; avec `query: ` / `passage: ` cos 0,87 / 0,78 / 0,79 (échelle tassée, propre à e5), RSS +440 Mo |
 | multilingual-e5-small (cstr) | cstr/multilingual-e5-small-GGUF @ 178420d | 131 624 960 | — | **Refusé par llama.cpp** : « bert model needs to define token type count » (conversion ancienne) |
 | multilingual-e5-small (keisuke-miyako) | keisuke-miyako/multilingual-e5-small-gguf-q8_0 @ e1da944 | 131 953 504 | — | Se charge, mais ne discrimine pas (cos 0,95 / 0,94 / 0,93) : écarté |
 | Qwen3-Embedding-0.6B Q8_0 | Qwen/Qwen3-Embedding-0.6B-GGUF @ 370f27d, `Qwen3-Embedding-0.6B-Q8_0.gguf` | 639 150 592 | 06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439 | OK, 1 024 dims, pooling LAST lu dans le GGUF, Apache-2.0 ; avec l'instruction de requête cos 0,77 / 0,37 / 0,41 ; RSS +1 055 Mo à `max_tokens = 2048` |
-| BGE Reranker v2 M3 (référence) | gpustack/bge-reranker-v2-m3-GGUF @ 3093af0 | 438 376 864 | (déjà dans `wavestack.toml`) | OK, scores 0,998 / 0,014 / 0,005, RSS +729 Mo |
+| BGE Reranker v2 M3 (référence) | gpustack/bge-reranker-v2-m3-GGUF @ 3093af0 | 438 376 864 | (déjà dans `harness-lab.toml`) | OK, scores 0,998 / 0,014 / 0,005, RSS +729 Mo |
 | Qwen3-Reranker-0.6B Q8_0 | ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF @ a02f48b, `qwen3-reranker-0.6b-q8_0.gguf` | 639 153 184 | 22c9979ce4fbcdc5acdc310c6641c32797eff1aa980b8f7a2db8a8ea23429a48 | OK **à deux conditions** (voir ci-dessous) ; RSS +937 Mo |
 | ms-marco-MiniLM-L6-v2 Q8_0 | toolittlecakes/ms-marco-MiniLM-L6-v2-Q8_0-GGUF @ 72e3ad8 | 25 281 216 | — | Se charge, **scores plats** même en anglais (0,50 / 0,48 / 0,49) : écarté |
 | ms-marco-MiniLM-L12-v2 Q8_0 | mradermacher/ms-marco-MiniLM-L12-v2-GGUF @ 2691566 | — | — | Idem (0,48 / 0,43 / 0,45 en anglais) : écarté |

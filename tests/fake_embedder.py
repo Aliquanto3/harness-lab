@@ -7,7 +7,7 @@ import hashlib
 import re
 from collections.abc import Sequence
 
-from wavestack.models.embedding import normalize
+from harness_lab.models.embedding import normalize
 
 DIMS = 64
 MODEL_ID = "fake-embedding"

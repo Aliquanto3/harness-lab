@@ -12,7 +12,7 @@ terms:
     definition: "Un modèle de langage placé dans une boucle : il lit le contexte, choisit de répondre ou d'appeler un outil, lit le résultat, et recommence jusqu'à avoir fini. L'agent lui-même tient en quelques lignes ; tout le reste est le harnais."
   harness:
     term: "Harnais"
-    definition: "Tout ce qui entoure le modèle pour en faire un agent utilisable : prompt système, mémoire, outils, RAG, MCP, skills, hooks, sous-agents, garde-fous et journal. WaveStack montre ces briques une à une."
+    definition: "Tout ce qui entoure le modèle pour en faire un agent utilisable : prompt système, mémoire, outils, RAG, MCP, skills, hooks, sous-agents, garde-fous et journal. HarnessLab montre ces briques une à une."
   llm:
     term: "LLM (grand modèle de langage)"
     definition: "Un modèle qui prédit le mot (le token) suivant d'un texte. Seul, il ne fait que continuer le texte reçu : il n'agit pas, ne se souvient de rien et ne sait rien de ce qui est postérieur à son entraînement."
@@ -24,7 +24,7 @@ terms:
     definition: "L'unité de texte que lit et produit le modèle : un mot, un morceau de mot ou un signe. Le coût, la vitesse et la taille de la fenêtre de contexte se comptent en tokens."
   fragment:
     term: "Fragment"
-    definition: "Le morceau de texte qu'un fournisseur cloud envoie dans un « delta » de sa réponse en flux : il ne correspond pas forcément à un seul token du modèle, puisque WaveStack ne voit que ce que l'API laisse passer, jamais le découpage exact du fournisseur."
+    definition: "Le morceau de texte qu'un fournisseur cloud envoie dans un « delta » de sa réponse en flux : il ne correspond pas forcément à un seul token du modèle, puisque HarnessLab ne voit que ce que l'API laisse passer, jamais le découpage exact du fournisseur."
   context_window:
     term: "Fenêtre de contexte"
     definition: "Le nombre maximal de tokens que le modèle peut lire en un appel : prompt système, historique, résultats d'outils et question. Au-delà, il faut retirer ou résumer quelque chose."
@@ -54,7 +54,7 @@ terms:
     definition: "Le stockage des poids du modèle sur moins de bits pour qu'il tienne en mémoire et tourne plus vite sur CPU, au prix d'une légère perte de qualité."
   gguf:
     term: "GGUF"
-    definition: "Le format de fichier des modèles quantifiés que lit le moteur local de WaveStack (llama.cpp). Un fichier GGUF contient les poids et leur description."
+    definition: "Le format de fichier des modèles quantifiés que lit le moteur local de HarnessLab (llama.cpp). Un fichier GGUF contient les poids et leur description."
   tool:
     term: "Outil"
     definition: "Une fonction que le harnais met à disposition du modèle (lire un fichier, interroger une API, calculer). Le modèle demande l'appel ; c'est le harnais qui l'exécute."
@@ -99,7 +99,7 @@ terms:
     definition: "Raccourcir les gros résultats d'outils et les extraits RAG avant l'appel au modèle. Ce qui est coupé est perdu pour lui."
   headroom:
     term: "Headroom"
-    definition: "La bibliothèque de compression que WaveStack utilise pour raccourcir le texte structuré (JSON, journaux) en gardant les lignes qui comptent."
+    definition: "La bibliothèque de compression que HarnessLab utilise pour raccourcir le texte structuré (JSON, journaux) en gardant les lignes qui comptent."
   caveman:
     term: "Caveman"
     definition: "Une consigne qui demande au modèle des réponses très courtes, pour réduire les tokens de sortie, donc la durée et le coût d'un tour."
@@ -141,10 +141,10 @@ terms:
     definition: "Un événement du journal, avec son type, son numéro d'ordre et ses données. Les vérifications d'un cas d'agent se calculent sur les enveloppes d'un tour."
   provenance:
     term: "Provenance"
-    definition: "L'origine d'un cas d'agent : fourni avec WaveStack, issu d'une recette, ou tiré d'un tour raté de la séance."
+    definition: "L'origine d'un cas d'agent : fourni avec HarnessLab, issu d'une recette, ou tiré d'un tour raté de la séance."
   replay:
     term: "Rejeu"
-    definition: "Rejouer un tour ou un cas pour observer à nouveau le résultat. Dans WaveStack, le rejeu réexécute les outils : il ne relit pas le journal."
+    definition: "Rejouer un tour ou un cas pour observer à nouveau le résultat. Dans HarnessLab, le rejeu réexécute les outils : il ne relit pas le journal."
   witness_replay:
     term: "Rejeu témoin"
     definition: "Un rejeu fait pour comparer, tour par tour, ce que donne le même scénario avant et après un changement, en gardant le tour d'origine comme témoin."
@@ -183,7 +183,7 @@ terms:
     definition: "La part des cas qui réussissent à chacun des k essais. Elle mesure la fiabilité : c'est la valeur qui compte pour un agent qui doit marcher à tous les coups."
   llm_judge:
     term: "Juge LLM"
-    definition: "Un second modèle chargé de noter la réponse d'un premier. Pratique, mais lui aussi se trompe et varie d'un essai à l'autre ; WaveStack s'en passe et vérifie des faits du journal."
+    definition: "Un second modèle chargé de noter la réponse d'un premier. Pratique, mais lui aussi se trompe et varie d'un essai à l'autre ; HarnessLab s'en passe et vérifie des faits du journal."
   guide:
     term: "guide"
     definition: "Un élément du harnais qui oriente le modèle avant qu'il agisse : une règle, une instruction ou un exemple placé dans le contexte (prompt système, mémoire, description d'un outil). Il cadre par avance, sans rien contrôler après coup."

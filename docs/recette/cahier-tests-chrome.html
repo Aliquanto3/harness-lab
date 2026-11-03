@@ -3,23 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cahier de tests WaveStack</title>
+<title>Cahier de tests HarnessLab</title>
 <style>
   :root {
     --bg: #f6f7f9; --surface: #ffffff; --text: #1b1f24; --muted: #5b6470; --border: #d9dde3;
-    --accent: #4b2bd6; --ok: #1f7a3d; --ok-bg: #e3f4e8; --ko: #b42318; --ko-bg: #fde7e5;
+    --accent: #0b6b78; --ok: #1f7a3d; --ok-bg: #e3f4e8; --ko: #b42318; --ko-bg: #fde7e5;
     --blocked: #8a5a00; --blocked-bg: #fdf1d8; --todo-bg: #eef0f3;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #12151a; --surface: #1b1f26; --text: #e7eaee; --muted: #9aa3ae; --border: #2e343d;
-      --accent: #a594ff; --ok: #6fd28f; --ok-bg: #173323; --ko: #ff8a80; --ko-bg: #3a1c1a;
+      --accent: #4fc1cf; --ok: #6fd28f; --ok-bg: #173323; --ko: #ff8a80; --ko-bg: #3a1c1a;
       --blocked: #f2c25b; --blocked-bg: #3a2e12; --todo-bg: #262b33;
     }
   }
   :root[data-theme="dark"] {
     --bg: #12151a; --surface: #1b1f26; --text: #e7eaee; --muted: #9aa3ae; --border: #2e343d;
-    --accent: #a594ff; --ok: #6fd28f; --ok-bg: #173323; --ko: #ff8a80; --ko-bg: #3a1c1a;
+    --accent: #4fc1cf; --ok: #6fd28f; --ok-bg: #173323; --ko: #ff8a80; --ko-bg: #3a1c1a;
     --blocked: #f2c25b; --blocked-bg: #3a2e12; --todo-bg: #262b33;
   }
   * { box-sizing: border-box; }
@@ -70,13 +70,13 @@
 </head>
 <body>
 <main>
-  <h1>Cahier de tests fonctionnels : WaveStack</h1>
+  <h1>Cahier de tests fonctionnels : HarnessLab</h1>
   <p class="lead">Campagne de démonstration exécutée par Claude in Chrome. Chaque cas cible ce qu'un test
     unitaire, d'intégration ou E2E scripté vérifie mal : un jugement sur le sens, un recoupement entre
     sources, un avis visuel ou une exploration.</p>
 
   <section class="meta" aria-label="Contexte de la campagne">
-    <div><span>Application</span>WaveStack, http://127.0.0.1:8420</div>
+    <div><span>Application</span>HarnessLab, http://127.0.0.1:8420</div>
     <div><span>Version</span><span id="meta-version">main @ d239b09</span></div>
     <div><span>Campagne</span><span id="meta-run">modèle vierge</span></div>
     <div><span>Environnement</span>Windows 11, Chrome, modèle local sur CPU</div>
@@ -100,7 +100,7 @@
       <li>Relever les erreurs de la console JavaScript.</li>
     </ol>
     <h3>Résultat attendu</h3>
-    <p>Chaque écran s'affiche sans erreur, l'onglet actif est mis en évidence dans la barre, et le titre du navigateur correspond à celui de la page (« WaveStack — Atelier LLM », etc.).</p>
+    <p>Chaque écran s'affiche sans erreur, l'onglet actif est mis en évidence dans la barre, et le titre du navigateur correspond à celui de la page (« HarnessLab — Atelier LLM », etc.).</p>
     <p class="beyond"><strong>Au-delà de l'E2E :</strong> le testeur juge si l'écran « a l'air cassé » (zone vide, texte tronqué) sans sélecteur prévu à l'avance.</p>
     <div class="verdict" data-case="CT-01"></div>
   </article>
@@ -169,7 +169,7 @@
       <li>Revenir au français.</li>
     </ol>
     <h3>Résultat attendu</h3>
-    <p>Tous les libellés visibles sont en allemand. Les noms propres (WaveStack, MCP, RAG) et les contenus générés par le modèle sont hors périmètre.</p>
+    <p>Tous les libellés visibles sont en allemand. Les noms propres (HarnessLab, MCP, RAG) et les contenus générés par le modèle sont hors périmètre.</p>
     <p class="beyond"><strong>Au-delà de l'E2E :</strong> repérer une phrase française dans une page allemande demande de lire la langue, pas de comparer des clés.</p>
     <div class="verdict" data-case="CT-06"></div>
   </article>
@@ -183,7 +183,7 @@
 <script>
   const STATUSES = [["todo", "À exécuter"], ["ok", "OK"], ["ko", "KO"], ["blocked", "Bloqué"]];
   // One state per copy: each campaign file starts blank, whatever the other copies hold.
-  const KEY = "wavestack-cahier:" + location.pathname;
+  const KEY = "harness-lab-cahier:" + location.pathname;
   let state = null;
   try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
   if (!state) { try { state = JSON.parse(document.getElementById("seed").textContent) || {}; } catch (e) { state = {}; } }

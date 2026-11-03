@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import pytest
 
-from wavestack.mcp.policy import ToolPolicy
-from wavestack.mcp.security_log import SecurityJournal
+from harness_lab.mcp.policy import ToolPolicy
+from harness_lab.mcp.security_log import SecurityJournal
 
 
 def test_defaults_match_mcp_tools_md():

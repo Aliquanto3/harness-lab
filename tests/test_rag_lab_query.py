@@ -16,7 +16,7 @@ from test_rag_lab import QUESTION, ended, run, run_status, stage
 from test_rag_lab_generation import own_chain
 from test_rag_rerank import place_reranker, rerank_config, session_for
 
-from wavestack.rag import lab as rag_lab
+from harness_lab.rag import lab as rag_lab
 
 HOPS = "Combien de jours de télétravail ?\n- Quel est le délai de préavis ?\n"
 ANSWER = "Quatorze caractères."
@@ -246,7 +246,7 @@ def test_every_option_of_a_sheeted_kind_has_a_sheet_with_a_source(lang):
 def test_a_missing_sheet_is_refused():
     import yaml
 
-    from wavestack import config
+    from harness_lab import config
 
     raw = yaml.safe_load(config.content_file("rag_lab.yaml", "fr").read_text(encoding="utf-8"))
     del raw["sheets"]["query.hyde"]

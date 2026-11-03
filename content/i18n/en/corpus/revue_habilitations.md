@@ -1,6 +1,6 @@
 # Exemplia access rights review
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this procedure describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this procedure describes no real company. -->
 
 An access right is a permission to use an application, a shared folder or a physical zone, described in the physical access policy for premises. This document sets the rules for their regular review.
 

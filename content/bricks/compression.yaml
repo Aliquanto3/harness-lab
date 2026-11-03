@@ -16,7 +16,7 @@ explanation_text:
   - - "Gain : moins de tokens lus, donc un premier token plus rapide et plus de place dans la fenêtre."
     - >-
       Coût : ce qui est coupé est perdu pour le modèle. Headroom écrit « Retrieve more »
-      pour qu'un agent récupère la suite, mais WaveStack ne fournit pas cet outil de
+      pour qu'un agent récupère la suite, mais HarnessLab ne fournit pas cet outil de
       récupération : c'est une limite à montrer.
     - >-
       Données : Headroom tourne dans le processus du harnais, hors ligne, sans télémétrie

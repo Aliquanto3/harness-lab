@@ -80,9 +80,9 @@ d'interface en fr, en, de.
   `skills` avec le 2B ; fermer chaque entrée sur le relevé (appels attendus, `prompt_ms` du
   premier appel de chaque quiz < 15 s, pas de `prefix_not_reused` de cause `history`), ou la
   laisser ouverte avec le constat.
-- **#7** : `tests/test_program.py` en mode exact (`WAVESTACK_TEST_GGUF` sur le 2B).
+- **#7** : `tests/test_program.py` en mode exact (`HARNESS_LAB_TEST_GGUF` sur le 2B).
 - **Installation à blanc** (objectif SM-5) : `git archive` de la branche en zip, décompression
-  dans un dossier temporaire, procédure du README à la lettre avec un `WAVESTACK_DATA_DIR`
+  dans un dossier temporaire, procédure du README à la lettre avec un `HARNESS_LAB_DATA_DIR`
   vide, sans droits admin ; chronométrer jusqu'à l'atelier prêt (cible < 20 min hors
   téléchargement du modèle) ; noter chaque écart au README.
 

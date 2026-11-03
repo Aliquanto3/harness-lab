@@ -1,15 +1,15 @@
 ---
-title: "Product Brief - WaveStack"
+title: "Product Brief - HarnessLab"
 status: ready
 created: 2026-09-22
 updated: 2026-09-22
 ---
 
-# Product Brief : WaveStack — Démonstrateur pédagogique de harnais agentique
+# Product Brief : HarnessLab — Démonstrateur pédagogique de harnais agentique
 
 ## Executive Summary
 
-Les collègues et clients de Wavestone savent déjà utiliser un chatbot. Ils ne savent pas ce qu'un harnais agentique ajoute à un LLM nu, ni pourquoi un skill, un MCP ou un hook changent radicalement ce qu'une IA peut faire — et donc où elle peut être déployée en toute confiance. WaveStack est une application locale, tournant sur CPU avec de petits modèles de langage (SLM), qui rend visible, brique par brique, ce que le harnais fait au LLM : raisonnement, mémoire, prompt système, outils, RAG, MCP, skills, hooks. Chaque brique s'active ou se désactive en direct, et l'utilisateur voit simultanément la réponse "humaine", ce qui apparaît dans le contexte du LLM, et comment le harnais orchestre l'appel. L'objectif n'est pas la qualité des réponses — de petits modèles CPU suffisent — mais la compréhension : donner aux équipes le vocabulaire et les repères pour raisonner sur l'agentique, l'hébergement des données et du LLM, et la souveraineté, puis imaginer des usages dans leur propre métier.
+Les consultants et leurs clients savent déjà utiliser un chatbot. Ils ne savent pas ce qu'un harnais agentique ajoute à un LLM nu, ni pourquoi un skill, un MCP ou un hook changent radicalement ce qu'une IA peut faire — et donc où elle peut être déployée en toute confiance. HarnessLab est une application locale, tournant sur CPU avec de petits modèles de langage (SLM), qui rend visible, brique par brique, ce que le harnais fait au LLM : raisonnement, mémoire, prompt système, outils, RAG, MCP, skills, hooks. Chaque brique s'active ou se désactive en direct, et l'utilisateur voit simultanément la réponse "humaine", ce qui apparaît dans le contexte du LLM, et comment le harnais orchestre l'appel. L'objectif n'est pas la qualité des réponses — de petits modèles CPU suffisent — mais la compréhension : donner aux équipes le vocabulaire et les repères pour raisonner sur l'agentique, l'hébergement des données et du LLM, et la souveraineté, puis imaginer des usages dans leur propre métier.
 
 ## The Problem
 
@@ -34,7 +34,7 @@ La progression pédagogique suit l'ordre : LLM nu → raisonnement affichable/ma
 
 ## Who This Serves
 
-**Utilisateurs primaires** : collègues Wavestone de practices variées (cloud, cyber, agile, PO, BA, IAM, DLP, SOC, souveraineté, numérique responsable, transformation numérique) qui connaissent déjà les chatbots mais pas l'agentique — objectif : qu'ils repartent avec le vocabulaire et les repères pour situer une solution agentique (hébergement, données, LLM) et imaginer des cas d'usage dans leur métier.
+**Utilisateurs primaires** : consultants de practices variées (cloud, cyber, agile, PO, BA, IAM, DLP, SOC, souveraineté, numérique responsable, transformation numérique) qui connaissent déjà les chatbots mais pas l'agentique — objectif : qu'ils repartent avec le vocabulaire et les repères pour situer une solution agentique (hébergement, données, LLM) et imaginer des cas d'usage dans leur métier.
 
 **Utilisateurs secondaires** : nouveaux arrivants internes découvrant à la fois le LLM et l'agentique (les briques de base leur servent directement) ; clients, une fois le démonstrateur jugé assez abouti pour sortir en clientèle.
 

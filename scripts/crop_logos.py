@@ -5,7 +5,7 @@
 
 `--bank`: the banque-visuels folder (its `logos/` and `manifeste.json`); by default the one
 synced under `~/.claude/skills/synced/*/banque-visuels`. Pillow is a tool of this script
-only, never a dependency of WaveStack: the page serves the PNG files written here, and
+only, never a dependency of HarnessLab: the page serves the PNG files written here, and
 loads nothing from the network.
 
 A symbol is the first block of opaque columns of the logo, up to the first transparent gap
@@ -24,7 +24,7 @@ from pathlib import Path
 from PIL import Image
 
 REPO = Path(__file__).resolve().parents[1]
-OUT = REPO / "src" / "wavestack" / "web" / "static" / "logos"
+OUT = REPO / "src" / "harness_lab" / "web" / "static" / "logos"
 SIDE = 128  # px, the longer side
 ALPHA = 32  # a pixel more opaque than this is part of the logo
 GAP = 0.02  # a gap of transparent columns this wide (share of the width) ends the symbol

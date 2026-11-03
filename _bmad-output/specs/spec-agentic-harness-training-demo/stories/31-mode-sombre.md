@@ -43,7 +43,7 @@ deferred:
 
 ## Intent
 
-**Problem:** WaveStack n'a qu'un thème clair. Sur un poste réglé en sombre, en visio le soir ou dans une salle sans lumière, l'interface éblouit. Anaël a demandé le 2026-09-28 un sélecteur « Système », « Clair », « Sombre » pour l'atelier, le diagnostic et les nouveaux écrans. Depuis la story 33, toutes les couleurs de `app.css` et `app.js` passent par des jetons, mais `diagnostic.html` écrit encore ses couleurs en dur. Et certains jetons jouent deux rôles qui divergent en sombre : l'encre sert de texte et de fond, et `on-ink` sert de texte sur l'encre et sur les couleurs de discipline.
+**Problem:** HarnessLab n'a qu'un thème clair. Sur un poste réglé en sombre, en visio le soir ou dans une salle sans lumière, l'interface éblouit. Anaël a demandé le 2026-09-28 un sélecteur « Système », « Clair », « Sombre » pour l'atelier, le diagnostic et les nouveaux écrans. Depuis la story 33, toutes les couleurs de `app.css` et `app.js` passent par des jetons, mais `diagnostic.html` écrit encore ses couleurs en dur. Et certains jetons jouent deux rôles qui divergent en sombre : l'encre sert de texte et de fond, et `on-ink` sert de texte sur l'encre et sur les couleurs de discipline.
 
 **Approach:** Dessiner une palette sombre dans DESIGN.md, avec un jumeau `{clé}-dark` pour chaque couleur du frontmatter, et la recopier dans `tokens.css` sous `:root[data-theme="dark"]` et sous `@media (prefers-color-scheme: dark) { :root:not([data-theme]) }`. Séparer les rôles qui divergent grâce à cinq jetons de rôle. Un petit script classique, `static/theme.js`, chargé en tête de chaque page, pose `data-theme` avant le premier rendu, lit et écrit le choix dans `localStorage` (lecture protégée), et branche chaque sélecteur `[data-theme-picker]`.
 
@@ -69,12 +69,12 @@ deferred:
 
 | Scenario | Input / State | Expected Output / Behavior | Error Handling |
 |----------|--------------|---------------------------|----------------|
-| Défaut, poste clair | Aucun `wavestack.theme`, `prefers-color-scheme: light` | Pas d'attribut `data-theme`, palette claire, sélecteur sur « Système » | — |
+| Défaut, poste clair | Aucun `harness_lab.theme`, `prefers-color-scheme: light` | Pas d'attribut `data-theme`, palette claire, sélecteur sur « Système » | — |
 | Défaut, poste sombre | Aucun choix, `prefers-color-scheme: dark` | Pas d'attribut, palette sombre (bloc `@media`) | — |
 | Le poste change de mode | « Système », puis le mode du poste bascule | La palette suit sans rechargement (CSS seul) | — |
-| Choix explicite | « Sombre » sur un poste clair, ou « Clair » sur un poste sombre | `data-theme="dark"` ou `"light"`, le choix l'emporte, `wavestack.theme` mémorisé | — |
-| Rechargement | `wavestack.theme = "dark"` | `data-theme="dark"` posé avant le premier rendu, même sans `app.js` | — |
-| Valeur corrompue | `wavestack.theme = "violet"` | Traitée comme « Système » | Ignorée sans message |
+| Choix explicite | « Sombre » sur un poste clair, ou « Clair » sur un poste sombre | `data-theme="dark"` ou `"light"`, le choix l'emporte, `harness_lab.theme` mémorisé | — |
+| Rechargement | `harness_lab.theme = "dark"` | `data-theme="dark"` posé avant le premier rendu, même sans `app.js` | — |
+| Valeur corrompue | `harness_lab.theme = "violet"` | Traitée comme « Système » | Ignorée sans message |
 | Stockage indisponible | `localStorage` lève une exception | « Système » au chargement ; un choix s'applique à la page sans être mémorisé | Aucune `pageerror`, aucune erreur en console |
 | Autres pages | Choix « Sombre », puis `/diagnostic` et `/models` | Même thème et même sélecteur (même origine) | — |
 
@@ -88,26 +88,26 @@ Les stories 33 (en cours), 23, 34, 32, 24, 25, 26 et 27 modifient ces fichiers a
   - Frontmatter : `description` (« Thème clair en V1… »), `colors`, groupés par commentaires (Charte, Relief, Lieu d'hébergement, États, Segments, Discipline, Sur encre), et `components` : `top-bar.background`, `discipline-code.model`, `chat-message-user.background`, `arch-model.plate`, `model-picker`, `scenario-picker`.
   - Prose : `## Brand & Style`, dernier paragraphe (« Thème clair en V1 `[ASSUMPTION]`… un thème sombre n'aura qu'à redéfinir les jetons »). `## Colors`, avec les tables des disciplines et de leurs contrastes. `## Do's and Don'ts`, dernière ligne.
   - Format DESIGN.md (`.claude/skills/bmad-ux/references/design-md-spec.md`) : clair et sombre se notent par des jetons jumeaux au suffixe `-dark`.
-- `src/wavestack/web/static/tokens.css` -- un seul bloc `:root`, miroir du frontmatter (AD-18). À y ajouter : `color-scheme` et les deux blocs sombres.
+- `src/harness_lab/web/static/tokens.css` -- un seul bloc `:root`, miroir du frontmatter (AD-18). À y ajouter : `color-scheme` et les deux blocs sombres.
 - `tests/test_web_tokens.py`
   - `_expected_tokens` et `_css_custom_properties` : l'expression régulière lit tout le fichier ; une fois les blocs sombres ajoutés, les dernières définitions écraseraient les premières. Il faut lire bloc par bloc.
   - `test_tokens_css_declares_no_orphan_token`.
   - `_luminance`, `_contrast`, `_PAIRS` et `test_discipline_tokens_meet_wcag_aa`, les contrastes clairs de la story 33, à garder.
   - `_COMMENTS`, `_HARD_COLOR` et `test_app_css_and_js_write_no_color_outside_the_tokens`, qui ne visent aujourd'hui que `app.css` et `app.js`.
-- `src/wavestack/web/static/app.css` -- endroits où un jeton joue un rôle qui diverge en sombre :
+- `src/harness_lab/web/static/app.css` -- endroits où un jeton joue un rôle qui diverge en sombre :
   - blocs `[data-discipline="prompt|context|harness|network|neutral|model"]` (`--on-discipline`, et `--discipline: var(--color-ink)` pour `model`) ;
   - fonds d'encre : `.top-bar`, `.bubble-user`, `.turn-step-tile[data-discipline="model"]`, `.arch-robots`, `.arch-cloud-model`, `.arch-server-model` ;
   - fonds vifs sous un texte, explicite ou hérité : `.net-mark`, `.net-host`, `.hosting-tag-network`, `.outbound-head`, `.arch-zone-network .arch-zone-label`, `.gauge.is-overflow .gauge-figures`, `.drawer-actions button.danger.is-confirm`, `.turn-group-status.is-running`, `.turn-group-status.is-failed`, `.turn-step.tone-error .turn-step-tile`, `.step-code mark` ;
   - sélecteurs de la barre haute : `.top-bar > .scenario-picker`, `.scenario-picker`, `.model-picker`, qui servent de modèle au sélecteur de thème.
-- `src/wavestack/web/static/app.js`
+- `src/harness_lab/web/static/app.js`
   - `GROUP_COLORS` et `DISCIPLINES` ne portent que des noms de variables, ce qui les rend compatibles tels quels.
-  - `loadShowForced` et `saveShowForced`, avec les clés `wavestack.*`, donnent le modèle de lecture protégée.
+  - `loadShowForced` et `saveShowForced`, avec les clés `harness_lab.*`, donnent le modèle de lecture protégée.
   - Le schéma pose ses couleurs par classes CSS, `svgEl` et les marqueurs `arch-marker` compris.
   - Aucune modification attendue.
-- `src/wavestack/web/static/index.html` -- `<head>` (`fonts.css`, `tokens.css`, `app.css`). Dans `header.top-bar`, le sélecteur se place juste avant `#reset-button`.
-- `src/wavestack/web/static/diagnostic.html` -- page autonome : `<style>` en ligne sans `tokens.css`, avec des couleurs en dur (`li.ok`, `li.warn`, `li.fail`, `li.incompatible`, `li.found`, `li.server`, `li.cloud`, `.served`, `.served-warning`, `.action`, `.hosting-tag-*`, `.cloud-result.*`, `dialog#cloud-warning`) et un `<script type="module">`. La story 25 y ajoute `nav.page-tabs`, et la story 24 y retouche des lignes.
-- `src/wavestack/web/static/models.html` -- page `/models` de la story 25, avec `nav.page-tabs`, `tokens.css` et des jetons seulement.
-- `src/wavestack/web/app.py` -- `app.mount("/static", …)` et l'intergiciel `Cache-Control: no-cache`. `theme.js` est servi sans nouvelle route.
+- `src/harness_lab/web/static/index.html` -- `<head>` (`fonts.css`, `tokens.css`, `app.css`). Dans `header.top-bar`, le sélecteur se place juste avant `#reset-button`.
+- `src/harness_lab/web/static/diagnostic.html` -- page autonome : `<style>` en ligne sans `tokens.css`, avec des couleurs en dur (`li.ok`, `li.warn`, `li.fail`, `li.incompatible`, `li.found`, `li.server`, `li.cloud`, `.served`, `.served-warning`, `.action`, `.hosting-tag-*`, `.cloud-result.*`, `dialog#cloud-warning`) et un `<script type="module">`. La story 25 y ajoute `nav.page-tabs`, et la story 24 y retouche des lignes.
+- `src/harness_lab/web/static/models.html` -- page `/models` de la story 25, avec `nav.page-tabs`, `tokens.css` et des jetons seulement.
+- `src/harness_lab/web/app.py` -- `app.mount("/static", …)` et l'intergiciel `Cache-Control: no-cache`. `theme.js` est servi sans nouvelle route.
 - `tests/test_web_app.py` -- boucle sur `("/", "/diagnostic", "/static/app.js")`.
 - `tools/e2e/run_e2e.py`
   - `Run.token_color` et `_CSS_COLOR_JS` résolvent un jeton dans le thème courant.
@@ -130,7 +130,7 @@ Les stories 33 (en cours), 23, 34, 32, 24, 25, 26 et 27 modifient ces fichiers a
    - ajouter à Colors une sous-section « Thème sombre » avec les rôles, la table clair / sombre et les contrastes ;
    - ajouter à Do's and Don'ts « fond d'encre = `ink-fill` », « texte sur fond vif = `on-vivid` » et « pas de `filter: invert` ».
    Raison : DESIGN.md est la source des jetons (AD-18).
-2. `src/wavestack/web/static/tokens.css` -- Dans `:root`, ajouter `color-scheme: light` et les jetons de rôle. Ajouter `:root[data-theme="dark"] { color-scheme: dark; --color-X: <X-dark>; … }` pour chaque couleur, puis `@media (prefers-color-scheme: dark) { :root:not([data-theme]) { … } }` avec des déclarations identiques. Aucun `--color-X-dark` n'est déclaré. Raison : le thème choisi l'emporte, « Système » suit le poste, et `color-scheme` fait suivre les contrôles natifs (listes, barres de défilement, `dialog`).
+2. `src/harness_lab/web/static/tokens.css` -- Dans `:root`, ajouter `color-scheme: light` et les jetons de rôle. Ajouter `:root[data-theme="dark"] { color-scheme: dark; --color-X: <X-dark>; … }` pour chaque couleur, puis `@media (prefers-color-scheme: dark) { :root:not([data-theme]) { … } }` avec des déclarations identiques. Aucun `--color-X-dark` n'est déclaré. Raison : le thème choisi l'emporte, « Système » suit le poste, et `color-scheme` fait suivre les contrôles natifs (listes, barres de défilement, `dialog`).
 3. `tests/test_web_tokens.py` -- Découper `tokens.css` en trois blocs (`:root`, `[data-theme="dark"]`, `@media` puis `:root:not([data-theme])`). Les tests :
    - la correspondance et l'absence d'orphelins portent sur le bloc `:root`, hors clés `-dark` ;
    - tout `X` a son `X-dark`, et inversement ;
@@ -141,13 +141,13 @@ Les stories 33 (en cours), 23, 34, 32, 24, 25, 26 et 27 modifient ces fichiers a
    - l'interdiction des couleurs en dur s'étend à tous les `.css`, `.js` et `.html` de `static/` sauf `tokens.css`. Les commentaires `<!-- -->`, `/* */` et `//` sont exclus, ainsi que les entités `&#…;` ;
    - chaque `static/*.html` charge `/static/tokens.css`, et `<script src="/static/theme.js">` est dans `<head>`, avant la première feuille de style, sans `type="module"`, `defer` ni `async`.
    Raison : c'est ce qui force la couverture complète maintenant et pour les stories 29 et 30.
-4. `src/wavestack/web/static/theme.js` (nouveau, script classique) -- Une IIFE qui :
-   - lit `wavestack.theme` sous `try/catch`, avec pour valeurs `system`, `light` et `dark`, toute autre valeur valant `system` ;
+4. `src/harness_lab/web/static/theme.js` (nouveau, script classique) -- Une IIFE qui :
+   - lit `harness_lab.theme` sous `try/catch`, avec pour valeurs `system`, `light` et `dark`, toute autre valeur valant `system` ;
    - pose ou retire `data-theme` sur `document.documentElement` ;
    - au `DOMContentLoaded`, règle chaque `select[data-theme-picker]` et l'écoute : au changement, elle applique le thème puis l'écrit sous `try/catch`.
    Aucune variable globale. Raison : un seul code pour toutes les pages, exécuté avant le rendu (un module serait différé).
 5. `index.html`, `diagnostic.html`, `models.html` -- En tête de `<head>`, `<script src="/static/theme.js"></script>`. Dans la barre haute de `index.html`, avant `#reset-button` : `<select id="theme-picker" class="theme-picker" data-theme-picker aria-label="Thème de l'interface" title="Thème de l'interface">` avec « ◐ Système » (`system`), « ☀ Clair » (`light`) et « ☾ Sombre » (`dark`). Même sélecteur à droite de `nav.page-tabs` dans `diagnostic.html` et `models.html`, ou en haut de page si la nav est absente. Raison : le choix se fait partout et reste le même d'une page à l'autre.
-6. `src/wavestack/web/static/app.css` -- Migrer les rôles :
+6. `src/harness_lab/web/static/app.css` -- Migrer les rôles :
    - les fonds d'encre du Code Map passent à `var(--color-ink-fill)` ;
    - `[data-discipline="model"]` prend `--discipline` et `--discipline-soft` à `ink-fill` ;
    - les blocs prompt, context et harness prennent `--on-discipline: var(--color-on-discipline)`, les blocs network et neutral `var(--color-on-vivid)` ;
@@ -175,7 +175,7 @@ Les stories 33 (en cours), 23, 34, 32, 24, 25, 26 et 27 modifient ces fichiers a
 
 **Acceptance Criteria:**
 - Given un tour « Outils réseau » à l'écran (fin de `disciplines`) et aucun choix mémorisé, when on lit la barre haute à 1600 × 1000, then `#theme-picker` montre « Système », propose Système, Clair et Sombre, et toutes les commandes de la barre sont entièrement visibles sur une ligne (`_fully_visible`). Sans attribut `data-theme`, avec `emulate_media(color_scheme="dark")`, le fond calculé de `body` vaut `surface-dark` (valeur lue dans DESIGN.md) sans rechargement ; avec `"light"`, il revient à `surface`.
-- Given le poste émulé en clair, when on choisit « Sombre », then `<html data-theme="dark">`, `localStorage["wavestack.theme"] == "dark"`, et :
+- Given le poste émulé en clair, when on choisit « Sombre », then `<html data-theme="dark">`, `localStorage["harness_lab.theme"] == "dark"`, et :
   - le fond de `.top-bar`, de la dernière `.bubble-user` et de la tuile de l'appel au modèle vaut `ink-fill-dark` ;
   - le filet du segment du prompt système vaut `discipline-prompt-dark` ;
   - chaque `.gauge-seg` a le fond de son jeton sombre ;
@@ -183,7 +183,7 @@ Les stories 33 (en cours), 23, 34, 32, 24, 25, 26 et 27 modifient ces fichiers a
   - `_contrast_sweep` ne renvoie aucun échec dans les cinq volets ni dans la barre haute.
 - Given « Sombre » mémorisé, when on recharge la page avec `**/static/app.js` interrompu (`route.abort`), then `data-theme="dark"` et le fond de `body` en `surface-dark` sont déjà en place. Après `unroute` et un rechargement, le sélecteur montre « Sombre » et aucune `pageerror` n'est apparue.
 - Given « Sombre », when on ouvre `/diagnostic` puis `/models`, then chaque page est sombre, son sélecteur montre « Sombre » et `_contrast_sweep` ne renvoie aucun échec. Choisir « Clair » sur `/diagnostic`, puis revenir à `/` avec le poste émulé en sombre, donne `data-theme="light"` et un fond `surface` clair.
-- Given `wavestack.theme = "violet"`, when on recharge, then il n'y a pas d'attribut `data-theme` et le sélecteur montre « Système ».
+- Given `harness_lab.theme = "violet"`, when on recharge, then il n'y a pas d'attribut `data-theme` et le sélecteur montre « Système ».
 - Given une nouvelle page dont le script d'initialisation fait lever `Storage.prototype.getItem` et `setItem`, when on charge `/` puis on choisit « Sombre », then la page s'affiche sans `pageerror`, et `data-theme="dark"` s'applique sans être mémorisé.
 - Given `uv run pytest -q`, when `tests/test_web_tokens.py` s'exécute, then la couverture des jumeaux, l'identité des deux blocs sombres, les contrastes des deux palettes, l'interdiction des couleurs en dur sur toutes les pages et la présence de `theme.js` en tête de chaque page passent. Retirer un seul `X-dark` fait échouer le test.
 
@@ -231,10 +231,10 @@ Les stories 33 (en cours), 23, 34, 32, 24, 25, 26 et 27 modifient ces fichiers a
 | `warning-soft`, `danger-soft` | fonds d'état du diagnostic | `#FFF4D6`, `#FDE8EB` | `#3A3010`, `#3A1820` |
 
 **Palette sombre** (`X-dark`) :
-- charte : `primary #9C86FF`, `primary-deep #C9BDFF`, `primary-soft #2A2350`, `accent #04F06A`, `accent-soft #0F3A24`, `ink #ECEBF5`, `ink-soft #B4B3C7`, `muted #8A8A9E`, `line #3A394F`, `surface #12121C`, `surface-raised #1E1D2C`, `warning #FFCA4A`, `danger #FF6B7F`, `on-primary #0E0B1E` ;
+- charte : `primary #9C86FF`, `primary-deep #C9BDFF`, `primary-soft #2A2350`, `accent #B4500F`, `accent-soft #0F3A24`, `ink #ECEBF5`, `ink-soft #B4B3C7`, `muted #8A8A9E`, `line #3A394F`, `surface #12121C`, `surface-raised #1E1D2C`, `warning #E8A317`, `danger #FF6B7F`, `on-primary #0E0B1E` ;
 - relief : `relief #2A2156`, `relief-active #3A2E78`, `dot #262538` ;
-- hébergement : `hosting-network #FFCA4A`, `hosting-boundary #ECEBF5` ;
-- états : `state-active` et `state-ok` `#04F06A`, `state-blocked` et `state-error` `#FF6B7F`, `state-unavailable #8A8A9E` ;
+- hébergement : `hosting-network #E8A317`, `hosting-boundary #ECEBF5` ;
+- états : `state-active` et `state-ok` `#B4500F`, `state-blocked` et `state-error` `#FF6B7F`, `state-unavailable #8A8A9E` ;
 - segments : `system-prompt #8C74FF`, `global-memory #3CC878`, `tool-descriptions #4F95EA`, `history #A48EF0`, `rag #1FB3A2`, `tool-results #F08A42`, `message #C07FDA`, `free #2A2938` ;
 - disciplines : `prompt #9C86FF` / `#262047`, `context #2FB8A3` / `#12302B`, `harness #E8639F` / `#3A1A2B`, `network #E8B516` / `#3A3010`, `neutral #8A8A9E` / `#26252F` ;
 - `on-ink #FFFFFF`, `on-ink-soft #CFCDE4`.
@@ -257,7 +257,7 @@ Un jeton ajouté entre-temps (stories 32 et 34, par exemple) reçoit une valeur 
 
 ```js
 (() => {
-  const KEY = "wavestack.theme", CHOICES = ["system", "light", "dark"];
+  const KEY = "harness_lab.theme", CHOICES = ["system", "light", "dark"];
   const read = () => { try { const v = localStorage.getItem(KEY); return CHOICES.includes(v) ? v : "system"; } catch { return "system"; } };
   const apply = (c) => (c === "system" ? document.documentElement.removeAttribute("data-theme") : document.documentElement.setAttribute("data-theme", c));
   apply(read());
@@ -286,7 +286,7 @@ Sans stockage, `read()` renvoie toujours « system ». Le sélecteur garde pourt
 - **Cinq jetons de rôle** plutôt qu'une redéfinition des jetons existants : `ink`, `on-ink` et `on-primary` jouent deux rôles qui divergent en sombre (texte et fond, texte sur l'encre et sur la discipline). Leur valeur claire est identique à l'ancienne, ce qui ne change rien au thème clair.
 - **Bloc `@media` sur `:root:not([data-theme])`** : c'est le « sans attribut » demandé. « Clair » pose `data-theme="light"`, qui l'emporte donc sur un poste sombre.
 - **Script classique partagé, `static/theme.js`**, chargé en tête plutôt que copié en ligne dans chaque page. Un module serait différé et laisserait passer un flash. Le coût, une requête locale en `no-cache`, est négligeable.
-- **Clé `wavestack.theme`** (`system`, `light`, `dark`), sur le modèle des autres clés `wavestack.*`. Rien côté serveur : c'est un réglage d'affichage (AD-18).
+- **Clé `harness_lab.theme`** (`system`, `light`, `dark`), sur le modèle des autres clés `harness_lab.*`. Rien côté serveur : c'est un réglage d'affichage (AD-18).
 - **Sélecteur natif `<select>`**, statique dans le HTML, placé avant « Réinitialiser » ; libellés « ◐ Système », « ☀ Clair », « ☾ Sombre ». Il est aussi sur le diagnostic et sur `/models` : la story couvre ces pages, et y changer de thème évite un aller-retour.
 - **Pas de synchronisation en direct entre onglets** : chaque page lit le choix à son chargement. Cela suffit pour un seul formateur.
 - **Texte sur rouge en `on-vivid` dans les deux thèmes** : DESIGN.md prescrit déjà « texte encre sur rouge ». C'est la seule retouche visible du thème clair, et elle améliore le contraste (3,7 → 5,3).
@@ -300,7 +300,7 @@ Sans stockage, `read()` renvoie toujours « system ». Le sélecteur garde pourt
 ## À vérifier sur PC
 
 - **Suivi du mode Windows**
-  - **Geste** : Paramètres, Personnalisation, Couleurs, « Choisir votre mode » = Sombre, puis lancer `uv run wavestack` dans PowerShell et ouvrir l'atelier dans Chrome puis dans Edge, sélecteur sur « Système ». Repasser Windows en Clair sans recharger.
+  - **Geste** : Paramètres, Personnalisation, Couleurs, « Choisir votre mode » = Sombre, puis lancer `uv run harness-lab` dans PowerShell et ouvrir l'atelier dans Chrome puis dans Edge, sélecteur sur « Système ». Repasser Windows en Clair sans recharger.
   - **Attendu** : l'atelier passe en sombre, puis revient en clair de lui-même.
   - **Critère** : bascule en moins de 2 s, sans rechargement, dans les deux navigateurs.
   - **Moyen** : à la main.
@@ -320,7 +320,7 @@ Sans stockage, `read()` renvoie toujours « system ». Le sélecteur garde pourt
   - **Critère** : 0 élément signalé sur les trois pages.
   - **Moyen** : Lighthouse à la main, ou Claude in Chrome.
 - **Mémorisation sans droits d'administrateur**
-  - **Geste** : choisir « Sombre », fermer Chrome, relancer `uv run wavestack`, puis refaire la même chose dans une fenêtre InPrivate d'Edge.
+  - **Geste** : choisir « Sombre », fermer Chrome, relancer `uv run harness-lab`, puis refaire la même chose dans une fenêtre InPrivate d'Edge.
   - **Attendu** : sombre repris dans Chrome ; dans InPrivate, choix possible sans erreur, puis oublié à la fermeture.
   - **Critère** : thème repris au lancement suivant, aucune erreur dans la console.
   - **Moyen** : Playwright (Chromium de `%LOCALAPPDATA%\ms-playwright`) ou à la main.
@@ -329,7 +329,7 @@ Sans stockage, `read()` renvoie toujours « system ». Le sélecteur garde pourt
 
 Statut : done (2026-09-29, orchestrateur de nuit ; étapes 1 à 4 menées par l'orchestrateur).
 
-**Changement :** sélecteur « ◐ Système » (par défaut), « ☀ Clair », « ☾ Sombre » dans la barre haute, sur `/diagnostic` et `/models` ; `theme.js` chargé en tête de chaque page pose `data-theme` avant le rendu (pas de flash), mémorise le choix (`wavestack.theme`, lecture protégée) et suit un autre onglet ou un retour arrière. Palette sombre dessinée : un jumeau `-dark` par couleur de DESIGN.md, recopié dans `tokens.css` sous `[data-theme="dark"]` et sous `prefers-color-scheme: dark` ; six jetons de rôle (`ink-fill`, `ink-fill-edge`, `on-discipline`, `on-vivid`, `warning-soft`, `danger-soft`). Contrastes WCAG AA vérifiés dans les deux palettes (texte et traits porteurs de sens), garde contre toute couleur en dur. Sélecteur compact sous 1 400 px (symbole visible, liste native conservée). Retouches acceptées du thème clair listées dans DESIGN.md (texte sur rouge, tuile en attente, bordures des contrôles, diagnostic passé aux jetons).
+**Changement :** sélecteur « ◐ Système » (par défaut), « ☀ Clair », « ☾ Sombre » dans la barre haute, sur `/diagnostic` et `/models` ; `theme.js` chargé en tête de chaque page pose `data-theme` avant le rendu (pas de flash), mémorise le choix (`harness_lab.theme`, lecture protégée) et suit un autre onglet ou un retour arrière. Palette sombre dessinée : un jumeau `-dark` par couleur de DESIGN.md, recopié dans `tokens.css` sous `[data-theme="dark"]` et sous `prefers-color-scheme: dark` ; six jetons de rôle (`ink-fill`, `ink-fill-edge`, `on-discipline`, `on-vivid`, `warning-soft`, `danger-soft`). Contrastes WCAG AA vérifiés dans les deux palettes (texte et traits porteurs de sens), garde contre toute couleur en dur. Sélecteur compact sous 1 400 px (symbole visible, liste native conservée). Retouches acceptées du thème clair listées dans DESIGN.md (texte sur rouge, tuile en attente, bordures des contrôles, diagnostic passé aux jetons).
 
 **Fichiers :** `web/static/{theme.js (nouveau),tokens.css,app.css,index.html,diagnostic.html,models.html,pages.css}`, `tests/test_web_{tokens,app}.py`, `tools/e2e/{run_e2e.py,README.md}`, DESIGN.md, EXPERIENCE.md, ARCHITECTURE-SPINE.md (AD-18), captures 46 à 51.
 

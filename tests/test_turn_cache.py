@@ -19,10 +19,10 @@ from test_rag import COVERED, OFF_CORPUS, index, place_model, rag_config, rag_se
 from test_subagent import RESULT, delegation, sub_session
 from test_tools import QWEN, call
 
-from wavestack.context.render import reasoning_wrap
-from wavestack.models.engine import CancelToken, EngineMetadata, Fragment
-from wavestack.session.effects import MemoryWrite
-from wavestack.trace.journal import get_journal
+from harness_lab.context.render import reasoning_wrap
+from harness_lab.models.engine import CancelToken, EngineMetadata, Fragment
+from harness_lab.session.effects import MemoryWrite
+from harness_lab.trace.journal import get_journal
 
 QWEN_TEXT = QWEN.decode("utf-8")
 
@@ -362,7 +362,7 @@ def test_a_cleared_cache_of_a_server_without_cache_ids_is_named_too():
 
 
 def test_the_cache_is_refused_during_a_turn_and_without_support():
-    from wavestack.session.app_session import SendRefused
+    from harness_lab.session.app_session import SendRefused
 
     class NoClear(FakeEngine):
         clear_cache = None  # an engine that cannot empty its memory
@@ -394,7 +394,7 @@ def test_a_cleared_cache_stays_the_cause_after_a_cleared_conversation():
 
 
 def test_a_refused_clear_names_no_cleared_cache():
-    from wavestack.session.app_session import SendRefused
+    from harness_lab.session.app_session import SendRefused
 
     class Failing(FakeEngine):
         def clear_cache(self) -> bool:

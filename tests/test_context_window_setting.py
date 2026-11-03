@@ -19,15 +19,15 @@ from pydantic import SecretStr
 from starlette.testclient import TestClient
 from test_model_servers import OLLAMA_NAME, FakeServer, _candidate, _factory
 
-from wavestack import config
-from wavestack.context.window import bound_fr, kv_fr, read_time_fr
-from wavestack.models import discovery, probe, servers
-from wavestack.models.load_registry import LoadRegistry, ModelChoice
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.catalog import ContextWindowStatePayload
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.context.window import bound_fr, kv_fr, read_time_fr
+from harness_lab.models import discovery, probe, servers
+from harness_lab.models.load_registry import LoadRegistry, ModelChoice
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.catalog import ContextWindowStatePayload
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 GIB = 1024**3
 MIB = 1024**2
@@ -189,7 +189,7 @@ def test_check_window_refusal_in_figures():
     assert registry.check_window("Qwen3.5-4B", 16384, 4096, 0) is None
     assert registry.check_window("Qwen3.5-4B", 16384, 4096, 3 * GIB + 1344 * MIB) == (
         "Fenêtre de 16 384 tokens refusée : Qwen3.5-4B demanderait environ 4,3 Go ; "
-        "WaveStack occupe 150 Mo sans le modèle actif, pour un budget de 4,0 Go. Qwen3.5-4B "
+        "HarnessLab occupe 150 Mo sans le modèle actif, pour un budget de 4,0 Go. Qwen3.5-4B "
         "reste actif avec 4 096 tokens. Choisissez une fenêtre plus petite."
     )
 
@@ -584,7 +584,7 @@ def test_ollama_reloads_at_the_new_num_ctx_and_costs_its_kv(
 
 
 def test_ollama_reload_cost_unknown_is_refused(fake):
-    """A blob WaveStack cannot read: the reload's cost is unknown, never the margin alone."""
+    """A blob HarnessLab cannot read: the reload's cost is unknown, never the margin alone."""
     session = AppSession(config.load_config(), server_factory=_factory(), rss_fn=lambda: 150 * MIB)
     candidate = _candidate("ollama", "blobs/sha256-abc", resident=True)
     assert session.boot_server(candidate).result() == "ok"
@@ -772,7 +772,7 @@ QWEN35_4B_HEADER = {
 
 
 def _probed_before_lot_k(tmp_path: Path, name: str, header: dict, rss: int, kv: int) -> str:
-    """A GGUF probed by an older WaveStack: its entry holds the KV of the older formula."""
+    """A GGUF probed by an older HarnessLab: its entry holds the KV of the older formula."""
     path = write_gguf(tmp_path / f"{name}.gguf", header)
     stat = path.stat()
     probe.record_success(

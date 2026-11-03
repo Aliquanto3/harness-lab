@@ -1,6 +1,6 @@
 # Registre des sous-traitants d'Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : ce registre ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : ce registre ne décrit aucune entreprise réelle. -->
 
 Ce registre, tenu par la cellule fournisseurs et cité par le modèle de clauses de sécurité, liste chaque sous-traitant utilisé par un prestataire d'Exemplia : son nom, sa fonction, le pays où il héberge ou traite les données, et le niveau du prestataire qui le mandate.
 

@@ -1,5 +1,5 @@
 """Story 1 of the V1.1 vague 2 (CAP-2, CAP-3): the workshop's tool calls enforce the rule
-of `wavestack.mcp.policy` (defaults from `mcp-tools.md`) and feed the security journal."""
+of `harness_lab.mcp.policy` (defaults from `mcp-tools.md`) and feed the security journal."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from test_mcp_lab import connect, lab_call, lab_events, one, wait_idle
 from test_tools import call
 from test_turn import _run
 
-from wavestack.trace.journal import get_journal
+from harness_lab.trace.journal import get_journal
 
 
 def test_a_default_tool_is_allowed_and_journalled(loop):  # noqa: F811
@@ -118,7 +118,7 @@ def _wait_for_request(mark: int, timeout: float = 10) -> str:
 
 
 def test_ask_unanswered_is_refused_after_the_delay(loop, monkeypatch):  # noqa: F811
-    from wavestack.session import app_session
+    from harness_lab.session import app_session
 
     monkeypatch.setattr(app_session, "MCP_ASK_TIMEOUT_S", 0.3)
     session = mcp_session(loop)

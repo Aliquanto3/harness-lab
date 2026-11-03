@@ -15,12 +15,12 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from test_bricks import HEADERS
 
-from wavestack import config
-from wavestack.rag import access
-from wavestack.rag.corpus import load_rag_content, load_rag_questions
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.rag import access
+from harness_lab.rag.corpus import load_rag_content, load_rag_questions
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.web.app import create_app
 
 LANGS = ("fr", "en", "de")
 AVERAGE = re.compile(r"\b(mean|average|avg|mrr|recall_at_k|aggregates?)\b", re.IGNORECASE)
@@ -193,23 +193,25 @@ def test_an_unknown_question_is_refused_at_the_load(tmp_path, monkeypatch):
 
 
 def test_the_module_imports_only_the_permitted_names():
-    tree = ast.parse((config.repo_root() / "src/wavestack/rag/access.py").read_text("utf-8"))
+    tree = ast.parse((config.repo_root() / "src/harness_lab/rag/access.py").read_text("utf-8"))
     found = {
         (node.module, alias.name)
         for node in ast.walk(tree)
-        if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("wavestack")
+        if isinstance(node, ast.ImportFrom)
+        and node.module
+        and node.module.startswith("harness_lab")
         for alias in node.names
     }
     assert found == {
-        ("wavestack", "config"),
-        ("wavestack.rag.attack", "Provenance"),
-        ("wavestack.rag.attack", "provenance_text"),
-        ("wavestack.rag.corpus", "Chunk"),
-        ("wavestack.rag.corpus", "chunk_corpus"),
-        ("wavestack.rag.corpus", "load_rag_content"),
-        ("wavestack.rag.corpus", "load_rag_questions"),
-        ("wavestack.rag.index", "passage_text"),
-        ("wavestack.rag.lab", "bm25"),
+        ("harness_lab", "config"),
+        ("harness_lab.rag.attack", "Provenance"),
+        ("harness_lab.rag.attack", "provenance_text"),
+        ("harness_lab.rag.corpus", "Chunk"),
+        ("harness_lab.rag.corpus", "chunk_corpus"),
+        ("harness_lab.rag.corpus", "load_rag_content"),
+        ("harness_lab.rag.corpus", "load_rag_questions"),
+        ("harness_lab.rag.index", "passage_text"),
+        ("harness_lab.rag.lab", "bm25"),
     }
 
 
@@ -253,7 +255,9 @@ def test_endpoints_shapes_and_422():
 
 
 def test_the_page_script_has_no_colour_and_no_inner_html():
-    code = (config.repo_root() / "src/wavestack/web/static/rag-attack-access.js").read_text("utf-8")
+    code = (config.repo_root() / "src/harness_lab/web/static/rag-attack-access.js").read_text(
+        "utf-8"
+    )
     assert "innerHTML" not in code and "insertAdjacentHTML" not in code
     assert 'registerTab("attack_access"' in code and 'registerTab("attack"' not in code
     assert not re.search(r"#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(", code)

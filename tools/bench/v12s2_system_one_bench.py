@@ -1,7 +1,7 @@
 """V1.2 story 2 benchmark: System One decision models for the passage filter (CAP-6) and the
 grounding check, and the 16,384-token window of Qwen3.5-2B in 4 GB (CAP-7).
 
-Spec: `_bmad-output/specs/spec-wavestack-v1-2-atelier-recherche-documentaire/stories/
+Spec: `_bmad-output/specs/spec-harness-lab-v1-2-atelier-recherche-documentaire/stories/
 2-banc-prealable-system-one.md` (section "Décisions du point de contrôle"). Modelled on
 `v2s6_decision_bench.py`, whose helpers it reuses (`_snapshot`, NLI helpers, RAM watchdog,
 machine info); it adds no dependency to the project: measurement packages come from
@@ -44,7 +44,7 @@ from urllib.parse import urlsplit
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 SCRIPT = "tools/bench/v12s2_system_one_bench.py"
-SPEC_DIR = ROOT / "_bmad-output" / "specs" / "spec-wavestack-v1-2-atelier-recherche-documentaire"
+SPEC_DIR = ROOT / "_bmad-output" / "specs" / "spec-harness-lab-v1-2-atelier-recherche-documentaire"
 REPORT_PATH = SPEC_DIR / "rapport-banc-system-one.md"
 MEMLOG_PATH = SPEC_DIR / ".memlog.md"
 CLAIMS_PATH = HERE / "data" / "v12s2_claims.yaml"
@@ -59,7 +59,7 @@ ALLOWED_HOSTS = ("openrouter.ai",)
 KEY_ENV = "OPENROUTER_API_KEY"
 QUESTION_KEY = "decision"
 LANGS = ("fr", "en", "de")
-CHUNK_MAX_CHARS = 700  # [rag] chunk_max_chars of wavestack.toml: what the filter will see
+CHUNK_MAX_CHARS = 700  # [rag] chunk_max_chars of harness-lab.toml: what the filter will see
 SEED = 12002
 PREMISE_SEP = "\n\n---\n\n"
 REPETITIONS_ONLINE = 2
@@ -292,7 +292,7 @@ def load_claims(path: Path = CLAIMS_PATH) -> dict[str, dict[str, list[dict]]]:
 
 
 def _passage_text(chunk) -> str:
-    from wavestack.rag.index import passage_text
+    from harness_lab.rag.index import passage_text
 
     return passage_text(chunk)
 
@@ -301,8 +301,8 @@ def build_items(lang: str, claims: dict | None = None) -> Built:
     """The items of one language: filter pairs (question, chunk) and grounding pairs
     (premise, claim), labelled by construction. Chunks are those of the brick's default
     chunking over the active corpus (the trapped and sentinel documents are inactive)."""
-    from wavestack.rag.corpus import chunk_corpus, load_rag_content, load_rag_questions
-    from wavestack.rag.lab import bm25
+    from harness_lab.rag.corpus import chunk_corpus, load_rag_content, load_rag_questions
+    from harness_lab.rag.lab import bm25
 
     claims = load_claims() if claims is None else claims
     content = load_rag_content(lang)
@@ -456,7 +456,7 @@ class ProvenanceError(ValueError):
 
 def allowed_texts(lang: str, claims: dict | None = None) -> tuple[set[str], set[str]]:
     """(passages, queries) that may leave the machine in `lang`."""
-    from wavestack.rag.corpus import chunk_corpus, load_rag_content, load_rag_questions
+    from harness_lab.rag.corpus import chunk_corpus, load_rag_content, load_rag_questions
 
     claims = load_claims() if claims is None else claims
     chunks = chunk_corpus(load_rag_content(lang), CHUNK_MAX_CHARS, lang)
@@ -1885,8 +1885,8 @@ def _loader_nli(c: Candidate, models_dir: Path, v2):  # pragma: no cover - model
 
 
 def _loader_reranker(c: Candidate, models_dir: Path, v2):  # pragma: no cover - model
-    from wavestack import config
-    from wavestack.models.reranker import open_reranker
+    from harness_lab import config
+    from harness_lab.models.reranker import open_reranker
 
     model, why = config.load_config().rag_reranker
     if model is None:
@@ -1983,7 +1983,7 @@ def child_local(
     try:
         import llama_cpp
 
-        n_ctx = v2.slm_n_ctx(v2.wavestack_settings())
+        n_ctx = v2.slm_n_ctx(v2.harness_lab_settings())
         slm_llm = llama_cpp.Llama(model_path=str(slm), n_ctx=n_ctx, verbose=False)
         slm_llm.create_completion("Bonjour", max_tokens=1)
         out["rss_with_slm_mb"] = s12._rss_mb()
@@ -2088,8 +2088,8 @@ def child_memory(slm: Path) -> dict:  # pragma: no cover - needs the real GGUF
             stop.wait(0.25)
 
     threading.Thread(target=watch, daemon=True).start()
-    from wavestack.models.engine import CancelToken, LlamaCppEngine
-    from wavestack.rag.corpus import load_rag_content, read_documents
+    from harness_lab.models.engine import CancelToken, LlamaCppEngine
+    from harness_lab.rag.corpus import load_rag_content, read_documents
 
     docs = read_documents(load_rag_content("de"), "de")
     corpus = "\n\n".join(f"{d.title_text}\n{d.text}" for d in docs)
@@ -2107,7 +2107,7 @@ def child_memory(slm: Path) -> dict:  # pragma: no cover - needs the real GGUF
     stop.set()
     kv = None
     try:
-        from wavestack.models import probe
+        from harness_lab.models import probe
 
         per = probe.gguf_kv_bytes_per_token(str(slm))
         kv = round(per * MEMORY_N_CTX / (1 << 20)) if per else None
@@ -2263,7 +2263,7 @@ def make_fixture(out_dir: Path, all_items: list[Item]) -> None:
 
 def _default_slm() -> str | None:
     """The application's default SLM in its models folder, when present."""
-    from wavestack import config
+    from harness_lab import config
 
     path = config.models_dir() / config.DEFAULT_MODEL_FILE
     return str(path) if path.is_file() else None
@@ -2441,7 +2441,7 @@ def main(argv: list[str] | None = None) -> int:
         s.add_argument("--langs", default=",".join(LANGS))
         s.add_argument("--only", nargs="*")
         s.add_argument("--slm")
-        s.add_argument("--models-dir", default=str(Path.home() / ".cache" / "wavestack-bench"))
+        s.add_argument("--models-dir", default=str(Path.home() / ".cache" / "harness-lab-bench"))
         s.add_argument("--download", action="store_true")
         s.add_argument("--append-memlog", action="store_true")
         if name == "child-local":

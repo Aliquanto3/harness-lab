@@ -21,9 +21,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from wavestack import config
-from wavestack.rag import raptor
-from wavestack.rag.corpus import load_rag_content, read_documents
+from harness_lab import config
+from harness_lab.rag import raptor
+from harness_lab.rag.corpus import load_rag_content, read_documents
 
 LANGUAGES = ("fr", "en", "de")
 COMMENT = (

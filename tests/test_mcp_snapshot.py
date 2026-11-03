@@ -9,9 +9,9 @@ import json
 import pytest
 from test_mcp import MSLEARN_TOOLS, McpWeb, enable, loop, mcp_session, since, web  # noqa: F401
 
-from wavestack import config
-from wavestack.mcp import snapshot as mcp_snapshot
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.mcp import snapshot as mcp_snapshot
+from harness_lab.trace.journal import get_journal
 
 EXTRA_TOOL = {
     "name": "microsoft_learn_quiz",
@@ -94,7 +94,7 @@ def test_threshold_is_read_bounded_and_defaults_to_a_fifth():
     assert threshold(99).mcp_snapshot_drift_threshold == 10.0
     for unreadable in ("beaucoup", float("nan"), True, None):
         assert threshold(unreadable).mcp_snapshot_drift_threshold == 0.2
-    assert config.load_config().mcp_snapshot_drift_threshold == 0.2  # wavestack.toml
+    assert config.load_config().mcp_snapshot_drift_threshold == 0.2  # harness-lab.toml
 
 
 # ---------- at connection ----------
@@ -154,7 +154,7 @@ def test_a_server_that_fails_loses_its_warning(loop, web, snapshots):  # noqa: F
 
 
 def test_the_local_server_is_never_compared(loop, snapshots):  # noqa: F811
-    from wavestack.mcp.servers import McpServer
+    from harness_lab.mcp.servers import McpServer
 
     snapshots("local", [EXTRA_TOOL])
     session = mcp_session(loop)

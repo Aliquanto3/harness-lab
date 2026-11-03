@@ -47,17 +47,17 @@ context:
 
 ## Code Map
 
-- `src/wavestack/web/static/index.html` L29-155 -- `.layout` > (`bricks`, `.right` > (`.top-row` > `human`, `ctx`, `orch` ; `schema`)). Ne pas modifier : les poignées sont insérées par `app.js`.
-- `src/wavestack/web/static/app.css` L162-215 -- mise en page en **flexbox** (pas de grille) : `.layout`, `.right`, `.top-row` avec `gap: var(--spacing-gutter)` ; `.layout > .pane[data-pane="bricks"]` (`flex: 0 0` token), `.top-row .pane` (`flex: 1`), `.right > .pane[data-pane="schema"]` (`flex: 0 0` token). L1157-1190 : mode focus (`body.focus-mode`, `flex … !important` sur `.is-focused`) à ne pas casser.
-- `src/wavestack/web/static/tokens.css` -- `--spacing-gutter` 8, `--spacing-hit-target-min` 32, `--spacing-brick-panel-width` 280, `--spacing-architecture-band-height` 250, `--color-primary`. Ne pas modifier.
-- `src/wavestack/web/static/app.js` L5-24 `PANES`, `PANE_LABELS`, `store` (`hiddenPanes`, `focusedPane`) ; L339-358 `hidePane`/`showPane`/`toggleFocus` ; L1712 `renderPaneVisibility` (appelée par `render()`), où recalculer visibilité et ARIA des poignées ; L2427 `boot()` pour créer les poignées et lire le stockage. L2471 : un `ResizeObserver` sur `#schema` retrace les fils : il suffit si le schéma change de taille.
+- `src/harness_lab/web/static/index.html` L29-155 -- `.layout` > (`bricks`, `.right` > (`.top-row` > `human`, `ctx`, `orch` ; `schema`)). Ne pas modifier : les poignées sont insérées par `app.js`.
+- `src/harness_lab/web/static/app.css` L162-215 -- mise en page en **flexbox** (pas de grille) : `.layout`, `.right`, `.top-row` avec `gap: var(--spacing-gutter)` ; `.layout > .pane[data-pane="bricks"]` (`flex: 0 0` token), `.top-row .pane` (`flex: 1`), `.right > .pane[data-pane="schema"]` (`flex: 0 0` token). L1157-1190 : mode focus (`body.focus-mode`, `flex … !important` sur `.is-focused`) à ne pas casser.
+- `src/harness_lab/web/static/tokens.css` -- `--spacing-gutter` 8, `--spacing-hit-target-min` 32, `--spacing-brick-panel-width` 280, `--spacing-architecture-band-height` 250, `--color-primary`. Ne pas modifier.
+- `src/harness_lab/web/static/app.js` L5-24 `PANES`, `PANE_LABELS`, `store` (`hiddenPanes`, `focusedPane`) ; L339-358 `hidePane`/`showPane`/`toggleFocus` ; L1712 `renderPaneVisibility` (appelée par `render()`), où recalculer visibilité et ARIA des poignées ; L2427 `boot()` pour créer les poignées et lire le stockage. L2471 : un `ResizeObserver` sur `#schema` retrace les fils : il suffit si le schéma change de taille.
 - `tests/test_web_app.py` -- sert `/static/app.js` ; aucun test JS dans le dépôt.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/web/static/app.css` -- tailles en variables CSS (`--pane-bricks-width`, `--pane-schema-height`, `--pane-human-grow`, `--pane-ctx-grow`, `--pane-orch-grow`) avec les tokens comme valeurs par défaut ; bornes par `clamp()` avec `100%` pour la fenêtre rétrécie ; style `.pane-resize-handle` (gouttière absorbée par des marges négatives, zone de saisie élargie, pilule) ; masquée en mode focus.
-- [x] `src/wavestack/web/static/app.js` -- `store.paneSizes`, lecture/écriture `localStorage` protégée des tailles et de `hiddenPanes` (écriture dans `hidePane`/`showPane` et en fin de redimensionnement) ; création des 4 poignées au `boot()` ; glisser (pointer events + capture), flèches, double-clic ; visibilité et ARIA des poignées dans `renderPaneVisibility`.
+- [x] `src/harness_lab/web/static/app.css` -- tailles en variables CSS (`--pane-bricks-width`, `--pane-schema-height`, `--pane-human-grow`, `--pane-ctx-grow`, `--pane-orch-grow`) avec les tokens comme valeurs par défaut ; bornes par `clamp()` avec `100%` pour la fenêtre rétrécie ; style `.pane-resize-handle` (gouttière absorbée par des marges négatives, zone de saisie élargie, pilule) ; masquée en mode focus.
+- [x] `src/harness_lab/web/static/app.js` -- `store.paneSizes`, lecture/écriture `localStorage` protégée des tailles et de `hiddenPanes` (écriture dans `hidePane`/`showPane` et en fin de redimensionnement) ; création des 4 poignées au `boot()` ; glisser (pointer events + capture), flèches, double-clic ; visibilité et ARIA des poignées dans `renderPaneVisibility`.
 
 **Acceptance Criteria:**
 - Given l'interface au lancement sans stockage, when on l'affiche, then la disposition est identique à celle d'avant la story.
@@ -67,7 +67,7 @@ context:
 
 ## Implementation Notes
 
-- Fichiers touchés : `app.css`, `app.js` seulement. Clé `localStorage` `wavestack.panes` = `{hidden, sizes}` ; valeurs validées (JSON invalide, nombre hors bornes, cinq volets masqués → défauts).
+- Fichiers touchés : `app.css`, `app.js` seulement. Clé `localStorage` `harness_lab.panes` = `{hidden, sizes}` ; valeurs validées (JSON invalide, nombre hors bornes, cinq volets masqués → défauts).
 - Zone de saisie des poignées verticales asymétrique (6 px à gauche, 18 px à droite) pour ne pas couvrir la barre de défilement native du volet de gauche.
 - Poignée des briques (après revue) : garantit 240 px à chaque colonne visible du haut ; la borne suit le poids de la colonne la plus étroite (`240 × somme des poids / plus petit poids + gouttières`). Vérifié dans Chrome : colonnes égales → briques jusqu'à 394 px, colonnes 240/240/240 ; une colonne déjà à 240 px bloque l'élargissement des briques.
 - Après revue : en-têtes de volet et `#event-log-head` passent au-dessus de la zone de saisie des poignées (`z-index: 2`) ; flèches avec Alt/Ctrl/Meta ignorées ; pilule visible en `forced-colors`. Vérifié dans Chrome (point le plus bas du bouton du journal, haut des boutons du schéma, Alt+←).

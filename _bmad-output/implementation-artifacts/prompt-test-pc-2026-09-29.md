@@ -14,7 +14,7 @@ qu'une personne doit encore faire. Travaille en français.
 ## Contexte
 
 - Poste : Windows 11, PowerShell, **sans droits d'administrateur**, CPU seulement, 16 Go de RAM.
-  Modèles réels : Qwen3.5-2B et Qwen3.5-4B en GGUF (en général `%LOCALAPPDATA%\WaveStack\models`),
+  Modèles réels : Qwen3.5-2B et Qwen3.5-4B en GGUF (en général `%LOCALAPPDATA%\HarnessLab\models`),
   Ollama s'il tourne, clés Groq et Mistral éventuelles (variables d'environnement ou
   `api_keys.json`). Navigateurs : Chrome et Edge.
 - Dépôt : branche `claude/lucid-cori-1rkbjf`, dernier commit (celui du rapport de nuit
@@ -39,7 +39,7 @@ qu'une personne doit encore faire. Travaille en français.
 
 1. **Ne modifie rien sans l'accord d'Anaël** : ni le code, ni la configuration du dépôt, ni son
    dossier de données réel. Tes scripts vivent hors du dépôt (dossier temporaire) et utilisent un
-   dossier de données jetable (`WAVESTACK_DATA_DIR` vers une copie, `models` en jonction vers le
+   dossier de données jetable (`HARNESS_LAB_DATA_DIR` vers une copie, `models` en jonction vers le
    vrai dossier). Si un test échoue, décris l'anomalie et propose un correctif : ne l'applique pas.
 2. **Mesures** : avant toute mesure de temps ou de mémoire, demande à Anaël de fermer Edge,
    Outlook et Teams, attends sa confirmation, et note l'état réel (Edge se relance parfois seul :
@@ -67,10 +67,10 @@ uv sync --extra compression --extra rag-alt
 uv run ruff check .
 uv run ruff format --check .
 uv run pytest -q
-$env:WAVESTACK_TEST_GGUF = "<chemin du Qwen3.5-2B .gguf>"
-$env:WAVESTACK_TEST_MODELS_DIR = "$env:LOCALAPPDATA\WaveStack\models"
+$env:HARNESS_LAB_TEST_GGUF = "<chemin du Qwen3.5-2B .gguf>"
+$env:HARNESS_LAB_TEST_MODELS_DIR = "$env:LOCALAPPDATA\HarnessLab\models"
 uv run pytest -q -m model
-$env:WAVESTACK_TEST_WINDOWS_FILES = "1"; uv run pytest -q; Remove-Item Env:WAVESTACK_TEST_WINDOWS_FILES
+$env:HARNESS_LAB_TEST_WINDOWS_FILES = "1"; uv run pytest -q; Remove-Item Env:HARNESS_LAB_TEST_WINDOWS_FILES
 uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py
 uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py --only rag rag_rerank rag_lab --no-rag-alt
 ```
@@ -126,7 +126,7 @@ journal d'événements et relève la RSS (processus et enfants). Couvre en prior
 
 ### 4. Playwright sur la vraie application
 
-Lance WaveStack normalement sur le vrai 2B, puis vérifie avec Playwright (Chromium) : mises en
+Lance HarnessLab normalement sur le vrai 2B, puis vérifie avec Playwright (Chromium) : mises en
 page à 1 280, 1 366, 1 440 et 1 600 px de large, en normal et en mode projection (barre haute sur
 une ligne avec ses liens « LLM nu » et « Atelier RAG », « Réinitialiser » visible, puces « · lié »
 lisibles) ; balayage des contrastes en clair et en sombre sur l'atelier, `/diagnostic`,
@@ -188,7 +188,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 
 ### Story 22 — Retours de recette : briques, volets et tiroirs
 
-- **Geste** : Edge, lancer WaveStack (`uv run wavestack`), regarder le panneau des briques ; éteindre RAG avec « Reranking » coché ; déplier MCP brique éteinte ; survoler « Reranking » et « Lazy loading ». — **Attendu** : Raisonnement en tête ; interrupteurs gris, raison en infobulle. — **Critère** : infobulle visible en moins de 2 s de survol, sous Edge et Chrome. — **Moyen** : Claude in Chrome ou à la main.
+- **Geste** : Edge, lancer HarnessLab (`uv run harness-lab`), regarder le panneau des briques ; éteindre RAG avec « Reranking » coché ; déplier MCP brique éteinte ; survoler « Reranking » et « Lazy loading ». — **Attendu** : Raisonnement en tête ; interrupteurs gris, raison en infobulle. — **Critère** : infobulle visible en moins de 2 s de survol, sous Edge et Chrome. — **Moyen** : Claude in Chrome ou à la main.
 - **Geste** : lancer « Métier SOC » dans le sélecteur de scénario, texte à 125 % puis 150 % (« Aa »), cliquer « Afficher plus » puis « Réduire ». — **Attendu** : 3 lignes, bouton présent, la réponse d'un tour reste lisible. — **Critère** : au moins 2 bulles visibles au-dessus du champ sur l'écran du poste, sans défilement de la page. — **Moyen** : à la main (œil humain).
 - **Geste** : scénario « Mémoire globale », « Modifier la mémoire », ajouter des entrées jusqu'à 8 par « Écrire en mémoire ». — **Attendu** : croix en haut à droite, pied « Tout effacer » (rouge) / « Fermer » visible sans défiler. — **Critère** : les deux boutons visibles à 100 % et 150 % de taille de texte ; distinction jugée évidente par Anaël. — **Moyen** : à la main.
 - **Geste** : « Modifier le prompt », ne rien changer, puis modifier et « Enregistrer ». — **Attendu** : bouton gris puis confirmation « Prompt système enregistré. ». — **Critère** : confirmation lue par le lecteur d'écran de Windows (Narrateur) — **Moyen** : à la main.
@@ -198,7 +198,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 ### Story 33 — Contrastes et code couleur par discipline
 
 - **Barre haute projetée**
-  - **Geste** : dans Chrome puis Edge, lancer `uv run wavestack`, choisir « Outils réseau » dans le sélecteur de scénario, envoyer « Résume l'article Wikipédia sur le Mont-Saint-Michel. », puis projeter ou se placer à 3 m de l'écran.
+  - **Geste** : dans Chrome puis Edge, lancer `uv run harness-lab`, choisir « Outils réseau » dans le sélecteur de scénario, envoyer « Résume l'article Wikipédia sur le Mont-Saint-Michel. », puis projeter ou se placer à 3 m de l'écran.
   - **Attendu** : barre haute foncée, légende de la jauge lisible, total en tokens et en pourcentage.
   - **Critère** : Anaël lit la légende et le total à 3 m, à 100 % puis à 150 % de taille de texte (« Aa »), sans texte coupé.
   - **Moyen** : à la main.
@@ -223,22 +223,22 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
   - **Critère** : 0 élément signalé pour le contraste.
   - **Moyen** : à la main (Lighthouse), ou Claude in Chrome.
 - **Mode contrasté de Windows**
-  - **Geste** : Paramètres, puis Accessibilité, puis Thèmes de contraste, choisir « Désert », puis recharger WaveStack.
+  - **Geste** : Paramètres, puis Accessibilité, puis Thèmes de contraste, choisir « Désert », puis recharger HarnessLab.
   - **Attendu** : barre haute, bulles et tuiles restent lisibles ; les focus sont visibles.
   - **Critère** : tous les textes restent lisibles, et le focus clavier reste visible sur les interrupteurs et la barre haute.
   - **Moyen** : à la main.
 
 ### Story 23 — Données sortantes visibles, en-têtes compris
 
-- **Geste** : sur le PC relié à Internet, dans Chrome puis Edge, lancer `uv run wavestack` (PowerShell), choisir le scénario « Outils réseau » et envoyer « Résume l'article Wikipédia sur le Mont-Saint-Michel. », puis cliquer le nœud 🌐 « Wikipédia » du schéma. — **Attendu** : l'étape se déplie sur « 🌐 RÉSEAU · Données sortantes » avec les en-têtes, et l'outil réussit (pas de 403). — **Critère** : `User-Agent: WaveStack/0.1 (demonstrateur pedagogique; <contact de [net] contact>)` est lisible en entier sans défilement horizontal à 1366 × 768, et le résultat est non vide. — **Moyen** : Claude in Chrome, à défaut à la main.
+- **Geste** : sur le PC relié à Internet, dans Chrome puis Edge, lancer `uv run harness-lab` (PowerShell), choisir le scénario « Outils réseau » et envoyer « Résume l'article Wikipédia sur le Mont-Saint-Michel. », puis cliquer le nœud 🌐 « Wikipédia » du schéma. — **Attendu** : l'étape se déplie sur « 🌐 RÉSEAU · Données sortantes » avec les en-têtes, et l'outil réussit (pas de 403). — **Critère** : `User-Agent: HarnessLab/0.1 (demonstrateur pedagogique; <contact de [net] contact>)` est lisible en entier sans défilement horizontal à 1366 × 768, et le résultat est non vide. — **Moyen** : Claude in Chrome, à défaut à la main.
 - **Geste** : avec Groq choisi au diagnostic (vraie clé), envoyer « Quelle heure est-il ? », puis dans PowerShell `Select-String -Path <dossier de données>\*.jsonl,<dossier de données>\*.log -Pattern '<8 premiers caractères de la clé>'`, ou le script AppSession qui lit `get_journal().all_events()`. — **Attendu** : `outbound_request{origin: model}` porte `Authorization: [masqué]`. — **Critère** : zéro occurrence de la clé ou de ses fragments. — **Moyen** : script AppSession et `Select-String`.
 - **Geste** : derrière le proxy d'entreprise, activer data.gouv.fr dans la brique MCP, déplier sa connexion dans « Préparation du harnais », puis faire un appel MCP. — **Attendu** : chaque requête montre ses en-têtes, `Mcp-Session-Id` et tout `Proxy-Authorization` à « [masqué] ». — **Critère** : aucun identifiant du proxy ni aucun identifiant de session en clair dans le journal. — **Moyen** : Claude in Chrome, puis le JSON du journal.
-- **Geste** : donner à un participant novice la consigne « Trouve ce que WaveStack envoie à Wikipédia » (retest M2), en partant du panneau des briques. — **Attendu** : il lit la carte Outils, puis clique le nœud ou l'étape. — **Critère** : il trouve le bloc en moins de 30 s, sans aide. — **Moyen** : à la main seulement (œil humain).
+- **Geste** : donner à un participant novice la consigne « Trouve ce que HarnessLab envoie à Wikipédia » (retest M2), en partant du panneau des briques. — **Attendu** : il lit la carte Outils, puis clique le nœud ou l'étape. — **Critère** : il trouve le bloc en moins de 30 s, sans aide. — **Moyen** : à la main seulement (œil humain).
 
 ### Story 34 — Vue liée au survol et lecture guidée des volets
 
 - **Vue liée pendant la génération**
-  - **Geste** : dans Edge puis Chrome, lancer `uv run wavestack` (PowerShell) avec Qwen3.5-4B (GGUF), choisir le scénario « Outils natifs », envoyer « Combien font 12*37 ? », et pendant la génération survoler la carte Outils, puis le nœud Calculatrice.
+  - **Geste** : dans Edge puis Chrome, lancer `uv run harness-lab` (PowerShell) avec Qwen3.5-4B (GGUF), choisir le scénario « Outils natifs », envoyer « Combien font 12*37 ? », et pendant la génération survoler la carte Outils, puis le nœud Calculatrice.
   - **Attendu** : éclairage immédiat, sans clignotement, pendant que le texte arrive.
   - **Critère** : l'éclairage suit le pointeur en moins de 100 ms, et le CPU ne dépasse pas celui d'un tour sans survol de plus de 5 points (Gestionnaire des tâches).
   - **Moyen** : Claude in Chrome, et à la main pour le CPU.
@@ -258,7 +258,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
   - **Critère** : Anaël lit les sous-titres et la frise à 3 m ; aucun texte coupé dans la barre haute.
   - **Moyen** : à la main (œil humain).
 - **Mouvement réduit Windows**
-  - **Geste** : Paramètres, Accessibilité, Effets visuels, désactiver « Effets d'animation », recharger WaveStack, survoler une carte.
+  - **Geste** : Paramètres, Accessibilité, Effets visuels, désactiver « Effets d'animation », recharger HarnessLab, survoler une carte.
   - **Attendu** : l'estompage est instantané, sans fondu.
   - **Critère** : aucune transition visible, et l'éclairage reste identique.
   - **Moyen** : à la main.
@@ -271,7 +271,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 ### Story 32 — Contexte LLM lisible : texte groupé, sources en marge, lu et produit distincts
 
 - **Lecture d'un tour à outil**
-  - **Geste** : sur Windows 11, dans Chrome puis Edge, lancer `uv run wavestack` (PowerShell), charger Qwen3.5-4B (GGUF) et choisir le scénario « Outils natifs ». Envoyer « Quelle heure est-il ? », puis regarder Contexte LLM.
+  - **Geste** : sur Windows 11, dans Chrome puis Edge, lancer `uv run harness-lab` (PowerShell), charger Qwen3.5-4B (GGUF) et choisir le scénario « Outils natifs ». Envoyer « Quelle heure est-il ? », puis regarder Contexte LLM.
   - **Attendu** : Appel 1 et Appel 2 ; au second, le déjà-lu est replié et le résultat d'outil marqué « Nouveau » ; réflexion, appel d'outil et réponse sur leur fond.
   - **Critère** : Anaël dit en moins de 10 s ce qui est nouveau à l'appel 2, et juge la vue plus claire que l'ancienne.
   - **Moyen** : à la main (œil humain).
@@ -303,10 +303,10 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 
 ### Story 24 — Modèles : mémoire comptée juste, budget dynamique, sonde interruptible
 
-- **Geste** : Edge, Outlook et Teams fermés ; lancer WaveStack, lire la ligne « Mémoire » du diagnostic ; dans PowerShell, `uv run python -c "import psutil; v=psutil.virtual_memory(); print(v.total//2**20, v.available//2**20)"`. — **Attendu** : RAM totale, disponible, 60 %, plafond et budget retenu. — **Critère** : budget = min(4 096, 0,6 × disponible) à 5 % près de la mesure PowerShell. — **Moyen** : script AppSession ou Claude in Chrome.
-- **Geste** : rouvrir Edge et Teams, relancer WaveStack. — **Attendu** : budget plus petit si la RAM disponible chute sous 6,8 Go, contrôle en `warn` avec le conseil. — **Critère** : chiffres cohérents avec PowerShell. — **Moyen** : à la main.
-- **Geste** : mettre `budget_mode = "fixed"` et `budget_mb = 6144` dans `[memory]` de `wavestack.toml`, relancer. — **Attendu** : « valeur fixe », 6 144 Mo. — **Critère** : texte exact du budget. — **Moyen** : Playwright ou à la main.
-- **Geste** : 2B actif, choisir le 4B dans « Changer de modèle ». — **Attendu** : refus chiffré. — **Critère** : « WaveStack occupe N Mo sans le modèle actif » avec 80 ≤ N ≤ 400, jamais 0, proche (±100 Mo) de la RSS mesurée par script après libération. — **Moyen** : script AppSession.
+- **Geste** : Edge, Outlook et Teams fermés ; lancer HarnessLab, lire la ligne « Mémoire » du diagnostic ; dans PowerShell, `uv run python -c "import psutil; v=psutil.virtual_memory(); print(v.total//2**20, v.available//2**20)"`. — **Attendu** : RAM totale, disponible, 60 %, plafond et budget retenu. — **Critère** : budget = min(4 096, 0,6 × disponible) à 5 % près de la mesure PowerShell. — **Moyen** : script AppSession ou Claude in Chrome.
+- **Geste** : rouvrir Edge et Teams, relancer HarnessLab. — **Attendu** : budget plus petit si la RAM disponible chute sous 6,8 Go, contrôle en `warn` avec le conseil. — **Critère** : chiffres cohérents avec PowerShell. — **Moyen** : à la main.
+- **Geste** : mettre `budget_mode = "fixed"` et `budget_mb = 6144` dans `[memory]` de `harness-lab.toml`, relancer. — **Attendu** : « valeur fixe », 6 144 Mo. — **Critère** : texte exact du budget. — **Moyen** : Playwright ou à la main.
+- **Geste** : 2B actif, choisir le 4B dans « Changer de modèle ». — **Attendu** : refus chiffré. — **Critère** : « HarnessLab occupe N Mo sans le modèle actif » avec 80 ≤ N ≤ 400, jamais 0, proche (±100 Mo) de la RSS mesurée par script après libération. — **Moyen** : script AppSession.
 - **Geste** : copier le 2B sous un autre nom dans `models\` (jamais sondé), le choisir à chaud, cliquer « Arrêter » dans les 5 s. — **Attendu** : « Chargement arrêté : … est de nouveau actif. ». — **Critère** : `Get-Process python` ne montre plus l'enfant de sonde 1 s après le clic ; aucune entrée pour ce fichier dans `failed_probes` ; fin d'arrêt ≤ 3 s plus le rechargement du 2B. — **Moyen** : Claude in Chrome et PowerShell.
 - **Geste** : Ollama lancé, `llama3.2:3b` non chargé (`ollama ps` vide), le choisir. — **Attendu** : accepté ; ligne du diagnostic ≈ 2,3 Go. — **Critère** : pas de refus ; après un message, `ollama ps` (SIZE) à ±30 % de l'estimation ; noter `OLLAMA_NUM_PARALLEL` et le type de KV d'Ollama. — **Moyen** : script AppSession et PowerShell.
 - **Geste** : reprendre le fichier incompatible de C6 (même fichier que la recette), le choisir. — **Attendu** : raison accentuée juste dans le diagnostic et le journal. — **Critère** : aucun « Ã » ni « Â » dans la page ni dans les nouvelles entrées de `settings.json`. — **Moyen** : Claude in Chrome.
@@ -314,7 +314,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 
 ### Story 25 — Sélecteur de modèles regroupé et tableau des capacités
 
-- **Geste** : Qwen3.5-2B et 4B en GGUF dans `models\`, Ollama lancé avec au moins `llama3.2:3b` et un modèle Qwen ; lancer WaveStack, ouvrir « Changer de modèle… » dans Chrome puis dans Edge. — **Attendu** : groupes « Sur ce poste · Qwen (Alibaba) » puis « Sur ce poste · Llama (Meta) », 2B avant 4B, préfixes « Local · fichier » et « Local · Ollama », légende lisible en tête de liste. — **Critère** : ordre et libellés exacts, aucun modèle dans « Autres éditeurs » parmi Qwen, Llama et Gemma ; légende entière visible sans troncature dans les deux navigateurs. — **Moyen** : Claude in Chrome ; Edge à la main.
+- **Geste** : Qwen3.5-2B et 4B en GGUF dans `models\`, Ollama lancé avec au moins `llama3.2:3b` et un modèle Qwen ; lancer HarnessLab, ouvrir « Changer de modèle… » dans Chrome puis dans Edge. — **Attendu** : groupes « Sur ce poste · Qwen (Alibaba) » puis « Sur ce poste · Llama (Meta) », 2B avant 4B, préfixes « Local · fichier » et « Local · Ollama », légende lisible en tête de liste. — **Critère** : ordre et libellés exacts, aucun modèle dans « Autres éditeurs » parmi Qwen, Llama et Gemma ; légende entière visible sans troncature dans les deux navigateurs. — **Moyen** : Claude in Chrome ; Edge à la main.
 - **Geste** : cliquer « Tableau des modèles et de leurs capacités… » puis « Ouvrir le tableau ». — **Attendu** :
   - Qwen3.5-2B et 4B : outils « oui », raisonnement « activable » ;
   - `llama3.2:3b` : outils « non », avec la raison, et raisonnement « jamais » ;
@@ -330,12 +330,12 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 ### Story 26 — Fenêtre de contexte réglable (4 096, 8 192, 16 384)
 
 - **Geste** : Edge, Outlook et Teams fermés. Qwen3.5-2B actif, envoyer « Bonjour », ouvrir « Fenêtre ▾ » et lire les trois choix. — **Attendu** : cache, temps de lecture et verdict pour 4 096, 8 192 et 16 384. — **Critère** : le cache du 2B égale `kv_bytes_per_token × fenêtre`, à comparer à l'entrée `probed_models` de `settings.json`. Le débit affiché est à ±20 % de `evaluated_tokens / prompt_ms` du dernier `model_call_ended`, lu dans le journal. — **Moyen** : script AppSession et Claude in Chrome.
-- **Geste** : choisir 8 192, cliquer « Appliquer ». — **Attendu** : rechargement, conversation gardée, jauge à 8 192. — **Critère** : rechargement en 30 s au plus ; RSS de WaveStack après rechargement à ±30 % du coût annoncé ; `settings.json` contient `"context": {"window": 8192}`. — **Moyen** : script AppSession et PowerShell (`Get-Process`).
+- **Geste** : choisir 8 192, cliquer « Appliquer ». — **Attendu** : rechargement, conversation gardée, jauge à 8 192. — **Critère** : rechargement en 30 s au plus ; RSS de HarnessLab après rechargement à ±30 % du coût annoncé ; `settings.json` contient `"context": {"window": 8192}`. — **Moyen** : script AppSession et PowerShell (`Get-Process`).
 - **Geste** : 2B à 16 384, remplir le contexte (MCP complet, trois serveurs), puis envoyer. — **Attendu** : pas de débordement là où 4 096 débordait (M4). — **Critère** : premier token mesuré face au temps annoncé ; noter s'il dépasse 30 s (NFR-1). — **Moyen** : script AppSession, puis Claude in Chrome pour la jauge.
 - **Geste** : 4B actif, choisir 16 384. — **Attendu** : refus chiffré si le budget ne suffit pas. — **Critère** : texte « Fenêtre de 16 384 tokens refusée » avec budget et calcul ; le 4B reste actif à la fenêtre précédente. — **Moyen** : Claude in Chrome.
 - **Geste** : Ollama avec `llama3.2:3b` choisi, passer à 8 192 puis envoyer un message ; relever `ollama ps`. — **Attendu** : Ollama recharge le modèle avec `num_ctx` 8192. — **Critère** : la taille de `ollama ps` augmente d'environ le KV annoncé (±30 %). — **Moyen** : PowerShell et script AppSession.
 - **Geste** : llama-server lancé avec `-c 4096`, puis choisir 8 192. — **Attendu** : « bornée à 4 096 par llama-server (-c) ». — **Critère** : la jauge reste à 4 096, `window_source=server`. — **Moyen** : Claude in Chrome.
-- **Geste** : relancer WaveStack après avoir choisi 8 192. — **Attendu** : 8 192 repris ; le diagnostic conseille `-c 8192` pour llama-server. — **Critère** : bouton « Fenêtre 8 192 » au premier affichage. — **Moyen** : Playwright ou à la main.
+- **Geste** : relancer HarnessLab après avoir choisi 8 192. — **Attendu** : 8 192 repris ; le diagnostic conseille `-c 8192` pour llama-server. — **Critère** : bouton « Fenêtre 8 192 » au premier affichage. — **Moyen** : Playwright ou à la main.
 - **Geste** : lire le panneau vidéoprojeté, sous Chrome et Edge, à 125 % et à 150 %. — **Attendu** : barre haute sur une ligne, panneau lisible et non coupé. — **Critère** : aucune commande de la barre haute sur deux lignes à 1280×650. — **Moyen** : à la main seulement.
 
 ### Story 27 — Lot H : scénarios et consignes du palier 2
@@ -348,13 +348,13 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 - **Geste** : lancer « Métier Souveraineté », envoyer le prompt 1, ouvrir les données sortantes de l'appel dans Orchestration. — **Attendu** : recherche réelle sur data.gouv.fr après chargement de la documentation. — **Critère** : `datagouv__search_datasets` `ok` au prompt 1, requête visible (URL, corps, en-têtes). — **Moyen** : script AppSession, puis Claude in Chrome pour l'affichage.
 - **Geste** : lancer « Métier SOC », envoyer les deux prompts. — **Attendu** : prompt 1 : lecture d'`alertes_siem.log` (ou nom corrigé après le refus du harnais) ; prompt 2 : blocage H1, puis la réponse signale le refus et renvoie vers un humain. — **Critère** : `hook_decided` `h1` `block` ; la réponse contient « analyste » ou « habilité » (sinon, noter KO : la consigne porte seule la leçon). — **Moyen** : script AppSession.
 - **Geste** : lancer « Compression du contexte », éteindre la brique Compression, envoyer le prompt 1 ; si rien n'est lu, forcer read_file avec « Journal de sauvegarde (compression) » et rejouer. — **Attendu** : `read_file("journal_serveur.log")` appelé par le modèle, sans débordement. — **Critère** : `tool_started.trigger == "model"` au premier essai ; jauge sous 3 584. — **Moyen** : script AppSession, secours à la main.
-- **Geste** : `$env:WAVESTACK_TEST_GGUF = "<chemin du 2B>"` puis `uv run pytest -s -rA tests/test_program.py -k fits`. — **Attendu** : réussi, avec la jauge locale exacte. — **Critère** : `mcp_full` tient avec son nouveau prompt ; chaque scénario garde une marge positive. — **Moyen** : PowerShell sur le PC cible.
+- **Geste** : `$env:HARNESS_LAB_TEST_GGUF = "<chemin du 2B>"` puis `uv run pytest -s -rA tests/test_program.py -k fits`. — **Attendu** : réussi, avec la jauge locale exacte. — **Critère** : `mcp_full` tient avec son nouveau prompt ; chaque scénario garde une marge positive. — **Moyen** : PowerShell sur le PC cible.
 - **Geste** : faire lire les consignes de « Où vont mes données ? », « Skills » et « Métier SOC » (dépliées) à un formateur novice. — **Attendu** : il sait quoi cliquer et quoi dire sans aide. — **Critère** : chaque consigne est suivie jusqu'au bout en moins de 2 min. — **Moyen** : à la main seulement.
 
 ### Story 31 — Mode sombre
 
 - **Suivi du mode Windows**
-  - **Geste** : Paramètres, Personnalisation, Couleurs, « Choisir votre mode » = Sombre, puis lancer `uv run wavestack` dans PowerShell et ouvrir l'atelier dans Chrome puis dans Edge, sélecteur sur « Système ». Repasser Windows en Clair sans recharger.
+  - **Geste** : Paramètres, Personnalisation, Couleurs, « Choisir votre mode » = Sombre, puis lancer `uv run harness-lab` dans PowerShell et ouvrir l'atelier dans Chrome puis dans Edge, sélecteur sur « Système ». Repasser Windows en Clair sans recharger.
   - **Attendu** : l'atelier passe en sombre, puis revient en clair de lui-même.
   - **Critère** : bascule en moins de 2 s, sans rechargement, dans les deux navigateurs.
   - **Moyen** : à la main.
@@ -374,7 +374,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
   - **Critère** : 0 élément signalé sur les trois pages.
   - **Moyen** : Lighthouse à la main, ou Claude in Chrome.
 - **Mémorisation sans droits d'administrateur**
-  - **Geste** : choisir « Sombre », fermer Chrome, relancer `uv run wavestack`, puis refaire la même chose dans une fenêtre InPrivate d'Edge.
+  - **Geste** : choisir « Sombre », fermer Chrome, relancer `uv run harness-lab`, puis refaire la même chose dans une fenêtre InPrivate d'Edge.
   - **Attendu** : sombre repris dans Chrome ; dans InPrivate, choix possible sans erreur, puis oublié à la fermeture.
   - **Critère** : thème repris au lancement suivant, aucune erreur dans la console.
   - **Moyen** : Playwright (Chromium de `%LOCALAPPDATA%\ms-playwright`) ou à la main.
@@ -382,7 +382,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 ### Story 29 — Écran « LLM nu » : l'architecture d'un modèle, sans l'agentique
 
 - **Vitesse token par token**
-  - **Geste** : PowerShell, `uv run wavestack`, Qwen3.5-2B GGUF actif. Dans Chrome, cliquer « LLM nu », saisir « Explique en deux phrases ce qu'est un token. », puis « Générer ».
+  - **Geste** : PowerShell, `uv run harness-lab`, Qwen3.5-2B GGUF actif. Dans Chrome, cliquer « LLM nu », saisir « Explique en deux phrases ce qu'est un token. », puis « Générer ».
   - **Attendu** : les puces arrivent une à une ; premier token, puis débit.
   - **Critère** : premier token en moins de 10 s (NFR-1, LLM nu), débit affiché ≥ 8 tokens/s, pas de saccade de plus de 1 s entre deux puces.
   - **Moyen** : Claude in Chrome ; mesure croisée par script AppSession.
@@ -395,7 +395,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
   - **Geste** : Qwen3.5-2B, « Montrer les tokens candidats » coché, prompt « La capitale de la France est ». Survoler la première puce.
   - **Attendu** : cinq candidats, « Paris » en tête.
   - **Critère** : somme des `p` affichés ≤ 100 %. Le token tiré est marqué, et le débit baisse de moins de 20 % par rapport à la case décochée.
-  - **Moyen** : Claude in Chrome, puis `pytest -m model` avec `WAVESTACK_TEST_GGUF`.
+  - **Moyen** : Claude in Chrome, puis `pytest -m model` avec `HARNESS_LAB_TEST_GGUF`.
 - **Dimensions réelles**
   - **Geste** : découper un texte avec Qwen3.5-2B, puis 4B.
   - **Attendu** : dimension d'embedding, couches, têtes et vocabulaire conformes à la fiche du modèle.
@@ -435,19 +435,19 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
 ### Story 30 — Atelier RAG : l'architecture RAG à manipuler
 
 - **Installation de l'extra sans droits d'administrateur**
-  - **Geste** : dans PowerShell, depuis le dossier de WaveStack, lancer `uv sync --extra compression --extra rag-alt`, puis `uv run wavestack`.
+  - **Geste** : dans PowerShell, depuis le dossier de HarnessLab, lancer `uv sync --extra compression --extra rag-alt`, puis `uv run harness-lab`.
   - **Attendu** : installation sans invite UAC ni pare-feu, et FAISS et LanceDB disponibles dans `/rag`.
   - **Critère** : code de sortie 0 ; durée et taille de `.venv` notées ; aucune boîte de dialogue.
   - **Moyen** : à la main, ou script PowerShell.
 - **DLL non signées (AppLocker ou WDAC)**
   - **Geste** : `/rag`, base vectorielle FAISS puis LanceDB, « Lancer la chaîne ».
   - **Attendu** : le run passe ; si un import est bloqué, l'étape en `error` dit pourquoi et le reste fonctionne.
-  - **Critère** : aucune `pageerror` ; WaveStack reste utilisable.
+  - **Critère** : aucune `pageerror` ; HarnessLab reste utilisable.
   - **Moyen** : Claude in Chrome ou Playwright.
 - **Chaîne livrée avec les vrais modèles**
   - **Geste** : `/rag`, question « Combien de jours de télétravail par semaine ? », « Lancer », avec granite-embedding et bge-reranker (Qwen3.5-2B actif).
   - **Attendu** : les sept étapes sont renseignées, et le reranking réordonne.
-  - **Critère** : run complet en moins de 15 s ; RSS de WaveStack sous le budget (4 Go) ; mémoire affichée par étape relevée.
+  - **Critère** : run complet en moins de 15 s ; RSS de HarnessLab sous le budget (4 Go) ; mémoire affichée par étape relevée.
   - **Moyen** : script AppSession, puis Playwright pour la capture.
 - **Coût mémoire réel des imports**
   - **Geste** : RSS avant et après la première exécution FAISS, puis LanceDB (Gestionnaire des tâches ou script `psutil`).
@@ -465,7 +465,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
   - **Critère** : aucune erreur réseau ; aucune invite du pare-feu.
   - **Moyen** : à la main.
 - **Rien dans le dépôt**
-  - **Geste** : après les runs, lancer `git status` et regarder `%LOCALAPPDATA%\WaveStack\rag_lab`.
+  - **Geste** : après les runs, lancer `git status` et regarder `%LOCALAPPDATA%\HarnessLab\rag_lab`.
   - **Attendu** : les index sont dans le dossier de données seulement.
   - **Critère** : `git status` propre.
   - **Moyen** : PowerShell.
@@ -498,7 +498,7 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
   - **Critère** : la version s'affiche. Sinon, le message exact est relevé et C9 et C10 passent à « non fait (poste) ».
   - **Moyen** : à la main.
 - **Lancement avec -c 4096**
-  - **Geste** : lancer la commande de C10, WaveStack arrêté et le 2B non chargé ailleurs, puis lancer WaveStack.
+  - **Geste** : lancer la commande de C10, HarnessLab arrêté et le 2B non chargé ailleurs, puis lancer HarnessLab.
   - **Attendu** : « Local · llama-server » au diagnostic, sans avertissement de contexte.
   - **Critère** : RSS de `llama-server` (commande `PEAK_CMD`) bien sous 5 137 Mo.
   - **Moyen** : script AppSession ou à la main.
@@ -508,12 +508,12 @@ critère et le moyen proposé. Pour les stories 22 à 27 et 31 à 34, le cahier
   - **Critère** : chaque test reçoit un statut OK ou KO, pas « non fait » pour cause de consigne.
   - **Moyen** : à la main (œil humain).
 - **Vider les clés (Z2)**
-  - **Geste** : suivre Z2 dans un nouveau terminal, puis lancer `uv run wavestack` et ouvrir le diagnostic.
+  - **Geste** : suivre Z2 dans un nouveau terminal, puis lancer `uv run harness-lab` et ouvrir le diagnostic.
   - **Attendu** : aucune ligne « Clé fournie par la variable… » ni clé enregistrée ; le diagnostic demande de choisir un modèle servi.
   - **Critère** : les lignes Groq et Mistral du diagnostic indiquent qu'aucune clé n'est fournie (libellé exact relevé). Après « Défaire », les clés reviennent.
   - **Moyen** : à la main.
 - **Mémoire pleine (D11)**
-  - **Geste** : lancer le script D11, relancer WaveStack, allumer « Mémoire globale » à la main, puis lire la jauge.
+  - **Geste** : lancer le script D11, relancer HarnessLab, allumer « Mémoire globale » à la main, puis lire la jauge.
   - **Attendu** : 20 entrées dans le tiroir ; la jauge compte environ 1 550 tokens de mémoire.
   - **Critère** : la jauge reste sous la fenêtre utilisable (sans débordement). `memory.json` est restauré ensuite.
   - **Moyen** : script AppSession pour la jauge, à la main pour l'affichage.

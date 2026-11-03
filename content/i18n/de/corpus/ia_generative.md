@@ -1,6 +1,6 @@
 # Leitlinien zur Nutzung generativer KI bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Leitlinien beschreiben kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Leitlinien beschreiben kein reales Unternehmen. -->
 
 Exemplia fördert die Nutzung generativer künstlicher Intelligenz, um beim Verfassen, Zusammenfassen und Übersetzen Zeit zu sparen, unter Einhaltung dieser Leitlinien. Sie gelten für Chat-Assistenten, Bildgeneratoren und Tools zur Code-Vervollständigung.
 

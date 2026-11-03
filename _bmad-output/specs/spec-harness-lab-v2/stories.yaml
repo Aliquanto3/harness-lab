@@ -1,0 +1,132 @@
+- id: "1"
+  title: "V2 (1/6) : jeu de questions de démonstration avec réponses attendues"
+  description: >-
+    Poser le jeu de questions (réponse attendue, document et ancre du bon passage) en trois
+    langues, son chargeur validé et sa sélection dans l'interface (CAP-1). Taille M.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Brouillon non déclenché : ne lancer qu'après les conditions 1 et 2 de « Déclenchement »
+    (SPEC.md). Lire brownfield.md. Partir des 10 requêtes de tools/bench/story12_bench.py ;
+    faire relire les questions par Anaël avant de les traduire. Exécution sur ce PC (16 Go) :
+    pytest en quarts, E2E par tranches --only, au premier plan, une suite à la fois.
+- id: "2"
+  title: "V2 (2/6) : diagnostic du bon extrait dans la vue harnais"
+  description: >-
+    Partiellement absorbée par la V1.2, story 9 (CAP-10), reste ouverte (voir la story) ; l'énoncé d'origine suit.
+    Pour un tour lancé depuis une question du jeu, calculer avant la génération où est le bon
+    extrait et quelle étape l'a perdu, puis l'afficher dans Orchestration et Contexte LLM
+    (CAP-2). Taille L.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Brouillon non déclenché (voir SPEC.md). Nouvel événement au catalogue (AD-2), émis avant
+    model_call_started ; le calcul de rang complet est un diagnostic, il ne change jamais le
+    contexte. Aucune lecture de la réponse du modèle. Exécution sur ce PC (16 Go) : pytest en
+    quarts, E2E par tranches --only, au premier plan, une suite à la fois.
+- id: "3"
+  title: "V2 (3/6) : diagnostic du bon extrait dans l'Atelier RAG"
+  description: >-
+    Partiellement absorbée par la V1.2, story 9 (CAP-10), reste ouverte (voir la story) ; l'énoncé d'origine suit.
+    Suivre le bon extrait d'étape en étape dans l'Atelier RAG, compter les tokens de l'étape
+    contexte et nommer dans la synthèse A/B la chaîne qui le place le plus haut (CAP-3).
+    Taille M.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Brouillon non déclenché (voir SPEC.md). Réutiliser le repérage du bon extrait de la
+    story 2, sans le dupliquer. Exécution sur ce PC (16 Go) : pytest en quarts, E2E par
+    tranches --only, au premier plan, une suite à la fois.
+- id: "4"
+  title: "V2 (4/6) : module « Où naît l'erreur d'un RAG »"
+  description: >-
+    Partiellement absorbée par la V1.2, story 9 (CAP-10), reste ouverte (voir la story) ; l'énoncé d'origine suit.
+    Écrire le module V2 et ses scénarios, au moins trois cas d'échec localisés à des étapes
+    différentes, rattachés aux questions du jeu, en trois langues (CAP-4). Taille S à M.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Brouillon non déclenché (voir SPEC.md). Les cas d'échec se trouvent avec les vrais modèles
+    d'embedding et de reranking, sur le PC cible : prévoir un passage manuel d'Anaël. Exécution
+    sur ce PC (16 Go) : pytest en quarts, E2E par tranches --only, au premier plan, une suite à
+    la fois.
+- id: "5"
+  title: "V2 (5/6) : coût contrefactuel d'un tour local"
+  description: >-
+    Pour un tour local, estimer ce qu'aurait coûté le même tour chez chaque modèle cloud déclaré
+    avec un prix, daté et sourcé, sans réseau (CAP-5). Taille M.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Brouillon non déclenché (voir SPEC.md). Lire _bmad-output/implementation-artifacts/
+    spec-estimateur-finops-api.md : même registre de prix, même affichage, jamais de calcul
+    côté front. Exécution sur ce PC (16 Go) : pytest en quarts, E2E par tranches --only, au
+    premier plan, une suite à la fois.
+- id: "6"
+  title: "V2 (6/6) : test préalable des modèles de décision"
+  description: >-
+    Banc hors produit qui mesure chaque candidat de decision-model-candidates.md selon les six
+    critères du test préalable et consigne un verdict par candidat (CAP-6). Taille M, plus un
+    relevé manuel sur le PC cible.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Seule story que la contrainte « Déclenchement » permet avant le pilote, sur décision
+    d'Anaël. Modèle : tools/bench/story12_bench.py. Aucune dépendance ajoutée au projet
+    (uv run --with), aucun changement sous src/harness_lab. Les mesures du conteneur ne valent pas
+    verdict : le relevé sur le PC cible le fait.
+- id: "7"
+  title: "V2 (7/7) : banc des nouveaux candidats de décision"
+  description: >-
+    Étendre le banc de la story 6 à Decision 2.0 Kai 0.6B et aux deux encodeurs NLI multilingues
+    de decision-model-candidates.md, puis consigner leur verdict relevé sur le PC cible (CAP-6).
+    Taille S à M, plus un relevé manuel sur le PC cible.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Permise avant le pilote, comme la story 6 : c'est un banc, pas une fonction. Étendre
+    tools/bench/v2s6_decision_bench.py sans le dupliquer ; aucune dépendance ajoutée au projet
+    (uv run --with), aucun changement sous src/harness_lab. Relire et épingler le code distant de
+    Decision 2.0 avant toute exécution. Le PC (16 Go) est partagé : une mesure à la fois, au
+    premier plan.
+- id: "8"
+  title: "V2 (8/8) : banc d'un modèle de décision servi par Ollama (tev1 0.8B)"
+  description: >-
+    Étendre le banc de la story 6 à tev1 0.8B servi par Ollama 0.35 (/v1/systemone), avec les
+    mêmes critères et prompts, puis consigner son verdict relevé sur le PC cible (CAP-6).
+    Taille S à M, plus un relevé manuel sur le PC cible.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Permise avant le pilote, comme les stories 6 et 7 : c'est un banc, pas une fonction. Étendre
+    tools/bench/v2s6_decision_bench.py sans le dupliquer ; aucune dépendance ajoutée au projet
+    (uv run --with), aucun changement sous src/harness_lab. Le modèle tourne dans le processus
+    Ollama : la RAM compte l'enfant de mesure et le processus Ollama qui sert tev1, et le
+    hors-ligne se vérifie aussi côté serveur. Verdict au mieux « à surveiller » (modèle causal,
+    règle d'un seul modèle génératif) ; établir la licence des poids. Anaël met Ollama à jour en
+    0.35 avant le relevé. Le test du document des candidats compte ses lignes : ajouter la ligne
+    de tev1 et le candidat ensemble. Le PC (16 Go) est partagé : une mesure à la fois, au
+    premier plan.
+- id: "9"
+  title: "V2 (9/9) : banc des modèles de décision servis par llama.cpp (Julia-1, Laya)"
+  description: >-
+    Étendre le banc de la story 6 aux modèles de décision que llama-server sert sur
+    /v1/systemone depuis la PR #29818 de llama.cpp (billet ggml-org du 2026-10-02) : Julia-1
+    144M (sur mmBERT-small, plus de 50 langues) d'abord, Laya 421M (sur ModernBERT-large,
+    anglais seul) pour comparaison, avec les mêmes critères et prompts, puis consigner leur
+    verdict relevé sur le PC cible (CAP-6). Taille S à M, plus un relevé manuel sur le PC cible.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Permise avant le pilote, comme les stories 6 à 8 : c'est un banc, pas une fonction. Étendre
+    tools/bench/v2s6_decision_bench.py sans le dupliquer (réutiliser le client /v1/systemone de
+    la story 8 si elle est faite) ; aucune dépendance ajoutée au projet, aucun changement sous
+    src/harness_lab. llama-server : binaire CPU Windows d'une version publiée de llama.cpp qui
+    contient la PR #29818, en archive zip sans droits administrateur, version et sha256 notés ;
+    GGUF téléchargés une fois puis servis par chemin local (pas -hf pendant la mesure), pour
+    vérifier le hors-ligne côté serveur. La RAM compte l'enfant de mesure et le processus
+    llama-server, avec le SLM par défaut chargé. Établir la licence de chaque GGUF (le billet
+    annonce Apache 2.0). Écartés sans mesure : lev 4B, OpenJev 27B (taille, et CC BY-NC 4.0
+    incompatible avec NFR-10) ; Kev-4B seulement si son GGUF quantifié plus le SLM tiennent
+    sous 4 096 Mo. Ajouter les lignes du document des candidats avec le candidat (le test
+    compte ses lignes). Le PC (16 Go) est partagé : une mesure à la fois, au premier plan.

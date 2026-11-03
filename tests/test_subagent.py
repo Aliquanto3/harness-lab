@@ -14,10 +14,10 @@ from test_bricks import HEADERS, _client
 from test_cloud import SENTINEL, Provider, _cloud_session, _journal_text, _no_sentinel, delta, sse
 from test_tools import QWEN, _segments, call, web  # noqa: F401 - fixture
 
-from wavestack import config
-from wavestack.hooks import DEMO_HOOKS, Hook, HookResult
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.hooks import DEMO_HOOKS, Hook, HookResult
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 TASK = "Lis le fichier notes_reunion.txt et liste les décisions."
 RESULT = "Décisions : budget validé, planning validé."
@@ -114,7 +114,7 @@ def test_the_sub_agent_context_has_its_prompt_the_task_and_its_tools_only():
     kinds = {s["kind"] for s in first["segments"]}
     assert "history" not in kinds and "hook_injection" not in kinds
     (prompt,) = _segments(first, "system_prompt")
-    assert prompt["brick"] == "subagent" and "sous-agent de WaveStack" in prompt["text"]
+    assert prompt["brick"] == "subagent" and "sous-agent de HarnessLab" in prompt["text"]
     (task,) = _segments(first, "user_message")
     assert (task["text"], task["brick"], task["component"]) == (TASK, "subagent", "subagent.agent")
     catalog = "".join(s["text"] for s in _segments(first, "tool_catalog"))
@@ -937,8 +937,8 @@ def test_no_other_brick_enters_the_sub_agent_context():
 def test_sub_messages_are_the_ones_written_before_the_derivation():
     """E067, a refactor without effect: the head of `_sub_messages` is the sub-agent's prompt
     then the task, attributed to `subagent.agent`, as when it was written by hand."""
-    from wavestack.context.segments import Part, SegmentKind
-    from wavestack.session.app_session import _SubContext
+    from harness_lab.context.segments import Part, SegmentKind
+    from harness_lab.session.app_session import _SubContext
 
     _, session = sub_session([RESULT])
     sub = _SubContext(context_id="sub1", task=TASK, prompt="Tu es un sous-agent.", tools=())
@@ -956,7 +956,7 @@ def test_sub_messages_are_the_ones_written_before_the_derivation():
 def test_every_brick_declaring_sub_says_what_it_brings():
     """E067: a brick that comes to declare `sub` (RAG, global memory…) must bring its part to
     `_sub_contributions`; only `tools` brings none there (its tools go through `sub.tools`)."""
-    from wavestack.session.app_session import _SubContext
+    from harness_lab.session.app_session import _SubContext
 
     _, session = sub_session([RESULT])
     sub = _SubContext(context_id="sub1", task=TASK, prompt="Tu es un sous-agent.", tools=())
@@ -968,7 +968,7 @@ def test_every_brick_declaring_sub_says_what_it_brings():
 
 def test_a_brick_that_does_not_declare_sub_adds_nothing_to_it(monkeypatch):
     """E067: the head follows `contributes_to`: `subagent` without `sub` puts nothing there."""
-    from wavestack.session.app_session import _SubContext
+    from harness_lab.session.app_session import _SubContext
 
     _, session = sub_session([RESULT])
     sub = _SubContext(context_id="sub1", task=TASK, prompt="Tu es un sous-agent.", tools=())

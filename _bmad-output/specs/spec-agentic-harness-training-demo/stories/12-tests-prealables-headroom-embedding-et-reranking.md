@@ -31,7 +31,7 @@ deferred:
 
 **Always:**
 - Aucune dépendance ajoutée au projet : `pyproject.toml` et `uv.lock` restent inchangés, les paquets de mesure arrivent par `uv run --with` ou dans un environnement jetable du scratchpad.
-- Chaque mesure tourne dans un processus enfant neuf, pour un RSS propre : la garde réseau du projet (`wavestack.net.guard.install`) est installée avant tout import tiers, les variables de proxy sont retirées comme dans `tests/conftest.py`, et un hook d'audit consigne chaque `socket.getaddrinfo` et `socket.connect` tentés.
+- Chaque mesure tourne dans un processus enfant neuf, pour un RSS propre : la garde réseau du projet (`harness_lab.net.guard.install`) est installée avant tout import tiers, les variables de proxy sont retirées comme dans `tests/conftest.py`, et un hook d'audit consigne chaque `socket.getaddrinfo` et `socket.connect` tentés.
 - Sous Linux, si `strace` est présent, la variante configurée de Headroom tourne aussi sous `strace -f -e trace=connect`, pour voir les sockets du code natif qui échappent à la garde (plafond d'AD-15). Sans `strace`, le script le dit.
 - Le verdict indique pour chaque chiffre s'il est mesuré (ici ou sur le PC cible) ou provisoire (carte de modèle, raisonnement).
 - Les textes affichés par le script, le README et la story sont en français ; code et identifiants en anglais.
@@ -58,7 +58,7 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/net/guard.py` -- `install(allowed_hosts)` et `find_blocked(exc)` : garde réutilisée telle quelle par le script ; la garde accepte l'hôte du proxy, d'où le retrait des variables de proxy (story 1e).
+- `src/harness_lab/net/guard.py` -- `install(allowed_hosts)` et `find_blocked(exc)` : garde réutilisée telle quelle par le script ; la garde accepte l'hôte du proxy, d'où le retrait des variables de proxy (story 1e).
 - `tests/conftest.py` -- modèle du retrait des variables de proxy et de la garde limitée à la boucle locale.
 - `pyproject.toml` -- lecture seule ; ruff inclut `tools/` (seuls `.claude`, `_bmad`, `_bmad-output` sont exclus), pytest ne collecte que `tests/`.
 - `_bmad-output/planning-artifacts/architecture/architecture-agentic-harness-training-demo-2026-09-23/ARCHITECTURE-SPINE.md` -- AD-8 (budget 4 Go, `LoadRegistry`), AD-15 (garde, règle d'adoption, variables HF), AD-22 (embedding et reranking par llama-cpp-python), `## Stack` (ligne headroom-ai), `## Deferred` (deux entrées à mettre à jour).
@@ -259,7 +259,7 @@ Même poste, banc du lot F (comptage `gpt-4`, RSS ajoutée au pic). Résultats b
 3. **Modèle d'embedding recommandé.** granite-107m multilingue suppose un GGUF communautaire (bartowski) fidèle au modèle IBM. Le pooling CLS est confirmé par `1_Pooling/config.json` du modèle IBM (carte HF), mais il n'est pas vérifié dans les métadonnées du GGUF. Le banc affiche `pooling_gguf` pour le confirmer.
 4. **multilingual-e5-small.** Le GGUF de cstr vise CrispEmbed : llama.cpp pourrait refuser de le charger. Le banc le dira.
 5. **Format de paire du reranker.** Il reproduit celui de llama-server. Idéalement, comparer une fois l'ordre obtenu avec `llama-server --rerank` sur le PC cible.
-6. **Tokens de Headroom.** Ses comptes ne servent qu'à ses propres décisions : WaveStack compte les tokens lui-même. La table `o200k_base` coûte environ 60 Mo, soit l'écart de RSS entre la variante naïve et la variante configurée. La story 20 peut enregistrer un compteur par estimation pour économiser cette mémoire, si l'écart se confirme sur le PC cible.
+6. **Tokens de Headroom.** Ses comptes ne servent qu'à ses propres décisions : HarnessLab compte les tokens lui-même. La table `o200k_base` coûte environ 60 Mo, soit l'écart de RSS entre la variante naïve et la variante configurée. La story 20 peut enregistrer un compteur par estimation pour économiser cette mémoire, si l'écart se confirme sur le PC cible.
 7. **Prose non compressée.** Sans Kompress, Headroom laisse la prose telle quelle (0 % sur l'échantillon). La story 20 décide si le libellé de la brique le dit, ou si un compresseur maison minimal complète Headroom pour les `rag_excerpt`.
 8. **AppLocker et WDAC.** headroom-ai ajoute deux binaires natifs non vérifiés : la bibliothèque Rust `_core` (`.pyd` sous Windows) et l'exécutable `ast-grep` (50 Mo). Ce dernier n'est pas lancé pendant une compression JSON : `strace -e trace=execve` ne montre aucun processus enfant (mesuré ici). Même risque que les DLL de llama.cpp : à vérifier en session pilote (Deferred du spine).
 9. **Résolution des dépendances.** La compatibilité de headroom-ai avec le projet a été résolue sans llama-cpp-python (index abetlen injoignable ici). Les dépendances de llama-cpp-python (numpy, diskcache, jinja2, typing-extensions) ne recoupent celles de headroom que sur jinja2 et typing-extensions, déjà présents dans le projet. À confirmer par un `uv lock` réel au moment de la story 20.

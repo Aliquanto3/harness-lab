@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Recette WaveStack palier 2</title>
+<title>Recette HarnessLab palier 2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
@@ -191,7 +191,7 @@ code { font: 0.9em var(--mono); background: var(--code-bg); border-radius: 4px; 
 <div class="shell">
   <aside>
     <div class="brand">
-      <span class="kicker">WaveStack · palier 2 · recette suivante</span>
+      <span class="kicker">HarnessLab · palier 2 · recette suivante</span>
       <h1>Recette sur le PC cible</h1>
       <p>Les tests de la recette du 28/09, repris avec un geste pas à pas, sur le commit de la nuit du 28/09.</p>
     </div>
@@ -251,7 +251,7 @@ const GROUPS = [
   { id: "dec", title: "Décisions à trancher", sub: "Guide, section 7 : D2, D3, D9" },
 ];
 
-const PEAK_CMD = `Get-Process python*, wavestack*, llama-server*, ollama* -ErrorAction SilentlyContinue |
+const PEAK_CMD = `Get-Process python*, harness-lab*, llama-server*, ollama* -ErrorAction SilentlyContinue |
   Select-Object Name, Id, @{n = "Mo"; e = { [math]::Round($_.WorkingSet64 / 1MB) } },
     @{n = "Pic Mo"; e = { [math]::Round($_.PeakWorkingSet64 / 1MB) } }`;
 
@@ -275,9 +275,9 @@ Expand-Archive $zip -DestinationPath $dest -Force; Get-ChildItem $dest -Recurse 
 $llama = "$dest\llama-server.exe"; & $llama --version`;
 const LLAMA_PROXY = String.raw`$px = @{ Proxy = [System.Net.WebRequest]::GetSystemWebProxy().GetProxy("https://api.github.com"); ProxyUseDefaultCredentials = $true }`;
 const LLAMA_FIND = String.raw`$llama = Get-ChildItem "$env:LOCALAPPDATA\llama.cpp" -Recurse -Filter llama-server.exe | Sort-Object LastWriteTime | Select-Object -Last 1 -ExpandProperty FullName`;
-const LLAMA_RUN = String.raw`& $llama -m "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096`;
-const LLAMA_RUN_NO_C = String.raw`& $llama -m "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1`;
-const MEMORY_FULL = String.raw`$d = "$env:LOCALAPPDATA\WaveStack"
+const LLAMA_RUN = String.raw`& $llama -m "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096`;
+const LLAMA_RUN_NO_C = String.raw`& $llama -m "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1`;
+const MEMORY_FULL = String.raw`$d = "$env:LOCALAPPDATA\HarnessLab"
 if ((Test-Path "$d\memory.json.avant-d11") -or (Test-Path "$d\memory.json.d11-sans-fichier")) { throw "Sauvegarde D11 déjà présente : restaurez d'abord (bloc « Restaurer la mémoire »), ne relancez pas ce bloc." }
 if (Test-Path "$d\memory.json") { Copy-Item "$d\memory.json" "$d\memory.json.avant-d11" } else { New-Item "$d\memory.json.d11-sans-fichier" | Out-Null }
 $base = "preference de test pour la jauge, memoire globale pleine : reponses courtes, sources citees, vocabulaire simple, exemples tires de la cybersecurite, pas de jargon inutile, et un resume final en trois points. "
@@ -289,29 +289,29 @@ $e = foreach ($i in 1..20) {
 }
 [IO.File]::WriteAllText("$d\memory.json", (ConvertTo-Json @($e) -Depth 3), (New-Object Text.UTF8Encoding $false))
 "$((Get-Content "$d\memory.json" -Raw | ConvertFrom-Json).Count) entrees"`;
-const MEMORY_RESTORE = String.raw`$d = "$env:LOCALAPPDATA\WaveStack"
+const MEMORY_RESTORE = String.raw`$d = "$env:LOCALAPPDATA\HarnessLab"
 if (Test-Path "$d\memory.json.avant-d11") { Move-Item "$d\memory.json.avant-d11" "$d\memory.json" -Force; "memory.json restauré" }
 elseif (Test-Path "$d\memory.json.d11-sans-fichier") { Remove-Item "$d\memory.json", "$d\memory.json.d11-sans-fichier"; "memory.json de test retiré (il n'existait pas avant D11)" }
 else { "Aucune sauvegarde D11 : rien n'est touché." }`;
 const KEYS_MACHINE = String.raw`[Environment]::GetEnvironmentVariable("GROQ_API_KEY", "Machine"); [Environment]::GetEnvironmentVariable("MISTRAL_API_KEY", "Machine")`;
 const KEYS_LAUNCH = String.raw`Remove-Item Env:GROQ_API_KEY, Env:MISTRAL_API_KEY -ErrorAction SilentlyContinue
-$z = Join-Path $env:TEMP ("wavestack-z2-" + (Get-Date -Format yyyyMMdd-HHmmss))
+$z = Join-Path $env:TEMP ("harness-lab-z2-" + (Get-Date -Format yyyyMMdd-HHmmss))
 New-Item -ItemType Directory -Force "$z\data", "$z\ollama", "$z\hf" | Out-Null
-$env:WAVESTACK_DATA_DIR = "$z\data"; $env:OLLAMA_MODELS = "$z\ollama"; $env:HF_HOME = "$z\hf"
+$env:HARNESS_LAB_DATA_DIR = "$z\data"; $env:OLLAMA_MODELS = "$z\ollama"; $env:HF_HOME = "$z\hf"
 Remove-Item Env:HF_HUB_CACHE -ErrorAction SilentlyContinue
 Get-ChildItem "$HOME\.lmstudio\models", "$HOME\.cache\lm-studio\models" -Recurse -Filter *.gguf -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
 if ($env:GROQ_API_KEY -or $env:MISTRAL_API_KEY) { throw "Une clé est encore visible dans ce terminal : Z2 arrêté, rien n'est lancé." }
 $env:UV_SYSTEM_CERTS = "1"
-uv run wavestack`;
-const RERANK_ASIDE = String.raw`$m = "$env:LOCALAPPDATA\WaveStack\models\reranker"
+uv run harness-lab`;
+const RERANK_ASIDE = String.raw`$m = "$env:LOCALAPPDATA\HarnessLab\models\reranker"
 Rename-Item "$m\bge-reranker-v2-m3-Q4_K_M.gguf" "bge-reranker-v2-m3-Q4_K_M.gguf.bak"`;
-const RERANK_BACK = String.raw`$m = "$env:LOCALAPPDATA\WaveStack\models\reranker"
+const RERANK_BACK = String.raw`$m = "$env:LOCALAPPDATA\HarnessLab\models\reranker"
 Rename-Item "$m\bge-reranker-v2-m3-Q4_K_M.gguf.bak" "bge-reranker-v2-m3-Q4_K_M.gguf"`;
-const SETTINGS_BACKUP_Z3 = String.raw`$d = "$env:LOCALAPPDATA\WaveStack"
+const SETTINGS_BACKUP_Z3 = String.raw`$d = "$env:LOCALAPPDATA\HarnessLab"
 if (Test-Path "$d\settings.json.avant-z3") { throw "Sauvegarde settings.json.avant-z3 déjà présente : restaurez d'abord, ne relancez pas ce bloc." }
 Copy-Item "$d\settings.json" "$d\settings.json.avant-z3"`;
-const RESEND_ON = `uv run python -c "from wavestack import config; s = config.read_settings(); c = s.get('cloud', {}); ms = c.setdefault('models', []); e = next((m for m in ms if m.get('id') == 'mistral'), None) or ms.append({'id': 'mistral'}) or ms[-1]; e.setdefault('reasoning', {})['resend'] = True; config.save_setting('cloud', c); print(config.read_settings()['cloud'])"`;
-const SETTINGS_RESTORE_Z3 = String.raw`$d = "$env:LOCALAPPDATA\WaveStack"
+const RESEND_ON = `uv run python -c "from harness_lab import config; s = config.read_settings(); c = s.get('cloud', {}); ms = c.setdefault('models', []); e = next((m for m in ms if m.get('id') == 'mistral'), None) or ms.append({'id': 'mistral'}) or ms[-1]; e.setdefault('reasoning', {})['resend'] = True; config.save_setting('cloud', c); print(config.read_settings()['cloud'])"`;
+const SETTINGS_RESTORE_Z3 = String.raw`$d = "$env:LOCALAPPDATA\HarnessLab"
 if (Test-Path "$d\settings.json.avant-z3") { Move-Item "$d\settings.json.avant-z3" "$d\settings.json" -Force; "settings.json restauré" } else { "Aucune sauvegarde : rien n'est touché." }`;
 
 const TESTS = [
@@ -321,10 +321,10 @@ const TESTS = [
     expect: ["Aucun processus msedge.", "Personne n'utilise le PC pendant les tests chronométrés."],
     known: "Le 28/09 : OK.",
     fields: [{ k: "edge", label: "Edge revenu en cours de séance ?", type: "yn" }] },
-  { id: "P2", g: "prep", title: "Lancer WaveStack", min: 3,
-    steps: ["Ouvrez un terminal PowerShell à la racine du clone, sur la branche de la nuit (guide, section 1 : claude/lucid-cori-1rkbjf).", "Lancez les deux lignes ci-dessous : le navigateur s'ouvre sur WaveStack (sinon, ouvrez http://127.0.0.1:8420/ dans Chrome).", "Ouvrez le diagnostic (clic sur l'indicateur du modèle, ou http://127.0.0.1:8420/diagnostic) et relevez la ligne « Budget mémoire de WaveStack : B Mo (…) » : ce budget B sert à C4, C5 et X4 (story 24 : il dépend de la RAM disponible au lancement, au plus 4 096 Mo).", "Revenez à l'atelier. Barre haute : lisez l'indicateur du modèle, entre « Volets ▾ » et « Changer de modèle… ».", "Panneau des briques (à gauche) : lisez la carte « Raisonnement », la première depuis la story 22."],
-    cmds: [{ label: "Lancement", code: '$env:UV_SYSTEM_CERTS = "1"\nuv run wavestack' }],
-    expect: ["La page principale s'ouvre avec Qwen3.5-2B-Q4_K_M actif (indicateur « Local »).", "Diagnostic : « Budget mémoire de WaveStack : … Mo », suivi de son calcul (plafond, ou 60 % de la RAM disponible).", "Carte Raisonnement : « Budget de réflexion : 768 tokens ; au-delà, le harnais ferme la réflexion et garde 768 tokens pour la réponse. »"],
+  { id: "P2", g: "prep", title: "Lancer HarnessLab", min: 3,
+    steps: ["Ouvrez un terminal PowerShell à la racine du clone, sur la branche de la nuit (guide, section 1 : claude/lucid-cori-1rkbjf).", "Lancez les deux lignes ci-dessous : le navigateur s'ouvre sur HarnessLab (sinon, ouvrez http://127.0.0.1:8420/ dans Chrome).", "Ouvrez le diagnostic (clic sur l'indicateur du modèle, ou http://127.0.0.1:8420/diagnostic) et relevez la ligne « Budget mémoire de HarnessLab : B Mo (…) » : ce budget B sert à C4, C5 et X4 (story 24 : il dépend de la RAM disponible au lancement, au plus 4 096 Mo).", "Revenez à l'atelier. Barre haute : lisez l'indicateur du modèle, entre « Volets ▾ » et « Changer de modèle… ».", "Panneau des briques (à gauche) : lisez la carte « Raisonnement », la première depuis la story 22."],
+    cmds: [{ label: "Lancement", code: '$env:UV_SYSTEM_CERTS = "1"\nuv run harness-lab' }],
+    expect: ["La page principale s'ouvre avec Qwen3.5-2B-Q4_K_M actif (indicateur « Local »).", "Diagnostic : « Budget mémoire de HarnessLab : … Mo », suivi de son calcul (plafond, ou 60 % de la RAM disponible).", "Carte Raisonnement : « Budget de réflexion : 768 tokens ; au-delà, le harnais ferme la réflexion et garde 768 tokens pour la réponse. »"],
     known: "Le 28/09 : OK, carte Raisonnement conforme (768).",
     fields: [{ k: "budget", label: "Budget mémoire B (diagnostic)", unit: "Mo", type: "num" }, { k: "carte", label: "Texte de la carte conforme ?", type: "yn" }] },
   { id: "P3", g: "prep", title: "Installer llama-server", min: 10,
@@ -366,24 +366,24 @@ const TESTS = [
     fields: [{ k: "duree", label: "Durée du tour", unit: "s", type: "num" }, { k: "juste", label: "Réponse juste (17 h 50) ?", type: "yn" }] },
   { id: "C3", g: "corr", lot: "D", title: "User-Agent envoyé à Wikipédia", min: 3,
     steps: ["Sélecteur de scénario → « Module 2 · Outils · 45 min » → « Outils réseau ». Cliquez le second prompt suggéré (« Résume l'article Wikipédia sur le Mont-Saint-Michel. »), puis « Envoyer ».", "Schéma d'architecture, zone « 🌐 RÉSEAU · hors du poste » : cliquez le nœud « Résumé Wikipédia ». Orchestration ouvre l'étape « Exécute l'outil hors du poste ».", "Dépliez son bloc « 🌐 RÉSEAU · Données sortantes » et lisez la section « En-têtes »."],
-    expect: ["Section « En-têtes » : « User-Agent: WaveStack/0.1 (demonstrateur pedagogique; https://github.com/Aliquanto3/agentic-harness-training-demo) ».", "Le résumé de l'article arrive (plus de 403)."],
+    expect: ["Section « En-têtes » : « User-Agent: HarnessLab/0.1 (demonstrateur pedagogique; https://github.com/Aliquanto3/agentic-harness-training-demo) ».", "Le résumé de l'article arrive (plus de 403)."],
     known: "Script : wikipedia_summary répond en 165 ms avec l'article. Le 28/09 : KO, « Données sortantes » ne montrait que method, url et body, sans en-tête (story 23 : en-têtes visibles).",
     fields: [{ k: "ua", label: "Contact présent dans l'User-Agent ?", type: "yn" }] },
   { id: "C4", g: "corr", lot: "E4", title: "« Arrêter » pendant le chargement du 4B", min: 8,
-    steps: ["Éteignez la brique RAG par son interrupteur (ses modèles comptent dans la mémoire).", "Barre haute : « Changer de modèle… » → Qwen3.5-4B-Q4_K_M → « Charger ».", "Pendant le chronomètre, dans les 5 s, cliquez « Arrêter » (à droite du champ de message, dans la Vue humain).", "Si le 4B est refusé tout de suite, sans chronomètre (sonde déjà faite) : WaveStack lancé, 2B actif, créez une copie jamais sondée avec « Copier le 2B (WaveStack lancé) » ; ne relancez pas WaveStack (le diagnostic de lancement sonde tout GGUF jamais sondé). Ouvrez http://127.0.0.1:8420/diagnostic dans un second onglet, collez le chemin de la copie sous « Ou indiquez le chemin d'un fichier GGUF : », cliquez « Choisir ce fichier » (changement à chaud), revenez aussitôt à l'onglet de l'atelier et cliquez « Arrêter » dans les 5 s.", "WaveStack arrêté, supprimez la copie (« Supprimer la copie »). Si sa sonde a abouti, son entrée reste dans probed_models de settings.json : sans effet, elle peut rester.", "Puis rechoisissez le 4B et laissez aller jusqu'au bout."],
-    cmds: [{ label: "Copier le 2B (WaveStack lancé)", code: String.raw`$m = "$env:LOCALAPPDATA\WaveStack\models"
-Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5-2B-copie-C4.gguf"` }, { label: "Supprimer la copie (WaveStack arrêté)", code: String.raw`Remove-Item "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-copie-C4.gguf"` }],
-    expect: ["Barre haute : « Arrêt demandé · Chargement du modèle … » ; infobulle : « Un chargement du moteur en cours se termine avant l'arrêt ; une sonde est interrompue tout de suite. »", "« Chargement arrêté : Qwen3.5-2B-Q4_K_M est de nouveau actif. » Pendant une sonde, l'arrêt est immédiat (story 24).", "Second essai : « Changement refusé : Qwen3.5-4B-Q4_K_M demande environ 4,4 Go ; WaveStack occupe N Mo sans le modèle actif, pour un budget de B (…). », B étant le budget relevé en P2 et N entre 80 et 400 Mo, jamais 0 ; puis le 2B actif."],
-    known: "Script : sonde ≈ 53 s, RSS 4 262 Mo, « WaveStack occupe 118 Mo », 2B restauré. Le 28/09 : KO, arrêt effectif après ≈ 25 s (fin de la sonde) ; second essai « WaveStack occupe 0 Mo sans le modèle actif » (faux) (story 24).",
-    fields: [{ k: "delai", label: "Délai entre le clic et l'arrêt", unit: "s", type: "num" }, { k: "occupe", label: "« WaveStack occupe »", unit: "Mo", type: "num" }] },
+    steps: ["Éteignez la brique RAG par son interrupteur (ses modèles comptent dans la mémoire).", "Barre haute : « Changer de modèle… » → Qwen3.5-4B-Q4_K_M → « Charger ».", "Pendant le chronomètre, dans les 5 s, cliquez « Arrêter » (à droite du champ de message, dans la Vue humain).", "Si le 4B est refusé tout de suite, sans chronomètre (sonde déjà faite) : HarnessLab lancé, 2B actif, créez une copie jamais sondée avec « Copier le 2B (HarnessLab lancé) » ; ne relancez pas HarnessLab (le diagnostic de lancement sonde tout GGUF jamais sondé). Ouvrez http://127.0.0.1:8420/diagnostic dans un second onglet, collez le chemin de la copie sous « Ou indiquez le chemin d'un fichier GGUF : », cliquez « Choisir ce fichier » (changement à chaud), revenez aussitôt à l'onglet de l'atelier et cliquez « Arrêter » dans les 5 s.", "HarnessLab arrêté, supprimez la copie (« Supprimer la copie »). Si sa sonde a abouti, son entrée reste dans probed_models de settings.json : sans effet, elle peut rester.", "Puis rechoisissez le 4B et laissez aller jusqu'au bout."],
+    cmds: [{ label: "Copier le 2B (HarnessLab lancé)", code: String.raw`$m = "$env:LOCALAPPDATA\HarnessLab\models"
+Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5-2B-copie-C4.gguf"` }, { label: "Supprimer la copie (HarnessLab arrêté)", code: String.raw`Remove-Item "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-copie-C4.gguf"` }],
+    expect: ["Barre haute : « Arrêt demandé · Chargement du modèle … » ; infobulle : « Un chargement du moteur en cours se termine avant l'arrêt ; une sonde est interrompue tout de suite. »", "« Chargement arrêté : Qwen3.5-2B-Q4_K_M est de nouveau actif. » Pendant une sonde, l'arrêt est immédiat (story 24).", "Second essai : « Changement refusé : Qwen3.5-4B-Q4_K_M demande environ 4,4 Go ; HarnessLab occupe N Mo sans le modèle actif, pour un budget de B (…). », B étant le budget relevé en P2 et N entre 80 et 400 Mo, jamais 0 ; puis le 2B actif."],
+    known: "Script : sonde ≈ 53 s, RSS 4 262 Mo, « HarnessLab occupe 118 Mo », 2B restauré. Le 28/09 : KO, arrêt effectif après ≈ 25 s (fin de la sonde) ; second essai « HarnessLab occupe 0 Mo sans le modèle actif » (faux) (story 24).",
+    fields: [{ k: "delai", label: "Délai entre le clic et l'arrêt", unit: "s", type: "num" }, { k: "occupe", label: "« HarnessLab occupe »", unit: "Mo", type: "num" }] },
   { id: "C5", g: "corr", lot: "E5", title: "Briques indisponibles avec llama3.2:3b", min: 3,
     steps: ["Ollama lancé (ollama serve dans un autre terminal, s'il ne tourne pas déjà).", "Barre haute : « Changer de modèle… » → « Local · Ollama · llama3.2:3b … » → « Charger ».", "Sélecteur de scénario → « Module 2 · Outils · 45 min » → « Outils natifs ». Lisez l'encadré sous la consigne, dans la Vue humain."],
     expect: ["llama3.2:3b est accepté si le budget B relevé en P2 dépasse ≈ 2,6 Go (≈ 2,3 Go au diagnostic, plus la marge : story 24) ; sinon, refus chiffré qui cite B.", "Sous la consigne : « Brique du scénario indisponible avec ce modèle : Outils : Le modèle chargé n'offre pas l'appel d'outils (aucun format d'appel connu pour cette famille de modèle) : choisissez un autre modèle. »"],
-    known: "Le 28/09 : OK, encadré vu avec minicpm5:1b-q4_k_m ; llama3.2:3b refusé à tort (« demande environ 4,0 Go ; WaveStack occupe 149 Mo ») (story 24).",
+    known: "Le 28/09 : OK, encadré vu avec minicpm5:1b-q4_k_m ; llama3.2:3b refusé à tort (« demande environ 4,0 Go ; HarnessLab occupe 149 Mo ») (story 24).",
     fields: [{ k: "encadre", label: "Encadré affiché ?", type: "yn" }, { k: "accepte", label: "llama3.2:3b accepté ?", type: "yn" }] },
   { id: "C6", g: "corr", lot: "E6", title: "Fichier incompatible, raison en français", min: 3,
     steps: ["Barre haute : « Changer de modèle… » → « Autre fichier ou clé API… » : le diagnostic s'ouvre.", "Indiquez le chemin du blob Ollama refusé le 27/09 (par exemple le nemotron_h, sans gabarit de conversation) et validez.", "Facultatif : olmo-3:7b via Ollama, s'il est installé."],
-    expect: ["« llama-cpp-python 0.3.35 ne sait pas charger ce fichier (architecture non prise en charge, fichier incomplet ou abîmé). Choisissez un autre modèle, ou servez-le avec Ollama ou llama-server. » Le message brut n'est plus qu'un détail technique.", "Accents justes : « abîmé », « modèle » (story 24).", "Le modèle précédent reste actif.", "olmo-3:7b : refus chiffré, WaveStack ≈ 200 Mo sans le modèle actif (jamais « 0 Mo »)."],
+    expect: ["« llama-cpp-python 0.3.35 ne sait pas charger ce fichier (architecture non prise en charge, fichier incomplet ou abîmé). Choisissez un autre modèle, ou servez-le avec Ollama ou llama-server. » Le message brut n'est plus qu'un détail technique.", "Accents justes : « abîmé », « modèle » (story 24).", "Le modèle précédent reste actif.", "olmo-3:7b : refus chiffré, HarnessLab ≈ 200 Mo sans le modèle actif (jamais « 0 Mo »)."],
     known: "Le 28/09 : OK, mais texte mal décodé : « abÃ®mÃ© », « modÃ¨le » (story 24).",
     fields: [{ k: "raison", label: "Raison en français, accents justes ?", type: "yn" }] },
   { id: "C7", g: "corr", lot: "F", title: "Compression : l'erreur du journal est gardée", min: 5,
@@ -392,20 +392,20 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
     known: "Le 28/09 : OK, 2 004 → 496 tokens ; un premier appel à Headroom rend 525 → 525 (texte sans redondance, attendu).",
     fields: [{ k: "avant", label: "Tokens avant", type: "num" }, { k: "apres", label: "Tokens après", type: "num" }] },
   { id: "C8", g: "corr", lot: "G", title: "Script de l'index pendant une session", min: 3,
-    steps: ["WaveStack lancé : sélecteur de scénario → « Module 3 · RAG · 45 min » → « RAG », premier prompt suggéré, « Envoyer » (l'index est ouvert).", "Dans un second terminal, à la racine du clone :"],
+    steps: ["HarnessLab lancé : sélecteur de scénario → « Module 3 · RAG · 45 min » → « RAG », premier prompt suggéré, « Envoyer » (l'index est ouvert).", "Dans un second terminal, à la racine du clone :"],
     cmds: [{ label: "Reconstruire l'index", code: "uv run python scripts/build_rag_index.py\n$LASTEXITCODE" }],
-    expect: ["« L'index est ouvert par un autre programme (WaveStack, un antivirus ou un outil de synchronisation) : il ne peut pas être remplacé. Construisez-le depuis la carte RAG, ou arrêtez WaveStack, puis relancez ce script. »", "Code de sortie 1, index intact."],
-    crit: "Si le script réussit : WaveStack arrêté, <code>git restore data/rag_index.sqlite</code>.",
+    expect: ["« L'index est ouvert par un autre programme (HarnessLab, un antivirus ou un outil de synchronisation) : il ne peut pas être remplacé. Construisez-le depuis la carte RAG, ou arrêtez HarnessLab, puis relancez ce script. »", "Code de sortie 1, index intact."],
+    crit: "Si le script réussit : HarnessLab arrêté, <code>git restore data/rag_index.sqlite</code>.",
     known: "Le 28/09 : OK, message attendu, code 1.",
     fields: [{ k: "code", label: "Code de sortie", type: "num" }] },
   { id: "C9", g: "corr", lot: "E1", title: "llama-server sans -c : mémoire comptée", min: 10,
-    steps: ["P3 fait. Dans WaveStack, choisissez un petit modèle (gemma3:1b via Ollama) ou un modèle cloud, puis arrêtez WaveStack (Ctrl+C). Ne jamais avoir le 2B chargé dans WaveStack en même temps que llama-server.", "Dans un nouveau terminal, posez $llama (« Retrouver llama-server »), puis lancez llama-server sans -c : c'est voulu pour ce seul test.", "Relancez WaveStack et lisez le diagnostic (lien de l'indicateur du modèle, ou http://127.0.0.1:8420/diagnostic), section « Modèles détectés ».", "Mesurez la mémoire des processus. Puis arrêtez WaveStack, et llama-server (Ctrl+C dans sa fenêtre)."],
+    steps: ["P3 fait. Dans HarnessLab, choisissez un petit modèle (gemma3:1b via Ollama) ou un modèle cloud, puis arrêtez HarnessLab (Ctrl+C). Ne jamais avoir le 2B chargé dans HarnessLab en même temps que llama-server.", "Dans un nouveau terminal, posez $llama (« Retrouver llama-server »), puis lancez llama-server sans -c : c'est voulu pour ce seul test.", "Relancez HarnessLab et lisez le diagnostic (lien de l'indicateur du modèle, ou http://127.0.0.1:8420/diagnostic), section « Modèles détectés ».", "Mesurez la mémoire des processus. Puis arrêtez HarnessLab, et llama-server (Ctrl+C dans sa fenêtre)."],
     cmds: [{ label: "Retrouver llama-server", code: LLAMA_FIND }, { label: "llama-server sans -c (C9 seulement)", code: LLAMA_RUN_NO_C }, { label: "Mémoire des processus", code: PEAK_CMD }],
-    expect: ["Mémoire d'environ 5 Go au diagnostic (et non la seule taille du fichier).", "« llama-server a été lancé avec un contexte de 262 144 tokens, alors que WaveStack n'en utilise que 4 096 : il réserve la mémoire de tout ce contexte. Arrêtez-le et relancez-le avec -c 4096. »", "Si la ligne dit « sans son cache de contexte (fichier du modèle illisible depuis WaveStack) » : KO (lecteur GGUF)."],
+    expect: ["Mémoire d'environ 5 Go au diagnostic (et non la seule taille du fichier).", "« llama-server a été lancé avec un contexte de 262 144 tokens, alors que HarnessLab n'en utilise que 4 096 : il réserve la mémoire de tout ce contexte. Arrêtez-le et relancez-le avec -c 4096. »", "Si la ligne dit « sans son cache de contexte (fichier du modèle illisible depuis HarnessLab) » : KO (lecteur GGUF)."],
     known: "Le 27/09 : 5 137 Mo sans -c. Le 28/09 : KO (poste), llama-server pas installé (voir P3).",
     fields: [{ k: "diag", label: "Mémoire affichée au diagnostic", unit: "Mo", type: "num" }, { k: "rss", label: "RSS de llama-server", unit: "Mo", type: "num" }] },
   { id: "C10", g: "corr", lot: "N6", title: "llama-server -c 4096 : mesures pour N6", min: 25,
-    steps: ["WaveStack et llama-server arrêtés (C9). Dans le terminal de llama-server, relancez-le avec -c 4096, puis lancez WaveStack.", "Barre haute : « Changer de modèle… » → « Local · llama-server · … » → « Charger ».", "Sélecteur de scénario → « Module 2 · Outils · 45 min » → « Outils natifs » : prompt de l'heure, puis celui de la multiplication. Relevez prompt_ms du 1er appel du 2e tour (Journal des événements, « Appel au modèle terminé »).", "« Module 6 · Sous-agent et compression · 60 min » → « Sous-agent », tel que livré (RAG éteint depuis la story 27) : délégation puis les 3 quiz ; relevez prompt_ms du 1er appel de chaque quiz.", "Relancez le scénario « Sous-agent », allumez la brique RAG par son interrupteur avant le premier prompt, et refaites la même série.", "À la fin : arrêtez WaveStack puis llama-server, et revenez au 2B intégré (« Local · fichier · Qwen3.5-2B-Q4_K_M.gguf … » → « Charger »)."],
+    steps: ["HarnessLab et llama-server arrêtés (C9). Dans le terminal de llama-server, relancez-le avec -c 4096, puis lancez HarnessLab.", "Barre haute : « Changer de modèle… » → « Local · llama-server · … » → « Charger ».", "Sélecteur de scénario → « Module 2 · Outils · 45 min » → « Outils natifs » : prompt de l'heure, puis celui de la multiplication. Relevez prompt_ms du 1er appel du 2e tour (Journal des événements, « Appel au modèle terminé »).", "« Module 6 · Sous-agent et compression · 60 min » → « Sous-agent », tel que livré (RAG éteint depuis la story 27) : délégation puis les 3 quiz ; relevez prompt_ms du 1er appel de chaque quiz.", "Relancez le scénario « Sous-agent », allumez la brique RAG par son interrupteur avant le premier prompt, et refaites la même série.", "À la fin : arrêtez HarnessLab puis llama-server, et revenez au 2B intégré (« Local · fichier · Qwen3.5-2B-Q4_K_M.gguf … » → « Charger »)."],
     cmds: [{ label: "llama-server avec -c 4096", code: LLAMA_RUN }, { label: "Mémoire des processus", code: PEAK_CMD }],
     expect: ["Diagnostic : étiquette « Local », sans avertissement de contexte ; un tour montre « Local · llama-server » (indicateur du modèle) et le robot hors du cadre Harnais.", "RSS de llama-server proche de la mémoire affichée, bien sous 5 137 Mo."],
     known: "Moteur intégré (script) : 2e tour 1,1 s ; quiz RAG éteint 4,1 / 3,4 / 3,6 s ; RAG allumé 86,7 / 91,5 / 114,0 s. Le 28/09 : KO (poste), llama-server pas installé (voir P3).",
@@ -422,12 +422,12 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
       "Mémoire globale : scénario « Mémoire globale », premier prompt suggéré. Carte « Mémoire globale » → « Modifier la mémoire » : l'entrée écrite y est ; fermez par « × ». Cliquez ensuite le nœud « Mémoire globale » du Schéma d'architecture : le même tiroir s'ouvre ; fermez-le.",
       "« Réinitialiser » : cliquez « ⟲ Réinitialiser », tout à droite de la barre haute. Le sélecteur de scénario revient à « Choisir un scénario » (LLM nu, briques éteintes).",
       "Carte « Mémoire globale » (éteinte) → « Modifier la mémoire » : lisez les entrées, puis fermez par « × ». Envoyez « Bonjour » et lisez le titre du tour dans Orchestration.",
-      "D11, mémoire pleine : WaveStack arrêté (Ctrl+C), lancez « Mémoire pleine (D11) » une seule fois : il sauvegarde memory.json en memory.json.avant-d11 (ou note qu'il n'existait pas), refuse si une sauvegarde D11 existe déjà, puis écrit 20 entrées de 300 caractères (réponse « 20 entrees »). Relancez uv run wavestack.",
+      "D11, mémoire pleine : HarnessLab arrêté (Ctrl+C), lancez « Mémoire pleine (D11) » une seule fois : il sauvegarde memory.json en memory.json.avant-d11 (ou note qu'il n'existait pas), refuse si une sauvegarde D11 existe déjà, puis écrit 20 entrées de 300 caractères (réponse « 20 entrees »). Relancez uv run harness_lab.",
       "D11 : ne lancez ni le scénario « Mémoire globale » ni « ⟲ Réinitialiser » : ils restaurent la mémoire de démonstration. Allumez la brique « Mémoire globale » par son interrupteur dans le Panneau des briques, puis la brique « Raisonnement » (le pire cas : 2 560 utilisables).",
       "D11 : lisez la ligne d'état de la carte « Mémoire globale » (« 20 entrées · N tokens »), le total de la jauge dans la barre haute (« … / 2 560 tokens · … % ») et, au survol, son segment « Mémoire globale ». Ouvrez « Modifier la mémoire » : 20 entrées. Fermez par « × ».",
-      "D11 : WaveStack arrêté, lancez « Restaurer la mémoire (D11) » (il ne touche à rien sans sauvegarde D11), puis relancez.",
+      "D11 : HarnessLab arrêté, lancez « Restaurer la mémoire (D11) » (il ne touche à rien sans sauvegarde D11), puis relancez.",
     ],
-    cmds: [{ label: "Mémoire pleine (D11), WaveStack arrêté", code: MEMORY_FULL }, { label: "Restaurer la mémoire (D11), WaveStack arrêté", code: MEMORY_RESTORE }],
+    cmds: [{ label: "Mémoire pleine (D11), HarnessLab arrêté", code: MEMORY_FULL }, { label: "Restaurer la mémoire (D11), HarnessLab arrêté", code: MEMORY_RESTORE }],
     checks: ["LLM nu : « Quelle heure est-il ? » → heure inventée ou aveu.", "Raisonnement : replié dans la Vue humain, bloc « Réflexion » (« Afficher le raisonnement de cet appel ») dans Contexte LLM ; infobulle de la jauge : « Fenêtre de 4 096 tokens, dont 1 536 réservés à la réponse : 2 560 utilisables. »", "« Afficher le raisonnement » décoché : la bulle ne garde que le texte.", "Brique éteinte, rejeu, « Comparer » : moins de sortie.", "Mémoire courte : le prénom revient ; brique éteinte, le rejeu l'oublie.", "Prompt système : « Prompt système enregistré. » sous le texte, puis la réponse du rejeu change.", "Mémoire globale : l'entrée est dans le tiroir, ouvert aussi par le nœud du schéma.", "« Réinitialiser » : les trois entrées de démonstration reviennent (« L'utilisateur s'appelle Camille. »…, marquées « démonstration »), et le tour suivant s'appelle « Tour 1 » dans Orchestration.", "D11 : 20 entrées ; la jauge reste sous 2 560 utilisables, sans « contexte dépassé ».", "D11 : « memory.json restauré » (ou retiré s'il n'existait pas avant D11)."],
     crit: "Premier token du LLM nu en moins de 10 s. D11 : la jauge reste sous la fenêtre utilisable ; la mémoire pleine compte ≈ 1 550 tokens (estimation du dépôt), à relever.",
     known: "Le 28/09 : OK, LLM nu 2 000 ms ; avec Groq gpt-oss-120b, 2 464 utilisables (attendu). « Enregistrer » du prompt système sans retour visuel (story 22). D11 et « Réinitialiser » : consigne incompréhensible, réécrite ici.",
@@ -443,7 +443,7 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
       "Éteignez la brique RAG par l'interrupteur de sa carte. Cliquez le premier prompt suggéré (mot de passe chez Exemplia), puis « Envoyer ».",
       "Rallumez la brique RAG, cliquez « Rejouer le dernier prompt » (Vue humain), puis « Comparer » (en-tête de Contexte LLM).",
       "Orchestration : dépliez l'étape « Recherche RAG ». Schéma d'architecture : posez le pointeur sur le nœud « Index RAG (rag_index.sqlite) ».",
-      "Terminal : lancez « Mémoire des processus » et notez la RSS de WaveStack (avant le reranker).",
+      "Terminal : lancez « Mémoire des processus » et notez la RSS de HarnessLab (avant le reranker).",
       "Scénario « RAG avec reranking » : sur la carte RAG, l'interrupteur « Reranking » est coché. Cliquez le premier prompt suggéré (hôtel à Paris), puis « Envoyer ».",
       "Orchestration : dépliez l'étape « Reranking » (sous « Recherche RAG ») ; relevez sa durée. Relancez « Mémoire des processus » (RSS ajoutée).",
       "Carte RAG : décochez « Reranking ». Lisez la carte, puis « Rejouer le dernier prompt » et regardez Orchestration.",
@@ -458,7 +458,7 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
       "Sélecteur de scénario → « Module 4 · MCP · 45 min » → « MCP en documentation complète ». Avant d'envoyer, lisez la jauge (« … / 3 584 tokens · … % »).",
       "Cliquez le prompt suggéré, puis « Envoyer » ; relevez la durée du tour.",
       "Scénario « Lazy loading » : lisez la jauge, puis envoyez le premier prompt suggéré ; suivez dans Orchestration le chargement de la documentation.",
-      "Si rien n'est chargé : en haut du Panneau des briques, activez « Afficher les actions forcées » ; carte MCP, dépliez « Serveurs : … », cliquez « Charger la documentation » sur « Glossaire WaveStack », choisissez local__define_term, « Armer », puis « Rejouer le dernier prompt ».",
+      "Si rien n'est chargé : en haut du Panneau des briques, activez « Afficher les actions forcées » ; carte MCP, dépliez « Serveurs : … », cliquez « Charger la documentation » sur « Glossaire HarnessLab », choisissez local__define_term, « Armer », puis « Rejouer le dernier prompt ».",
       "Envoyez le second prompt suggéré (data.gouv.fr, qualité de l'air). Si le modèle appelle la recherche, dépliez l'étape « Exécute l'outil hors du poste ». Un appel MCP ne se force pas.",
       "Désactivez « Afficher les actions forcées ».",
     ],
@@ -497,11 +497,11 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
     steps: [
       "Sélecteur de scénario → « Transverses et métier » → « Où vont mes données ? ».",
       "Carte MCP (Panneau des briques) : la brique est allumée par le scénario. Lisez le résumé de ses options, puis dépliez-le.",
-      "Schéma d'architecture : repérez les outils et « Glossaire WaveStack » dans « 🖥 Poste de travail », et « data.gouv.fr » dans « 🌐 RÉSEAU · hors du poste ».",
+      "Schéma d'architecture : repérez les outils et « Glossaire HarnessLab » dans « 🖥 Poste de travail », et « data.gouv.fr » dans « 🌐 RÉSEAU · hors du poste ».",
       "Carte MCP : décochez « data.gouv.fr », regardez le schéma, puis recochez-le.",
       "Cliquez le prompt suggéré, puis « Envoyer ». Cliquez le nœud « data.gouv.fr » du schéma : Orchestration montre « 🌐 RÉSEAU · Données sortantes ».",
     ],
-    checks: ["Brique MCP allumée au lancement, résumé « Serveurs : 2 activés sur 3 · Lazy loading » (« Glossaire WaveStack » et « data.gouv.fr » cochés).", "Seul le flux vers data.gouv.fr franchit la frontière dans le schéma ; décoché, il disparaît, recoché, il revient."],
+    checks: ["Brique MCP allumée au lancement, résumé « Serveurs : 2 activés sur 3 · Lazy loading » (« Glossaire HarnessLab » et « data.gouv.fr » cochés).", "Seul le flux vers data.gouv.fr franchit la frontière dans le schéma ; décoché, il disparaît, recoché, il revient."],
     known: "Le 28/09 : non fait, « Lazy loading » affiché actif alors que la brique MCP était éteinte au lancement ; consigne incomprise. Depuis les stories 22 et 27, le scénario allume MCP lui-même, en lazy loading, avec le serveur local et data.gouv.fr (rien à cocher) ; brique éteinte, le résumé dirait « · brique éteinte ».",
     fields: [{ k: "frontiere", label: "Un seul flux franchit la frontière ?", type: "yn" }] },
   { id: "X2", g: "trans", lot: "H3 · D6", title: "SOC", min: 10,
@@ -527,11 +527,11 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
     known: "Script : IAM sans appel d'outil ; Souveraineté, prompt 2 : 1 153 tokens gardés sur 4 352, sans débordement. Le 28/09 : non fait, « Que dois-je tester ici ? ».",
     fields: [{ k: "hotes", label: "Hôtes vus dans les Données sortantes", type: "text" }, { k: "h5", label: "Appel de recherche réel ?", type: "yn" }] },
   { id: "X4", g: "trans", lot: "NFR-2", title: "Pic mémoire toutes briques actives", min: 5,
-    steps: ["Scénario « RAG avec reranking » (« Module 3 · RAG · 45 min »), premier prompt suggéré, « Envoyer » : le 2B, l'embedding et le reranker sont chargés.", "Dans un terminal, lancez la commande ci-dessous et relevez la colonne « Pic Mo » du processus python de WaveStack."],
+    steps: ["Scénario « RAG avec reranking » (« Module 3 · RAG · 45 min »), premier prompt suggéré, « Envoyer » : le 2B, l'embedding et le reranker sont chargés.", "Dans un terminal, lancez la commande ci-dessous et relevez la colonne « Pic Mo » du processus python de HarnessLab."],
     cmds: [{ label: "Mémoire des processus", code: PEAK_CMD }],
     crit: "Sous le budget B relevé en P2, lui-même au plus 4 096 Mo (3 314 Mo le 27/09).",
     known: "Le 28/09 : OK, pic 3 270 Mo, sous 4 096.",
-    fields: [{ k: "pic", label: "Pic de WaveStack", unit: "Mo", type: "num" }] },
+    fields: [{ k: "pic", label: "Pic de HarnessLab", unit: "Mo", type: "num" }] },
 
   { id: "D1", g: "mod", lot: "17", title: "Changement à chaud vers un modèle qui tient", min: 10,
     steps: [
@@ -549,12 +549,12 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
     steps: [
       "Dans un terminal : ollama serve (laissez-le ouvert). Un message d'adresse déjà utilisée veut dire qu'Ollama tourne déjà (icône de la zone de notification) : c'est bon.",
       "Dans un second terminal : ollama ps. Notez ce qui est chargé (en général rien).",
-      "WaveStack : « Changer de modèle… » → « Local · Ollama · qwen3.5:2b … » → « Charger ». Scénario « Outils natifs », prompt « Quelle heure est-il ? », « Envoyer ».",
+      "HarnessLab : « Changer de modèle… » → « Local · Ollama · qwen3.5:2b … » → « Charger ». Scénario « Outils natifs », prompt « Quelle heure est-il ? », « Envoyer ».",
       "En bas d'Orchestration, ouvrez « Journal des événements (N) » : cherchez une ligne « Erreur du harnais » qui commence par « Transparence réduite : Ollama a lu … tokens de prompt, le harnais en a compté … ». Une ligne « Cache du serveur local » n'est qu'une information.",
       "ollama ps : qwen3.5:2b est chargé. Revenez au 2B intégré (« Local · fichier · Qwen3.5-2B-Q4_K_M.gguf … » → « Charger ») : ollama ps.",
-      "Rechoisissez qwen3.5:2b, un tour, puis arrêtez WaveStack (Ctrl+C) : ollama ps.",
+      "Rechoisissez qwen3.5:2b, un tour, puis arrêtez HarnessLab (Ctrl+C) : ollama ps.",
     ],
-    checks: ["qwen3.5:2b : un tour aboutit.", "Alerte « Transparence réduite » : notez ses deux comptes (lus par Ollama, comptés par le harnais), ou « aucune ».", "ollama ps est vide après un changement de modèle et après la fermeture de WaveStack (sauf un modèle chargé par un autre programme)."],
+    checks: ["qwen3.5:2b : un tour aboutit.", "Alerte « Transparence réduite » : notez ses deux comptes (lus par Ollama, comptés par le harnais), ou « aucune ».", "ollama ps est vide après un changement de modèle et après la fermeture de HarnessLab (sauf un modèle chargé par un autre programme)."],
     cmds: [{ label: "Serveur Ollama (s'il ne tourne pas déjà)", code: "ollama serve" }, { label: "Modèles chargés par Ollama", code: "ollama ps" }],
     known: "Le 28/09 : non fait, « Que dois-je tester ici ? ».",
     fields: [{ k: "comptes", label: "Deux comptes de l'alerte (ou « aucune »)", type: "text" }] },
@@ -570,17 +570,17 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
     known: "Le 28/09 : OK ; Mistral : 429 « Rate limit exceeded » (quota).",
     fields: [{ k: "mistral", label: "Mistral : code HTTP", type: "num" }] },
   { id: "D4m", g: "mod", title: "Relance", min: 2,
-    steps: ["Notez le modèle actif (indicateur de la barre haute).", "Dans le terminal de WaveStack : Ctrl+C, puis uv run wavestack.", "Relisez l'indicateur du modèle."],
-    checks: ["Ctrl+C, puis uv run wavestack : le dernier modèle chargé revient."],
+    steps: ["Notez le modèle actif (indicateur de la barre haute).", "Dans le terminal de HarnessLab : Ctrl+C, puis uv run harness_lab.", "Relisez l'indicateur du modèle."],
+    checks: ["Ctrl+C, puis uv run harness-lab : le dernier modèle chargé revient."],
     known: "Le 28/09 : OK." },
 
   { id: "Z1", g: "dec", lot: "D2", title: "Sans le fichier du reranker", min: 8,
     steps: [
-      "WaveStack arrêté (Ctrl+C), lancez « Mettre le reranker de côté ».",
-      "Relancez uv run wavestack. Sélecteur de scénario → « Module 3 · RAG · 45 min » → « RAG avec reranking ».",
+      "HarnessLab arrêté (Ctrl+C), lancez « Mettre le reranker de côté ».",
+      "Relancez uv run harness-lab. Sélecteur de scénario → « Module 3 · RAG · 45 min » → « RAG avec reranking ».",
       "Carte RAG (Panneau des briques) : lisez la raison sous l'interrupteur « Reranking ». Ne cliquez pas « Télécharger le modèle de reranking (≈ … Mo) » : il retéléchargerait le fichier.",
       "Cliquez le premier prompt suggéré, puis « Envoyer ». Orchestration : dépliez l'étape « Recherche RAG ».",
-      "WaveStack arrêté, lancez « Le remettre », puis relancez : la raison disparaît.",
+      "HarnessLab arrêté, lancez « Le remettre », puis relancez : la raison disparaît.",
     ],
     cmds: [{ label: "Mettre le reranker de côté", code: RERANK_ASIDE }, { label: "Le remettre", code: RERANK_BACK }],
     expect: ["Sous « Reranking » : « Indisponible : modèle absent. Le modèle de reranking … n'est pas sur le poste. … Le RAG fonctionne sans reranking. »", "Le tour aboutit : « Recherche RAG » dit pourquoi le reranking n'a pas eu lieu ; pas d'étape « Reranking ».", "La brique RAG reste disponible (RAG simple)."],
@@ -593,20 +593,20 @@ Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5
       "D'abord, dans un terminal : lancez « Clés posées pour tout le poste ? ». Une valeur affichée veut dire qu'une clé est posée pour tout le poste : notez-le ; la suite la retire seulement de ce terminal.",
       "P3 fait. Dans un autre terminal, lancez llama-server avec « Retrouver llama-server » puis « Lancer llama-server » (P3) : le 2B reste à sa place, llama-server le lit.",
       "Quittez Ollama (icône de la zone de notification, « Quit Ollama »). S'il reste lancé, ses modèles apparaissent au diagnostic comme incompatibles (« Fichier GGUF du modèle introuvable dans le dossier d'Ollama (…) ») : c'est attendu, car OLLAMA_MODELS pointe vers un dossier vide.",
-      "WaveStack arrêté. Ouvrez un nouveau terminal PowerShell à la racine du clone et lancez « Lancer WaveStack sans clé ni données ». Il retire les clés de ce terminal (Remove-Item Env:GROQ_API_KEY, idem Mistral), pointe WAVESTACK_DATA_DIR vers un dossier temporaire vide (ni api_keys.json, ni settings.json, ni modèles), OLLAMA_MODELS et HF_HOME vers des dossiers vides, pour ce terminal seulement, liste les GGUF de LM Studio, puis refuse de lancer si une clé est encore visible.",
-      "Si le bloc liste des fichiers de LM Studio, WaveStack les trouvera : le diagnostic les proposera au lieu de demander un modèle servi. Notez-le (Z2 « non fait (poste) »), ou poursuivez en lisant seulement les lignes des clés.",
+      "HarnessLab arrêté. Ouvrez un nouveau terminal PowerShell à la racine du clone et lancez « Lancer HarnessLab sans clé ni données ». Il retire les clés de ce terminal (Remove-Item Env:GROQ_API_KEY, idem Mistral), pointe HARNESS_LAB_DATA_DIR vers un dossier temporaire vide (ni api_keys.json, ni settings.json, ni modèles), OLLAMA_MODELS et HF_HOME vers des dossiers vides, pour ce terminal seulement, liste les GGUF de LM Studio, puis refuse de lancer si une clé est encore visible.",
+      "Si le bloc liste des fichiers de LM Studio, HarnessLab les trouvera : le diagnostic les proposera au lieu de demander un modèle servi. Notez-le (Z2 « non fait (poste) »), ou poursuivez en lisant seulement les lignes des clés.",
       "Lisez le diagnostic : « Modèles détectés », puis « Modèles cloud » (lignes Groq et Mistral). Relevez le libellé exact.",
-      "Défaire : Ctrl+C dans ce terminal, puis fermez-le. Rien à restaurer ; le dossier temporaire (%TEMP%\\wavestack-z2-…) peut rester. Arrêtez llama-server.",
-      "Contrôle : dans un nouveau terminal, uv run wavestack comme d'habitude : vos clés et le 2B sont là.",
+      "Défaire : Ctrl+C dans ce terminal, puis fermez-le. Rien à restaurer ; le dossier temporaire (%TEMP%\\harness-lab-z2-…) peut rester. Arrêtez llama-server.",
+      "Contrôle : dans un nouveau terminal, uv run harness-lab comme d'habitude : vos clés et le 2B sont là.",
     ],
-    cmds: [{ label: "Clés posées pour tout le poste ? (d'abord)", code: KEYS_MACHINE }, { label: "Lancer WaveStack sans clé ni données (nouveau terminal)", code: KEYS_LAUNCH }],
-    expect: ["Le diagnostic bloque avec « Aucun fichier GGUF, mais un serveur local sert 1 modèle : choisissez un modèle servi. » et propose le modèle de llama-server, avec « Choisir ».", "Groq et Mistral : aucune ligne « Clé fournie par la variable … » ni « Clé enregistrée » ; à la place, « Ou définissez la variable GROQ_API_KEY, puis ouvrez un nouveau terminal. » (idem MISTRAL_API_KEY).", "Ollama lancé : ses modèles en « incompatible », avec la raison ci-contre.", "Après le test, WaveStack lancé normalement retrouve les clés et le 2B."],
+    cmds: [{ label: "Clés posées pour tout le poste ? (d'abord)", code: KEYS_MACHINE }, { label: "Lancer HarnessLab sans clé ni données (nouveau terminal)", code: KEYS_LAUNCH }],
+    expect: ["Le diagnostic bloque avec « Aucun fichier GGUF, mais un serveur local sert 1 modèle : choisissez un modèle servi. » et propose le modèle de llama-server, avec « Choisir ».", "Groq et Mistral : aucune ligne « Clé fournie par la variable … » ni « Clé enregistrée » ; à la place, « Ou définissez la variable GROQ_API_KEY, puis ouvrez un nouveau terminal. » (idem MISTRAL_API_KEY).", "Ollama lancé : ses modèles en « incompatible », avec la raison ci-contre.", "Après le test, HarnessLab lancé normalement retrouve les clés et le 2B."],
     crit: "Aucun fichier ni variable du poste modifié. Sans llama-server (P3 KO), Z2 est « non fait (poste) ».",
     known: "Le 28/09 : non fait, « Comment vider les clés API ? ».",
     fields: [{ k: "libelle", label: "Libellé exact des lignes Groq et Mistral", type: "text" }, { k: "machine", label: "Clé posée pour tout le poste ?", type: "yn" }, { k: "intacts", label: "Clés et modèles intacts après le test", type: "yn" }] },
   { id: "Z3", g: "dec", lot: "D9", title: "Mistral : renvoi du raisonnement", min: 8,
-    steps: ["Avec un quota Mistral disponible, WaveStack arrêté : lancez « Sauvegarder settings.json » (une seule fois : il refuse si la sauvegarde existe déjà).", "Lancez « Ajouter resend » : il lit settings.json, ajoute seulement reasoning.resend = true à l'entrée mistral de cloud.models (en la créant au besoin, sans toucher au reste) et affiche la section cloud.", "Relancez WaveStack, passez sur Mistral (« Changer de modèle… », « Choisir… », « Utiliser ce modèle ») : un tour avec outil (scénario « Outils natifs », prompt de l'heure), puis un second tour.", "WaveStack arrêté, lancez « Restaurer settings.json »."],
-    cmds: [{ label: "Clé ajoutée (JSON)", code: '{"cloud": {"models": [{"id": "mistral", "reasoning": {"resend": true}}]}}' }, { label: "Sauvegarder settings.json (WaveStack arrêté)", code: SETTINGS_BACKUP_Z3 }, { label: "Ajouter resend", code: RESEND_ON }, { label: "Restaurer settings.json (WaveStack arrêté)", code: SETTINGS_RESTORE_Z3 }],
+    steps: ["Avec un quota Mistral disponible, HarnessLab arrêté : lancez « Sauvegarder settings.json » (une seule fois : il refuse si la sauvegarde existe déjà).", "Lancez « Ajouter resend » : il lit settings.json, ajoute seulement reasoning.resend = true à l'entrée mistral de cloud.models (en la créant au besoin, sans toucher au reste) et affiche la section cloud.", "Relancez HarnessLab, passez sur Mistral (« Changer de modèle… », « Choisir… », « Utiliser ce modèle ») : un tour avec outil (scénario « Outils natifs », prompt de l'heure), puis un second tour.", "HarnessLab arrêté, lancez « Restaurer settings.json »."],
+    cmds: [{ label: "Clé ajoutée (JSON)", code: '{"cloud": {"models": [{"id": "mistral", "reasoning": {"resend": true}}]}}' }, { label: "Sauvegarder settings.json (HarnessLab arrêté)", code: SETTINGS_BACKUP_Z3 }, { label: "Ajouter resend", code: RESEND_ON }, { label: "Restaurer settings.json (HarnessLab arrêté)", code: SETTINGS_RESTORE_Z3 }],
     expect: ["Accepté : les deux tours aboutissent.", "Un 400 veut dire refus."],
     known: "Le 28/09 : non fait, pas de quota Mistral.",
     fields: [{ k: "code", label: "Code HTTP obtenu", type: "num" }] },

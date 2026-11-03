@@ -9,13 +9,13 @@ from types import SimpleNamespace
 from fake_engine import FakeEngine, booted_session
 from starlette.testclient import TestClient
 
-from wavestack import config
-from wavestack.models import discovery
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticResult, DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web import app as web_app
-from wavestack.web.app import _sse_stream, create_app
+from harness_lab import config
+from harness_lab.models import discovery
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticResult, DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web import app as web_app
+from harness_lab.web.app import _sse_stream, create_app
 
 
 def _client(app):
@@ -25,7 +25,7 @@ def _client(app):
 
 
 def _build(monkeypatch, tmp_path):
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     monkeypatch.setenv("OLLAMA_MODELS", str(tmp_path / "no-ollama"))
     monkeypatch.setenv("HF_HUB_CACHE", str(tmp_path / "no-hf-cache"))
     monkeypatch.setattr(discovery, "_lm_studio_dirs", lambda: [tmp_path / "no-lmstudio"])
@@ -86,7 +86,7 @@ def test_every_page_opens_on_the_same_shared_bar(monkeypatch, tmp_path):
     """Story 2 (2026-09-30): the same `nav.site-nav` at the head of the five pages, but for
     `aria-current` (one, on the page's own link) and the projection mode (the main screen's):
     the brand, then the five pages in a fixed order, then « Affichage ▾ » with the theme and
-    the language. No `.page-tabs`, « ← Atelier » nor « Ouvrir WaveStack » left."""
+    the language. No `.page-tabs`, « ← Atelier » nor « Ouvrir HarnessLab » left."""
     client = _client(_build(monkeypatch, tmp_path))
     navs = {}
     for path in SITE_PAGES:
@@ -109,7 +109,7 @@ def test_every_page_opens_on_the_same_shared_bar(monkeypatch, tmp_path):
         assert "site-nav-brand" not in current[current.rindex("<a ") :], path
         hrefs = re.findall(r'<a href="([^"]*)"', nav)
         assert hrefs == ["/", *BAR_PAGES], (path, hrefs)
-        assert '<a href="/" class="site-nav-brand">WaveStack</a>' in nav
+        assert '<a href="/" class="site-nav-brand">HarnessLab</a>' in nav
         assert 'data-i18n-aria-label="common.links.pages" data-i18n-links>' in nav
         for control in ('id="display-menu"', 'id="theme-picker"', 'id="language-picker"'):
             assert control in nav, (path, control)
@@ -144,7 +144,7 @@ def test_the_main_screen_bar_is_under_the_panes(monkeypatch, tmp_path):
 def test_api_diagnostic_contains_a_model_table_failure(monkeypatch, tmp_path):
     """Story 25 (AD-16): the table failing leaves `/api/diagnostic` whole, without `models`
     (the picker then lists the candidates as before)."""
-    from wavestack.models import catalog
+    from harness_lab.models import catalog
 
     def broken(*args, **kwargs):
         raise RuntimeError("table cassée")
@@ -470,7 +470,7 @@ def test_the_session_spend_is_in_the_state_and_has_its_place_in_the_top_bar(monk
     """FinOps: `/api/state` gives the session's spend (`None` before a paid call), for a
     reloaded page; `#consumption` follows the gauge's figures; a card's capabilities say
     « Prix » (lot 3 of 2026-10-04: `models.columns`, on « Diagnostic et modèles »)."""
-    from wavestack.models import openai_chat
+    from harness_lab.models import openai_chat
 
     client = _client(_build(monkeypatch, tmp_path))
     assert client.get("/api/state").json()["consumption_updated"] is None
@@ -495,9 +495,9 @@ def test_the_session_cap_is_shown_before_it_bites(monkeypatch, tmp_path):
     far; the figure is the configuration's, never a copy."""
     import json
 
-    from wavestack.models import openai_chat
+    from harness_lab.models import openai_chat
 
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     config.settings_path().parent.mkdir(parents=True, exist_ok=True)
     config.settings_path().write_text(json.dumps({"finops": {"max_session_usd": 2}}), "utf-8")
     client = _client(_build(monkeypatch, tmp_path))
@@ -557,12 +557,12 @@ def _diagnostic_lines(caplog) -> list[logging.LogRecord]:
     return [
         r
         for r in caplog.records
-        if r.name == "wavestack.web.app" and "/api/diagnostic" in r.getMessage()
+        if r.name == "harness_lab.web.app" and "/api/diagnostic" in r.getMessage()
     ]
 
 
 def test_api_diagnostic_logs_its_total_wait_and_steps_in_debug(monkeypatch, tmp_path, caplog):
-    caplog.set_level(logging.DEBUG, logger="wavestack.web.app")
+    caplog.set_level(logging.DEBUG, logger="harness_lab.web.app")
     client = _client(_build(monkeypatch, tmp_path))
     mark = get_journal().last_seq()
     assert client.get("/api/diagnostic").status_code == 200
@@ -588,7 +588,7 @@ def test_api_diagnostic_logs_its_total_wait_and_steps_in_debug(monkeypatch, tmp_
 
 def test_a_slow_api_diagnostic_is_a_warning(monkeypatch, tmp_path, caplog):
     monkeypatch.setattr(web_app, "SLOW_DIAGNOSTIC_S", 0.0)  # every call is « slow »
-    caplog.set_level(logging.DEBUG, logger="wavestack.web.app")
+    caplog.set_level(logging.DEBUG, logger="harness_lab.web.app")
     assert _client(_build(monkeypatch, tmp_path)).get("/api/diagnostic").status_code == 200
 
     (line,) = _diagnostic_lines(caplog)
@@ -604,7 +604,7 @@ def test_the_wait_before_the_handler_is_measured_from_the_arrival(monkeypatch, t
     starts at least 1 s after it; the total counts the wait and every step."""
     ticks = iter(range(10_000))
     monkeypatch.setattr(web_app, "time", SimpleNamespace(perf_counter=lambda: float(next(ticks))))
-    caplog.set_level(logging.DEBUG, logger="wavestack.web.app")
+    caplog.set_level(logging.DEBUG, logger="harness_lab.web.app")
     client = _client(_build(monkeypatch, tmp_path))
     assert client.get("/api/health").status_code == 200
     assert _diagnostic_lines(caplog) == []  # another route: no line

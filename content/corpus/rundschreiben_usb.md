@@ -1,6 +1,6 @@
 # Rundschreiben der Zentrale zu USB-Speichermedien (nur auf Deutsch)
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Rundschreiben beschreibt kein reales Unternehmen. Dieses Dokument existiert nur auf Deutsch, da es von der deutschen Zentrale stammt. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Rundschreiben beschreibt kein reales Unternehmen. Dieses Dokument existiert nur auf Deutsch, da es von der deutschen Zentrale stammt. -->
 
 Dieses Rundschreiben der deutschen Zentrale von Exemplia in Frankfurt gilt nur für Mitarbeitende an diesem Standort; es existiert nur auf Deutsch, da das lokale Team in dieser Sprache arbeitet.
 

@@ -13,7 +13,7 @@ context: []
 
 ## Intent
 
-**Problem:** Rien, dans WaveStack, ne dit ce que coûte un appel à un modèle cloud. Pourtant, c'est une question clé de la formation (FinOps), et un point à surveiller pendant les démos payantes, avec Gemini par exemple.
+**Problem:** Rien, dans HarnessLab, ne dit ce que coûte un appel à un modèle cloud. Pourtant, c'est une question clé de la formation (FinOps), et un point à surveiller pendant les démos payantes, avec Gemini par exemple.
 
 **Approach:** Chaque entrée `[[cloud.models]]` déclare ses prix (entrée et sortie, en dollars par million de tokens, avec la date de relevé). Le harnais calcule le coût d'entrée et le coût de sortie de chaque appel cloud, puis le total du tour et le total de la séance. L'interface les affiche séparément, toujours comme des estimations.
 
@@ -35,7 +35,7 @@ Décision de l'utilisateur (2026-09-29) : une story à part, après Gemini. Elle
   - Si les tokens sont estimés (`usage_source = estimate`), le coût l'est aussi : « ≈ » partout.
 - Tous les appels payants comptent dans le total de la séance, dans un seul registre protégé par un verrou (`openai_chat`, à côté de `pace`) :
   - les tours, le sous-agent, « Tester » au diagnostic, l'écran « LLM nu ».
-  - Ni « Vider la conversation » ni « Réinitialiser » ne le remettent à zéro : l'argent dépensé l'est. Seul un relancement de WaveStack le remet à zéro.
+  - Ni « Vider la conversation » ni « Réinitialiser » ne le remettent à zéro : l'argent dépensé l'est. Seul un relancement de HarnessLab le remet à zéro.
 - Les montants restent en dollars (la devise de facturation). Le total de la séance donne aussi sa conversion en euros, au taux de `[finops] eur_per_usd` (0,86 par défaut, borné de 0,5 à 2).
 - Affichage en français :
   - « Coût estimé : entrée … $ · sortie … $ » dans le corps déplié de chaque appel cloud (le compteur de tokens) ;
@@ -68,26 +68,26 @@ Décision de l'utilisateur (2026-09-29) : une story à part, après Gemini. Elle
 
 ## Code Map
 
-- `wavestack.toml` -- ajouter `pricing` aux entrées groq, mistral et gemini, et la section `[finops] eur_per_usd` avec son commentaire.
-- `src/wavestack/config.py` :
+- `harness-lab.toml` -- ajouter `pricing` aux entrées groq, mistral et gemini, et la section `[finops] eur_per_usd` avec son commentaire.
+- `src/harness_lab/config.py` :
   - `CloudModel` (`extra="forbid"`) : ajouter `pricing: CloudPricing | None` ;
   - `Config` : ajouter la propriété `eur_per_usd` (bornée, sur le modèle de `_float`).
-- `src/wavestack/models/openai_chat.py` :
+- `src/harness_lab/models/openai_chat.py` :
   - `run_call` (`ended()`) : calculer les coûts quand `isinstance(entry, CloudModel) and entry.pricing` ;
   - les écrire dans `model_call_ended` (`cost_in_usd`, `cost_out_usd`, `cost_source`) et sur `ChatCall` ;
   - mettre à jour le registre de la séance, puis émettre `consumption_updated` (`total_in_usd`, `total_out_usd`, `calls`, `approx`).
-- `src/wavestack/trace/catalog.py` -- ajouter à `ModelCallEndedPayload` les champs facultatifs à `None`, et à `TurnEndedPayload` `cost_in_usd`/`cost_out_usd`, facultatifs. Créer `ConsumptionUpdatedPayload`, enregistré dans `PAYLOAD_MODELS`.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/trace/catalog.py` -- ajouter à `ModelCallEndedPayload` les champs facultatifs à `None`, et à `TurnEndedPayload` `cost_in_usd`/`cost_out_usd`, facultatifs. Créer `ConsumptionUpdatedPayload`, enregistré dans `PAYLOAD_MODELS`.
+- `src/harness_lab/session/app_session.py` :
   - ajouter au tour les coûts des `ChatCall` (principal et sous-agent) ;
   - `turn_ended` (≈ :5542) les porte quand le tour a coûté quelque chose ;
   - `/api/state` expose le total de la séance, pour le rechargement de la page.
-- `src/wavestack/web/static/app.js` :
+- `src/harness_lab/web/static/app.js` :
   - `callBody()` (compteur de tokens), `headParts` (en-tête de tour) ;
   - la barre haute (`#consumption` près de `#gauge-figures`, zone « Consommation » que la story GreenOps complétera) ;
   - la gestion de `consumption_updated`, et le rechargement depuis l'état.
-- `src/wavestack/web/static/index.html` -- ajouter l'emplacement `#consumption`.
-- `src/wavestack/models/catalog.py` `ModelEntry` et `cloud_entries` -- ajouter `price_fr`. Dans `models.html`, ajouter la colonne « Prix » (et passer `colSpan` de 8 à 9).
-- `src/wavestack/session/diagnostic.py` `cloud_rows`, `diagnostic.html` -- ajouter la ligne « Prix ».
+- `src/harness_lab/web/static/index.html` -- ajouter l'emplacement `#consumption`.
+- `src/harness_lab/models/catalog.py` `ModelEntry` et `cloud_entries` -- ajouter `price_fr`. Dans `models.html`, ajouter la colonne « Prix » (et passer `colSpan` de 8 à 9).
+- `src/harness_lab/session/diagnostic.py` `cloud_rows`, `diagnostic.html` -- ajouter la ligne « Prix ».
 - `README.md` -- ajouter une section FinOps courte : prix déclarés, estimation, mise à jour des prix.
 - Tests :
   - `tests/test_cloud.py` : le modèle Provider/MockTransport, lignes de la matrice ;
@@ -97,10 +97,10 @@ Décision de l'utilisateur (2026-09-29) : une story à part, après Gemini. Elle
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/config.py`, `wavestack.toml` -- `pricing` et `[finops]` -- les prix déclarés et datés.
-- [x] `src/wavestack/models/openai_chat.py`, `src/wavestack/trace/catalog.py` -- coûts par appel, registre de la séance, `consumption_updated` -- un seul endroit calcule.
-- [x] `src/wavestack/session/app_session.py` -- le total du tour et l'état -- pour l'en-tête du tour et le rechargement.
-- [x] `src/wavestack/web/static/*`, `src/wavestack/models/catalog.py`, `src/wavestack/session/diagnostic.py` -- affichages.
+- [x] `src/harness_lab/config.py`, `harness-lab.toml` -- `pricing` et `[finops]` -- les prix déclarés et datés.
+- [x] `src/harness_lab/models/openai_chat.py`, `src/harness_lab/trace/catalog.py` -- coûts par appel, registre de la séance, `consumption_updated` -- un seul endroit calcule.
+- [x] `src/harness_lab/session/app_session.py` -- le total du tour et l'état -- pour l'en-tête du tour et le rechargement.
+- [x] `src/harness_lab/web/static/*`, `src/harness_lab/models/catalog.py`, `src/harness_lab/session/diagnostic.py` -- affichages.
 - [x] `tests/*`, `tools/e2e/*` -- la matrice, l'affichage et l'E2E.
 - [x] `README.md` -- la documentation.
 

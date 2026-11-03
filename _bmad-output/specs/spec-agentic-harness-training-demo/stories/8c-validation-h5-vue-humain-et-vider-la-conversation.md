@@ -51,22 +51,22 @@ context: []
 
 ## Code Map
 
-- `src/wavestack/web/static/app.js` :
+- `src/harness_lab/web/static/app.js` :
   - `store` (L14) : `chatFrom` sert déjà d'indice du premier tour affiché ; `applyEnvelope` `conversation_cleared` (L122) le règle. Réutiliser pour `renderContext` (L751, cherche le dernier tour avec `context`) et `renderSteps` (L1055, `store.turns.forEach`). `offTurn` (L216) : entrées placées par `afterTurn` ; pour masquer celles d'avant le vidage (Q1), noter le `seq` du vidage et celui de chaque entrée (`afterTurn` ne distingue pas une connexion juste avant le vidage d'une connexion juste après).
   - `renderChat` (L653) : reconstruit `#chat` à chaque rendu, y compris toutes les 250 ms pendant un tour (L1487) ; ajouter la carte après la bulle du modèle. Garder le nœud de la carte entre deux rendus tant que son état ne change pas, et restaurer le focus comme `renderBricks` (L386-392, `data-focus-key`).
   - `approvalLines` (L949) et `hookCard` (L1000) : à séparer en carte interactive (Vue humain) et trace (Orchestration). `answer` garde `step.answering` et `store.composerError`.
   - `outboundPayload` (L926) : ouvert par défaut via `store.closedPayloads` ; la carte de la Vue humain le veut replié par défaut, avec un état propre.
   - `renderChips` (L1100) : `is-linked` ; `renderSchema` (L1280) : `blocked` lit `store.turns.at(-1)`.
   - `NO_TURN_FR`/`CLEARED_FR` (L377).
-- `src/wavestack/web/static/app.css` : `.harness-event` (L547), `.approval-actions` (L563), `.bubble-model` (L371). La carte du fil doit suivre la largeur des bulles.
+- `src/harness_lab/web/static/app.css` : `.harness-event` (L547), `.approval-actions` (L563), `.bubble-model` (L371). La carte du fil doit suivre la largeur des bulles.
 - `_bmad-output/planning-artifacts/ux-designs/ux-agentic-harness-training-demo-2026-09-22/EXPERIENCE.md` L129, L166.
 - Ne pas toucher : `session/app_session.py` (`clear_conversation` L1484 émet déjà `conversation_cleared` puis un `context_preview`), `web/app.py`, `trace/catalog.py`.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/web/static/app.js` -- carte interactive dans `renderChat`, trace lecture seule dans `hookCard`, libellé de l'outil, puce liée, masquage des tours antérieurs au vidage dans Contexte LLM, Orchestration et schéma, textes de vidage -- AD-1
-- [x] `src/wavestack/web/static/app.css` -- carte de validation dans le fil -- DESIGN.md harness-event
+- [x] `src/harness_lab/web/static/app.js` -- carte interactive dans `renderChat`, trace lecture seule dans `hookCard`, libellé de l'outil, puce liée, masquage des tours antérieurs au vidage dans Contexte LLM, Orchestration et schéma, textes de vidage -- AD-1
+- [x] `src/harness_lab/web/static/app.css` -- carte de validation dans le fil -- DESIGN.md harness-event
 - [x] `EXPERIENCE.md` -- lignes 129 et 166 -- UX
 
 **Acceptance Criteria:**
@@ -113,8 +113,8 @@ Groupes routés en `patch` : P1 à P3 ; `defer` : VG1-VG3 ; aucun `intent_gap` n
 ## Verification
 
 **Commands:**
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 - `uv run ruff check .` et `uv run pytest` -- expected: inchangés, tout passe (aucun fichier Python touché)
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` : briques « Outils » (jours fériés) et « Hooks » avec H5 ; demander les jours fériés 2026 ; répondre depuis la Vue humain, au clavier puis à la souris ; recharger en attente ; masquer la Vue humain en attente ; « Vider la conversation » puis recharger.
+- `uv run harness-lab` : briques « Outils » (jours fériés) et « Hooks » avec H5 ; demander les jours fériés 2026 ; répondre depuis la Vue humain, au clavier puis à la souris ; recharger en attente ; masquer la Vue humain en attente ; « Vider la conversation » puis recharger.

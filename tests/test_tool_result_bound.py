@@ -20,14 +20,14 @@ from test_mcp import MSLEARN_TOOLS, McpWeb, enable, loop, mcp_session  # noqa: F
 from test_tools import QWEN, _segments, call, tool_session
 from test_turn import _run
 
-from wavestack import config
-from wavestack.context.segments import SegmentKind
-from wavestack.mcp import connection
-from wavestack.net.factory import create_async_client, create_client
-from wavestack.session.app_session import AppSession
-from wavestack.tools import network
-from wavestack.trace.catalog import ToolEndedPayload
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.context.segments import SegmentKind
+from harness_lab.mcp import connection
+from harness_lab.net.factory import create_async_client, create_client
+from harness_lab.session.app_session import AppSession
+from harness_lab.tools import network
+from harness_lab.trace.catalog import ToolEndedPayload
+from harness_lab.trace.journal import get_journal
 
 LIMIT = config.DEFAULT_TOOL_RESULT_MAX_TOKENS
 FLOOR = 200

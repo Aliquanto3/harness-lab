@@ -1,4 +1,4 @@
-# Addendum au PRD : WaveStack
+# Addendum au PRD : HarnessLab
 
 Contenu destiné à `bmad-ux` et `bmad-architecture`. Rien ici n'engage le périmètre, qui est fixé par `prd.md`.
 
@@ -15,7 +15,7 @@ La veille complète est dans `research-landscape.md`.
 ### Moteur d'inférence
 
 La veille propose llama-cpp-python. Une wheel CPU précompilée s'installe par `uv`, sans compilateur ni exécutable à signer. C'est le moteur par défaut le plus sûr sur un poste verrouillé.
-- Ollama ou llama-server, déjà lancés sur le poste, viendraient en option (FR-34), via leur point d'entrée natif en texte brut uniquement (`raw` chez Ollama, `/completion` chez llama-server), sans adaptateur de chat ni compatible OpenAI en V1. Ce mode laisse WaveStack appliquer lui-même le gabarit.
+- Ollama ou llama-server, déjà lancés sur le poste, viendraient en option (FR-34), via leur point d'entrée natif en texte brut uniquement (`raw` chez Ollama, `/completion` chez llama-server), sans adaptateur de chat ni compatible OpenAI en V1. Ce mode laisse HarnessLab appliquer lui-même le gabarit.
 - L'addendum du brief jugeait Ollama plus simple : tranché le 2026-09-23 (architecture) — llama-cpp-python en processus par défaut.
 
 ### Modèles candidats (2B au plus par défaut)
@@ -103,7 +103,7 @@ Points de vigilance :
 
 ### Dépôt privé, code remis à des clients (NFR-10, NFR-11)
 
-- Regrouper les mentions des tiers (licences OFL des polices, attribution MIT du skill Caveman). La licence de WaveStack lui-même relève de Wavestone ; la fixer avant toute remise du code à un client.
+- Regrouper les mentions des tiers (licences OFL des polices, attribution MIT du skill Caveman). La licence de HarnessLab lui-même reste ; la fixer avant toute remise du code à un client.
 - Vérifier la licence de chaque modèle proposé au téléchargement :
   - Llama 3.2 (Llama Community License) et Gemma (Gemma Terms of Use) ont des conditions propres, à relire avant de les proposer ;
   - Qwen et Granite sont a priori sous Apache-2.0, à vérifier pour chaque version.

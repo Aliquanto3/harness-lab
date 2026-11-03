@@ -12,7 +12,7 @@ sources: []
 
 ## Why
 
-Anaël dispose d'un budget sur les API OpenAI et Anthropic (2026-10-03) et veut proposer leurs modèles dans WaveStack, à côté de Groq, Mistral, Gemini et Gemma. C'est une occasion à saisir, mais la couche cloud ne parle qu'un format, Chat Completions (`openai_chat`, AD-5), et aucun des deux fournisseurs ne s'en contente :
+Anaël dispose d'un budget sur les API OpenAI et Anthropic (2026-10-03) et veut proposer leurs modèles dans HarnessLab, à côté de Groq, Mistral, Gemini et Gemma. C'est une occasion à saisir, mais la couche cloud ne parle qu'un format, Chat Completions (`openai_chat`, AD-5), et aucun des deux fournisseurs ne s'en contente :
 - les modèles GPT-6 n'appellent plus d'outils par Chat Completions (Sol aucun, Luna seulement sans raisonnement), et ne renvoient jamais le texte de leur raisonnement ;
 - la couche compatible OpenAI d'Anthropic est destinée aux tests, ne renvoie pas la réflexion et ignore le cache de prompt.
 
@@ -46,7 +46,7 @@ Les briques Outils, MCP, Skills, Sous-agent et Raisonnement exigent donc leurs A
   - Format pivot : la session garde son historique au format Chat Completions. Un traducteur par API écrit le corps natif dans le rendu segmenté (`render_chat_body`), si bien que les segments restent les octets envoyés (AD-4).
   - Une nouvelle décision AD-26 fixe le champ `api` et le format pivot. `ARCHITECTURE-SPINE.md` est mis à jour en story 1.
 - **Raisonnement conservé d'Anthropic.**
-  - Sur un compte créé après le 2026-08-31, un historique réécrit rend un 400. WaveStack réécrit l'historique par conception : fenêtre, troncature des résultats d'outils, compression, mémoire, briques changées en séance.
+  - Sur un compte créé après le 2026-08-31, un historique réécrit rend un 400. HarnessLab réécrit l'historique par conception : fenêtre, troncature des résultats d'outils, compression, mémoire, briques changées en séance.
   - Toute requête `anthropic_messages` envoie donc l'en-tête `thinking-binding-controls-2026-08-01` avec `prefix_mismatch_behavior: "drop_block"`, et trace `input_transformations` (CAP-4). Mesuré en story 3 (2026-10-03) : `block_binding` est refusé (400) avec `{type: "disabled"}`, il ne part donc qu'avec la réflexion allumée ; l'en-tête part toujours.
 - **Renvoi verbatim.**
   - Les signatures des blocs `thinking` et les items `reasoning` chiffrés repartent tels quels, à leur seul fournisseur, comme `extra_content` de Gemini.
@@ -66,11 +66,11 @@ Les briques Outils, MCP, Skills, Sous-agent et Raisonnement exigent donc leurs A
 
 - Pas de SDK, pas de couche compatible OpenAI d'Anthropic, pas de GPT-6 par Chat Completions.
 - Pas d'activation du cache de prompt d'Anthropic (`cache_control`), pas de `count_tokens`, pas d'outils serveur (recherche web, exécution de code), pas de Batches, pas de Bedrock, Vertex ni Azure.
-- Opus 5.5 et GPT-6.1 Sol ne sont pas activés : ils restent en commentaire dans `wavestack.toml`.
+- Opus 5.5 et GPT-6.1 Sol ne sont pas activés : ils restent en commentaire dans `harness-lab.toml`.
 
 ## Success signal
 
-- Sur le PC cible, avec un plafond de 5 $, le formateur joue un scénario Outils et un scénario Raisonnement avec Haiku, Sonnet et Luna, réflexion visible pour chacun. Le coût affiché par WaveStack reste dans 10 % du coût relevé dans la console du fournisseur.
+- Sur le PC cible, avec un plafond de 5 $, le formateur joue un scénario Outils et un scénario Raisonnement avec Haiku, Sonnet et Luna, réflexion visible pour chacun. Le coût affiché par HarnessLab reste dans 10 % du coût relevé dans la console du fournisseur.
 
 ## Assumptions
 

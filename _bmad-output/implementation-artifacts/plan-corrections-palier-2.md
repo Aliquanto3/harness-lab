@@ -45,7 +45,7 @@ Décisions du rapport du week-end, d'après le test :
 
 ## Lot 0 — Consigner le test (sans code, à faire en premier)
 
-- Commiter : `wavestack.toml` (sha256, commits Hugging Face, `measured_rss_mb` 430 et 740),
+- Commiter : `harness-lab.toml` (sha256, commits Hugging Face, `measured_rss_mb` 430 et 740),
   `content/mcp_snapshots/`, `data/rag_index.sqlite` (1,6 Mo, recommandé : une installation neuve
   n'a rien à construire), `bench-headroom.json` et `bench-embed.json` déplacés vers la story 12
   (section « Verdict »).
@@ -104,7 +104,7 @@ token, loin du vrai tokenizer sur ce contenu).
 - B2. Cause du débordement tirée du `breakdown` réel : résultats d'outils, documentation
   d'outils, historique, extraits RAG, mémoire ; pistes adaptées (« question plus précise »,
   « allumez la compression », « videz la conversation »).
-- B3. Test `fits` : compter avec un tokenizer réaliste (le vrai GGUF quand `WAVESTACK_TEST_GGUF`
+- B3. Test `fits` : compter avec un tokenizer réaliste (le vrai GGUF quand `HARNESS_LAB_TEST_GGUF`
   est posé, sinon un ratio calibré sur ce test : ≈ 2 caractères par token) et vérifier aussi la
   place laissée au premier résultat d'outil borné.
 
@@ -127,8 +127,8 @@ et réserve. Test sans GGUF avec le faux moteur (`[raisonne]` long).
 
 - D1. **Wikipédia répond 403** à `wikipedia_summary` et `fetch_page` : la politique robots de
   Wikimedia exige un contact dans l'User-Agent. Ajouter l'URL du dépôt à `USER_AGENT`
-  (`src/wavestack/net/factory.py:28`) ; vérifié à la main : 200 avec
-  `WaveStack/0.1 (demonstrateur pedagogique; https://github.com/Aliquanto3/agentic-harness-training-demo)`.
+  (`src/harness_lab/net/factory.py:28`) ; vérifié à la main : 200 avec
+  `HarnessLab/0.1 (demonstrateur pedagogique; https://github.com/Aliquanto3/agentic-harness-training-demo)`.
   Test : l'User-Agent contient une URL ou une adresse.
 - D2. **E2E sur un poste connecté** : 30 échecs, tous dus à l'hypothèse « pas d'Internet »
   (`public_holidays`, data.gouv, Microsoft Learn répondent). Le lanceur E2E doit couper le réseau
@@ -138,7 +138,7 @@ et réserve. Test sans GGUF avec le faux moteur (`[raisonne]` long).
 ## Lot E — Modèles : mémoire, refus et arrêt
 
 - E1. **llama-server lancé sans `-c`** occupe 5 137 Mo (contexte par défaut très large), alors que
-  WaveStack ne compte que la taille du fichier (1,28 Go). Lire `n_ctx` dans `/props` : si elle
+  HarnessLab ne compte que la taille du fichier (1,28 Go). Lire `n_ctx` dans `/props` : si elle
   dépasse nettement la fenêtre, le signaler au diagnostic (« relancez llama-server avec
   `-c 4096` ») et compter une mémoire estimée réaliste. Guide et README : `-c 4096`.
 - E2. **Estimation du 4B trop basse** : 3,4 Go estimés (`rss_bytes` 2,88 Go +
@@ -146,7 +146,7 @@ et réserve. Test sans GGUF avec le faux moteur (`[raisonne]` long).
   comptés). Ajouter les tampons de calcul au sondage (RSS après une évaluation réelle), puis
   resonder. Le 2B n'a ni `rss_bytes` ni `kv_bytes_per_token` (sondé avant la story 17) : resonder
   les entrées incomplètes.
-- E3. **Message de refus** : « WaveStack occupe 0,0 Go sans le modèle actif » alors que le
+- E3. **Message de refus** : « HarnessLab occupe 0,0 Go sans le modèle actif » alors que le
   processus pèse ≈ 200 Mo. Afficher la vraie valeur (en Mo sous 1 Go).
 - E4. **« Arrêter » pendant un chargement** : l'intention `stop` répond `stopping: false` pendant
   `model_load` (Ollama). Rendre le chargement annulable (le modèle précédent revient), ou masquer
@@ -176,11 +176,11 @@ et réserve. Test sans GGUF avec le faux moteur (`[raisonne]` long).
 - G1. `test_an_index_replaced_during_the_session_is_read_again` et
   `test_an_index_replaced_with_the_reranker_loaded_closes_it` échouent sous Windows
   (`WinError 5` : `os.replace` sur un index ouvert). La carte RAG gère déjà ce cas (elle libère
-  l'index avant). Pour le script : message clair (« WaveStack utilise l'index : construisez-le
-  depuis la carte RAG, ou arrêtez WaveStack ») ; tests adaptés (fermer la connexion avant, ou
+  l'index avant). Pour le script : message clair (« HarnessLab utilise l'index : construisez-le
+  depuis la carte RAG, ou arrêtez HarnessLab ») ; tests adaptés (fermer la connexion avant, ou
   vérifier le message sous Windows).
 - G2. Tests `model` du RAG : `_isolated_data_dir` cache toujours les vrais modèles, ils sont
-  toujours sautés. Ajouter une variable (`WAVESTACK_TEST_MODELS_DIR`) qui pointe vers le vrai
+  toujours sautés. Ajouter une variable (`HARNESS_LAB_TEST_MODELS_DIR`) qui pointe vers le vrai
   dossier des modèles. Corriger `test_real_reranker_puts_the_password_document_first` :
   `score()` renvoie des `RerankScore` (`NamedTuple`), `0 <= s` lève `TypeError` ; comparer
   `s.score`. Vérifié à la main : scores 0,0 / 0,919 / 0,0.
@@ -251,7 +251,7 @@ Résultats complets : `resultats-test-pc-palier-2-2026-09-27.md` (branche au com
 
 **Lot J** (`spec-lot-j-suites-du-test-pc-palier-2.md`) : journal de llama.cpp coupé quand le
 tokenizer ouvre seul un GGUF ; test `fits` sur la jauge locale exacte avec
-`WAVESTACK_TEST_GGUF` ; budget 768 ; `cost_mb` 110 ; guide corrigé. Anomalies reportées, avec
+`HARNESS_LAB_TEST_GGUF` ; budget 768 ; `cost_mb` 110 ; guide corrigé. Anomalies reportées, avec
 leur criticité, dans `deferred-work.md` : sous-agent avec RAG (moyenne, lot H), comportement du
 2B (moyenne, lot H), premier tour lent (faible à moyenne, spec), relecture après chargement
 d'une documentation en lazy loading (faible, spec).

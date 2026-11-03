@@ -1,6 +1,6 @@
 # Procédure disciplinaire d'Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
 
 Ce document décrit les étapes d'une procédure disciplinaire chez Exemplia ; il est classé confidentiel et son accès est réservé aux ressources humaines, à la direction et, pour un dossier qui le concerne, au collaborateur lui-même.
 

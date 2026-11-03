@@ -13,7 +13,7 @@ context: []
 
 ## Intent
 
-**Problem:** Toute l'interface de WaveStack et tous ses contenus sont en français. L'utilisateur veut l'anglais, le français et l'allemand. La langue se choisit seulement quand la conversation est vide, et les paramètres par défaut (prompt système, mémoires, descriptions d'outils…) doivent aussi être traduits (demande du 2026-09-29).
+**Problem:** Toute l'interface de HarnessLab et tous ses contenus sont en français. L'utilisateur veut l'anglais, le français et l'allemand. La langue se choisit seulement quand la conversation est vide, et les paramètres par défaut (prompt système, mémoires, descriptions d'outils…) doivent aussi être traduits (demande du 2026-09-29).
 
 **Approach:** Cette story est la première de cinq, parce que le périmètre représente environ 2 000 textes par langue. Elle pose :
 - le réglage `language` (fr, en ou de ; fr par défaut) ;
@@ -90,20 +90,20 @@ La story est approuvée par délégation, pendant la nuit, et relue le matin.
 
 ## Code Map
 
-- `src/wavestack/config.py` :
+- `src/harness_lab/config.py` :
   - `content_dir()` (≈ :943) : ajouter `content_file(rel, lang=None)`, qui lit la langue du réglage si elle n'est pas donnée ;
   - `Config.language` (valeur bornée à fr, en, de) ;
   - `LANGUAGES = ("fr", "en", "de")`.
 - Les chargeurs qui font `content_dir() / …` passent par `content_file` : `bricks/contract`, `cloud`, `compression/port`, `context/segments`, `hooks`, `mcp/servers`, `mcp/local_server`, `memory`, `models/catalog`, `rag/corpus`, `rag/lab`, `scenarios`, `session/llm_lab`, `skills`, `subagent`, `tools/*`. Leurs caches `@cache` doivent se vider au changement de langue (une fonction `clear_content_caches()` les appelle).
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/session/app_session.py` :
   - `set_language` sur le modèle de `clear_conversation` (≈ :5016) et du refus hors `idle` ;
   - rechargement comme `_reconfigure` (≈ :5130), sans vider autre chose ;
   - `_default_prompt` (≈ :789) relu ;
   - l'état publié porte `language` et `language_locked`.
-- `src/wavestack/web/app.py` -- ajouter la route `/api/intentions/language` à côté de `clear_conversation` et `reset` (≈ :684-753).
-- `src/wavestack/trace/catalog.py` -- créer `LanguageChangedPayload`.
-- `src/wavestack/hooks.py:42-54,216` -- noms des jours et des mois par langue.
-- `src/wavestack/web/static/index.html`, `app.js` -- le sélecteur dans la barre haute (à côté du thème), l'état verrouillé, `location.reload()` après succès, et `document.documentElement.lang`.
+- `src/harness_lab/web/app.py` -- ajouter la route `/api/intentions/language` à côté de `clear_conversation` et `reset` (≈ :684-753).
+- `src/harness_lab/trace/catalog.py` -- créer `LanguageChangedPayload`.
+- `src/harness_lab/hooks.py:42-54,216` -- noms des jours et des mois par langue.
+- `src/harness_lab/web/static/index.html`, `app.js` -- le sélecteur dans la barre haute (à côté du thème), l'état verrouillé, `location.reload()` après succès, et `document.documentElement.lang`.
 - `content/i18n/{en,de}/…` -- les fichiers traduits listés dans « Always ».
 - `_bmad-output/planning-artifacts/architecture/architecture-agentic-harness-training-demo-2026-09-23/ARCHITECTURE-SPINE.md` (AD-19, section « Langue ») et `CLAUDE.md` -- la convention de langue.
 - `_bmad-output/implementation-artifacts/deferred-work.md` -- les stories 2 à 5.
@@ -115,10 +115,10 @@ La story est approuvée par délégation, pendant la nuit, et relue le matin.
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/config.py` et tous les chargeurs -- `content_file`, la langue, le vidage des caches.
-- [x] `src/wavestack/session/app_session.py`, `src/wavestack/web/app.py`, `src/wavestack/trace/catalog.py`, `src/wavestack/hooks.py` -- l'intention, le rechargement, l'état, la date H3.
+- [x] `src/harness_lab/config.py` et tous les chargeurs -- `content_file`, la langue, le vidage des caches.
+- [x] `src/harness_lab/session/app_session.py`, `src/harness_lab/web/app.py`, `src/harness_lab/trace/catalog.py`, `src/harness_lab/hooks.py` -- l'intention, le rechargement, l'état, la date H3.
 - [x] `content/i18n/en/**`, `content/i18n/de/**` -- les traductions des défauts du LLM.
-- [x] `src/wavestack/web/static/index.html`, `app.js` -- le sélecteur.
+- [x] `src/harness_lab/web/static/index.html`, `app.js` -- le sélecteur.
 - [x] `tests/test_i18n.py`, `tools/e2e/*` -- la matrice et l'E2E.
 - [x] `ARCHITECTURE-SPINE.md`, `CLAUDE.md`, `deferred-work.md`, `README.md` -- la documentation.
 

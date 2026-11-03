@@ -31,7 +31,7 @@ Lignes « d.N » = lignes du diff `git -C ..\wt-story5 diff 14353f6 cb46afc -- .
 - BH9. Accessibilité : les deux pourcentages d'une ligne n'ont pas de nom accessible (en-têtes `aria-hidden`).
 - BH10. Tests manquants : top-p avec tail (= VG3), modèle changé (= VG1), « Arrêter » pendant B après A, comparaison cloud.
 - BH11. Pas d'E2E positif des barres ni de capture `distribution-bars`/`window-diagram` (= VG5).
-- BH12. ARCHITECTURE-SPINE se contredit sur l'état du navigateur (« le brouillon est la seule chose gardée » puis réglages B gardés) ; paragraphe « État du navigateur » à mettre à jour (`wavestack.llm.sampling_b`).
+- BH12. ARCHITECTURE-SPINE se contredit sur l'état du navigateur (« le brouillon est la seule chose gardée » puis réglages B gardés) ; paragraphe « État du navigateur » à mettre à jour (`harness_lab.llm.sampling_b`).
 - BH13. Pendant une comparaison, la fin de A écrit « Réponse terminée. » sous « Générer » (`#generate-status`) alors que B tourne.
 - BH14. Softmax plein vocabulaire calculé deux fois par token (`read_logits` appelle `candidates_from_logits` puis `top_from_logits`).
 - BH15. Réglages B sans remise à zéro ; si le modèle ne règle pas la température, B = A sans le dire.

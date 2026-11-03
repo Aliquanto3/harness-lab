@@ -4,7 +4,7 @@
 # le bilan des sorties sous le schéma.
 servers:
   local:
-    label_text: Glossaire WaveStack
+    label_text: Glossaire HarnessLab
   datagouv:
     label_text: data.gouv.fr
     sends_text: la recherche et ses arguments

@@ -1,6 +1,6 @@
 # Projet Talvane (document sentinelle, inactif)
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : ce document sentinelle sert aux démonstrations d'effacement (CAP-14) et n'est jamais actif par défaut. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : ce document sentinelle sert aux démonstrations d'effacement (CAP-14) et n'est jamais actif par défaut. -->
 
 Ce document sentinelle sert aux démonstrations d'effacement d'un document du corpus (story 18) : il porte un contenu facilement reconnaissable, qui doit disparaître entièrement d'une recherche une fois le document retiré.
 

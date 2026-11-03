@@ -19,10 +19,10 @@ from test_reasoning import RecordingEngine
 from test_tools import QWEN
 from test_turn import _run
 
-from wavestack import config
-from wavestack.models.cloud_base import cache_tokens
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.models.cloud_base import cache_tokens
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 CELLS = (
     "cache_origin",
@@ -284,7 +284,7 @@ def test_an_engine_that_says_nothing_leaves_the_local_cells_unmeasured():
 
 def test_the_pivots_leave_out_a_cache_count_the_response_does_not_carry():
     """CAP-1: an absent count stays absent in the pivot, a declared 0 stays a 0."""
-    from wavestack.models import anthropic_messages, openai_responses
+    from harness_lab.models import anthropic_messages, openai_responses
 
     assert openai_responses.pivot_usage({"input_tokens": 10})["prompt_tokens_details"] == {}
     declared = {"input_tokens": 10, "input_tokens_details": {"cached_tokens": 0}}

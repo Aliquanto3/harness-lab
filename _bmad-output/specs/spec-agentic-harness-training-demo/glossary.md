@@ -1,16 +1,16 @@
-# Glossaire — WaveStack
+# Glossaire — HarnessLab
 
 Vocabulaire utilisé tel quel dans SPEC.md, l'architecture, l'UX et le code (identifiants) ou le contenu (libellés français).
 
 - **Modèle** : le modèle de langage qui génère les réponses : un SLM local par défaut, ou un modèle cloud. Un seul modèle est actif à la fois.
 - **Modèle cloud** : un modèle hébergé par un fournisseur et appelé par API au format chat. Le fournisseur applique lui-même le gabarit et analyse les appels d'outils : cette part du harnais est alors hébergée hors du poste.
-- **Point d'accès** : l'adresse d'API d'un modèle cloud, déclarée en configuration. Un point d'accès interne (Wavestone sur Azure ou GCP) se déclare hors du dépôt.
+- **Point d'accès** : l'adresse d'API d'un modèle cloud, déclarée en configuration. Un point d'accès interne (sur Azure ou GCP) se déclare hors du dépôt.
 - **LLM nu** : le modèle sollicité sans aucune brique. Chaque message est envoyé seul, avec le seul gabarit de conversation du modèle.
 - **Harnais** : tout le code autour du modèle, qui assemble le contexte, appelle le modèle, interprète sa sortie, exécute des actions et décide de continuer ou de s'arrêter.
 - **Brique** : une capacité du harnais que l'on peut activer ou désactiver indépendamment. Liste V1 : raisonnement, mémoire courte, prompt système, mémoire globale, outils, RAG, MCP, skills, hooks, sous-agent, compression du contexte.
 - **Tour** : un cycle complet, du message de l'utilisateur jusqu'à la réponse finale. Un tour peut contenir plusieurs appels au modèle.
 - **Contexte** : l'ensemble exact des tokens envoyés au modèle lors d'un appel. Il est composé de segments, chacun attribué à la brique qui l'a produit.
-- **Fenêtre de contexte** : le nombre maximal de tokens que le contexte peut atteindre. WaveStack la plafonne en dessous de la limite du modèle.
+- **Fenêtre de contexte** : le nombre maximal de tokens que le contexte peut atteindre. HarnessLab la plafonne en dessous de la limite du modèle.
 - **Vue humain** : le volet qui montre la conversation telle qu'un utilisateur de chatbot la voit.
 - **Vue harnais** : l'ensemble des deux volets contexte LLM et orchestration, qui montrent ce que le harnais a réellement fait à chaque tour.
 - **Contexte LLM** : le volet qui montre le contexte exact de chaque appel au modèle, segmenté par brique, et la sortie brute du modèle.
@@ -30,7 +30,7 @@ Vocabulaire utilisé tel quel dans SPEC.md, l'architecture, l'UX et le code (ide
 - **Scénario** : une séquence préparée de configuration des briques et de prompts, qui illustre une brique ou un message pédagogique.
 - **Programme** : la suite ordonnée des scénarios, du LLM nu au harnais complet. Il se découpe en modules, chacun tenant dans une session de formation de 30 min à 1 h.
 - **Rejeu d'un prompt** : le renvoi du dernier message avec une autre configuration de briques, à partir de l'état qui précédait le tour d'origine, pour comparer deux tours.
-- **Formateur** : la personne qui anime une session de formation avec WaveStack.
-- **Participant** : une personne formée, qui regarde WaveStack projeté. Certains profils techniques l'installent aussi sur leur poste.
-- **Utilisateur** : toute personne aux commandes de WaveStack, formateur ou participant qui l'a installé sur son poste.
+- **Formateur** : la personne qui anime une session de formation avec HarnessLab.
+- **Participant** : une personne formée, qui regarde HarnessLab projeté. Certains profils techniques l'installent aussi sur leur poste.
+- **Utilisateur** : toute personne aux commandes de HarnessLab, formateur ou participant qui l'a installé sur son poste.
 - **Poste de référence** : le PC professionnel sur lequel les exigences de performance sont mesurées : HP EliteBook (édition Bang & Olufsen), Windows 11, Intel Core i5 vPro, sans GPU dédié, 16 Go de RAM.

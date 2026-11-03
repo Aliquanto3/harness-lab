@@ -1,6 +1,6 @@
 # Disziplinarverfahren von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
 
 Dieses Dokument beschreibt die Schritte eines Disziplinarverfahrens bei Exemplia; es ist als vertraulich eingestuft, und der Zugang ist der Personalabteilung, der Geschäftsleitung und, bei einer eigenen Akte, der betroffenen Person selbst vorbehalten.
 

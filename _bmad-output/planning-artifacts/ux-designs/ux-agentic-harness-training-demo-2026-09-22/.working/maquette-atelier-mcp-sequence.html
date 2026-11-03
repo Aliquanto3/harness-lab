@@ -8,9 +8,9 @@
      schéma commun (diagram-*) repris de l'application par chemin relatif au dépôt. Les fonctions
      du module static/diagram.js (lot 2) sont recopiées plus bas : un module ES ne se charge pas
      depuis file://. -->
-<link rel="stylesheet" href="../../../../../src/wavestack/web/static/fonts.css">
-<link rel="stylesheet" href="../../../../../src/wavestack/web/static/tokens.css">
-<link rel="stylesheet" href="../../../../../src/wavestack/web/static/pages.css">
+<link rel="stylesheet" href="../../../../../src/harness_lab/web/static/fonts.css">
+<link rel="stylesheet" href="../../../../../src/harness_lab/web/static/tokens.css">
+<link rel="stylesheet" href="../../../../../src/harness_lab/web/static/pages.css">
 <style>
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -36,7 +36,7 @@ pre { margin: 0; }
   background: #24243a; color: #fff; border: 1px solid #3a3a55; border-radius: 9999px;
   padding: 4px 9px; cursor: pointer;
 }
-.mockbar button[aria-pressed="true"] { background: #451DC7; border-color: #9C86FF; }
+.mockbar button[aria-pressed="true"] { background: #0B6B78; border-color: #9C86FF; }
 /* Retouches demandées au module commun (lot 2), simulées ici : anneau d'encre sous le halo,
    « Suivre le direct » pressé en plein. */
 .diagram-block.is-active { box-shadow: 0 0 0 2px var(--color-ink), 0 0 0 6px var(--color-state-active) !important; }
@@ -104,7 +104,7 @@ body.is-resizing-y { cursor: row-resize; user-select: none; }
 @media (prefers-reduced-motion: reduce) { .diagram-revealed-new { animation: none; } }
 .arch-empty { position: absolute; left: 30%; top: 55%; transform: translate(-50%, -50%); max-width: 22em; text-align: center; color: var(--color-ink-soft); font-size: var(--typography-body-sm-font-size); pointer-events: none; }
 
-/* La barre WaveStack reste tout en haut, en permanence (décision d'Anaël du 2026-10-05). */
+/* La barre HarnessLab reste tout en haut, en permanence (décision d'Anaël du 2026-10-05). */
 body > .site-nav { position: sticky; top: 0; margin-bottom: 0; }
 .pane {
   min-width: 0; min-height: 0; display: flex; flex-direction: column;
@@ -392,8 +392,8 @@ body > .site-nav { position: sticky; top: 0; margin-bottom: 0; }
 </head>
 <body>
 
-<nav class="site-nav" aria-label="Pages de WaveStack">
-  <a href="#" class="site-nav-brand">WaveStack</a>
+<nav class="site-nav" aria-label="Pages de HarnessLab">
+  <a href="#" class="site-nav-brand">HarnessLab</a>
   <a href="#">Harnais</a><a href="#">LLM</a><a href="#">RAG</a><a href="#" aria-current="page">MCP</a><a href="#">🛠️ Diagnostic</a>
 </nav>
 
@@ -490,7 +490,7 @@ body > .site-nav { position: sticky; top: 0; margin-bottom: 0; }
               <button class="node user" style="grid-column:1;grid-row:1">👤 Utilisateur</button>
               <button class="robot" style="grid-column:1;grid-row:2 / 4">SLM local</button>
               <div class="host" style="grid-column:2">
-                <button class="host-label">Hôte · WaveStack</button>
+                <button class="host-label">Hôte · HarnessLab</button>
                 <button class="node integration" data-b="i-glo">● Code pour lire glossary.yaml</button>
                 <button class="node integration" data-b="i-dg">◆ Code pour l'API data.gouv.fr (REST)</button>
                 <button class="node integration" data-b="i-ms">▲ Code pour l'API Microsoft (autre format)</button>
@@ -519,12 +519,12 @@ body > .site-nav { position: sticky; top: 0; margin-bottom: 0; }
                 SLM local<small>Qwen3 1.7B</small>
               </button>
               <div class="host diagram-block" data-node="host">
-                <button class="host-label" data-explain="L'hôte est l'application qui héberge le modèle et les clients MCP : ici, le harnais WaveStack. Il décide quels outils montrer au modèle et exécute ses demandes. Analogie : le restaurant.">Hôte · WaveStack</button>
+                <button class="host-label" data-explain="L'hôte est l'application qui héberge le modèle et les clients MCP : ici, le harnais HarnessLab. Il décide quels outils montrer au modèle et exécute ses demandes. Analogie : le restaurant.">Hôte · HarnessLab</button>
                 <button class="node client diagram-block" data-node="c-glo" data-explain="Un client MCP par serveur (connexion 1 à 1). Il parle JSON-RPC au serveur et rend les réponses à l'hôte. Analogie : le serveur de salle.">Client MCP → glossaire</button>
                 <button class="node client diagram-block" data-node="c-dg" data-explain="Le client de data.gouv.fr : mêmes messages qu'avec le glossaire, seul le transport change (HTTP).">Client MCP → data.gouv.fr</button>
                 <button class="node client diagram-block" data-node="c-ms" data-explain="Le client de Microsoft Learn : même protocole, même code côté hôte.">Client MCP → MS Learn</button>
               </div>
-              <button class="node has-prim diagram-block" style="grid-column:3;grid-row:1" data-node="s-glo" data-explain="Serveur MCP « Glossaire WaveStack » : un processus Python à part, lancé par l'hôte sur ce poste (stdio). Il expose 2 outils, 1 ressource et 1 prompt. Analogie : la cuisine."><span>🔌 Glossaire</span><span class="prim" data-prim="glo"></span></button>
+              <button class="node has-prim diagram-block" style="grid-column:3;grid-row:1" data-node="s-glo" data-explain="Serveur MCP « Glossaire HarnessLab » : un processus Python à part, lancé par l'hôte sur ce poste (stdio). Il expose 2 outils, 1 ressource et 1 prompt. Analogie : la cuisine."><span>🔌 Glossaire</span><span class="prim" data-prim="glo"></span></button>
               <button class="node src diagram-block" style="grid-column:4;grid-row:1" data-node="d-glo" data-explain="La source du glossaire : un fichier YAML que le serveur lit. L'hôte ne le lit jamais lui-même.">📄 glossary.yaml</button>
             </div>
           </div>
@@ -614,13 +614,13 @@ function createStepper(host, { onShow, onLive, describe }) {
 const COLS = [
   { id: "user", name: "Utilisateur", sub: "vous" },
   { id: "slm", name: "SLM local", sub: "Qwen3 1.7B" },
-  { id: "host", name: "Hôte WaveStack", sub: "le harnais" },
+  { id: "host", name: "Hôte HarnessLab", sub: "le harnais" },
   { id: "client", name: "Client MCP", sub: "un par serveur" },
   { id: "server", name: "Serveur MCP", sub: "" },
   { id: "source", name: "Source de données", sub: "" },
 ];
 const SERVERS = {
-  glo: { name: "Glossaire WaveStack", net: false, transport: "stdio (processus enfant)", where: "python -m wavestack.mcp.local_server fr", src: "glossary.yaml" },
+  glo: { name: "Glossaire HarnessLab", net: false, transport: "stdio (processus enfant)", where: "python -m harness_lab.mcp.local_server fr", src: "glossary.yaml" },
   dg: { name: "data.gouv.fr", net: true, transport: "Streamable HTTP", where: "https://mcp.data.gouv.fr/mcp", src: "API data.gouv.fr" },
   ms: { name: "Microsoft Learn", net: true, transport: "Streamable HTTP", where: "https://learn.microsoft.com/api/mcp", src: "Docs Microsoft" },
 };
@@ -638,10 +638,10 @@ function handshake(sv) {
   const rows = [
     R(1, 2, "internal", { text: net ? "ouvre une session HTTP avec data.gouv.fr" : "lance le serveur : python -m … local_server", explain: net ? "L'hôte crée un client pour ce serveur. Le transport Streamable HTTP envoie chaque message en POST à l'adresse du serveur." : "L'hôte crée un client pour ce serveur et lance le serveur comme processus enfant. Ils se parlent par l'entrée et la sortie standard, une ligne JSON par message.", step: true }),
     R(2, 3, "rpc", { method: "initialize", ms: 10, net, explain: "Le client se présente : version du protocole, capacités du client, nom et version.", json: J({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "mcp", version: "0.1.0" } } }) }),
-    R(3, 2, "rpc", { method: "initialize", text: net ? "capacités : tools" : "capacités : tools · resources · prompts", ms: net ? 412 : 1352, rt: true, net, explain: "Le serveur répond par la version retenue, son nom et ses capacités : les primitives qu'il propose. Le client ne demandera que celles-là.", json: J({ jsonrpc: "2.0", id: 1, result: { protocolVersion: "2025-11-25", capabilities: net ? { tools: { listChanged: false } } : { tools: { listChanged: false }, resources: { subscribe: false, listChanged: false }, prompts: { listChanged: false } }, serverInfo: { name: net ? "data.gouv.fr" : "wavestack-glossaire", version: "1.2.0" } } }) }),
+    R(3, 2, "rpc", { method: "initialize", text: net ? "capacités : tools" : "capacités : tools · resources · prompts", ms: net ? 412 : 1352, rt: true, net, explain: "Le serveur répond par la version retenue, son nom et ses capacités : les primitives qu'il propose. Le client ne demandera que celles-là.", json: J({ jsonrpc: "2.0", id: 1, result: { protocolVersion: "2025-11-25", capabilities: net ? { tools: { listChanged: false } } : { tools: { listChanged: false }, resources: { subscribe: false, listChanged: false }, prompts: { listChanged: false } }, serverInfo: { name: net ? "data.gouv.fr" : "harness-lab-glossaire", version: "1.2.0" } } }) }),
     R(2, 3, "rpc", { method: "notifications/initialized", noReply: true, ms: 1363, net, explain: "Une notification, sans réponse ni identifiant : le client confirme que la session est ouverte.", json: J({ jsonrpc: "2.0", method: "notifications/initialized" }) }),
     R(2, 3, "rpc", { method: "tools/list", ms: 1363, net, explain: "Le client demande la liste des outils.", json: J({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} }) }),
-    R(3, 2, "rpc", { method: "tools/list", text: net ? "6 outils" : "2 outils", ms: net ? 388 : 4, rt: true, net, mv: "tools", explain: "Chaque outil vient avec son nom, sa description et le schéma de ses arguments : c'est ce que l'hôte mettra dans le contexte du modèle.", json: net ? J({ jsonrpc: "2.0", id: 2, result: { tools: [{ name: "search_datasets", description: "Recherche des jeux de données…", inputSchema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] } }, "… 5 autres"] } }) : J({ jsonrpc: "2.0", id: 2, result: { tools: [{ name: "list_terms", description: "Liste les termes du glossaire du démonstrateur WaveStack, un par ligne.", inputSchema: { type: "object", properties: {} } }, { name: "define_term", description: "Donne la définition d'une notion du démonstrateur WaveStack…", inputSchema: { type: "object", properties: { term: { type: "string" } }, required: ["term"] } }] } }) }),
+    R(3, 2, "rpc", { method: "tools/list", text: net ? "6 outils" : "2 outils", ms: net ? 388 : 4, rt: true, net, mv: "tools", explain: "Chaque outil vient avec son nom, sa description et le schéma de ses arguments : c'est ce que l'hôte mettra dans le contexte du modèle.", json: net ? J({ jsonrpc: "2.0", id: 2, result: { tools: [{ name: "search_datasets", description: "Recherche des jeux de données…", inputSchema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] } }, "… 5 autres"] } }) : J({ jsonrpc: "2.0", id: 2, result: { tools: [{ name: "list_terms", description: "Liste les termes du glossaire du démonstrateur HarnessLab, un par ligne.", inputSchema: { type: "object", properties: {} } }, { name: "define_term", description: "Donne la définition d'une notion du démonstrateur HarnessLab…", inputSchema: { type: "object", properties: { term: { type: "string" } }, required: ["term"] } }] } }) }),
   ];
   if (net) {
     rows.push(R(2, 3, "note", { text: "pas de resources/list ni de prompts/list : le serveur ne les annonce pas" }));
@@ -832,7 +832,7 @@ function renderHeads() {
     heads.append(b);
     explain(b, {
       user: "Vous, ou le participant. Il parle à l'hôte.",
-      host: "L'application qui héberge le modèle et les clients MCP : le harnais WaveStack.",
+      host: "L'application qui héberge le modèle et les clients MCP : le harnais HarnessLab.",
       client: "Le client MCP de ce serveur : il parle JSON-RPC, l'hôte non.",
       server: sv.net ? "Un service public joint en HTTP : les messages quittent le poste." : "Un processus à part, lancé par l'hôte sur ce poste (stdio).",
       slm: "Le modèle local. Il ne parle qu'à l'hôte.",
@@ -849,7 +849,7 @@ function geometry(row) {
 }
 
 const WHY = {
-  true: ["Pourquoi une poignée de main ?", "Comme au restaurant : « Bonjour, je suis le serveur de salle de WaveStack » (initialize) ; « Bonjour, voici ce que nous servons : des plats à la carte, ce que nous posons sur la table, des formules » (capacités : outils, ressources, prompts) ; « Bien reçu » (notifications/initialized) ; « La carte, s'il vous plaît » (tools/list, resources/list, prompts/list). Ensuite seulement, on commande."],
+  true: ["Pourquoi une poignée de main ?", "Comme au restaurant : « Bonjour, je suis le serveur de salle de HarnessLab » (initialize) ; « Bonjour, voici ce que nous servons : des plats à la carte, ce que nous posons sur la table, des formules » (capacités : outils, ressources, prompts) ; « Bien reçu » (notifications/initialized) ; « La carte, s'il vous plaît » (tools/list, resources/list, prompts/list). Ensuite seulement, on commande."],
   call: ["Qui choisit l'outil ?", "Un outil est choisi par le modèle. L'hôte lui montre les outils, le modèle demande un appel, l'hôte le fait passer par le client. Le modèle ne parle jamais au serveur."],
   resource: ["Qui choisit la ressource ?", "Une ressource est choisie par l'application (l'hôte), pas par le modèle : elle sert à donner du contexte, comme un fichier joint avec @."],
   prompt: ["Qui choisit le prompt ?", "Un prompt est choisi par l'utilisateur : un modèle de demande que le serveur prépare, comme une commande /."],
@@ -1042,7 +1042,7 @@ function renderServers() {
   const btns = el("div", "row-btns");
   const b1 = el("button", "btn btn-primary", sc.open ? "Reconnecter" : "Se connecter"); const b2 = el("button", "btn btn-secondary", "Arrêter"); b2.disabled = true;
   btns.append(b1, b2); body.append(btns);
-  if (!sc.open) { body.append(el("p", "note", sc.closed ? "Connexion fermée : changement de langue. Reconnectez-vous au Glossaire WaveStack." : sc.failed ? "La connexion à data.gouv.fr a échoué. Le glossaire, local, reste disponible." : "Une fois connecté, choisissez ici un outil, une ressource ou un prompt.")); return; }
+  if (!sc.open) { body.append(el("p", "note", sc.closed ? "Connexion fermée : changement de langue. Reconnectez-vous au Glossaire HarnessLab." : sc.failed ? "La connexion à data.gouv.fr a échoué. Le glossaire, local, reste disponible." : "Une fois connecté, choisissez ici un outil, une ressource ou un prompt.")); return; }
   const net = SERVERS[sc.open].net;
   const tabs = el("div", "tabs"); tabs.setAttribute("role", "tablist");
   const T = [["tools", net ? "🔧 Outils 6" : "🔧 Outils 2"], ["resources", "📄 Ressources 1"], ["prompts", sc.listFail === "prompts" ? "💬 Prompts ⚠" : "💬 Prompts 1"]];
@@ -1092,7 +1092,7 @@ function renderServers() {
 
 function renderModel() {
   const body = $("model-body"); body.replaceChildren();
-  if (!sc.open) { body.append(el("p", "sm soft", sc.closed ? "La connexion au Glossaire WaveStack est fermée : reconnectez-vous pour relister ses outils." : sc.failed ? "La connexion à data.gouv.fr a échoué : aucun outil listé." : "Connectez-vous à un serveur : sa documentation d'outils et son poids s'afficheront ici.")); return; }
+  if (!sc.open) { body.append(el("p", "sm soft", sc.closed ? "La connexion au Glossaire HarnessLab est fermée : reconnectez-vous pour relister ses outils." : sc.failed ? "La connexion à data.gouv.fr a échoué : aucun outil listé." : "Connectez-vous à un serveur : sa documentation d'outils et son poids s'afficheront ici.")); return; }
   const net = sc.open ? SERVERS[sc.open].net : false;
   body.append(Object.assign(el("p", "sm soft", "Liste des outils en cours…"), { id: "mv-pending" }));
   const seg = el("div", "seg"); seg.dataset.mv = "tools"; const a = el("button", null, "Documentation complète"), b = el("button", null, "Lazy loading");
@@ -1174,8 +1174,8 @@ function togglePane(id, show) {
 document.querySelectorAll("[data-hide]").forEach((b) => (b.onclick = () => togglePane(b.dataset.hide, false)));
 
 // Gouttières glissables (comme l'Atelier Harnais ; module commun static/panes.js, AD-28).
-// Tailles mémorisées à part de l'atelier (wavestack.mcp.panes).
-const SIZES_KEY = "wavestack.mcp.panes";
+// Tailles mémorisées à part de l'atelier (harness_lab.mcp.panes).
+const SIZES_KEY = "harness_lab.mcp.panes";
 const SIZE_DEFAULT = { "--w-servers": 260, "--w-model": 290, "--h-arch": 206 };
 const SIZE_MIN = { "--w-servers": 200, "--w-model": 220, "--h-arch": 120 };
 const SEQ_MIN = { w: 380, h: 160 };

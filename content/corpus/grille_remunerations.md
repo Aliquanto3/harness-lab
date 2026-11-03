@@ -1,6 +1,6 @@
 # Grille des rémunérations d'Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette grille ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette grille ne décrit aucune entreprise réelle. -->
 
 Ce document décrit la structure des rémunérations d'Exemplia ; il est classé confidentiel et son accès est réservé aux ressources humaines et à la direction.
 

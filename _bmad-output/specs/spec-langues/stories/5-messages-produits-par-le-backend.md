@@ -31,7 +31,7 @@ context:
   - `content/messages.yaml` : sections par domaine (`tools`, `hooks`, `memory`, `delegation`, `mcp`, `session`, `availability`, `diagnostic`, `models`, `catalog`, `rag_lab`, `llm_lab`, `greenops`, `web`, `context`…), clés `snake_case` en anglais, variables `{name}`, pluriels `.one` et `.other`.
   - La valeur française est le littéral actuel, octet pour octet : la suite existante passe sans changer une assertion.
   - Les surcouches ont les mêmes clés et le même jeu de variables par clé. Une clé absente d'une traduction prend le français.
-- **`msg(key, lang, **kw)`** dans `src/wavestack/messages.py` :
+- **`msg(key, lang, **kw)`** dans `src/harness_lab/messages.py` :
   - `lang` est obligatoire, jamais lu dans `settings.json` ; la session passe `self._language`.
   - Un fichier traduit invalide donne le français. La session le trace une fois par `_localized(load_messages)` au démarrage et à chaque changement de langue.
   - Une clé inconnue ou une variable manquante lève une exception : c'est une erreur de programmation, attrapée par les tests.
@@ -42,7 +42,7 @@ context:
   - H1 et H5 lisent `HookContext`, le serveur MCP local sa langue d'argument ;
   - les exceptions levées loin de la session (`ServerError`, `DownloadError`, `ProviderError`, `ToolError`, `StageFailed`…) portent une clé et ses variables. `str()` rend le français ; la session rend la langue au moment de placer le texte dans un événement, l'état ou le contexte.
 - **Périmètre** : tout texte qui finit dans un champ `*_text` d'événement, d'état ou de réponse d'API, un `detail` HTTP, un contrôle du diagnostic, une étape d'atelier, ou le contexte envoyé au modèle. Cela inclut les causes littérales françaises des `harness_error` et les lignes d'audit H2.
-- **Terminal** (décision d'Anaël, 2026-09-30) : la sortie en terminal (`cli.py`, dont `wavestack diagnostic` et les `harness_error` imprimés, et `scripts/build_rag_index.py`) passe par le même catalogue, toujours en anglais (`msg(key, "en")`), sans lire `settings.json`. `--lang` du script reste la langue de l'index. Les tests qui lisent cette sortie passent à l'anglais.
+- **Terminal** (décision d'Anaël, 2026-09-30) : la sortie en terminal (`cli.py`, dont `harness-lab diagnostic` et les `harness_error` imprimés, et `scripts/build_rag_index.py`) passe par le même catalogue, toujours en anglais (`msg(key, "en")`), sans lire `settings.json`. `--lang` du script reste la langue de l'index. Les tests qui lisent cette sortie passent à l'anglais.
 - **Infobulle** : `common.language.help` (en `fr`, `en` et `de`) ne dit plus que des messages restent en français.
 - **Exécution** : `pytest` en quarts et l'E2E par tranches `--only`, au premier plan, une suite à la fois. Traductions par deux sous-agents, un par langue, qui reçoivent la table des libellés `ui.yaml` déjà traduits et les noms de briques traduits.
 
@@ -93,7 +93,7 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] Commit 1 : `src/wavestack/messages.py`, `content/messages.yaml` (sections `session`, `tools.datetime`, `mcp.glossary`), `config.clear_content_caches`, `_localized`, `native.get_datetime`, `local_server.py`, `ui_texts.py` (partage de `_check` et `_filled`). Traductions `en` et `de` de ces trois clés dans le même commit, puisqu'elles sont l'objet des reprises.
+- [x] Commit 1 : `src/harness_lab/messages.py`, `content/messages.yaml` (sections `session`, `tools.datetime`, `mcp.glossary`), `config.clear_content_caches`, `_localized`, `native.get_datetime`, `local_server.py`, `ui_texts.py` (partage de `_check` et `_filled`). Traductions `en` et `de` de ces trois clés dans le même commit, puisqu'elles sont l'objet des reprises.
 - [x] `tests/test_backend_messages.py` (nouveau), commits 1 à 4 :
   - chaque clé rendue en `fr`, `en` et `de` avec des variables fictives : non vide, sans `{` restant ;
   - chaque ligne de la matrice côté Python, session `de` ou `en` et `settings.json` contraire ;
@@ -108,7 +108,7 @@ context:
 
 **Acceptance Criteria:**
 - Given la langue `fr`, when on joue ruff, pytest en quarts et l'E2E par tranches après chaque commit, then tout passe et aucune assertion existante n'a changé hors des trois de `_localized` et de la sortie en terminal.
-- Given n'importe quel réglage de langue, when on lance `wavestack diagnostic` ou `build_rag_index.py`, then la sortie est en anglais.
+- Given n'importe quel réglage de langue, when on lance `harness-lab diagnostic` ou `build_rag_index.py`, then la sortie est en anglais.
 - Given la langue `de`, when les tranches `ui_language`, `content_language`, `annex_language` et `backend_language` jouent sans exclusion des textes du Python, then aucune valeur française des catalogues du périmètre n'est visible ni envoyée au modèle.
 
 ## Implementation Notes

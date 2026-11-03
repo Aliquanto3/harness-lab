@@ -1,6 +1,6 @@
 # Procédure des entretiens annuels d'Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette procédure ne décrit aucune entreprise réelle. -->
 
 Ce document décrit l'entretien annuel d'Exemplia, mené par le responsable direct de chaque collaborateur ; il est classé document des ressources humaines.
 

@@ -1,6 +1,6 @@
 # Rapport du 2026-10-16 : V1.1, vague 2 (ouverture aux RSSI)
 
-Plan : [plan-2026-10-16-v1-1-vague-2.md](plan-2026-10-16-v1-1-vague-2.md). Spec : `_bmad-output/specs/spec-wavestack-v1-1-vague-2/` (SPEC, companions, `ux/`, maquette v2, `stories.yaml`, specs de story avec leurs sections « Revue »).
+Plan : [plan-2026-10-16-v1-1-vague-2.md](plan-2026-10-16-v1-1-vague-2.md). Spec : `_bmad-output/specs/spec-harness-lab-v1-1-vague-2/` (SPEC, companions, `ux/`, maquette v2, `stories.yaml`, specs de story avec leurs sections « Revue »).
 
 ## En bref
 
@@ -15,7 +15,7 @@ Plan : [plan-2026-10-16-v1-1-vague-2.md](plan-2026-10-16-v1-1-vague-2.md). Spec 
 |---|---|---|---|---|
 | 1 Politique MCP et journal | #47 | règle autoriser / demander / refuser par outil, journal de sécurité, CSV | 1 high (outil refusé exécuté dans la conversation), 3 medium, 4 low → corrigés | 52/52 |
 | 2 Outils MCP locaux | #50 | bac à sable, RAM, capture d'écran | 2 medium (chemin 8.3 `ANAEL~1.YAH`, disque sans plafond) + 2 en revue → corrigés | 52/52 |
-| 3 GitHub par OAuth | #55 | device flow de l'OAuth App WaveStack, jeton renouvelé, refus | 5 medium (page MCP en panne derrière un proxy, état « expiré », jeton figé) + 4 en revue → corrigés | 111/111 |
+| 3 GitHub par OAuth | #55 | device flow de l'OAuth App HarnessLab, jeton renouvelé, refus | 5 medium (page MCP en panne derrière un proxy, état « expiré », jeton figé) + 4 en revue → corrigés | 111/111 |
 | 4 Moteur des garde-fous | #48 | toxicité multilingue ONNX, Presidio + motifs FR | 4 medium (contournement après 256 tokens, numéro fiscal jamais vu, téléphone au seuil) → corrigés | 120/120 |
 | 5 Garde-fous dans le tour | #54 | filtrage réel, verdicts, brique interactive | **3 high** (texte bloqué affiché, message brut renvoyé au modèle, trace en clair) → corrigés en une passe | 88/88 |
 | 6 FinOps cache et compression | #51 | économie du cache (net signé), compression en $ | 1 medium (somme de séance faussée) + 1 en revue → corrigés | 95/95 |
@@ -42,7 +42,7 @@ Correctifs : #67 (message détaillé de la vérification RAG), #49 (guillemets),
 ## Restes et écarts
 
 - **`rag_lab` « fin de run »** : échec intermittent (3 fois dans une tranche, puis 3/3 et 255/255 verts) ; cause non trouvée ; le message d'échec affiche maintenant les champs en cause (#67).
-- **Lecture seule GitHub** : WaveStack n'envoie jamais `X-MCP-Readonly` ; ce niveau de refus n'est pas activable aujourd'hui (documenté).
+- **Lecture seule GitHub** : HarnessLab n'envoie jamais `X-MCP-Readonly` ; ce niveau de refus n'est pas activable aujourd'hui (documenté).
 - **Réponse réelle de GitHub à un compte sans droit** : 403 HTTP (géré) ou `isError` (pas encore distingué) : à vérifier.
 - **`/api/state`** parcourt tout le journal de séance à chaque appel ; la barre l'appelle à l'ouverture des panneaux : à indexer si une séance devient très longue.
 - **`limites-harnais.md`** porte encore « brouillon à valider par Anaël ».

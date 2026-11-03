@@ -1,7 +1,7 @@
 ---
-title: 'Recherche technique : API LLM cloud gratuites pour WaveStack'
+title: 'Recherche technique : API LLM cloud gratuites pour HarnessLab'
 type: 'technical'
-topic: 'API LLM cloud gratuites (Mistral, Google AI Studio, NVIDIA Build, OpenRouter et alternatives) pour WaveStack'
+topic: 'API LLM cloud gratuites (Mistral, Google AI Studio, NVIDIA Build, OpenRouter et alternatives) pour HarnessLab'
 decision: 'Quels fournisseurs cloud inscrire dans la spec (story LLM cloud) et avec quels avertissements'
 source: 'run'
 shape: 'select'
@@ -14,7 +14,7 @@ claims_verified: 1
 claims_unverified: 18
 ---
 
-# Recherche technique : API LLM cloud gratuites pour WaveStack
+# Recherche technique : API LLM cloud gratuites pour HarnessLab
 
 **Décision servie :** quels fournisseurs cloud inscrire dans la spec comme cibles de la future story « LLM cloud », et avec quels avertissements.
 
@@ -30,7 +30,7 @@ claims_unverified: 18
 **Trois constats orientent ce choix :**
 
 1. **Seuls trois des neuf candidats ne sont ni éliminés ni réservés au rang d'exemples :** Groq, Mistral et, en option, Cloudflare. GitHub Models a fermé le 30 juillet 2026 [30][31]. Cerebras exige une carte bancaire pour un essai de 30 jours [28]. Les 0,10 $ mensuels offerts par Hugging Face ne couvrent pas une séance [32]. OpenRouter plafonne à 50 requêtes par jour sans achat de crédits [20]. Les conditions de NVIDIA le réservent à « l'évaluation » et réutilisent les contenus [17]. Google réserve l'offre payante aux utilisateurs de l'EEE [11].
-2. **La gratuité se paie presque toujours en données.** Mistral (sauf désactivation) [3], Google (sans opt-out possible) [11] et NVIDIA [17] utilisent les prompts gratuits pour améliorer leurs modèles. Seuls Groq [25] et Cloudflare [34] s'en abstiennent. C'est un **matériau pédagogique** direct pour la question centrale de WaveStack : où vont les données ? Chaque fournisseur doit donc l'afficher dans l'infobulle.
+2. **La gratuité se paie presque toujours en données.** Mistral (sauf désactivation) [3], Google (sans opt-out possible) [11] et NVIDIA [17] utilisent les prompts gratuits pour améliorer leurs modèles. Seuls Groq [25] et Cloudflare [34] s'en abstiennent. C'est un **matériau pédagogique** direct pour la question centrale de HarnessLab : où vont les données ? Chaque fournisseur doit donc l'afficher dans l'infobulle.
 3. **Aucun quota n'est stable ni publié de façon fiable.** Plusieurs tableaux ne sont lisibles que dans une console connectée [1][14]. Les offres ont changé au cours de l'année [2][22][30]. La spec ne doit donc **fixer aucun quota** : un refus pour débit dépassé (erreur 429) doit devenir un événement visible et expliqué. Et une **vérification réelle, avec la clé du formateur,** doit avoir lieu avant chaque séance.
 
 **Principale réserve :** la plupart des affirmations reposent sur **une seule source primaire**, la documentation du fournisseur lui-même (18 non vérifiées de façon indépendante, 1 vérifiée). Le fonctionnement réel, clé en main, n'a été testé pour aucun fournisseur. La spec doit donc exiger ce test.
@@ -101,7 +101,7 @@ Notes de 1 à 3. Une absence de preuve vaut 1, et cette note est signalée (« n
 ### Google AI Studio : offre gratuite de l'API Gemini
 
 - **Gratuit sans carte bancaire** [10]. Point d'accès compatible OpenAI : `https://generativelanguage.googleapis.com/v1beta/openai/` [13].
-- **Clause EEE, vérifiée mot pour mot** : « You may use only Paid Services when making API Clients available to users in the European Economic Area, Switzerland, or the United Kingdom » [11]. Un fil du forum officiel montre que sa portée est débattue [12]. Pour **un formateur qui projette sa propre démo**, le risque paraît faible, car il ne met rien à disposition d'utilisateurs. En revanche, la clause viserait directement des **participants qui saisiraient leur propre clé gratuite dans WaveStack** (une option du cadre d'usage). Confiance moyenne.
+- **Clause EEE, vérifiée mot pour mot** : « You may use only Paid Services when making API Clients available to users in the European Economic Area, Switzerland, or the United Kingdom » [11]. Un fil du forum officiel montre que sa portée est débattue [12]. Pour **un formateur qui projette sa propre démo**, le risque paraît faible, car il ne met rien à disposition d'utilisateurs. En revanche, la clause viserait directement des **participants qui saisiraient leur propre clé gratuite dans HarnessLab** (une option du cadre d'usage). Confiance moyenne.
 - **Données.** Sur l'offre gratuite, les contenus servent à améliorer les produits Google et **peuvent être lus par des relecteurs humains, sans opt-out possible** [11].
 - **Vitesse.** Environ 195 tokens/s pour Gemini 2.5 Flash [15]. Quotas et appel d'outils sur l'offre gratuite non vérifiés : ils ne s'affichent que dans le tableau de bord [14].
 
@@ -136,7 +136,7 @@ Notes de 1 à 3. Une absence de preuve vaut 1, et cette note est signalée (« n
 
 À reprendre dans `bmad-correct-course`, puis dans la spec et l'architecture. Leur niveau de confiance figure entre parenthèses.
 
-1. **Architecture (AD-5).** Un seul adaptateur `openai_chat` : adresse de base, clé, modèle, streaming, `tools`. Ajouter un fournisseur ne demande que de la configuration. Cela couvre aussi les futurs points d'accès Wavestone sur Azure ou GCP. (Haute pour Mistral [6], OpenRouter [20] et Groq [25] ; moyenne pour Google [13] et Cloudflare [35], dont le streaming n'est pas confirmé.)
+1. **Architecture (AD-5).** Un seul adaptateur `openai_chat` : adresse de base, clé, modèle, streaming, `tools`. Ajouter un fournisseur ne demande que de la configuration. Cela couvre aussi les futurs points d'accès sur Azure ou GCP. (Haute pour Mistral [6], OpenRouter [20] et Groq [25] ; moyenne pour Google [13] et Cloudflare [35], dont le streaming n'est pas confirmé.)
 2. **Préréglages par défaut : Groq et Mistral**, dans les données de `content/`. Google, NVIDIA, OpenRouter et Cloudflare y figurent en **exemples de configuration**, avec leurs avertissements. (Moyenne : absence de carte bancaire non confirmée par une source primaire pour Groq et Mistral.)
 3. **Infobulle par fournisseur.** Elle affiche le lieu d'hébergement, l'usage des données pour l'entraînement (oui, non, désactivable), les quotas renvoyés vers la console et la nature « offre d'essai » le cas échéant. Cela sert directement le signal de succès SM-3. (Haute sur les politiques de données [11][17][25][34] ; moyenne pour Mistral [3], lu à travers un résumé.)
 4. **Aucun quota fixé dans la spec.** Un refus pour débit dépassé (erreur 429) devient un événement tracé et expliqué, jamais un plantage (NFR-8). (Haute.)
@@ -152,7 +152,7 @@ Notes de 1 à 3. Une absence de preuve vaut 1, et cette note est signalée (« n
 - **Modèles `:free` d'OpenRouter qui acceptent `tools`** : il suffit d'une commande locale sur `https://openrouter.ai/api/v1/models`, en filtrant `supported_parameters`.
 - **Streaming combiné à l'appel d'outils chez Groq et Cloudflare** : à confirmer par la vérification avant séance (recommandation 6).
 - **Hébergement UE de Mistral** : la page de confidentialité renvoie une erreur 404. Il faut chercher sa nouvelle adresse, ou poser la question au support.
-- **Portée de la clause EEE de Google** : aucune réponse officielle n'a été trouvée. Il faudrait un avis juridique Wavestone si les participants doivent utiliser leurs propres clés.
+- **Portée de la clause EEE de Google** : aucune réponse officielle n'a été trouvée. Il faudrait un avis juridique si les participants doivent utiliser leurs propres clés.
 - **Passage de NVIDIA des crédits à une limite de débit** : connu seulement par des sources secondaires. Le compte réel le montrera.
 
 ## Sources

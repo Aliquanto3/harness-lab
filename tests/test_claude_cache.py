@@ -20,11 +20,11 @@ from test_anthropic_messages import (
 )
 from test_cloud import _of, _turn
 
-from wavestack import config
-from wavestack.cloud import chat_fields
-from wavestack.context.render import render_chat_body
-from wavestack.context.segments import Part, SegmentKind
-from wavestack.models.cloud_base import (
+from harness_lab import config
+from harness_lab.cloud import chat_fields
+from harness_lab.context.render import render_chat_body
+from harness_lab.context.segments import Part, SegmentKind
+from harness_lab.models.cloud_base import (
     CACHE_WRITE_1H_FACTOR,
     cache_savings,
     call_cost,
@@ -32,8 +32,8 @@ from wavestack.models.cloud_base import (
     session_cap_error,
     write_1h_price,
 )
-from wavestack.session.app_session import SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace.journal import get_journal
 
 FIVE = {"type": "ephemeral"}
 HOUR = {"type": "ephemeral", "ttl": "1h"}

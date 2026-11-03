@@ -40,7 +40,7 @@ deferred:
 
 **Always:**
 - Textes en français ; commandes en PowerShell (Windows 11, sans droits d'administrateur) ; conventions de `CLAUDE.md` (`uv`, jamais pip).
-- Chaque libellé d'interface cité (bouton, menu, carte, étape, message) est relu dans le code **au moment de l'implémentation**, après les stories 23 à 27 et 29 à 34 (recherche dans `src/wavestack/web/static/app.js`, `index.html`, `content/**/*.yaml`, `src/wavestack/**/*.py`). Aucun libellé n'est recopié de mémoire ni tiré de cette spec sans vérification : les stories de la nuit renomment et déplacent des éléments (sélecteur de modèles, volets numérotés, onglets, nouveaux écrans).
+- Chaque libellé d'interface cité (bouton, menu, carte, étape, message) est relu dans le code **au moment de l'implémentation**, après les stories 23 à 27 et 29 à 34 (recherche dans `src/harness_lab/web/static/app.js`, `index.html`, `content/**/*.yaml`, `src/harness_lab/**/*.py`). Aucun libellé n'est recopié de mémoire ni tiré de cette spec sans vérification : les stories de la nuit renomment et déplacent des éléments (sélecteur de modèles, volets numérotés, onglets, nouveaux écrans).
 - Le mécanisme d'enregistrement du cahier est conservé tel quel : `db` de l'artefact (`window.claude.use("db")`, collection de résultats), repli dans le navigateur (`localStorage`), compte rendu à copier, filtres et compteurs. La page reste autonome : un seul fichier HTML, sans script externe (la feuille Google Fonts actuelle peut rester).
 - Ne rien affirmer de faux sur le comportement livré par les stories 22 à 34 : quand une attente d'un test existant a changé (par exemple C3, dont les en-têtes sont visibles depuis la story 23), l'attente est corrigée sans ajouter de test sur la nouvelle fonctionnalité.
 - Le guide et le cahier disent la même chose : mêmes gestes, mêmes commandes, mêmes critères.
@@ -86,9 +86,9 @@ deferred:
   - `app.js` l.1209 : « · brique éteinte » sur la carte MCP.
   - `app.js` l.2098-2100 : options du sélecteur, dont « Autre fichier ou clé API… ».
   - `app.js` l.2266 : « Modèle : … ».
-- `src/wavestack/session/app_session.py:4465-4495` -- « Réinitialiser » (`reset`) ramène au LLM nu, sans scénario, et restaure la mémoire de démonstration. Un scénario marqué `restore_memory` la restaure aussi (`content/scenarios.yaml`, `global_memory` l.111) : une mémoire remplie à la main est donc écrasée par le lancement du scénario « Mémoire globale ».
-- `src/wavestack/memory.py:26-27` -- `MAX_ENTRIES = 20`, `MAX_CHARS = 300`. `memory.json` est une liste JSON de `{id, text, created_at, source}`, chaque texte sur une ligne. Le test du dépôt : `tests/test_global_memory.py:559`.
-- `src/wavestack/config.py:688-699` -- `cloud_key` : `api_keys.json` d'abord, puis la variable `key_env` (`GROQ_API_KEY`, `MISTRAL_API_KEY`). Une variable vide compte comme absente. L'interface n'a aucun bouton pour supprimer une clé.
+- `src/harness_lab/session/app_session.py:4465-4495` -- « Réinitialiser » (`reset`) ramène au LLM nu, sans scénario, et restaure la mémoire de démonstration. Un scénario marqué `restore_memory` la restaure aussi (`content/scenarios.yaml`, `global_memory` l.111) : une mémoire remplie à la main est donc écrasée par le lancement du scénario « Mémoire globale ».
+- `src/harness_lab/memory.py:26-27` -- `MAX_ENTRIES = 20`, `MAX_CHARS = 300`. `memory.json` est une liste JSON de `{id, text, created_at, source}`, chaque texte sur une ligne. Le test du dépôt : `tests/test_global_memory.py:559`.
+- `src/harness_lab/config.py:688-699` -- `cloud_key` : `api_keys.json` d'abord, puis la variable `key_env` (`GROQ_API_KEY`, `MISTRAL_API_KEY`). Une variable vide compte comme absente. L'interface n'a aucun bouton pour supprimer une clé.
 - `content/scenarios.yaml:300-312` -- `data_flows` : briques `short_memory`, `system_prompt` et `tools` ; `mcp_lazy: true` avec MCP éteint (la cause de la confusion X1, traitée par la story 22).
 - Specs de la nuit, stories 22 à 27 et 29 à 34, dans `stories/*.md` : sections « À vérifier sur PC » et « Auto Run Result » pour savoir quels libellés ont changé. La story 22 (faite) a changé le tiroir de la mémoire, les sous-options grisées, les onglets « Agent principal » / « Sous-agent », « Tour N » après « Réinitialiser » et « Annuler » du formulaire forcé.
 - Faits vérifiés le 2026-09-28 pour llama.cpp :
@@ -153,7 +153,7 @@ deferred:
   - `[high]` → regroupé (nouveau terminal sans `$gk`, edge).
   - `[high]` → regroupé (Windows Terminal fermé, edge).
   - `[medium]` `[patch]` (edge) garde de lancement qui imprime False sans arrêter — arrêt explicite.
-  - `[maybe-false]` `[patch]` (edge « claim ») copie de C4 sondée au lancement : la sonde interrompue n'est jamais testée — copie créée pendant que WaveStack tourne, choisie à chaud.
+  - `[maybe-false]` `[patch]` (edge « claim ») copie de C4 sondée au lancement : la sonde interrompue n'est jamais testée — copie créée pendant que HarnessLab tourne, choisie à chaud.
   - `[maybe-false]` `[patch]` (edge « deletion ») porte « la fusion attend le lot H » retirée — état du lot H rétabli.
 
 ## Design Notes
@@ -169,7 +169,7 @@ $zip = "$env:TEMP\$($asset.name)"; $dest = "$env:LOCALAPPDATA\llama.cpp\$($rel.t
 Invoke-WebRequest -UseBasicParsing $asset.browser_download_url -OutFile $zip
 Expand-Archive $zip -DestinationPath $dest -Force; Get-ChildItem $dest -Recurse | Unblock-File
 $llama = "$dest\llama-server.exe"; & $llama --version
-& $llama -m "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096
+& $llama -m "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096
 ```
 
 Dans un nouveau terminal, sans rien retélécharger :
@@ -183,9 +183,9 @@ Repli si l'API est bloquée : `$tag = "b11239"`, puis l'URL `https://github.com/
 **Gestes à réécrire.** Les libellés ci-dessous sont à revérifier dans le code.
 - **M1, « Réinitialiser »** : cliquer « ⟲ Réinitialiser » dans la barre haute. On revient au LLM nu, sans scénario, et la mémoire de démonstration est restaurée. Pour le vérifier, ouvrir « Modifier la mémoire » sur la carte Mémoire globale : les entrées de démonstration sont revenues, et Orchestration repart à « Tour 1 ».
 - **D11, mémoire pleine** :
-  1. WaveStack arrêté, sauvegarder `memory.json`.
+  1. HarnessLab arrêté, sauvegarder `memory.json`.
   2. Écrire, avec un script PowerShell fourni, 20 entrées de 300 caractères au format du Code Map.
-  3. Relancer WaveStack. Ne pas lancer le scénario « Mémoire globale » (il restaure la démonstration) : allumer la brique à la main dans le Panneau des briques.
+  3. Relancer HarnessLab. Ne pas lancer le scénario « Mémoire globale » (il restaure la démonstration) : allumer la brique à la main dans le Panneau des briques.
   4. Lire la jauge de la barre haute, puis restaurer la sauvegarde.
 - **M3** : dire où se trouve chaque élément. L'interrupteur Reranking est dans la carte RAG, la case « Recherche RAG » et l'étape « Reranking » sont dans Orchestration, l'index est dans le Schéma.
 - **M6** : le formulaire forcé « Déléguer au sous-agent » (et son « Annuler »), puis les onglets du Contexte LLM.
@@ -237,7 +237,7 @@ Repli si l'API est bloquée : `$tag = "b11239"`, puis l'URL `https://github.com/
   - **Critère** : la version s'affiche. Sinon, le message exact est relevé et C9 et C10 passent à « non fait (poste) ».
   - **Moyen** : à la main.
 - **Lancement avec -c 4096**
-  - **Geste** : lancer la commande de C10, WaveStack arrêté et le 2B non chargé ailleurs, puis lancer WaveStack.
+  - **Geste** : lancer la commande de C10, HarnessLab arrêté et le 2B non chargé ailleurs, puis lancer HarnessLab.
   - **Attendu** : « Local · llama-server » au diagnostic, sans avertissement de contexte.
   - **Critère** : RSS de `llama-server` (commande `PEAK_CMD`) bien sous 5 137 Mo.
   - **Moyen** : script AppSession ou à la main.
@@ -247,12 +247,12 @@ Repli si l'API est bloquée : `$tag = "b11239"`, puis l'URL `https://github.com/
   - **Critère** : chaque test reçoit un statut OK ou KO, pas « non fait » pour cause de consigne.
   - **Moyen** : à la main (œil humain).
 - **Vider les clés (Z2)**
-  - **Geste** : suivre Z2 dans un nouveau terminal, puis lancer `uv run wavestack` et ouvrir le diagnostic.
+  - **Geste** : suivre Z2 dans un nouveau terminal, puis lancer `uv run harness-lab` et ouvrir le diagnostic.
   - **Attendu** : aucune ligne « Clé fournie par la variable… » ni clé enregistrée ; le diagnostic demande de choisir un modèle servi.
   - **Critère** : les lignes Groq et Mistral du diagnostic indiquent qu'aucune clé n'est fournie (libellé exact relevé). Après « Défaire », les clés reviennent.
   - **Moyen** : à la main.
 - **Mémoire pleine (D11)**
-  - **Geste** : lancer le script D11, relancer WaveStack, allumer « Mémoire globale » à la main, puis lire la jauge.
+  - **Geste** : lancer le script D11, relancer HarnessLab, allumer « Mémoire globale » à la main, puis lire la jauge.
   - **Attendu** : 20 entrées dans le tiroir ; la jauge compte environ 1 550 tokens de mémoire.
   - **Critère** : la jauge reste sous la fenêtre utilisable (sans débordement). `memory.json` est restauré ensuite.
   - **Moyen** : script AppSession pour la jauge, à la main pour l'affichage.

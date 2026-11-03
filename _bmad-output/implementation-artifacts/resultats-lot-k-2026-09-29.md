@@ -5,7 +5,7 @@ seul, 16 Go. Tête testée : `1eae76c` (`origin/claude/lot-k-recette-pc`, tête 
 Consigné au fil de l'eau par Claude Code ; aucun fichier du dépôt modifié (hors ce fichier,
 non commité). Prompt suivi : `prompt-recette-lot-k-2026-09-29.md`.
 
-Préparation : l'instance WaveStack de test laissée par la séance du matin (run6, `launch.py`,
+Préparation : l'instance HarnessLab de test laissée par la séance du matin (run6, `launch.py`,
 dossier jetable) a été arrêtée pour libérer le port 8420 et le venv. Dossier réel avant la
 séance : `settings.json` 9 272 octets, empreinte `FA634B52…` (inchangée depuis le matin).
 Processus au début : Edge ouvert (23 processus), Outlook et Teams fermés, Ollama lancé.
@@ -19,7 +19,7 @@ Processus au début : Edge ouvert (23 processus), Outlook et Teams fermés, Olla
 | lint | `uv run ruff check .` | propre | « All checks passed! » | OK | ruff |
 | format | `uv run ruff format --check .` | propre | « 148 files already formatted » | OK | ruff |
 | pytest | `uv run pytest -q` (16:17 à 16:26) | vert | **1 253 passed, 3 skipped, 7 deselected in 529.54s**, code 0 | OK | pytest |
-| `fits` exact | `WAVESTACK_TEST_GGUF` = 2B ; `uv run pytest -s -rA tests/test_program.py -k fits` | réussi, marges positives | **1 passed** en 19 s. Plus petite marge d'aperçu : **`mcp_full` p1, 3 204 / 3 584, marge 380** (328 après son résultat de 52). Une fois l'historique simulé et la place du résultat retirés : `network_tools` p2 388 (2 553 − 1 765 − 400), `compression` p1 465 (2 470 − 2 005), `mcp_lazy` p2 630, `compression` p2 685 ; `subagent` p2 1 150, p3 et p4 ≈ 1 686 (historique d'un seul échange, voir point 3) ; `iam` et `sovereignty` comptés sans historique (1 322 et 1 707) | OK | pytest |
+| `fits` exact | `HARNESS_LAB_TEST_GGUF` = 2B ; `uv run pytest -s -rA tests/test_program.py -k fits` | réussi, marges positives | **1 passed** en 19 s. Plus petite marge d'aperçu : **`mcp_full` p1, 3 204 / 3 584, marge 380** (328 après son résultat de 52). Une fois l'historique simulé et la place du résultat retirés : `network_tools` p2 388 (2 553 − 1 765 − 400), `compression` p1 465 (2 470 − 2 005), `mcp_lazy` p2 630, `compression` p2 685 ; `subagent` p2 1 150, p3 et p4 ≈ 1 686 (historique d'un seul échange, voir point 3) ; `iam` et `sovereignty` comptés sans historique (1 322 et 1 707) | OK | pytest |
 | E2E | `PYTHONUTF8=1 uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` (16:27 à 16:36) | 0 FAIL, `[linked_view]` aux quatre largeurs | **654 réussies, 0 en échec**, code 0. `[linked_view]` : « barre sur une ligne, « Réinitialiser » entier, légende de la jauge dégagée, « · lié » entier sur la puce (10 px de marge) » **PASS à 1 280, 1 366, 1 440, 1 600, projection et normal**. 5 `harness_error` voulus (429, 500, flux cassé, 401, embedding). Console : 2 × `ERR_FAILED`, 1 × `ERR_CONNECTION_RESET` et **1 × `ERR_CONNECTION_REFUSED`** (une de plus que les 3 notées sur le poste de développement ; aucune vérification ne la juge, réseau coupé du parcours) | OK | E2E |
 | arbre | `git restore tools/e2e/screenshots` | arbre propre | captures restaurées ; seul ce fichier de résultats est nouveau | OK | PowerShell |
 
@@ -28,7 +28,7 @@ Processus au début : Edge ouvert (23 processus), Outlook et Teams fermés, Olla
 `<scratchpad>\wsdata` (scratchpad de cette séance, hors dépôt) : copie de `settings.json`,
 `api_keys.json`, `memory.json`, `audit.log` du dossier réel ; `models` = vrai dossier avec des
 **liens physiques** (`mklink /H`) vers le 2B, le 4B, l'embedding et le reranker. Tous les
-lancements passent par `WAVESTACK_DATA_DIR` vers ce dossier (`launch.py` et `ws.py` de la séance
+lancements passent par `HARNESS_LAB_DATA_DIR` vers ce dossier (`launch.py` et `ws.py` de la séance
 du matin, copiés). Outils de la séance : `repath.py` (chemins et empreinte), `pw_k.py`
 (Playwright, points 2, 5 et 6).
 
@@ -47,7 +47,7 @@ date des liens = celles des entrées. Empreinte du `settings.json` jetable avant
 | 1 | empreinte du `settings.json` jetable après lancement, chargement, lectures du panneau, choix du scénario « Outils natifs » et trois tours | inchangée | `10C7B88A…`, 9 662 octets : **identique** ; l'entrée du 2B garde 49 152 dans le fichier | OK | script |
 | 1 | mémoire, 2B, scénario « Skills », même conversation, un tour après chaque réglage ; Edge ouvert (23 processus, 1 450 Mo), **Outlook et Teams fermés** (Teams, ouvert en début de séance, fermé par Anaël à 17:02) ; `mem.py` (RSS et mémoire privée du processus) | 4 096 → 8 192 : ≈ + 48 Mio | t5 à 4 096 : RSS 2 062, privé 2 422 Mo ; t6 à 8 192 (rechargement 3,0 s, conversation gardée) : 2 135 / 2 494 → **+73 Mo RSS, +72 Mo privé** ; t7 à 8 192 : 2 138 / 2 497 ; t8 revenu à 4 096 : 2 036 / 2 424 (−102 / −73) ; t9 à 8 192 : 2 094 / 2 496 (**+58 / +72**). La mémoire privée monte de **72 Mo** à chaque passage (trois mesures concordantes) pour **48 Mio annoncés** : 1,5 fois l'annonce, contre 4 fois avant le lot (ce matin : +61 Mo privé pour 192 annoncés). L'écart restant (≈ 24 Mo) croît avec la fenêtre sans être du cache d'attention (tampons de calcul de llama.cpp, probablement) | OK (ordre de grandeur) ; écart de 1,5 noté | script |
 | 1 | `settings.json` jetable après ces réglages | seuls les réglages posés le changent | 9 704 octets, `A9A02302…` : clé `context` `{'window': 8192}` ajoutée ; entrées `probed_models` inchangées (2B **49 152**, 4B **131 072** dans le fichier) | OK | script |
-| 1 | WaveStack arrêté, fenêtre remise à 4 096 ; `config.save_setting('memory', {'budget_mode': 'fixed', 'budget_mb': 6144})` sur le jetable ; relance (run2, 17:07) | « valeur fixe », 6 144 Mo | « RAM du poste : 16 064 Mo, dont 7 355 Mo disponibles au lancement. Budget mémoire de WaveStack : **6 144 Mo (valeur fixe [memory] budget_mb de 6 144 Mo (budget_mode = « fixed »))**. » | OK | script |
+| 1 | HarnessLab arrêté, fenêtre remise à 4 096 ; `config.save_setting('memory', {'budget_mode': 'fixed', 'budget_mb': 6144})` sur le jetable ; relance (run2, 17:07) | « valeur fixe », 6 144 Mo | « RAM du poste : 16 064 Mo, dont 7 355 Mo disponibles au lancement. Budget mémoire de HarnessLab : **6 144 Mo (valeur fixe [memory] budget_mb de 6 144 Mo (budget_mode = « fixed »))**. » | OK | script |
 | 1 | `select_model` du 4B (7,8 s) ; panneau « Fenêtre ▾ » | 16 384 tient | 4 096 « **128 Mo** », 8 192 « **256 Mo** », 16 384 « **512 Mo** » (32 768 octets par token), **tous `fits` true** (le matin : 512 Mo / 1,0 Go / 2,0 Go, 16 384 refusé). `settings.json` : seul `selected_model` change (4B choisi), sondes inchangées | OK | script |
 | 1 | 4B, un tour à 4 096 (« Bonjour. ») ; `context_window` 16 384 ; un tour (« Merci. ») | accepté, rechargement ; hausse ≈ 384 Mio (± 30 %) | **accepté** : « Fenêtre de contexte : 16 384 tokens (conversation gardée). », rechargement **5,4 s**. Mémoire : 4 096 → RSS 4 317, privé 3 330 Mo ; 16 384 → RSS 4 708, privé 3 821 Mo : **+391 Mo RSS (+2 %)**, **+491 Mo privé (+28 %)** pour **384 Mio annoncés** : dans ± 30 % pour les deux | OK | script |
 
@@ -114,7 +114,7 @@ prévu (73 à 106 px coupés) : le geste demande un tour avec appel de la Calcul
 | 3b | « Vider la conversation », prompt 2 (t11) | idem | 1 appel `mslearn__microsoft_docs_search`, 1 153 / 5 222 tokens ; jauge 2 367 / 3 584, **aucun `context_overflow`** (le matin : 3 967 / 3 584) ; mais réponse coupée par la réserve (**512 tokens, `stop_reason` length, tour `limit`**) avant tout lien : **0 lien** (longue explication de PIM, exemple inventé d'« étudiant ») ; 142 s | **KO** (liens) | script |
 | 3b | « Métier Souveraineté », prompt 1 (t12) | appel de `datagouv__search_datasets`, requête vers mcp.data.gouv.fr | `load_tool_doc(datagouv__search_datasets)` trigger model, puis **aucun appel** ni requête sortante pendant le tour ; réponse de méthode (« Commence par l'outil `datagouv__search_datasets` » suivi d'une longue liste de mots-clés) ; `completed`, 88 s | secours nécessaire (suite après la pause) | script |
 
-**Pause de 17:22 à 17:44** (appel Teams d'Anaël) : aucun tour en cours, WaveStack (run2) resté
+**Pause de 17:22 à 17:44** (appel Teams d'Anaël) : aucun tour en cours, HarnessLab (run2) resté
 lancé et inactif. Reprise Teams et Outlook refermés (Edge : 22 processus, 1 346 Mo ; 5 249 Mo
 libres).
 
@@ -130,7 +130,7 @@ libres).
 
 | Point | Geste | Attendu | Obtenu | Statut | Moyen |
 |---|---|---|---|---|---|
-| 4 | 2B intégré, `context_window` 8 192 (enregistré : `settings.json` jetable `{'window': 8192}`) ; WaveStack arrêté ; `llama-server.exe` b11239 `-m <jetable>\models\Qwen3.5-2B-Q4_K_M.gguf --port 8080 -np 1 -c 4096` (« listening » en 3 s, `n_slots = 1, n_ctx_slot = 4096`) ; relance (run3), choix de « Local · llama-server · Qwen3.5-2B-Q4_K_M.gguf · 2B » ; relance (run4) | llama-server repris, 8 192 configuré, 4 096 effectif | run4 : modèle actif `kind` server repris ; `configured` **8 192**, `window` **4 096**, `window_source` server, `bound_fr` « bornée à 4 096 par llama-server (-c) » | OK | script |
+| 4 | 2B intégré, `context_window` 8 192 (enregistré : `settings.json` jetable `{'window': 8192}`) ; HarnessLab arrêté ; `llama-server.exe` b11239 `-m <jetable>\models\Qwen3.5-2B-Q4_K_M.gguf --port 8080 -np 1 -c 4096` (« listening » en 3 s, `n_slots = 1, n_ctx_slot = 4096`) ; relance (run3), choix de « Local · llama-server · Qwen3.5-2B-Q4_K_M.gguf · 2B » ; relance (run4) | llama-server repris, 8 192 configuré, 4 096 effectif | run4 : modèle actif `kind` server repris ; `configured` **8 192**, `window` **4 096**, `window_source` server, `bound_fr` « bornée à 4 096 par llama-server (-c) » | OK | script |
 | 4 | bouton et infobulle au premier affichage (Edge 154, 1 600 × 1 000) | « Fenêtre 4 096 ▾ », infobulle « …, 8 192 choisi. » | bouton « **Fenêtre 4 096 ▾** » ; infobulle « **Fenêtre de contexte : 4 096 tokens, bornée à 4 096 par llama-server (-c), 8 192 choisi.** » (capture `run4\edge-bouton-fenetre.png`) | OK | Playwright (Edge) |
 | 4 | `/api/diagnostic` et page `/diagnostic` (Edge) | conseil « relancez-le avec `-np 1 -c 8192` » | API et page : « Modèle retenu : Qwen3.5-2B-Q4_K_M.gguf, servi par llama-server (http://127.0.0.1:8080) (choisi lors d'un lancement précédent). **llama-server a été lancé avec un contexte de 4 096 tokens par emplacement, sous la fenêtre choisie de 8 192 : la fenêtre effective reste de 4 096 tokens. Arrêtez-le et relancez-le avec `-np 1 -c 8192`.** » (ligne `model` en `warn` ; le conseil paraît déjà au choix du modèle en run3, « changé sans relance ») (capture `run4\edge-diagnostic.png`) | OK | script, Playwright (Edge) |
 | 4 | llama-server arrêté ; 2B intégré choisi ; `context_window` 4 096 | retour à l'état de départ | 2B intégré actif, 4 096 appliqué (rechargement 4,2 s), `window_source` configured ; plus aucun processus `llama-server` | OK | script |
@@ -185,14 +185,14 @@ Tests automatiques : ruff propre, pytest 1 253 réussis, `fits` réussi (marge `
 
 ## Nettoyage
 
-Fait : llama-server arrêté ; 2B intégré et fenêtre 4 096 remis dans WaveStack (run4) ; captures
+Fait : llama-server arrêté ; 2B intégré et fenêtre 4 096 remis dans HarnessLab (run4) ; captures
 E2E restaurées ; dossier réel vérifié à 17:59 (`settings.json` 9 272 octets `FA634B52…`,
-`api_keys.json`, `memory.json`, `audit.log` inchangés). Laissé en place : WaveStack run4 lancé
+`api_keys.json`, `memory.json`, `audit.log` inchangés). Laissé en place : HarnessLab run4 lancé
 sur le dossier jetable (budget fixe 6 144 Mo dans le jetable) pour vos gestes ;
 `<scratchpad>\wsdata` (copie et liens physiques : les supprimer n'efface pas les originaux) ;
-`%LOCALAPPDATA%\llama.cpp\b11256-lotk` (installation du point 8, sans effet sur WaveStack, à
+`%LOCALAPPDATA%\llama.cpp\b11256-lotk` (installation du point 8, sans effet sur HarnessLab, à
 supprimer à volonté). Dépôt en tête détachée sur `1eae76c` ; `git status` : seul ce fichier est
-nouveau. Pour arrêter WaveStack :
+nouveau. Pour arrêter HarnessLab :
 `Get-CimInstance Win32_Process -Filter "Name like 'python%'" | Where-Object CommandLine -match "launch.py" | ForEach-Object { Stop-Process -Id $_.ProcessId }`.
 ﻿﻿
 ## Contre-vérification indépendante (autre session Claude Code, 2026-09-29, 18:05 à 18:30)

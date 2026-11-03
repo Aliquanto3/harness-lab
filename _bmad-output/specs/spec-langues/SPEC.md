@@ -9,11 +9,11 @@ sources: []
 
 > **Canonical contract.** This SPEC and the files in `companions:` are the complete, preservation-validated contract for what to build, test, and validate. Source documents listed in frontmatter are for traceability — consult them only if you need narrative rationale or prose color this contract intentionally omits.
 
-# Langues : WaveStack en français, anglais et allemand (stories 2 à 5)
+# Langues : HarnessLab en français, anglais et allemand (stories 2 à 5)
 
 ## Why
 
-Anaël veut WaveStack en français, en anglais et en allemand (demande du 2026-09-29), pour former des publics non francophones avec le même démonstrateur. La story 1, fusionnée par la PR #7, pose le socle et traduit les défauts envoyés au LLM :
+Anaël veut HarnessLab en français, en anglais et en allemand (demande du 2026-09-29), pour former des publics non francophones avec le même démonstrateur. La story 1, fusionnée par la PR #7, pose le socle et traduit les défauts envoyés au LLM :
 - le réglage `language` et le sélecteur ;
 - la surcouche `content/i18n/{en,de}/` et la résolution `config.content_file`.
 

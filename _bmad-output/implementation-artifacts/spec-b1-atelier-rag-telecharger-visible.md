@@ -46,9 +46,9 @@ context:
 
 ## Code Map
 
-- `src/wavestack/rag/lab.py` -- `Catalog.payload` (~l.466) : ajouter `"download_count"` à chaque étape (options du payload dont `download` n'est pas `None`).
-- `src/wavestack/web/static/rag.css` -- règles ~l.347-350 (`.rag-seq-step:not(.is-selected) .rag-chain-download:not(.is-active)`, notice) à retirer ; commentaire ~l.323 à corriger ; styles de la mention (`.rag-arch-download`, bouton discret sous le sous-titre, grille de la tuile `grid-column: 2`) et de la phrase du groupe (`.rag-arch-download-hint`), sans opacité (balayage AA).
-- `src/wavestack/web/static/rag.js` -- `renderArchitecture` (~l.758) : pour une tuile dont `component.stage` a `download_count > 0`, `button.rag-arch-download[data-stage]` ; pour un composant du groupe non utilisé dont l'étape est `movable` avec `download_count > 0`, `button.rag-arch-download-hint`. Clic : `setMode("compose")`, puis `select(clé de l'étape propre : catalog.steps.find(s => s.own && s.stage === kind).key)`, `scrollIntoView` + focus sur `.rag-download` ; hint : palette `#rag-palette-a select` à la valeur du kind, focus sur `.rag-palette-add`. `setMode` met `current` à null : sélectionner après.
+- `src/harness_lab/rag/lab.py` -- `Catalog.payload` (~l.466) : ajouter `"download_count"` à chaque étape (options du payload dont `download` n'est pas `None`).
+- `src/harness_lab/web/static/rag.css` -- règles ~l.347-350 (`.rag-seq-step:not(.is-selected) .rag-chain-download:not(.is-active)`, notice) à retirer ; commentaire ~l.323 à corriger ; styles de la mention (`.rag-arch-download`, bouton discret sous le sous-titre, grille de la tuile `grid-column: 2`) et de la phrase du groupe (`.rag-arch-download-hint`), sans opacité (balayage AA).
+- `src/harness_lab/web/static/rag.js` -- `renderArchitecture` (~l.758) : pour une tuile dont `component.stage` a `download_count > 0`, `button.rag-arch-download[data-stage]` ; pour un composant du groupe non utilisé dont l'étape est `movable` avec `download_count > 0`, `button.rag-arch-download-hint`. Clic : `setMode("compose")`, puis `select(clé de l'étape propre : catalog.steps.find(s => s.own && s.stage === kind).key)`, `scrollIntoView` + focus sur `.rag-download` ; hint : palette `#rag-palette-a select` à la valeur du kind, focus sur `.rag-palette-add`. `setMode` met `current` à null : sélectionner après.
 - `content/ui.yaml`, `content/i18n/{en,de}/ui.yaml` -- section `rag` : `arch_downloads` (one/other), `arch_downloads_title`, `arch_downloads_add` (one/other ; `{component}`, `{count}`, `{stage}`).
 - `README.md` l.67-71, `docs/installation.md` l.183-191, `docs/guide.md` l.358-367 -- emplacement exact : page `/rag`, mention sur la tuile, mode Composer, ligne de l'étape.
 - `tests/test_rag_lab_download.py` -- `download_count` du catalogue.
@@ -57,7 +57,7 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/rag/lab.py` -- `download_count` par étape -- AD-1.
+- [x] `src/harness_lab/rag/lab.py` -- `download_count` par étape -- AD-1.
 - [x] `content/ui.yaml` ×3 -- textes de la mention et de la phrase.
 - [x] `rag.css`, `rag.js` -- lignes toujours visibles ; mention et phrase, clic.
 - [x] `tests/test_rag_lab_download.py` -- compte du catalogue.
@@ -93,7 +93,7 @@ Passe 1, 2026-10-05.
 | 6 | blind, verif | tests manquants : clic Reranker, repli du focus, recompte après téléchargement, en/de rendus | low | recompte couvert en pytest ; pluriels en/de par `test_ui_texts` ; repli : voir 13 | rejeté (sauf 13) |
 | 7 | blind, edge | E2E : tuile jamais révélée → délai Playwright au lieu d'un échec clair | low | boucle `range(12)` sans contrôle | patch (`r.check` puis retour) |
 | 8 | blind | `SPEC.md` du lot 5 : « pas de téléchargement depuis Dérouler » | false | la mention ne télécharge pas : elle passe en Composer | rejeté |
-| 9 | blind | `wavestack.toml`, `messages.yaml` ne parlent pas de la tuile | low | ils disent l'endroit exact du bouton, toujours vrai | rejeté |
+| 9 | blind | `harness-lab.toml`, `messages.yaml` ne parlent pas de la tuile | low | ils disent l'endroit exact du bouton, toujours vrai | rejeté |
 | 10 | blind | README : cas sans Reranking absent, « N » pour deux nombres | low | paragraphe | patch |
 | 11 | blind | phrase maladroite de `vues-atelier-rag.md` §7 | low | « lignes » répété | patch |
 | 12 | edge | étape à une seule option, boutons désactivés : rien à focaliser | low | Reranking sans reranker déclaré n'a pas de `select` | patch (repli sur la tête de ligne) |

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from wavestack.models.engine import CancelToken, LlamaCppEngine, Sampling
+from harness_lab.models.engine import CancelToken, LlamaCppEngine, Sampling
 
 TINY = Path(__file__).parent / "fixtures" / "tiny-llama.gguf"
 
@@ -54,7 +54,7 @@ def test_fragments_carry_the_most_probable_tokens(engine):
     """Story 5 of 2026-09-30: with the candidates, each token's `top` (the session's memory
     of the live distribution): `{p, texts, tail}`, the most probable first, `tail` the rest;
     the token that stops the generation carries it too."""
-    from wavestack.models.candidates import TOP
+    from harness_lab.models.candidates import TOP
 
     width = min(TOP, engine.dimensions()["vocab_size"])
     ids = engine.tokenize("<|im_start|>user\nBonjour<|im_end|>\n")

@@ -1,6 +1,6 @@
 # Clauses de sécurité des contrats de prestation chez Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : ce modèle de clauses ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : ce modèle de clauses ne décrit aucune entreprise réelle. -->
 
 Ce modèle complète la politique de sécurité des prestataires : il liste les clauses que la cellule fournisseurs insère dans tout contrat de prestation, selon le niveau du prestataire.
 

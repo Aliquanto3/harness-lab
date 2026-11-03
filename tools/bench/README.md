@@ -22,11 +22,11 @@ uv run --with huggingface-hub --with fastembed python tools/bench/story12_bench.
 Options utiles :
 
 - `--json` : sortie complète en JSON, à joindre à la story 12 ;
-- `embed --models-dir D:\modeles` : dossier des modèles (par défaut `~/.cache/wavestack-bench`) ;
+- `embed --models-dir D:\modeles` : dossier des modèles (par défaut `~/.cache/harness-lab-bench`) ;
 - `embed --only granite107m_q8 bgererank_m3_q4km` : ne mesurer que certains candidats (un identifiant inconnu ou retiré est signalé, et le banc s'arrête) ;
 - `headroom --no-strace` : ne pas lancer `strace` (Linux).
 
-Le téléchargement passe par le proxy du poste et par le magasin de certificats du système, comme WaveStack. Si le proxy refuse `huggingface.co`, copiez les fichiers GGUF à la main dans `<models-dir>/<propriétaire>__<dépôt>/<fichier>` (le chemin exact est affiché pour chaque candidat), puis relancez sans `--download`.
+Le téléchargement passe par le proxy du poste et par le magasin de certificats du système, comme HarnessLab. Si le proxy refuse `huggingface.co`, copiez les fichiers GGUF à la main dans `<models-dir>/<propriétaire>__<dépôt>/<fichier>` (le chemin exact est affiché pour chaque candidat), puis relancez sans `--download`.
 
 ## Lire le résultat
 
@@ -37,9 +37,9 @@ Chaque mesure tourne dans un processus enfant neuf, pour un RSS propre. Ce proce
 **Headroom.** Deux variantes sont comparées :
 
 - **naïve** : aucune variable, compression ML laissée par défaut ;
-- **configurée** : les variables qu'utilisera WaveStack (`LITELLM_LOCAL_MODEL_COST_MAP`, `TIKTOKEN_CACHE_DIR` vers le cache fourni par litellm, `HEADROOM_OFFLINE`, `HEADROOM_BEACON=off`, `HEADROOM_UPDATE_CHECK=off`, `DO_NOT_TRACK`) et `kompress_model="disabled"`.
+- **configurée** : les variables qu'utilisera HarnessLab (`LITELLM_LOCAL_MODEL_COST_MAP`, `TIKTOKEN_CACHE_DIR` vers le cache fourni par litellm, `HEADROOM_OFFLINE`, `HEADROOM_BEACON=off`, `HEADROOM_UPDATE_CHECK=off`, `DO_NOT_TRACK`) et `kompress_model="disabled"`.
 
-Dans les deux variantes, Headroom compte ses tokens avec le même modèle que WaveStack, `gpt-4` (`COUNTING_MODEL`, table tiktoken `cl100k_base`, présente dans toutes les copies de litellm). Avec `gpt-4o`, il lui fallait `o200k_base`, absente du cache de litellm sur le PC cible : tiktoken tentait de la télécharger depuis `openaipublic.blob.core.windows.net`, et le verdict était « ÉCARTÉ » (lot F, 2026-09-27).
+Dans les deux variantes, Headroom compte ses tokens avec le même modèle que HarnessLab, `gpt-4` (`COUNTING_MODEL`, table tiktoken `cl100k_base`, présente dans toutes les copies de litellm). Avec `gpt-4o`, il lui fallait `o200k_base`, absente du cache de litellm sur le PC cible : tiktoken tentait de la télécharger depuis `openaipublic.blob.core.windows.net`, et le verdict était « ÉCARTÉ » (lot F, 2026-09-27).
 
 Le verdict « RETENU » exige cinq critères : aucune tentative réseau, pas de torch, RSS ajouté ≤ 300 Mo, licences compatibles, fonctionnement sans aucun réseau.
 
@@ -64,7 +64,7 @@ Ces seuils ont été fixés quand la mesure du RSS était fausse. Avec les pics 
 uv run python tools/bench/v2s6_decision_bench.py list   # candidats, commande de chacun, verdicts d'office
 ```
 
-Certains candidats sont servis hors de l'enfant de mesure, sur `/v1/systemone` : `tev1` par Ollama (story 8), `julia1` et `laya` par un llama-server portable (story 9). Pour `tev1`, Ollama 0.35 ou plus doit tourner, et le modèle doit être tiré une fois (`ollama pull tev1:0.8b`, ou `--download`) ; le banc le décharge à la fin. Le banc ne télécharge jamais le binaire de llama-server : décompresser une fois `llama-b11378-bin-win-cpu-x64.zip` (release `b11378` de ggml-org/llama.cpp) dans `%LOCALAPPDATA%\WaveStack\bench\llama-b11378\`, ou passer `--llama-server <chemin>` (ou `WAVESTACK_LLAMA_SERVER`). Le banc lance le serveur sur 127.0.0.1, le GGUF par chemin local, et l'arrête à la fin quoi qu'il arrive. La commande sort avec le code 2 quand le serveur ou le modèle manque, quand le serveur ne démarre pas, ou quand un modèle ou un serveur reste chargé après la mesure, ou que cela n'a pas pu être vérifié (`/api/ps` illisible, processus restants non relus).
+Certains candidats sont servis hors de l'enfant de mesure, sur `/v1/systemone` : `tev1` par Ollama (story 8), `julia1` et `laya` par un llama-server portable (story 9). Pour `tev1`, Ollama 0.35 ou plus doit tourner, et le modèle doit être tiré une fois (`ollama pull tev1:0.8b`, ou `--download`) ; le banc le décharge à la fin. Le banc ne télécharge jamais le binaire de llama-server : décompresser une fois `llama-b11378-bin-win-cpu-x64.zip` (release `b11378` de ggml-org/llama.cpp) dans `%LOCALAPPDATA%\HarnessLab\bench\llama-b11378\`, ou passer `--llama-server <chemin>` (ou `HARNESS_LAB_LLAMA_SERVER`). Le banc lance le serveur sur 127.0.0.1, le GGUF par chemin local, et l'arrête à la fin quoi qu'il arrive. La commande sort avec le code 2 quand le serveur ou le modèle manque, quand le serveur ne démarre pas, ou quand un modèle ou un serveur reste chargé après la mesure, ou que cela n'a pas pu être vérifié (`/api/ps` illisible, processus restants non relus).
 
 Les commandes exactes du relevé, le sens des critères et le tableau à remplir sont dans `_bmad-output/implementation-artifacts/rapport-test-prealable-modeles-de-decision.md`. L'option `--out` écrit le résultat en JSON UTF-8 : sous PowerShell 5.1, une redirection `>` l'écrirait en UTF-16.
 
@@ -77,7 +77,7 @@ Les commandes exactes du relevé, le sens des critères et le tableau à remplir
 
 ## Banc de la V1.2, story 2 : System One et fenêtre de 16 384 tokens
 
-`v12s2_system_one_bench.py` mesure, sur le corpus fictif Exemplia et le jeu de questions (450 items en fr, en, de), les candidats du filtre de passages et du contrôle d'ancrage (taux H7 d'affirmations non étayées acceptées), puis la mémoire de Qwen3.5-2B à 16 384 tokens. Six modèles en ligne par OpenRouter (`openrouter.ai` seul autorisé), six candidats locaux sans torch. Rapport : `_bmad-output/specs/spec-wavestack-v1-2-atelier-recherche-documentaire/rapport-banc-system-one.md`.
+`v12s2_system_one_bench.py` mesure, sur le corpus fictif Exemplia et le jeu de questions (450 items en fr, en, de), les candidats du filtre de passages et du contrôle d'ancrage (taux H7 d'affirmations non étayées acceptées), puis la mémoire de Qwen3.5-2B à 16 384 tokens. Six modèles en ligne par OpenRouter (`openrouter.ai` seul autorisé), six candidats locaux sans torch. Rapport : `_bmad-output/specs/spec-harness-lab-v1-2-atelier-recherche-documentaire/rapport-banc-system-one.md`.
 
 ```bash
 uv run python tools/bench/v12s2_system_one_bench.py list      # effectifs du jeu et candidats
@@ -97,13 +97,13 @@ uv run python tools/bench/v12s2_system_one_bench.py memory --confirm-idle --appe
 uv run python tools/bench/v12s2_system_one_bench.py dry-run
 ```
 
-À préparer : `OPENROUTER_API_KEY` (variable ou `HKCU\Environment`, jamais affichée ni écrite) avec du crédit ; GGUF Qwen3.5-2B (`Qwen3.5-2B-Q4_K_M.gguf`) et reranker de la brique dans le dossier des modèles de WaveStack ; snapshots ONNX `deberta_xsmall`, `mdeberta` et Strands Decider 2B (port ONNX q8 de hobson v19, ~1,8 Go), chacun à son commit épinglé, dans `~/.cache/wavestack-bench` (`--models-dir` pour un autre dossier ; un snapshot d'un autre commit est refusé). AnyJev s'installe depuis l'archive de son commit relu (construction pur Python) et lit le SLM par défaut, sans second modèle. Les limites quotidiennes du modèle `:free` sont à relire le jour du banc. Une clé refusée ou un crédit épuisé (HTTP 401, 402, 403) arrête tout le banc (code de sortie 3) sans marquer de modèle « refusé ».
+À préparer : `OPENROUTER_API_KEY` (variable ou `HKCU\Environment`, jamais affichée ni écrite) avec du crédit ; GGUF Qwen3.5-2B (`Qwen3.5-2B-Q4_K_M.gguf`) et reranker de la brique dans le dossier des modèles de HarnessLab ; snapshots ONNX `deberta_xsmall`, `mdeberta` et Strands Decider 2B (port ONNX q8 de hobson v19, ~1,8 Go), chacun à son commit épinglé, dans `~/.cache/harness-lab-bench` (`--models-dir` pour un autre dossier ; un snapshot d'un autre commit est refusé). AnyJev s'installe depuis l'archive de son commit relu (construction pur Python) et lit le SLM par défaut, sans second modèle. Les limites quotidiennes du modèle `:free` sont à relire le jour du banc. Une clé refusée ou un crédit épuisé (HTTP 401, 402, 403) arrête tout le banc (code de sortie 3) sans marquer de modèle « refusé ».
 
 Les cas enregistrés (`recorded/*.jsonl`, liste blanche de champs, sha256 de la requête, sans clé) sont à committer avec le rapport. `tests/fixtures/v12s2/` ne contient que de fausses réponses de test.
 
 ## Banc de la V1.2, story 21 : recherche visuelle sans OCR
 
-`v12s21_visual_search_bench.py` dit si un retriever visuel (ColPali, ColSmol ; ColQwen écarté faute de voie sans torch) tient dans le budget du CPU : pages du corpus Exemplia dessinées en images, indexées une à une, puis cherchées avec les questions préparées (MaxSim). Il mesure le pic de mémoire (budget 4 096 Mo), la latence par page et par requête, le rappel, les dépendances. Aucune dépendance n'est ajoutée au projet, torch n'est jamais installé. Rapport : `_bmad-output/specs/spec-wavestack-v1-2-atelier-recherche-documentaire/rapport-recherche-visuelle.md` (gabarit « pas encore mesuré » tant que rien n'est enregistré).
+`v12s21_visual_search_bench.py` dit si un retriever visuel (ColPali, ColSmol ; ColQwen écarté faute de voie sans torch) tient dans le budget du CPU : pages du corpus Exemplia dessinées en images, indexées une à une, puis cherchées avec les questions préparées (MaxSim). Il mesure le pic de mémoire (budget 4 096 Mo), la latence par page et par requête, le rappel, les dépendances. Aucune dépendance n'est ajoutée au projet, torch n'est jamais installé. Rapport : `_bmad-output/specs/spec-harness-lab-v1-2-atelier-recherche-documentaire/rapport-recherche-visuelle.md` (gabarit « pas encore mesuré » tant que rien n'est enregistré).
 
 ```bash
 uv run python tools/bench/v12s21_visual_search_bench.py list

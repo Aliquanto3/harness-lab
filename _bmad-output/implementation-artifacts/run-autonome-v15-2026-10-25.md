@@ -9,7 +9,7 @@ Lancé le 2026-10-25 à la demande d'Anaël, après le run V1.3, V1.4, V1.2 (arc
 | Dans le run | Epics V1.5 stories 1 à 6 | epic 15 dans `sprint-status.yaml` ; story 15.N = id N de `stories.yaml` |
 | Hors run | V1.5 incrément 2, V2 | incrément 2 revu après la recette de l'incrément 1 |
 
-Spec : `_bmad-output/specs/spec-wavestack-evaluer-l-agent/` (SPEC.md, contrat-des-cas.md, brownfield.md, vues.md, maquette), PR #134.
+Spec : `_bmad-output/specs/spec-harness-lab-evaluer-l-agent/` (SPEC.md, contrat-des-cas.md, brownfield.md, vues.md, maquette), PR #134.
 
 Au plus 3 stories en développement à la fois (3e créneau seulement pour une story sans fichier commun avec les deux autres ; décision d'Anaël du 2026-10-25)
 
@@ -29,14 +29,14 @@ Au plus 3 stories en développement à la fois (3e créneau seulement pour une s
 - `spec_checkpoint` (15.2, 15.3, 15.4) : `dev-story` écrit la spec de story et s'arrête ; `reviewer` la relit contre SPEC.md, maquette, vues.md et brownfield.md, tranche les points ouverts ; `dev-story` reprend. Chaque choix fait à la place d'Anaël : ligne `décision · à revoir`.
 - 15.2 : plafonds provisoires et liste de cas livrés ; la mesure sur le PC cible (3 exécutions par cas, max + 1) est une `attente humaine` d'Anaël qui ne bloque pas la fusion.
 - Local : contrôle rapide et tests ciblés seulement ; la CI de la PR (Windows, Ubuntu) sert de suite complète. Pas d'Ollama réel (Anaël lance un benchmark en parallèle) : tests et E2E sur les faux serveurs.
-- `gh run watch <id> --interval 60` ; worktrees `../wavestack-v15-s<n>`, branches `feat/v1-5-story-<n>-<slug>`, `git worktree prune` avant chaque lancement, suppression en fin de run.
+- `gh run watch <id> --interval 60` ; worktrees `../harness-lab-v15-s<n>`, branches `feat/v1-5-story-<n>-<slug>`, `git worktree prune` avant chaque lancement, suppression en fin de run.
 - Ce fichier et `sprint-status.yaml` vivent sur `chore/etat-run`, hors des PR de story.
 - Arrêt seulement pour une ressource ou une décision d'Anaël (modèle réel, PC cible) : notification, `attente humaine`, on avance ailleurs.
 - Fin de lot : PR de version 1.6.0, tag annoté, release GitHub.
 
 ## Contrats
 
-- 15.1 (214f9289) : `wavestack.agent_eval` — `cases.AgentCase` (champs de contrat-des-cas.md ; `system_prompt` interdit et `brick` obligatoire dans un cas fourni), `Provenance{source: fourni|séance|recette, date, model, turn_id, system_prompt_text, fixed_in}` (pas de champ `reference` : la recette d'origine va dans `fixed_in`), `Check` discriminé par `kind` (tool_called{tool, before?}, tool_not_called, argument_never{tool, argument, contains}, answer_contains{text}, hook_decided{hook, decision: block|ask_human}, subagent_called, turn_completed ; `model_calls_max` vient de `max_model_calls`, ajouté en dernier par verify). `RunStatus = passed|failed|not_run`, `NotRunReason = window|cancelled|budget`. `load_provided_cases(lang, known)` lit `content/agent_cases.yaml` (`cases: [...]`). `checks.verify(case, envelopes, lang) -> CaseVerdict{case_id, passed, checks: [CheckVerdict{kind, params, passed, reason_text, seq}], model_calls}` ; l'appelant filtre les enveloppes sur les tours du cas. `store` : `config.agent_cases_path()` = `data_dir()/agent_cases.json` `{version: 1, cases: [...]}` ; `read_session_cases`, `add_session_case(case, provided)`, `delete_session_case(id)`, `clear_session_cases()` ; id de séance `u` + 8 hex ; `SessionCasesUnreadable`.
+- 15.1 (214f9289) : `harness_lab.agent_eval` — `cases.AgentCase` (champs de contrat-des-cas.md ; `system_prompt` interdit et `brick` obligatoire dans un cas fourni), `Provenance{source: fourni|séance|recette, date, model, turn_id, system_prompt_text, fixed_in}` (pas de champ `reference` : la recette d'origine va dans `fixed_in`), `Check` discriminé par `kind` (tool_called{tool, before?}, tool_not_called, argument_never{tool, argument, contains}, answer_contains{text}, hook_decided{hook, decision: block|ask_human}, subagent_called, turn_completed ; `model_calls_max` vient de `max_model_calls`, ajouté en dernier par verify). `RunStatus = passed|failed|not_run`, `NotRunReason = window|cancelled|budget`. `load_provided_cases(lang, known)` lit `content/agent_cases.yaml` (`cases: [...]`). `checks.verify(case, envelopes, lang) -> CaseVerdict{case_id, passed, checks: [CheckVerdict{kind, params, passed, reason_text, seq}], model_calls}` ; l'appelant filtre les enveloppes sur les tours du cas. `store` : `config.agent_cases_path()` = `data_dir()/agent_cases.json` `{version: 1, cases: [...]}` ; `read_session_cases`, `add_session_case(case, provided)`, `delete_session_case(id)`, `clear_session_cases()` ; id de séance `u` + 8 hex ; `SessionCasesUnreadable`.
 - 15.6 (de484e94) : citation `[[g:clé]]` ou `[[g:clé|texte]]` (préfixe `g:` obligatoire, `[[page]]` = lien de wiki) ; `content/glossary.yaml` `terms: {clé: {term, definition}}` + surcouches en, de, 58 termes, clés en anglais ; test `tests/test_glossary.py::test_every_term_cited_by_a_content_text_exists_in_every_language`. Clés utiles au module 9 : agent_case, check, verdict, call_ceiling, budget_ceiling, pass_at_k, pass_hat_k, benchmark, regression, llm_judge, replay, witness_replay, determinism, journal, provenance, demo, harness.
 
 - 15.3 (spec 1c4d05fc) → 15.4 : fichiers propres à 15.3 (`web/agent_case_api.py`, `web/static/agent-case-form.js` et `.css`, clés `main.agent_case.*`, `agent_case.*`) ; 15.4 crée `web/agent_eval_api.py`, `agent-eval.js`, `main.agent_eval.*`. `agent-case-form.js` exporte `openCaseForm, closeCaseForm, canMakeCase, registerOpenView(fn(caseId)), onCaseSaved(fn)` ; `agent-eval.js` les importe (jamais l'inverse). Routes `/api/agent_eval/` : 15.3 `GET /draft`, `POST /verdict`, `POST /cases` ; 15.4 `GET /cases`, `DELETE /cases`, exécutions. 15.4 met `case_id` dans le payload `turn_started` des tours d'exécution, compare `case.window` au `configured` de `context_window_state`, produit les tours `verdict_turn_ids`. 15.4 ajoute l'étape E2E « Ouvrir Évaluer l'agent ». Insertion dans les fichiers partagés : app.py après `/api/intentions/compact`, app.js après l'import de panes.js, ui.yaml après `main.compare`, run_e2e.py en fin de liste ; index.html non touché.
@@ -54,10 +54,10 @@ Au plus 3 stories en développement à la fois (3e créneau seulement pour une s
 
 ## Reprise après /clear
 
-- Lire ce fichier en entier, puis `sprint-status.yaml` ; l'état réel prime : `gh pr list --state open`, `git -C ../wavestack-v15-s<n> log -3 --oneline` pour chaque story en cours.
+- Lire ce fichier en entier, puis `sprint-status.yaml` ; l'état réel prime : `gh pr list --state open`, `git -C ../harness-lab-v15-s<n> log -3 --oneline` pour chaque story en cours.
 - Une story dont le dev a commité sans rapport : relancer la chaîne à partir de `second-avis` sur son dernier commit.
 - E2E : `--only` prend les scénarios séparés par des espaces (`--only agent_eval agent_case`) ; avec une virgule, seul le diagnostic tourne et la commande sort en 0. `TEMP` et `TMP` en chemin long (`C:\Users\Utilisateur\AppData\Local\Temp`).
-- Fichiers temporaires des agents : chacun dans `C:\Users\Utilisateur\AppData\Local\Temp\wavestack-v15\s<story>` (le scratchpad de session a expiré).
+- Fichiers temporaires des agents : chacun dans `C:\Users\Utilisateur\AppData\Local\Temp\harness-lab-v15\s<story>` (le scratchpad de session a expiré).
 - Fin de run : `rapport-run-v1-5.md` (fusionné, bloqué, reporté, « à revoir », tests manuels), mémoire du projet, suppression des worktrees.
 
 ## Prochaines étapes (mise à jour du 2026-10-26 04:57 : run terminé)
@@ -68,10 +68,10 @@ Run terminé : epic 15 fusionné dans main, version 1.6.0 publiée. Suite : mesu
 
 - 2026-10-25 20:50 · run · décision · run V1.5 lancé ; run précédent archivé ; Ollama non requis (Anaël lance un benchmark) · —
 - 2026-10-25 20:58 · run · fusion · #134 MERGED dans main (squash) : spec V1.5 · 3214fec5
-- 2026-10-25 20:58 · 15.1 · dev · lancé (Opus, ../wavestack-v15-s1) · —
-- 2026-10-25 20:58 · 15.6 · dev · lancé (Sonnet, ../wavestack-v15-s6) · —
+- 2026-10-25 20:58 · 15.1 · dev · lancé (Opus, ../harness-lab-v15-s1) · —
+- 2026-10-25 20:58 · 15.6 · dev · lancé (Sonnet, ../harness-lab-v15-s6) · —
 - 2026-10-25 21:03 · run · décision · 3e créneau (Anaël) : phase spec de 15.2 avancée en V0 · —
-- 2026-10-25 21:03 · 15.2 · dev · lancé (Sonnet, phase spec, ../wavestack-v15-s2) · —
+- 2026-10-25 21:03 · 15.2 · dev · lancé (Sonnet, phase spec, ../harness-lab-v15-s2) · —
 - 2026-10-25 21:07 · 15.2 · dev · fini (phase spec, 8 cas, 9 points ouverts) · 87c373ec
 - 2026-10-25 21:07 · 15.2 · review · lancé (spec_checkpoint, Opus) · —
 - 2026-10-25 21:09 · 15.6 · dev · fini (58 termes, E2E glossary vert) · de484e94
@@ -87,7 +87,7 @@ Run terminé : epic 15 fusionné dans main, version 1.6.0 publiée. Suite : mesu
 - 2026-10-25 21:12 · 15.2 · attente humaine · mesure des plafonds sur le PC cible (tools/eval/measure_cases.py), après fusion · —
 - 2026-10-25 21:16 · 15.6 · review · prête (1 medium et 3 low corrigés, 2 faux, 1 laissé) · 4179682c
 - 2026-10-25 21:16 · 15.6 · fusion · PR #135 ouverte, CI en cours · 4179682c
-- 2026-10-25 21:16 · 15.3 · dev · lancé (Sonnet, phase spec, ../wavestack-v15-s3) · —
+- 2026-10-25 21:16 · 15.3 · dev · lancé (Sonnet, phase spec, ../harness-lab-v15-s3) · —
 - 2026-10-25 21:18 · 15.1 · review · prête (2 medium et 3 low corrigés ; ajout cases.POSITIVE_KINDS) · e53f3702
 - 2026-10-25 21:18 · 15.1 · décision · précision de contrat-des-cas.md sortie de la branche de story vers la PR docs #136 · aa2ca985
 - 2026-10-25 21:18 · 15.1 · fusion · PR #137 ouverte, CI en cours · aa2ca985
@@ -102,7 +102,7 @@ Run terminé : epic 15 fusionné dans main, version 1.6.0 publiée. Suite : mesu
 - 2026-10-25 21:30 · run · fusion · #136 MERGED dans main (précision de contrat-des-cas.md) · 85534df4
 - 2026-10-25 21:30 · 15.2 · dev · lancé (Sonnet, code, rebasé sur 85534df4) · —
 - 2026-10-25 21:30 · 15.3 · dev · lancé (Sonnet, code, rebasé sur 85534df4) · —
-- 2026-10-25 21:31 · 15.4 · dev · lancé (Opus, phase spec, ../wavestack-v15-s4) · —
+- 2026-10-25 21:31 · 15.4 · dev · lancé (Opus, phase spec, ../harness-lab-v15-s4) · —
 - 2026-10-25 21:44 · 15.2 · dev · fini (8 cas, tools/eval, 139 tests) · 74b431a7
 - 2026-10-25 21:44 · 15.2 · second-avis · lancé · —
 - 2026-10-25 21:44 · 15.4 · dev · fini (phase spec : état de session agent_eval, 11 points ouverts) · 63c0c771
@@ -121,7 +121,7 @@ Run terminé : epic 15 fusionné dans main, version 1.6.0 publiée. Suite : mesu
 - 2026-10-25 22:05 · 15.3 · review · prête (1 high et 3 medium corrigés ; ajout AppSession.journal_floor) · 51bd3579
 - 2026-10-25 22:05 · 15.3 · PR · #139 ouverte, CI en cours · 51bd3579
 - 2026-10-25 22:05 · run · décision · 15.5 avancée pendant les CI de 15.2 et 15.3 : contenus et programme d'après la spec validée de 15.4 et la maquette, libellés de la vue vérifiés après 4b · —
-- 2026-10-25 22:05 · 15.5 · dev · lancé (Sonnet, ../wavestack-v15-s5) · —
+- 2026-10-25 22:05 · 15.5 · dev · lancé (Sonnet, ../harness-lab-v15-s5) · —
 - 2026-10-25 22:13 · 15.2 · CI · verte (8/8) · b43d4bd8
 - 2026-10-25 22:13 · 15.2 · fusion · #138 MERGED dans main (squash) · f29058e1
 - 2026-10-25 22:13 · 15.2 · attente humaine · mesure des plafonds par Anaël sur le PC cible (uv run python tools/eval/measure_cases.py --runs 3), notifiée, non bloquante · —
@@ -136,7 +136,7 @@ Run terminé : epic 15 fusionné dans main, version 1.6.0 publiée. Suite : mesu
 - 2026-10-25 22:28 · 15.3 · fusion · #139 MERGED dans main (squash) · ffd2d60e
 - 2026-10-25 22:41 · 15.4 · dev · 4a fini (exécuteur, API, garde HTTP ; case_player supprimé ; rebasé sur ffd2d60e) · c087f36a
 - 2026-10-25 22:41 · 15.4 · second-avis · 4a lancé · —
-- 2026-10-25 22:41 · 15.4 · dev · 4b lancé (Opus, ../wavestack-v15-s4b, branche feat/v1-5-story-4b-vue empilée sur c087f36a) · —
+- 2026-10-25 22:41 · 15.4 · dev · 4b lancé (Opus, ../harness-lab-v15-s4b, branche feat/v1-5-story-4b-vue empilée sur c087f36a) · —
 - 2026-10-25 22:41 · 15.4 · décision · not_run des deux côtés = inchangé dans la comparaison (cas de la fenêtre) · à revoir
 - 2026-10-25 22:45 · 15.4 · second-avis · 4a : 2 medium (configuration non rétablie si l'arrêt dépasse 30 s ; conversation vidée, prévue par la spec), 5 low · c087f36a
 - 2026-10-25 22:45 · 15.4 · review · 4a lancé (Opus) · —
@@ -161,5 +161,5 @@ Run terminé : epic 15 fusionné dans main, version 1.6.0 publiée. Suite : mesu
 - 2026-10-26 04:45 · run · PR · #143 version 1.6.0 ouverte, CI en cours · —
 - 2026-10-26 04:57 · run · CI · #143 verte (8/8) · —
 - 2026-10-26 04:57 · run · fusion · #143 MERGED dans main (squash), version 1.6.0 · bd1dcc11
-- 2026-10-26 04:57 · run · décision · tag annoté v1.6.0 et release GitHub « WaveStack 1.6.0 » publiés · bd1dcc11
+- 2026-10-26 04:57 · run · décision · tag annoté v1.6.0 et release GitHub « HarnessLab 1.6.0 » publiés · bd1dcc11
 - 2026-10-26 04:57 · run · décision · fin du run : rapport-run-v1-5.md, mémoire du projet à jour, worktrees supprimés · —

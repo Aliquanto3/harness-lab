@@ -311,7 +311,7 @@ scenarios:
       redundancy, such as prose, goes through as it is; that is the tool's limit. To show it, ask the model to read guide_harnais.md and unfold the step: the guide goes through unchanged. Finally, ask the second
       prompt: what Headroom cut is lost to the model. Compression reduces what goes in,
       Caveman what comes out. If the card says Headroom is not installed, run
-      `uv sync --extra compression` then restart WaveStack.
+      `uv sync --extra compression` then restart HarnessLab.
     bricks: [short_memory, system_prompt, global_memory, tools, mcp, skills, hooks, compression]
     tools: [read_file]
     mcp_lazy: true
@@ -469,10 +469,10 @@ scenarios:
     title_text: Reading an agent-cost-kit summary
     description_text: >-
       The bricks of the previous scenario stay on. The token summary of a coding agent has
-      the same columns as WaveStack: “Cache read”, “Cache write 5 min” or “1 h”, “Uncached”
+      the same columns as HarnessLab: “Cache read”, “Cache write 5 min” or “1 h”, “Uncached”
       and “Output”. Send the three prompts, then open “Spend” in the top bar. The “This
       conversation” column counts since the last “Clear the conversation”, “Since launch”
-      since WaveStack started. Read it box by box: the read is the biggest, which is normal,
+      since HarnessLab started. Read it box by box: the read is the biggest, which is normal,
       every call reads the whole context already seen again and, with Claude, a read costs a
       tenth of the input. A write that exceeds the read signals a lost cache, broken prefix or expired
       cache: click “Clear the cache”, send a prompt, and the write climbs. “Uncached” is the
@@ -561,7 +561,7 @@ scenarios:
       from one turn to the next), not from you. Without that measure of the noise, you could not
       read a comparison after a change. On a single case, “Run” with “3 tries” gives “passed out
       of 3”, [[g:pass_at_k|pass@3]] (at least one try passed) and [[g:pass_hat_k|pass^3]] (all
-      passed): an agent's reliability is pass^k, not its best attempt. WaveStack's
+      passed): an agent's reliability is pass^k, not its best attempt. HarnessLab's
       [[g:replay|replay]] runs the tools again: the file read or the time asked for may differ
       from one try to the next. Frozen tools (their answers recorded) would make everything but
       the model [[g:determinism|deterministic]], hence a sharper comparison, but would no longer
@@ -602,7 +602,7 @@ scenarios:
     title_text: Where does my data go?
     description_text: >-
       Everything is on at launch: the local tools and the MCP brick, with lazy loading,
-      with the local server (WaveStack glossary) and the public server data.gouv.fr. First
+      with the local server (HarnessLab glossary) and the public server data.gouv.fr. First
       read the diagram: the tools and the local MCP server stay in the Workstation zone,
       data.gouv.fr is drawn in the network zone, outside the workstation. Untick then tick
       data.gouv.fr again in the MCP card: the flow that crosses the workstation boundary

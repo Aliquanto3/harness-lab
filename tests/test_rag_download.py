@@ -15,14 +15,14 @@ from starlette.testclient import TestClient
 from test_bricks import HEADERS
 from test_rag import MODEL_FILE, MODEL_SIZE, Embedders, build, card, place_model, rag_config
 
-from wavestack import config
-from wavestack.config import ModelFile
-from wavestack.models.download import DownloadError, download_files
-from wavestack.models.engine import CancelToken
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.config import ModelFile
+from harness_lab.models.download import DownloadError, download_files
+from harness_lab.models.engine import CancelToken
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 URL = "https://huggingface.co/demo/resolve/main/fake.gguf"
 CDN = "https://cdn-lfs.hf.co/demo/fake.gguf"
@@ -251,7 +251,7 @@ def test_routes_unknown_target_404_and_nothing_to_download_409(index):
 def test_a_file_copied_by_hand_is_found_by_the_download_button(index):
     session, embedders = download_session(rag_config(index), Server())
     assert "modèle absent" in card(session)["reason_text"]
-    place_model()  # copied by hand while WaveStack runs
+    place_model()  # copied by hand while HarnessLab runs
 
     with pytest.raises(SendRefused, match="Rien à télécharger"):
         session.download_model("rag_embedding")

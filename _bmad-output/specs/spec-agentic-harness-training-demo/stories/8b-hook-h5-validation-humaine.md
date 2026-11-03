@@ -60,26 +60,26 @@ baseline_commit: 'b92d481464d524bc0cf305b92312f1e97c5f0d35'
 
 ## Code Map
 
-- `src/wavestack/trace/catalog.py` : `HookDecision` (L294) + `ask_human` ; payloads `approval_requested{approval_id, tool, destination, preview: {method, url, body}}` et `approval_resolved{approval_id, decision, hook_disabled}` dans `PAYLOAD_MODELS`. `awaiting_human` existe déjà dans `SessionState` (L40).
-- `src/wavestack/hooks.py` : `ALLOWED["before_tool"]` + `ask_human` ; `HookResult.preview: dict[str, str] | None` ; fonction `ask` (H5) ; `DEMO_HOOKS` + `Hook("h5", {"before_tool"}, ask)` ; `audit` : ligne sur `approval_resolved` (le `tool_started` n'existe pas pour un refus : prendre l'outil et l'hôte dans l'`approval_requested` du même `approval_id`).
-- `src/wavestack/bricks/registry.py` L31 : `HOOKS` + `h5`.
+- `src/harness_lab/trace/catalog.py` : `HookDecision` (L294) + `ask_human` ; payloads `approval_requested{approval_id, tool, destination, preview: {method, url, body}}` et `approval_resolved{approval_id, decision, hook_disabled}` dans `PAYLOAD_MODELS`. `awaiting_human` existe déjà dans `SessionState` (L40).
+- `src/harness_lab/hooks.py` : `ALLOWED["before_tool"]` + `ask_human` ; `HookResult.preview: dict[str, str] | None` ; fonction `ask` (H5) ; `DEMO_HOOKS` + `Hook("h5", {"before_tool"}, ask)` ; `audit` : ligne sur `approval_resolved` (le `tool_started` n'existe pas pour un refus : prendre l'outil et l'hôte dans l'`approval_requested` du même `approval_id`).
+- `src/harness_lab/bricks/registry.py` L31 : `HOOKS` + `h5`.
 - `content/hooks.yaml`, `content/bricks/hooks.yaml` : texte H5 (AD-19).
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/session/app_session.py` :
   - `__init__` (L218) : `_hooks_enabled = set(ids) - {"h5"}` (Q1), `_sent` en conséquence ; `self._approval` (validation en attente : id, payload, `threading.Event`, réponse) et `self._hooks_off: set[str]` (hooks coupés pour le reste du tour, vidé dans `_run_turn`).
   - `_hook` (L1696) : filtre aussi `self._hooks_off` ; `ask_human` rend la main comme `block`.
   - `_run_tool` (L1664) : sur `ask_human`, `_await_human(hook_id, call, spec, result)` → `approved` (continue), `refused` (retourne le texte et `hook_id`, comme un blocage), `cancelled` (retourne `None`). Ids `{turn_id}.a{n}`.
   - `answer_approval(approval_id, approved, disable_hook) -> None`, lève `SendRefused` si la réponse n'est pas acceptée ; `stop()` (L1477) accepte `awaiting_human` et résout en `cancelled` ; `_refusal_reason` (L1470) : raison pour `awaiting_human`.
   - `_mcp_spec` (L1398) : `preview` pour `server.network`.
-- `src/wavestack/web/app.py` : `ApprovalIntention`, `POST /api/intentions/approval` (409 sur `SendRefused`), sur le modèle de `send` (L185) ; `pending_approval` dans `api_state` (L131).
-- `src/wavestack/web/static/app.js` : `applyEnvelope` (L104) : `approval_requested` / `approval_resolved` rattachés à la dernière étape `hook` (comme `effect_applied`, L234) ; `hookCard` (L924) : titre et bloc de validation, `outboundPayload` (L907) réutilisé, boutons → `postIntention("/api/intentions/approval", …)` (L691) ; `HOOK_DECISIONS` : `ask_human` ; `renderComposer` (L674) : « Arrêter » visible en `awaiting_human` ; indicateur de travail (L657) : « En attente de validation ». `app.css` : boutons de la carte si les styles existants ne suffisent pas.
+- `src/harness_lab/web/app.py` : `ApprovalIntention`, `POST /api/intentions/approval` (409 sur `SendRefused`), sur le modèle de `send` (L185) ; `pending_approval` dans `api_state` (L131).
+- `src/harness_lab/web/static/app.js` : `applyEnvelope` (L104) : `approval_requested` / `approval_resolved` rattachés à la dernière étape `hook` (comme `effect_applied`, L234) ; `hookCard` (L924) : titre et bloc de validation, `outboundPayload` (L907) réutilisé, boutons → `postIntention("/api/intentions/approval", …)` (L691) ; `HOOK_DECISIONS` : `ask_human` ; `renderComposer` (L674) : « Arrêter » visible en `awaiting_human` ; indicateur de travail (L657) : « En attente de validation ». `app.css` : boutons de la carte si les styles existants ne suffisent pas.
 - Tests : `tests/test_hooks.py` (`hooks_session`, `since`, `check`, `audit_lines`) et `network_session`/`MockTransport` de `tests/test_tools.py` (L444-490) ; `tests/test_mcp.py` (L120) pour le serveur public simulé. La réponse se donne depuis le fil du test une fois `approval_requested` émis (attente bornée sur le journal).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/trace/catalog.py`, `src/wavestack/hooks.py`, `src/wavestack/bricks/registry.py`, `content/hooks.yaml`, `content/bricks/hooks.yaml` -- `ask_human`, H5, événements, texte, ligne d'audit -- AD-2, AD-13, AD-19
-- [x] `src/wavestack/session/app_session.py` -- attente, réponse, arrêt, désactivation, aperçu MCP -- AD-3, AD-13, AD-14, AD-15
-- [x] `src/wavestack/web/app.py`, `static/app.js`, `static/app.css` -- intention `approval`, `pending_approval`, carte, indicateur -- AD-1, AD-18
+- [x] `src/harness_lab/trace/catalog.py`, `src/harness_lab/hooks.py`, `src/harness_lab/bricks/registry.py`, `content/hooks.yaml`, `content/bricks/hooks.yaml` -- `ask_human`, H5, événements, texte, ligne d'audit -- AD-2, AD-13, AD-19
+- [x] `src/harness_lab/session/app_session.py` -- attente, réponse, arrêt, désactivation, aperçu MCP -- AD-3, AD-13, AD-14, AD-15
+- [x] `src/harness_lab/web/app.py`, `static/app.js`, `static/app.css` -- intention `approval`, `pending_approval`, carte, indicateur -- AD-1, AD-18
 - [x] `tests/test_hooks.py` -- les lignes de la matrice, la route HTTP (200 puis 409) et `pending_approval` ; chaque rendu : somme des tokens égale au total, aucun `harness_error`
 
 **Acceptance Criteria:**
@@ -140,7 +140,7 @@ L'aperçu vient de la `ToolSpec`, que l'exécuteur appelle aussi avant d'envoyer
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur
 - `uv run pytest` -- expected: tous les tests passent (tests `model` exclus)
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` : activer « Outils » (jours fériés) et « Hooks », cocher H5 ; demander les jours fériés 2026 ; vérifier la carte, l'indicateur, puis « Refuser » ; recommencer avec « Autoriser et ne plus demander ».
+- `uv run harness-lab` : activer « Outils » (jours fériés) et « Hooks », cocher H5 ; demander les jours fériés 2026 ; vérifier la carte, l'indicateur, puis « Refuser » ; recommencer avec « Autoriser et ne plus demander ».

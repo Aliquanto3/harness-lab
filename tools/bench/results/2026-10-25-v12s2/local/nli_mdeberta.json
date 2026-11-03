@@ -4,7 +4,7 @@
     "deterministic": true,
     "max_gap": 0.0
   },
-  "guard": "wavestack.net.guard",
+  "guard": "harness_lab.net.guard",
   "id": "nli_mdeberta",
   "onnx_inputs": [
     "attention_mask",

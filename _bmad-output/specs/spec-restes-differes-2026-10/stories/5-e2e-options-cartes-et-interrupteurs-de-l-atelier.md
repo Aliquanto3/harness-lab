@@ -49,7 +49,7 @@ deferred: []
 ## Code Map
 
 - `tools/e2e/run_e2e.py` -- seul fichier de code touché. Helpers à réutiliser : `Run.check`, `Run.poll`, `Run.set_option` (attend `bricks_changed`), `Run.open_options`, `Run.show_forced`, `Run.arm`, `Run.api` (en-tête `Origin`), `Run.reload_app`/`wait_replayed`, `_step` (dernière étape d'Orchestration par titre), `_unfold_step`, `_schema_node`. Ne pas dupliquer les contrôles des stories 2 à 4 (`s_stream_lost`, `_forced_section`, `_consulted_tools`, dépliement MCP par D3 et `prefix_not_reused` dans `s_mcp_lazy`, date du tiroir de mémoire, délégation nommée).
-- `src/wavestack/web/static/app.js` (module ES : `store` et les fonctions ne sont pas globaux, donc lecture par le DOM, `localStorage` et `page.route`) -- lignes que chaque contrôle protège :
+- `src/harness_lab/web/static/app.js` (module ES : `store` et les fonctions ne sont pas globaux, donc lecture par le DOM, `localStorage` et `page.route`) -- lignes que chaque contrôle protège :
   - `setOption` : chemins `/api/intentions/mcp_server`, `mcp_mode`, `skill` (E016, E017, E023).
   - `applyEnvelope` `mcp_connect_ended` : appariement sur la plus ancienne carte non terminée du serveur (`!s.ended`) (E016) ; `connectBody` : badge `step-badge is-mcp` (E016) ; `schemaNode` : `main.schema.tools` dans l'infobulle (E016) et classe `is-loaded` d'un skill (E023).
   - `toolBody` : badge MCP d'une étape du harnais de la brique MCP (E017).
@@ -64,7 +64,7 @@ deferred: []
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `tools/e2e/run_e2e.py` -- `s_mcp_full` : interrupteur du serveur `local` décoché puis recoché dans la carte MCP (requêtes `/api/intentions/mcp_server` lues par `expect_request`), nouvelle connexion appariée (« connecté », aucune « connexion… »), badge MCP de la ligne dépliée, infobulle du nœud `Glossaire WaveStack` avec ses outils ; puis « Vider la conversation » : plus aucune ligne de connexion dans Orchestration -- E016, E030.
+- [x] `tools/e2e/run_e2e.py` -- `s_mcp_full` : interrupteur du serveur `local` décoché puis recoché dans la carte MCP (requêtes `/api/intentions/mcp_server` lues par `expect_request`), nouvelle connexion appariée (« connecté », aucune « connexion… »), badge MCP de la ligne dépliée, infobulle du nœud `Glossaire HarnessLab` avec ses outils ; puis « Vider la conversation » : plus aucune ligne de connexion dans Orchestration -- E016, E030.
 - [x] `tools/e2e/run_e2e.py` -- `s_mcp_lazy` : interrupteur « Lazy loading » décoché puis recoché avant le premier tour (`/api/intentions/mcp_mode`, `mode` lu dans `/api/state`) ; après le tour, étape « Chargement de la documentation » dépliée avec le badge MCP -- E017.
 - [x] `tools/e2e/run_e2e.py` -- `s_skills` : skill « Compte rendu de réunion » décoché puis recoché (`/api/intentions/skill`) ; nœud du schéma « Non chargé » avant, `is-loaded` et « Chargé dans la conversation » après le tour -- E023.
 - [x] `tools/e2e/run_e2e.py` -- `s_h5` : indicateur « En attente de validation » (Vue humain et Orchestration) ; double clic synchrone sur « Refuser » = une seule requête ; rechargement avec `/api/state` réécrit (`state: turn`) : trois boutons inactifs ; validation déjà répondue par l'API puis clic dans la page : 409 affiché sous le champ ; « Vider la conversation » : aucune carte H5, Orchestration vide, nœud « Jours fériés » sans « Au tour » -- E028, E030.
@@ -112,7 +112,7 @@ Mutations faites à la main dans `app.js`, rejouées, puis défaites (`git check
 | E035 | `saveShowForced()` du changement | « gardé après rechargement » (`localStorage` nul, case décochée) |
 | E035 | `action_dropped` d'`applyEnvelope` | « ligne « Action forcée abandonnée · Heure et date » » |
 | E043 | branche `store.resetSeq !== null` de la préparation | « la préparation du harnais garde la connexion MCP » |
-| E043 | `store.topStatus = resetStatusText()` | contrôle existant « message « WaveStack réinitialisé : LLM nu. » » |
+| E043 | `store.topStatus = resetStatusText()` | contrôle existant « message « HarnessLab réinitialisé : LLM nu. » » |
 | E047 | `store.openExplanations.clear()` | « « Réinitialiser » referme les listes d'options ouvertes » (1 ouverte) |
 | E053 | `if (store.showReasoning)` → `if (true)` | « décoché, plus de bloc dans la Vue humain » et « gardé au rechargement » |
 | E028 (revue) | ligne de la décision dans `approvalCard` | « la carte répondue affiche « Décision : Refusé » » et « … Annulé : tour arrêté » |
@@ -131,7 +131,7 @@ Passe 1 (2026-10-02), trois couches : blind-hunter (BH), edge-case-hunter (EC), 
 | # | Couche | Constat | Verdict | Preuve / suite |
 |---|---|---|---|---|
 | 1 | BH, EC, VG | `Run.open_options` rend la main sans rien dire si la liste reste repliée après trois essais | low | Vrai ; correctif direct : `AssertionError` qui nomme la carte (patch). La stabilité après le retour : course non montrée, rejetée. |
-| 2 | BH | `_show_reasoning_option` peut laisser `wavestack.showReasoning = "0"` si le rechargement lève | medium | Vrai : même page pour tous les scénarios. `try/finally` qui recoche (patch). |
+| 2 | BH | `_show_reasoning_option` peut laisser `harness_lab.showReasoning = "0"` si le rechargement lève | medium | Vrai : même page pour tous les scénarios. `try/finally` qui recoche (patch). |
 | 3 | BH, EC | écouteur `request` de `_approval_posts` jamais retiré si `ev.wait` lève | low | Vrai ; `try/finally` (patch). |
 | 4 | EC | une requête du second clic encore en file quand l'écouteur est retiré : faux succès possible | medium | Vrai en principe : `ev.wait` est du Python pur, sans pompe des événements Playwright. Aller-retour `page.evaluate("() => 0")` avant le retrait (patch). |
 | 5 | BH | `MutationObserver` jamais déconnecté | low | Sans effet observable (la page est rechargée par les scénarios suivants) ; rejeté. |

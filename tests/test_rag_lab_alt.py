@@ -31,9 +31,9 @@ from test_rag_lab import (
 )
 from test_rag_rerank import place_reranker, rerank_config
 
-from wavestack import config
-from wavestack.rag import lab as rag_lab
-from wavestack.session.app_session import SendRefused
+from harness_lab import config
+from harness_lab.rag import lab as rag_lab
+from harness_lab.session.app_session import SendRefused
 
 INSTALL = "uv sync --extra compression --extra rag-alt"
 

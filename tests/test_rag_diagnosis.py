@@ -14,9 +14,9 @@ from test_bricks import HEADERS
 from test_rag import build
 from test_rag_lab import _client, ready, run
 
-from wavestack import config
-from wavestack.rag import diagnosis
-from wavestack.rag.corpus import (
+from harness_lab import config
+from harness_lab.rag import diagnosis
+from harness_lab.rag.corpus import (
     Chunk,
     RagPassage,
     RagQuestion,
@@ -24,10 +24,10 @@ from wavestack.rag.corpus import (
     load_rag_content,
     load_rag_questions,
 )
-from wavestack.rag.diagnosis import Listed, StageList, diagnose_passage
+from harness_lab.rag.diagnosis import Listed, StageList, diagnose_passage
 
 LANGS = ("fr", "en", "de")
-STATIC = Path(__file__).resolve().parent.parent / "src" / "wavestack" / "web" / "static"
+STATIC = Path(__file__).resolve().parent.parent / "src" / "harness_lab" / "web" / "static"
 PASSAGE = RagPassage(doc_id="d", anchor_text="la règle  trois\nest simple")
 
 

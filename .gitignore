@@ -21,7 +21,7 @@ node_modules/
 .claude/settings.local.json
 
 # Local models, indexes, runtime data (repo-root only: /models/ would also
-# match src/wavestack/models/, the Python package, without the leading slash)
+# match src/harness_lab/models/, the Python package, without the leading slash)
 /models/
 data/indexes/
 *.gguf

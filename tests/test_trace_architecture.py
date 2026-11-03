@@ -3,16 +3,16 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from wavestack.trace.catalog import ArchitectureChangedPayload
-from wavestack.trace.envelope import Envelope, now_iso
-from wavestack.trace.scope import TraceScope
+from harness_lab.trace.catalog import ArchitectureChangedPayload
+from harness_lab.trace.envelope import Envelope, now_iso
+from harness_lab.trace.scope import TraceScope
 
 NODES = [
     {
         "id": "core.harness",
         "kind": "harness",
         "hosting": "local",
-        "label_text": "Harnais WaveStack",
+        "label_text": "Harnais HarnessLab",
         "wanted": True,
         "available": True,
         "reason_text": None,

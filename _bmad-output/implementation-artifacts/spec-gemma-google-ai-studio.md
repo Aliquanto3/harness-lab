@@ -12,9 +12,9 @@ context: []
 
 ## Intent
 
-**Problem:** Le plan de corrections du 2026-09-30 (lot 1) constate que Google AI Studio ne sert dans WaveStack que `gemini-3.5-flash-lite`, alors que l'éditeur `gemma` existe déjà dans `content/models/publishers.yaml` et que la clé sert aussi deux modèles Gemma 4 ouverts, gratuits, avec outils et raisonnement. Un modèle ouvert servi hors du poste, gratuit, est un cas pédagogique à part entière (« ce modèle tourne hors de votre poste », sans prix, avec ses conditions).
+**Problem:** Le plan de corrections du 2026-09-30 (lot 1) constate que Google AI Studio ne sert dans HarnessLab que `gemini-3.5-flash-lite`, alors que l'éditeur `gemma` existe déjà dans `content/models/publishers.yaml` et que la clé sert aussi deux modèles Gemma 4 ouverts, gratuits, avec outils et raisonnement. Un modèle ouvert servi hors du poste, gratuit, est un cas pédagogique à part entière (« ce modèle tourne hors de votre poste », sans prix, avec ses conditions).
 
-**Approach:** Déclarer une entrée `[[cloud.models]] id = "gemma"` dans `wavestack.toml`, sur le même `base_url`, la même clé (`GEMINI_API_KEY`) et le même contournement de signature que Gemini, construite sur les faits relevés sur l'API réelle le 2026-09-30 ; documenter l'entrée dans le README ; mettre à jour les tests et les attentes E2E qui énumèrent les préréglages cloud. Aucun changement de code Python.
+**Approach:** Déclarer une entrée `[[cloud.models]] id = "gemma"` dans `harness-lab.toml`, sur le même `base_url`, la même clé (`GEMINI_API_KEY`) et le même contournement de signature que Gemini, construite sur les faits relevés sur l'API réelle le 2026-09-30 ; documenter l'entrée dans le README ; mettre à jour les tests et les attentes E2E qui énumèrent les préréglages cloud. Aucun changement de code Python.
 
 **Décisions prises avec Anaël le 2026-09-30 :**
 - Modèle par défaut `gemma-4-26b-a4b-it` (MoE, 4 B actifs) ; `gemma-4-31b-it` (dense) documenté en secours dans le commentaire, comme le secours 3.6 de Gemini.
@@ -32,11 +32,11 @@ context: []
 
 ## Spec Change Log
 
-- 2026-09-30, après la revue : le relecteur a relevé que le commentaire Gemini de `wavestack.toml` cite une seconde clause EEE (« only Paid Services when making API Clients available to users in the EEA »), absente de mon premier relevé des conditions. Vérifiée sur ai.google.dev le jour même. Anaël a renégocié la décision : entrée active, note honnête sur les deux clauses, Gemini de nouveau « obligatoire ». KEEP : `training = "no"` reste fondé sur la clause 1.
+- 2026-09-30, après la revue : le relecteur a relevé que le commentaire Gemini de `harness-lab.toml` cite une seconde clause EEE (« only Paid Services when making API Clients available to users in the EEA »), absente de mon premier relevé des conditions. Vérifiée sur ai.google.dev le jour même. Anaël a renégocié la décision : entrée active, note honnête sur les deux clauses, Gemini de nouveau « obligatoire ». KEEP : `training = "no"` reste fondé sur la clause 1.
 
 ## Implementation Notes
 
-- **Fichiers touchés :** `wavestack.toml` (entrée `gemma` après `gemini`, note EEE de Gemini reformulée), `README.md` (titre et intro de « Modèle cloud », clé partagée, paragraphe Gemini corrigé, paragraphe Gemma, FinOps « — », GreenOps), `tests/test_cloud.py` (listes d'ids, deux tests Gemma), `tests/test_model_catalog.py` et `tools/e2e/run_e2e.py` (groupe « Réseau · Gemma (Google) » avant Gemini, ligne du tableau), `tests/test_greenops.py` (EcoLogits connaît `gemma-4-26b-a4b-it` hors ligne). Aucun code Python de `src/` modifié.
+- **Fichiers touchés :** `harness-lab.toml` (entrée `gemma` après `gemini`, note EEE de Gemini reformulée), `README.md` (titre et intro de « Modèle cloud », clé partagée, paragraphe Gemini corrigé, paragraphe Gemma, FinOps « — », GreenOps), `tests/test_cloud.py` (listes d'ids, deux tests Gemma), `tests/test_model_catalog.py` et `tools/e2e/run_e2e.py` (groupe « Réseau · Gemma (Google) » avant Gemini, ligne du tableau), `tests/test_greenops.py` (EcoLogits connaît `gemma-4-26b-a4b-it` hors ligne). Aucun code Python de `src/` modifié.
 - **Décision prise seul :** le raisonnement « allumé » envoie `include_thoughts = true` seul (accepté par l'API, explicite, et distinct du corps « éteint ») ; `always = false` puisque `minimal` éteint réellement la réflexion. Réserve de sortie inchangée (1 536 tokens allumé, 512 éteint) : la réflexion réelle tient dans 200 à 600 tokens.
 - **Surprise :** une clé saisie au diagnostic est rangée par `id` d'entrée (`api_keys.json`) : celle de Gemini ne sert pas à Gemma. `GEMINI_API_KEY` sert aux deux. Phrase ajoutée au README.
 - **Surprise :** le sélecteur lit « 26B » dans le nom du modèle (paramètres totaux, pas actifs) : exact pour un MoE 26B-A4B, laissé tel quel.

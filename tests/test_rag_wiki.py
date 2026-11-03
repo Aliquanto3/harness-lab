@@ -15,8 +15,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from wavestack.rag import wiki
-from wavestack.rag.corpus import DocText, load_rag_content, read_documents
+from harness_lab.rag import wiki
+from harness_lab.rag.corpus import DocText, load_rag_content, read_documents
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = ("fr", "en", "de")

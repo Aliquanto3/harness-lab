@@ -1,6 +1,6 @@
 # Exemplia subcontractor register
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this register describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this register describes no real company. -->
 
 This register, kept by the supplier unit and cited by the model of security clauses, lists every subcontractor used by an Exemplia supplier: its name, its function, the country where it hosts or processes data, and the tier of the supplier that uses it.
 

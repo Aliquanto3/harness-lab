@@ -28,7 +28,7 @@ deferred:
       Même mécanisme que le contexte principal (AD-4) ; à observer sur le PC cible, sans
       effet sur le résultat de la délégation.
     location: >-
-      src/wavestack/session/app_session.py (_run_subagent)
+      src/harness_lab/session/app_session.py (_run_subagent)
     severity: low (unverified)
 ---
 
@@ -75,11 +75,11 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/bricks/registry.py` -- `BRICKS` : ajouter `subagent` (`category="harness"`, `capabilities=["tool_call_parser"]`, `contributes_to=["main", "sub"]`), composant `subagent.agent` (`kind="subagent"`, `local_process`, `edges_to=["core.harness"]`). `core.model_sub` est déjà dans `RESERVED_NODES`.
-- `src/wavestack/config.py` (L259-276, modèle `tool_max_calls`) + `wavestack.toml` -- section `[subagent]` : `tools = ["read_file", "fetch_page"]`, `max_calls = 4` ; propriétés `subagent_tools`, `subagent_max_calls` (≥ 1).
-- `src/wavestack/trace/catalog.py` -- `SubagentStartedPayload{task, tools, phase_label}`, `SubagentEndedPayload{status: completed|limit|overflow|error|cancelled, result, context_tokens, kept_tokens, result_tokens, saved_tokens, estimated, context_estimated, calls, duration_ms}` (`calls` : appels au modèle du sous-agent ; `estimated` : `result_tokens` estimé, mode chat) dans `PAYLOAD_MODELS` (L447) ; `ArmedActionState.kind` (L399) + `"delegate"` ; `BrickState` (L256) + `force: BrickForce | None` (`{kind, target, label_fr, parameters, presets}`).
-- `src/wavestack/tools/registry.py` -- `class DelegationFailed(ToolError)` avec `status: Literal["limit","overflow","error"]`. `src/wavestack/tools/executor.py` `run` : `tool_ended.status = getattr(exc, "status", "error")` pour une `ToolError`.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/bricks/registry.py` -- `BRICKS` : ajouter `subagent` (`category="harness"`, `capabilities=["tool_call_parser"]`, `contributes_to=["main", "sub"]`), composant `subagent.agent` (`kind="subagent"`, `local_process`, `edges_to=["core.harness"]`). `core.model_sub` est déjà dans `RESERVED_NODES`.
+- `src/harness_lab/config.py` (L259-276, modèle `tool_max_calls`) + `harness-lab.toml` -- section `[subagent]` : `tools = ["read_file", "fetch_page"]`, `max_calls = 4` ; propriétés `subagent_tools`, `subagent_max_calls` (≥ 1).
+- `src/harness_lab/trace/catalog.py` -- `SubagentStartedPayload{task, tools, phase_label}`, `SubagentEndedPayload{status: completed|limit|overflow|error|cancelled, result, context_tokens, kept_tokens, result_tokens, saved_tokens, estimated, context_estimated, calls, duration_ms}` (`calls` : appels au modèle du sous-agent ; `estimated` : `result_tokens` estimé, mode chat) dans `PAYLOAD_MODELS` (L447) ; `ArmedActionState.kind` (L399) + `"delegate"` ; `BrickState` (L256) + `force: BrickForce | None` (`{kind, target, label_fr, parameters, presets}`).
+- `src/harness_lab/tools/registry.py` -- `class DelegationFailed(ToolError)` avec `status: Literal["limit","overflow","error"]`. `src/harness_lab/tools/executor.py` `run` : `tool_ended.status = getattr(exc, "status", "error")` pour une `ToolError`.
+- `src/harness_lab/session/app_session.py` :
   - Constante `DELEGATE = "delegate"` à côté de `LOAD_SKILL` (L105). `TurnState` (L252) + `subagent_tools: tuple[str, ...]`. `_SubContext{context_id, task, prompt, tools}` (dataclass locale).
   - `__init__` (L315) : `_subs = 0` ; `_ratio` (L338, L925) devient `_ratios = {"main": r, "sub": r}`, clé choisie par `current().context_id` (L1356, L2797, L2820) ; `_turn_ctx: tuple[TurnState, CancelToken] | None`, posé au début de `_run_turn` (L2033) et remis à `None` dans son `finally`.
   - `_load_content` (L943) : `content/subagent.yaml` et `content/prompts/subagent.md` quand la brique est déclarée ; échec → `_content_errors["subagent"]`.
@@ -95,25 +95,25 @@ deferred:
   - `_emit_bricks` (L732) : pour `subagent`, `force` (paramètre `task`, préréglages de `content/subagent.yaml`) et `limits_fr` (« Sous-agent : 4 appels au modèle au plus ; outils : … s'ils sont activés dans la brique Outils. »).
   - `_emit_architecture` (L533) : `subagent` voulue → nœud `core.model_sub` (`kind="model"`, même `hosting`/`model`/`provider` que `core.model`, `label_fr` « Modèle (sous-agent) ») et arête `core.harness → core.model_sub` (`crosses_boundary` si cloud) ; `subagent.agent` reste une puce (`kind="brick"`).
 - `content/bricks/subagent.yaml` (carte : « Sous-agent », `harness engineering`, hébergement, explication : contexte propre, même modèle, seul le résultat revient, économie, hooks), `content/subagent.yaml` (texte de `delegate` et de son paramètre, `phase_label_fr` « Appel au sous-agent », `force_label_fr`, préréglages, cause de dépassement), `content/prompts/subagent.md`, `content/demo_files/guide_harnais.md` (≈ 7 000 caractères, texte original non confidentiel), `content/scenarios.yaml` (scénario `subagent` dans un module « Sous-agent », 30 min).
-- `src/wavestack/web/app.py` -- `ArmIntention.kind` (L95) + `"delegate"`.
-- `src/wavestack/web/static/app.js` :
+- `src/harness_lab/web/app.py` -- `ArmIntention.kind` (L95) + `"delegate"`.
+- `src/harness_lab/web/static/app.js` :
   - `applyEnvelope` (L146-376) : `turn.subs` (Map `context_id` → projection `{id, parentStep, started, ended, steps, context, callEnded, overflow, limit, truncated, errors, status}`) ; les `kind` d'étape (`context_rendered`/`reconciled`, `model_*`, `tool_*`, `outbound_request`, `hook_decided`, `effect_applied`, `approval_*`, `tool_call_malformed`, `limit_reached`, `prefix_not_reused`, `context_overflow`, `output_truncated`, `harness_error`) visent `sub` quand `context_id` commence par `sub`, sinon le tour ; en `sub`, jamais `store.gauge`, `turn.context`, `turn.text`/`reasoning` ; `model_call_started` en `sub` met `turn.phaseLabel` à « Sous-agent · {phase_label} ». `tool_started` garde `stepId: envelope.step_id` ; `subagent_started` rattache la projection à l'étape outil dont `stepId === parent_step`.
   - `turnRows` (L1948) : une étape `delegate` donne la ligne « Délégation au sous-agent » (icône 👥, badge de déclenchement, chiffre « {result} tokens réinjectés · {saved} économisés ») ; son corps : tâche, outils, phrase d'économie, résultat, bouton « Voir le contexte du sous-agent ». Suivent les lignes de `turnRows(sub)` (clé préfixée, classe `is-sub`, indentées). `LIMITS` (L1938) a déjà `sub_calls`.
   - `renderContext` (L1411) : si le tour affiché a des sous-agents, bascule en tête (`aria-pressed`) « Contexte principal » / « Contexte du sous-agent » (un bouton par `sub{n}` s'il y en a plusieurs) ; état d'interface `store.ctxView` (retour au principal si absent) ; vue sous-agent : segments du dernier appel, total, ligne d'économie, sortie brute.
   - `renderChat` (L1184-1198) : cartes H5 aussi pour les étapes des sous-agents.
   - Panneau des briques : `FORCE_LABELS` (L665) + `subagent: "Déléguer au sous-agent"` ; bouton Forcer au niveau de la carte quand `brick.force` et `store.showForced` ; `forceForm` (L769) réutilisé avec `{id: "delegate", parameters, presets}` et `armAction("delegate", "delegate", {task})`. `BRICK_ICONS` (L3017) + `subagent: "👥"`.
   - Schéma : `buildSchema` (L3209, L3237) dessine un second robot « Sous-agent » à côté du premier (dans la boîte réseau si cloud) quand `core.model_sub` existe ; actif pendant un appel en cours d'un sous-agent du tour actif (`robotPose`, L3062).
-- `src/wavestack/web/static/app.css` -- `.turn-step-line.is-sub` (indentation, filet), `.ctx-view-switch`, `.robot-sub`.
+- `src/harness_lab/web/static/app.css` -- `.turn-step-line.is-sub` (indentation, filet), `.ctx-view-switch`, `.robot-sub`.
 - Tests : `tests/fake_engine.py` (`FakeEngine(outputs=…)`, une sortie par appel, sous-agent compris), `tests/test_tools.py` (`QWEN`, `call`, `tool_session`, `_segments`), `tests/test_forced.py` (`run`, `of`, `armed`), `tests/test_hooks.py` (`h5_session`, `wait_asked`), `tests/test_bricks.py` (`_client`, `HEADERS`), `tests/test_cloud.py` (session cloud factice), `tests/test_trace_architecture.py` L70 (`"subagent"` reste un `kind` de nœud invalide : inchangé).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/trace/catalog.py`, `src/wavestack/tools/registry.py`, `src/wavestack/tools/executor.py`, `src/wavestack/config.py`, `wavestack.toml` -- deux événements, `force`, `delegate` armable, `DelegationFailed` et son statut, section `[subagent]` -- contrat d'abord.
-- [x] `src/wavestack/bricks/registry.py`, `content/bricks/subagent.yaml`, `content/subagent.yaml`, `content/prompts/subagent.md`, `content/demo_files/guide_harnais.md` -- brique, textes, prompt, document long -- AD-12, AD-19.
-- [x] `src/wavestack/session/app_session.py` -- méta-outil, `TurnState`, boucle `sub{n}`, rendu, ratios, hooks par contexte, échecs, économie, armement, carte, schéma -- AD-4, AD-9 à AD-11, AD-25.
-- [x] `src/wavestack/web/app.py` -- `delegate` dans `ArmIntention` -- AD-18.
-- [x] `src/wavestack/web/static/app.js`, `app.css` -- projection par contexte, ligne et lignes filles, bascule de Contexte LLM, Forcer au niveau de la carte, second robot -- EXPERIENCE.
+- [x] `src/harness_lab/trace/catalog.py`, `src/harness_lab/tools/registry.py`, `src/harness_lab/tools/executor.py`, `src/harness_lab/config.py`, `harness-lab.toml` -- deux événements, `force`, `delegate` armable, `DelegationFailed` et son statut, section `[subagent]` -- contrat d'abord.
+- [x] `src/harness_lab/bricks/registry.py`, `content/bricks/subagent.yaml`, `content/subagent.yaml`, `content/prompts/subagent.md`, `content/demo_files/guide_harnais.md` -- brique, textes, prompt, document long -- AD-12, AD-19.
+- [x] `src/harness_lab/session/app_session.py` -- méta-outil, `TurnState`, boucle `sub{n}`, rendu, ratios, hooks par contexte, échecs, économie, armement, carte, schéma -- AD-4, AD-9 à AD-11, AD-25.
+- [x] `src/harness_lab/web/app.py` -- `delegate` dans `ArmIntention` -- AD-18.
+- [x] `src/harness_lab/web/static/app.js`, `app.css` -- projection par contexte, ligne et lignes filles, bascule de Contexte LLM, Forcer au niveau de la carte, second robot -- EXPERIENCE.
 - [x] `content/scenarios.yaml` -- scénario `subagent` (briques des modules précédents sans `reasoning` : `short_memory`, `system_prompt`, `tools`, `mcp` en lazy loading, `skills`, `hooks`, `global_memory`, `subagent` ; outils `read_file` ; prompt de délégation du `guide_harnais.md` puis trois questions de quiz, voir H-12) -- CAP-40.
 - [x] `tests/test_subagent.py` (nouveau) -- une ligne de la matrice par test, plus : contexte `sub1` sans historique ni prompt principal, identifiants et `parent_step`, `subagent_result` seul dans l'appel principal suivant, chiffres d'économie, schéma (`core.model_sub`, cloud en réseau), ratio `sub` distinct en mode chat, carte (`force`, `limits_fr`), intention HTTP 404/422.
 
@@ -174,7 +174,7 @@ deferred:
   - `[low]` `[patch]` Arrêt utilisateur rendu comme une erreur rouge — `tool_ended{cancelled}`, ligne neutre « arrêtée ».
   - `[low]` `[patch]` Audit H2 sans le contexte — `HookContext.context_id`, et les lignes des événements du sous-agent écrivent `t1.sub1` ; test.
   - `[low]` `[patch]` Scénario : quoi observer, risque que le principal relise le guide, question 3 — description réécrite (comparaison lecture directe / délégation, résumé qui perd des détails : redéléguer ou avouer), prompt « sans le lire toi-même ».
-  - `[low]` `[patch]` `[subagent]` : nouveaux essais non documentés, nom d'outil inconnu ignoré en silence — commentaire de `wavestack.toml`, `harness_error` au chargement ; test.
+  - `[low]` `[patch]` `[subagent]` : nouveaux essais non documentés, nom d'outil inconnu ignoré en silence — commentaire de `harness-lab.toml`, `harness_error` au chargement ; test.
   - `[low]` `[patch]` Schéma : arête `core.harness → core.model_sub` dessinée en local, pas celle de `core.model` — même règle (arête seulement en cloud) ; test.
   - `[low]` `[patch]` Fichier de story : `followup_review_recommended` et tâche `scenarios.yaml` incohérents — corrigés.
   - `[low]` `[patch]` `special_token_neutralized` et `model_first_token` ignorés dans `sub{n}` — projetés (notes du contexte du sous-agent ; l'indicateur « Sous-agent · … » reste).
@@ -229,7 +229,7 @@ def _sub_messages(self, sub, steps, chat):
 - H-12 (implémentation) Scénario `subagent` : convention cumulative de l'appelant (briques des modules précédents, comme les stories 13 et 14) plutôt que la liste courte de la tâche : `short_memory`, `system_prompt`, `tools`, `mcp` (lazy loading), `skills`, `hooks`, `subagent`, outils `read_file` seulement ; **sans** `reasoning`, dont la réserve de 1 536 tokens serrerait le contexte du sous-agent (guide ≈ 2 000 tokens). La story 21 réordonnera le programme.
 - H-13 (implémentation) Tous les événements du sous-agent, ses appels d'outil compris, héritent du déclenchement de la délégation (`model` ou `user`), comme l'écrit la contrainte ; ils ne passent pas à `model` pour les outils que le sous-agent décide.
 - H-14 (implémentation) Libellés : phase de travail « Appel au sous-agent » (`tool_started.phase_label`, puis « Sous-agent · … » pendant ses appels) ; ligne d'Orchestration « Délégation au sous-agent » ; nœud du schéma « Modèle (sous-agent) », robot « Sous-agent ».
-- H-15 (implémentation) Textes lus par un petit module `src/wavestack/subagent.py` (sur le modèle de `skills.py`), non listé au Code Map ; `content/subagent.yaml` porte aussi l'aide du champ `task` (`task_label_fr`).
+- H-15 (implémentation) Textes lus par un petit module `src/harness_lab/subagent.py` (sur le modèle de `skills.py`), non listé au Code Map ; `content/subagent.yaml` porte aussi l'aide du champ `task` (`task_label_fr`).
 - H-16 (implémentation) Un blocage `before_model_call` dans le sous-agent fait échouer la délégation (`tool_ended{error}`, message « le hook … a bloqué son appel au modèle ») ; le tour principal continue.
 - H-17 (implémentation) H2 : chaque `tool_ended` du journal d'audit nomme l'outil de son `tool_started` (même `step_id`), pour que la ligne de `delegate` ne prenne pas le nom d'un outil du sous-agent.
 - H-18 (implémentation) `/api/state` ignore les contextes `sub{n}` pour la jauge restaurée au rechargement (la jauge reste sur le contexte principal).
@@ -247,10 +247,10 @@ def _sub_messages(self, sub, steps, chat):
 **Commands:**
 - `uv run ruff check . && uv run ruff format --check .` -- expected: aucun écart
 - `uv run python -m pytest` -- expected: tout passe (tests `model` exclus)
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` avec Qwen : scénario « Sous-agent », délégation par le modèle puis forcée ; bascule de Contexte LLM, lignes filles et économie dans Orchestration, second robot animé ; H5 actif avec `fetch_page` : carte de validation dans la Vue humain.
+- `uv run harness-lab` avec Qwen : scénario « Sous-agent », délégation par le modèle puis forcée ; bascule de Contexte LLM, lignes filles et économie dans Orchestration, second robot animé ; H5 actif avec `fetch_page` : carte de validation dans la Vue humain.
 
 ## Auto Run Result
 
@@ -260,15 +260,15 @@ Blocking condition: aucune.
 **Résumé.** Brique `subagent` (harness engineering) et méta-outil `delegate(task)` : le sous-agent tourne sur le même moteur, dans `sub{n}` (numéroté sur la vie de la session), avec son prompt système, la tâche et les outils `[subagent] tools` ∩ outils activés ; boucle bornée (4 appels, nouveaux essais compris), hooks `before_model_call` / `before_tool` / `after_tool` (H1, H2, H5), échecs (`context_overflow`, `output_truncated`, `limit_reached{sub_calls|sub_retries}`, `harness_error`) tracés dans `sub{n}` puis `tool_ended{overflow|limit|error}` (`cancelled` pour un arrêt) et erreur réinjectée ; résultat seul dans le contexte principal en `subagent_result` ; `subagent_started` / `subagent_ended` avec l'économie (`context_tokens`, `kept_tokens`, `result_tokens`, `saved_tokens`, `estimated`, `context_estimated`). Délégation forcée depuis la carte (« Déléguer au sous-agent », préréglages), ratio d'estimation propre aux sous-agents en mode chat, second nœud Modèle dans le schéma (zone Réseau pour un modèle cloud). Front : projection par contexte, ligne « Délégation au sous-agent » et lignes filles indentées, bascule « Contexte principal / Contexte du sous-agent », second robot animé, cartes H5 du sous-agent dans la Vue humain.
 
 **Fichiers.**
-- `src/wavestack/session/app_session.py` — méta-outil, boucle `sub{n}`, rendu et ratios par contexte, échecs, économie, armement, carte, schéma, identifiants de hooks par contexte.
-- `src/wavestack/subagent.py` (nouveau) — chargement de `content/subagent.yaml` et du prompt du sous-agent.
-- `src/wavestack/trace/catalog.py` — `subagent_started`, `subagent_ended`, `BrickForce`, `delegate` armable.
-- `src/wavestack/tools/registry.py`, `tools/executor.py` — `DelegationFailed` et son statut dans `tool_ended`.
-- `src/wavestack/config.py`, `wavestack.toml` — section `[subagent]`.
-- `src/wavestack/bricks/registry.py` — brique `subagent`.
-- `src/wavestack/hooks.py` — H2 nomme l'outil de chaque `tool_ended` par son étape.
-- `src/wavestack/web/app.py` — `delegate` dans `ArmIntention` ; jauge de `/api/state` hors sous-agents.
-- `src/wavestack/web/static/app.js`, `app.css` — projection, Orchestration, Contexte LLM, Forcer sur la carte, second robot, journal.
+- `src/harness_lab/session/app_session.py` — méta-outil, boucle `sub{n}`, rendu et ratios par contexte, échecs, économie, armement, carte, schéma, identifiants de hooks par contexte.
+- `src/harness_lab/subagent.py` (nouveau) — chargement de `content/subagent.yaml` et du prompt du sous-agent.
+- `src/harness_lab/trace/catalog.py` — `subagent_started`, `subagent_ended`, `BrickForce`, `delegate` armable.
+- `src/harness_lab/tools/registry.py`, `tools/executor.py` — `DelegationFailed` et son statut dans `tool_ended`.
+- `src/harness_lab/config.py`, `harness-lab.toml` — section `[subagent]`.
+- `src/harness_lab/bricks/registry.py` — brique `subagent`.
+- `src/harness_lab/hooks.py` — H2 nomme l'outil de chaque `tool_ended` par son étape.
+- `src/harness_lab/web/app.py` — `delegate` dans `ArmIntention` ; jauge de `/api/state` hors sous-agents.
+- `src/harness_lab/web/static/app.js`, `app.css` — projection, Orchestration, Contexte LLM, Forcer sur la carte, second robot, journal.
 - `content/bricks/subagent.yaml`, `content/subagent.yaml`, `content/prompts/subagent.md`, `content/demo_files/guide_harnais.md` (≈ 7 400 caractères), `content/scenarios.yaml` (module « Sous-agent »).
 - `tests/test_subagent.py` (nouveau, 24 tests) ; `tests/test_bricks.py`, `test_cloud.py`, `test_scenarios.py`, `test_e2e_fake_openai.py` adaptés.
 - `tools/e2e/fake_openai.py`, `run_e2e.py`, `README.md` — script `delegate`, scénario `subagent` ; capture `tools/e2e/screenshots/19-sous-agent-delegation.jpg`.

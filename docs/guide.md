@@ -2,8 +2,8 @@
 
 [← Retour au README](../README.md)
 
-Ce guide décrit l'interface de WaveStack, le programme de formation et chaque atelier. Pour
-installer et lancer WaveStack, voir [l'installation détaillée](installation.md) ; pour les
+Ce guide décrit l'interface de HarnessLab, le programme de formation et chaque atelier. Pour
+installer et lancer HarnessLab, voir [l'installation détaillée](installation.md) ; pour les
 modèles (local, serveur, cloud), voir [Modèles](modeles.md).
 
 - [L'interface](#linterface)
@@ -133,7 +133,7 @@ La brique RAG cherche dans 27 textes fictifs (`content/corpus/`, l'organisation 
 « Exemplia », dont 2 inactifs par défaut et 3 monolingues, et un jeu de 21 questions préparées
 dans `content/rag_questions.yaml`, story 1) avec un petit modèle d'embedding local, nommé dans
 la seule section
-`[rag.embedding]` de `wavestack.toml` (Granite Embedding 107M multilingue, GGUF Q8_0, 121 Mo,
+`[rag.embedding]` de `harness-lab.toml` (Granite Embedding 107M multilingue, GGUF Q8_0, 121 Mo,
 verdict provisoire de la story 12). Les tailles sont en Mo décimaux (1 Mo = 1 000 000 octets),
 sur la carte comme ici.
 
@@ -180,7 +180,7 @@ La case « Reranking » de la carte RAG ajoute une seconde passe : la recherche 
 un par un avec la question, et seuls les `[rag] top_k` premiers (3 par défaut, 20 au plus)
 entrent dans le message. L'étape « Reranking » d'Orchestration montre l'ordre avant et après.
 
-- **Modèle.** Il est nommé dans la seule section `[rag.reranker]` de `wavestack.toml` : BGE
+- **Modèle.** Il est nommé dans la seule section `[rag.reranker]` de `harness-lab.toml` : BGE
   Reranker v2 M3, GGUF Q4_K_M, 438 Mo, Apache-2.0. C'est le verdict **provisoire** de la
   story 12 : sa latence et sa mémoire restent à mesurer sur le PC cible.
 - **Mémoire.** Il est compté dans le budget mémoire (`[memory]`, calculé au lancement) pour la
@@ -199,29 +199,29 @@ entrent dans le message. L'étape « Reranking » d'Orchestration montre l'ordre
 
 La brique Compression passe les gros résultats d'outils et les extraits RAG à
 [Headroom](https://pypi.org/project/headroom-ai/) (`headroom-ai` 0.38.0, Apache-2.0), avant
-l'appel au modèle. C'est une dépendance optionnelle, non installée par `uv run wavestack` seul :
-installez-la une fois, depuis le dossier de WaveStack, avant une séance qui l'utilise.
+l'appel au modèle. C'est une dépendance optionnelle, non installée par `uv run harness-lab` seul :
+installez-la une fois, depuis le dossier de HarnessLab, avant une séance qui l'utilise.
 
 ```bash
 uv sync --extra compression
-uv run wavestack
+uv run harness-lab
 ```
 
 - **Installation et mise à jour.** Relancez `uv sync --extra compression` après chaque mise à
   jour. Attention : un `uv sync` sans `--extra compression` retire Headroom et ses dépendances
-  (`uv run wavestack`, lui, les garde).
+  (`uv run harness-lab`, lui, les garde).
 - **Réseau à l'installation.** L'extra se télécharge depuis PyPI (`pypi.org`,
   `files.pythonhosted.org`) : environ 40 paquets, 285 Mo sur disque. Ensuite, Headroom tourne
   hors ligne, sans télémétrie ni modèle d'apprentissage automatique (variables posées par
-  WaveStack au lancement).
-- **Table de comptage.** WaveStack livre la table `cl100k_base` de tiktoken (1,6 Mo, licence
-  MIT, `src/wavestack/compression/tiktoken/`) : celle de litellm arrive en fins de ligne CRLF
+  HarnessLab au lancement).
+- **Table de comptage.** HarnessLab livre la table `cl100k_base` de tiktoken (1,6 Mo, licence
+  MIT, `src/harness_lab/compression/tiktoken/`) : celle de litellm arrive en fins de ligne CRLF
   et tiktoken la supprime au premier usage. Si la carte dit la table absente ou altérée,
-  restaurez-la : `git checkout -- src/wavestack/compression/tiktoken`, ou reprenez-la depuis
+  restaurez-la : `git checkout -- src/harness_lab/compression/tiktoken`, ou reprenez-la depuis
   l'archive (un outil qui convertit les fins de ligne l'altère).
 - **Poste verrouillé.** headroom-ai apporte deux binaires natifs non signés (`_core.pyd` et
   l'exécutable `ast-grep`) : AppLocker ou WDAC peuvent les bloquer. La carte de la brique dit
-  alors pourquoi elle est indisponible ; le reste de WaveStack fonctionne.
+  alors pourquoi elle est indisponible ; le reste de HarnessLab fonctionne.
 - **Sans l'extra,** la carte de la brique est indisponible et donne la commande d'installation.
 - **Réglages.** Headroom ajoute 84 Mo de mémoire au pic sur le PC cible (107 Mo sous Linux),
   avec le comptage `gpt-4` ; `[compression] cost_mb` en compte 110, contrôlés par le budget.
@@ -311,7 +311,7 @@ l'étape explique le pas affiché. L'INPUT, l'OUTPUT et chaque section suivante 
   Après une génération avec « Montrer les tokens candidats » coché (section 6), les Logits et
   le Tirage montrent aussi les candidats d'un token produit : le premier, ou celui dont on
   clique la puce en section 6.
-- **Moteur en processus ou exemple.** Seul un fichier GGUF chargé par WaveStack (moteur en
+- **Moteur en processus ou exemple.** Seul un fichier GGUF chargé par HarnessLab (moteur en
   processus) donne ses probabilités et tire un token. Avec lui, à l'ouverture de la page
   (session au repos, aucune génération gardée), la page découpe le texte du champ et fait lire
   les candidats du token suivant, sans rien tirer : l'INPUT et l'OUTPUT montrent des valeurs
@@ -354,13 +354,13 @@ Les sections suivantes reprennent la génération complète :
   voir [Modèles cloud](modeles.md#modèles-cloud)) : pour les autres réglages, la valeur du
   harnais part. Chaque appel trace son échantillonnage dans `model_call_started` (journal des
   événements).
-  - **Tokens candidats.** Avec un fichier GGUF chargé par WaveStack (moteur en processus),
+  - **Tokens candidats.** Avec un fichier GGUF chargé par HarnessLab (moteur en processus),
     « Montrer les tokens candidats » garde, pour chaque token produit, les cinq tokens que le
     modèle jugeait les plus probables : survolez, donnez le focus ou cliquez une puce pour voir
     leur probabilité, ceux que top-k, top-p ou min-p écartent et leur chance réelle d'être tirés
     (la température appliquée), le token tiré marqué. La lecture coûte peu (le vocabulaire d'une
     seule position par token). Avec llama-server, Ollama ou un modèle cloud, la case est grisée :
-    WaveStack ne lit pas leurs probabilités.
+    HarnessLab ne lit pas leurs probabilités.
   - **Comparer deux réglages.** « Comparer » génère deux fois le même prompt : A avec les
     réglages de l'OUTPUT, B avec les « Réglages B », côte à côte. Un seul modèle tourne sur le
     processeur : B commence quand A a fini, et « Arrêter » arrête les deux. Les réglages B
@@ -415,7 +415,7 @@ sable : la brique RAG de l'atelier (ses réglages, son index, ses modèles) ne c
   focus du Contexte liste les tours de la boucle ou les niveaux de la descente.
 - **L'exécution.** « Lancer la chaîne » exécute chaque étape sur la question (500 caractères au
   plus) et montre ce qu'elle reçoit, ce qu'elle produit, ses chiffres, ses extraits (rang, rang
-  d'avant, document, score), sa durée et la mémoire de WaveStack. La chaîne livrée lit l'index
+  d'avant, document, score), sa durée et la mémoire de HarnessLab. La chaîne livrée lit l'index
   de la brique (sans jamais y écrire) ; l'embedder et le reranker sont empruntés à la brique
   RAG quand elle les a chargés, sinon chargés pour l'exécution (dans le budget mémoire) puis
   fermés. Sans modèle d'embedding, l'étape le dit : téléchargez-le depuis son étape (voir plus
@@ -452,7 +452,7 @@ sable : la brique RAG de l'atelier (ses réglages, son index, ses modèles) ne c
   télécharge jamais rien. Une chaîne refusée dit pourquoi, en nommant l'étape.
 - **Embedding au choix.** L'étape Embedding propose, après le modèle de la brique RAG (Granite
   Embedding 107M) et fastembed, les modèles déclarés en `[[rag_lab.embeddings]]` de
-  `wavestack.toml` (jamais dans `settings.json`) : **multilingual-e5-small** (384 dimensions,
+  `harness-lab.toml` (jamais dans `settings.json`) : **multilingual-e5-small** (384 dimensions,
   512 tokens, préfixes `query: ` et `passage: `) et **Qwen3-Embedding 0.6B** (1 024 dimensions,
   2 048 tokens, une instruction devant la question). Leur fichier va sous `models/embedding/`
   du dossier de données ; absent, l'option est grisée et la raison nomme le fichier attendu.
@@ -464,7 +464,7 @@ sable : la brique RAG de l'atelier (ses réglages, son index, ses modèles) ne c
   jamais proposé comme modèle de conversation, où qu'il soit (dossier des modèles, cache
   Hugging Face, LM Studio) : la page Modèles le montre en rouge, avec la raison.
 - **Reranking au choix.** L'étape Reranking propose, après le modèle de la brique RAG (BGE
-  Reranker v2 M3), ceux déclarés en `[[rag_lab.rerankers]]` de `wavestack.toml` :
+  Reranker v2 M3), ceux déclarés en `[[rag_lab.rerankers]]` de `harness-lab.toml` :
   **Qwen3-Reranker 0.6B** (1 024 tokens par paire). Son fichier va sous `models/reranker/` ;
   absent, l'option est grisée et la raison nomme le fichier attendu (voir « Télécharger un
   modèle absent » plus bas). Il est chargé le temps de l'exécution dans son propre emplacement
@@ -506,7 +506,7 @@ sable : la brique RAG de l'atelier (ses réglages, son index, ses modèles) ne c
   « Lexical indexing », qui construit l'index inversé des chunks (termes, fréquences
   documentaires, longueurs ; tuile « Index lexical (BM25) » du groupe Données, chiffres et
   durée dans son focus), et l'étape BM25 lit cet index à chaque question. Les
-  autres étapes sont fixes. WaveStack vérifie la chaîne à chaque modification : une chaîne
+  autres étapes sont fixes. HarnessLab vérifie la chaîne à chaque modification : une chaîne
   invalide (deux recherches sans fusion après elles, une fusion sans deux recherches avant elle,
   un reranking avant toute recherche…) affiche sa raison sur l'étape fautive, et « Lancer la
   chaîne » est désactivé. Les chaînes en cours d'édition sont gardées par le navigateur ; « Revenir à la
@@ -515,7 +515,7 @@ sable : la brique RAG de l'atelier (ses réglages, son index, ses modèles) ne c
   fois par modèle et par taille d'extrait, puis relus (« relus du cache »), et les index sqlite-vec
   de l'atelier sont construits à côté, dans `rag_lab/` du dossier de données (moins de 1 Mo par
   configuration pour le corpus livré). Rien n'est écrit dans le dépôt ni dans l'index de la
-  brique. Ce dossier se supprime sans risque, WaveStack arrêté.
+  brique. Ce dossier se supprime sans risque, HarnessLab arrêté.
 
 Les textes de la page sont dans `content/rag_lab.yaml`. Les événements `rag_lab_*` sont tracés
 dans le contexte `rag_lab` : le journal des événements de l'atelier les liste, aucun volet ne
@@ -526,11 +526,11 @@ les montre. Après un rechargement, la page réaffiche la dernière exécution.
 La base vectorielle de l'Atelier RAG peut aussi être [FAISS](https://pypi.org/project/faiss-cpu/)
 (`faiss-cpu` 1.15.1, MIT) ou [LanceDB](https://pypi.org/project/lancedb/) (`lancedb` 0.39.0,
 Apache-2.0, avec `pyarrow` 25.0.1). Ce sont des dépendances optionnelles, l'extra `rag-alt`,
-non installées par `uv run wavestack` seul. Depuis le dossier de WaveStack :
+non installées par `uv run harness-lab` seul. Depuis le dossier de HarnessLab :
 
 ```bash
 uv sync --extra compression --extra rag-alt
-uv run wavestack
+uv run harness-lab
 ```
 
 - **Headroom.** Gardez `--extra compression` dans la commande : un `uv sync` sans lui retire
@@ -544,17 +544,17 @@ uv run wavestack
   vectorielle » dit la mémoire réellement ajoutée.
 - **Le dossier `rag_lab`.** Chaque index est construit à la première exécution (« construit
   (N vecteurs) »), puis relu (« relu ») ; `rag_lab/` du dossier de données se supprime sans
-  risque, WaveStack arrêté.
+  risque, HarnessLab arrêté.
 - **Poste verrouillé.** Leurs bibliothèques natives (DLL) ne sont pas signées : AppLocker ou
   WDAC peuvent les bloquer. L'étape « Base vectorielle » dit alors « Import refusé », l'option
   devient indisponible, et les autres bases (sqlite-vec, recherche en mémoire) restent
   utilisables.
 - **Sans l'extra,** FAISS et LanceDB sont grisés dans l'Atelier RAG, avec la commande
   d'installation.
-- **fastembed n'est pas livré** (décision de la story 30) : ni dépendance ni extra de WaveStack,
+- **fastembed n'est pas livré** (décision de la story 30) : ni dépendance ni extra de HarnessLab,
   car il ajoute onnxruntime et un client de téléchargement que le parcours n'a pas vérifiés hors
   ligne sous la garde réseau, ni sous Windows. Un formateur qui veut le montrer l'ajoute sur son
-  poste seulement, depuis le dossier de WaveStack : `uv add --optional fastembed
+  poste seulement, depuis le dossier de HarnessLab : `uv add --optional fastembed
   "fastembed==0.8.1"`, puis `uv sync --extra compression --extra rag-alt --extra fastembed` ;
   `git checkout pyproject.toml uv.lock` le retire avant une mise à jour. Son import est compté
   à vie par le budget (`[rag_lab] fastembed_cost_mb = 150`), son modèle à part, le temps d'une
@@ -587,7 +587,7 @@ apparaissent une à une, quand elles interviennent.
   serveur annonce des ressources et des prompts. « Pourquoi une poignée de main ? » l'explique
   par une analogie, le restaurant.
 - **La Séquence.** Une colonne par acteur : « Utilisateur », le modèle (« SLM local », ou le
-  modèle cloud et son fournisseur), « Hôte WaveStack », « Client MCP », « Serveur MCP » et
+  modèle cloud et son fournisseur), « Hôte HarnessLab », « Client MCP », « Serveur MCP » et
   « Source de données » ; un clic sur l'en-tête d'une colonne l'explique, avec une analogie (le
   restaurant). Chaque flèche porte son origine (« capturé sur le transport », « dans l'hôte ·
   déduit », « dans le serveur · non capturé », « événement du modèle »), son sens et sa durée ;
@@ -631,7 +631,7 @@ apparaissent une à une, quand elles interviennent.
 
 « Arrêter » interrompt l'échange en cours : une requête MCP arrêtée ferme la connexion, une
 génération arrêtée la garde. Sinon, la connexion reste ouverte jusqu'à la connexion suivante,
-un changement de langue, une réinitialisation ou la fermeture de WaveStack (« Connexion
+un changement de langue, une réinitialisation ou la fermeture de HarnessLab (« Connexion
 fermée : … Reconnectez-vous. »). Pendant un échange, l'atelier attend (« Atelier MCP : échange
 en cours ; attendez sa fin ou arrêtez-le. »). Après un rechargement, la page rejoue les
 derniers échanges.
@@ -669,7 +669,7 @@ La langue change :
   harnais (erreurs, raisons d'indisponibilité, erreurs d'outils lues par le modèle, marque de
   troncature, refus des hooks, résultat de `get_datetime`), tirés de `content/messages.yaml`.
 
-Seule la sortie du terminal (`wavestack diagnostic`, `scripts/build_rag_index.py`) reste en
+Seule la sortie du terminal (`harness-lab diagnostic`, `scripts/build_rag_index.py`) reste en
 anglais, quelle que soit la langue choisie.
 Une mémoire globale que vous avez modifiée est gardée telle quelle ; la mémoire de
 démonstration, elle, passe dans la nouvelle langue.
@@ -688,7 +688,7 @@ plan gratuit de Mistral, le coût réel est nul : le prix affiché est le prix c
 plan payant, la consommation est facturée à ce prix. Gemma n'a pas de `pricing` : le modèle est
 gratuit, aucun coût n'est estimé ni affiché (« — »).
 
-**Estimation.** Pour chaque appel cloud, WaveStack calcule le coût d'entrée (tokens du prompt ×
+**Estimation.** Pour chaque appel cloud, HarnessLab calcule le coût d'entrée (tokens du prompt ×
 prix d'entrée / 10⁶) et le coût de sortie (tokens produits × prix de sortie / 10⁶, les tokens de
 raisonnement compris, même ceux que Gemini ne compte pas dans `completion_tokens`). Les tokens
 viennent de `usage` quand le fournisseur le renvoie ; sinon ils sont estimés, et le coût aussi
@@ -708,7 +708,7 @@ pas envoyé, et le message dit le plafond, le total et comment le relever. Les m
 interrompus : le total peut dépasser le plafond du coût de chacun d'eux. Une valeur illisible,
 `nan`, `inf`, négative ou booléenne vaut 5 ; aucune valeur ne désactive le plafond, et `0` refuse
 tout appel tarifé. Pour le relever, modifiez-le dans `settings.json`, par exemple
-`{"finops": {"max_session_usd": 10}}`, WaveStack arrêté, puis relancez : le total de la séance ne
+`{"finops": {"max_session_usd": 10}}`, HarnessLab arrêté, puis relancez : le total de la séance ne
 revient à zéro qu'au relancement.
 
 **Affichage.** « Coût estimé : entrée … $ · sortie … $ » dans le détail de chaque appel
@@ -719,21 +719,21 @@ dès le premier appel payant : le total de la séance, entrée + sortie (arrondi
 cent), la phrase entière (4 chiffres significatifs, conversion en euros) dans l'infobulle. Ce
 total compte tous les appels payants : les tours, le sous-agent, « Tester » sur la page Modèles et
 l'Atelier LLM. Ni « Vider la conversation » ni « Réinitialiser » ne le remettent à zéro ; seul
-un relancement de WaveStack le fait (il n'est jamais écrit sur le disque). Les prix déclarés
+un relancement de HarnessLab le fait (il n'est jamais écrit sur le disque). Les prix déclarés
 sont aussi sur la ligne « Prix » de la carte dépliée d'un modèle, page Modèles. Un modèle
 local n'a pas de coût, et une entrée sans `pricing` non plus.
 
 **Mettre les prix à jour.** Relevez les prix sur la page du fournisseur, puis surchargez l'entrée
 dans `settings.json`, par exemple `{"id": "gemini", "pricing": {"input_usd_per_mtok": 0.3,
 "output_usd_per_mtok": 2.5, "cache_read_usd_per_mtok": 0.03, "checked": "2027-01-02"}}`, et
-relancez WaveStack (`cache_read_usd_per_mtok` et `cache_write_usd_per_mtok` sont facultatifs). Le taux de
+relancez HarnessLab (`cache_read_usd_per_mtok` et `cache_write_usd_per_mtok` sont facultatifs). Le taux de
 conversion se règle dans `[finops] eur_per_usd` (euros pour un dollar, 0,86 par défaut, borné de
 0,5 à 2 ; une valeur illisible, `nan` ou `inf`, vaut 0,86). Ce taux par défaut a été relevé le
 2026-09-30 : mettez-le à jour. Un prix négatif rend l'entrée invalide : elle est écartée au lancement, avec la raison.
 
 ## GreenOps, empreinte estimée des appels au modèle
 
-WaveStack estime, pour chaque appel au modèle, l'énergie consommée (Wh) et les émissions (g CO₂e),
+HarnessLab estime, pour chaque appel au modèle, l'énergie consommée (Wh) et les émissions (g CO₂e),
 puis les additionne par tour et par séance, sans aucun appel réseau.
 
 **Modèle cloud : méthode EcoLogits.** La bibliothèque `ecologits` (dépendance normale, son cœur
@@ -752,7 +752,7 @@ publiée, modèle multimodal) sont repris en français dans l'infobulle. Sans `i
 modèle qu'EcoLogits ne connaît pas, l'appel n'a pas d'empreinte, et l'infobulle dit pourquoi.
 
 **Modèle local : CodeCarbon.** Avec l'extra `greenops`, un traceur CodeCarbon hors ligne entoure
-chaque génération : le processus de WaveStack seul pour le moteur intégré, le poste entier pour
+chaque génération : le processus de HarnessLab seul pour le moteur intégré, le poste entier pour
 Ollama et llama-server (processus à part). Seule son énergie est gardée ; les émissions en
 découlent à `[greenops] local_gco2e_per_kwh` (41,4 g CO₂e par kWh par défaut, le facteur du mix
 France d'EcoLogits ; RTE donne pour 2025 19,6 g en émissions directes, environ 29 g en cycle de

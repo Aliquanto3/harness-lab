@@ -11,7 +11,7 @@ from pathlib import Path
 
 import yaml
 
-from wavestack import config
+from harness_lab import config
 
 # The DESIGN.md that declares the tokens; a lot's delta (lot 6 of 2026-10-04, its own
 # DESIGN.md) inherits them and declares no `colors:` of its own.
@@ -24,7 +24,7 @@ _DESIGN_MD_MATCHES = [
 ]
 assert len(_DESIGN_MD_MATCHES) == 1, f"expected exactly one DESIGN.md, found {_DESIGN_MD_MATCHES}"
 DESIGN_MD = _DESIGN_MD_MATCHES[0]
-STATIC_DIR = Path(__file__).resolve().parents[1] / "src" / "wavestack" / "web" / "static"
+STATIC_DIR = Path(__file__).resolve().parents[1] / "src" / "harness_lab" / "web" / "static"
 TOKENS_CSS = STATIC_DIR / "tokens.css"
 
 _ATTR_TO_CSS = {
@@ -214,12 +214,12 @@ def _contrast(a: str, b: str) -> float:
 # (foreground, background, ratio of the design note rounded to 0.1, WCAG AA threshold): 4.5
 # for text, 3 for a stroke that carries meaning.
 _PAIRS = [
-    ("on-ink", "ink", 19.7, 4.5),
-    ("on-ink-soft", "ink", 12.7, 4.5),
-    ("on-ink", "discipline-prompt", 9.3, 4.5),
+    ("on-ink", "ink", 17.5, 4.5),
+    ("on-ink-soft", "ink", 11.6, 4.5),
+    ("on-ink", "discipline-prompt", 5.2, 4.5),
     ("on-ink", "discipline-context", 5.2, 4.5),
     ("on-ink", "discipline-harness", 5.6, 4.5),
-    ("ink", "discipline-network", 8.7, 4.5),
+    ("ink", "discipline-network", 7.7, 4.5),
     *(
         ("ink-soft", f"discipline-{name}-soft", None, 4.5)
         for name in ("prompt", "context", "harness", "network", "neutral")
@@ -234,11 +234,11 @@ _PAIRS = [
 # Story 32: what the call produced and its reasoning, then the JSON trees' text colours, on
 # both backgrounds, on `surface-raised` and on each discipline's soft background (a section).
 _STORY32_TEXT = [
-    ("ink", "produced-soft", 16.9),
-    ("ink-soft", "produced-soft", 7.4),
-    ("ink", "reasoning-soft", 17.1),
-    ("ink-soft", "reasoning-soft", 7.5),
-    ("on-ink", "ink", 19.7),  # the « Produit par le modèle » tag
+    ("ink", "produced-soft", 15.0),
+    ("ink-soft", "produced-soft", 6.5),
+    ("ink", "reasoning-soft", 15.3),
+    ("ink-soft", "reasoning-soft", 6.6),
+    ("on-ink", "ink", 17.5),  # the « Produit par le modèle » tag
 ]
 _JSON_FLOORS = {"json-key": 8.7, "json-string": 7.6, "json-literal": 6.2}
 _JSON_BACKGROUNDS = [
@@ -277,8 +277,8 @@ def test_discipline_tokens_meet_wcag_aa():
         _contrast(colors["ink-soft"], colors[f"discipline-{n}-soft"])
         for n in ("prompt", "context", "harness", "network", "neutral")
     )
-    if soft_floor < 7.2:
-        failures.append(f"ink-soft sur un fond doux : {soft_floor:.2f} (< 7,2)")
+    if soft_floor < 6.3:
+        failures.append(f"ink-soft sur un fond doux : {soft_floor:.2f} (< 6,3)")
     assert not failures, failures
 
 
@@ -310,11 +310,10 @@ _VIVID = [
     "warning",
     "discipline-network",
     "discipline-neutral",
-    "state-active",
-    "accent",
-    "danger",
-    "state-error",
 ]
+# 2.0.0 (charte générique): the status fills are dark in the light theme, light in the dark one;
+# their text is `on-status` (white, then ink), no longer `on-vivid`.
+_STATUS = ["state-active", "accent", "danger", "state-error"]
 
 # (foreground, background, WCAG AA threshold), checked in both palettes (DESIGN.md > Colors >
 # Thème sombre): 4.5 for text, 3 for a stroke that carries meaning. `_PAIRS` above stays.
@@ -327,6 +326,7 @@ _THEME_PAIRS = [
     ("on-ink-soft", "ink-fill", 4.5),
     *(("on-discipline", f"discipline-{n}", 4.5) for n in ("prompt", "context", "harness")),
     *(("on-vivid", bg, 4.5) for bg in _VIVID),
+    *(("on-status", bg, 4.5) for bg in _STATUS),
     *(
         (f"discipline-{n}", bg, 3.0)
         for n in ("prompt", "context", "harness", "neutral")
@@ -360,25 +360,25 @@ _DARK_ONLY_PAIRS = [
 
 # The dark figures of the DESIGN.md table, rounded to 0.1.
 _DARK_RATIOS = {
-    ("primary", "surface-raised"): 5.7,
-    ("primary-deep", "primary-soft"): 8.4,
-    ("on-primary", "primary"): 6.7,
-    ("on-ink", "ink-fill"): 12.5,
-    ("on-ink-soft", "ink-fill"): 8.0,
-    ("on-discipline", "discipline-prompt"): 6.7,
-    ("on-discipline", "discipline-context"): 7.8,
-    ("on-discipline", "discipline-harness"): 6.2,
-    ("danger", "surface-raised"): 6.0,
+    ("primary", "surface-raised"): 8.0,
+    ("primary-deep", "primary-soft"): 8.3,
+    ("on-primary", "primary"): 7.8,
+    ("on-ink", "ink-fill"): 9.8,
+    ("on-ink-soft", "ink-fill"): 6.4,
+    ("on-discipline", "discipline-prompt"): 7.0,
+    ("on-discipline", "discipline-context"): 6.7,
+    ("on-discipline", "discipline-harness"): 5.3,
+    ("danger", "surface-raised"): 7.1,
 }
 
 # The dark floors of the DESIGN.md table: the lowest ratio of each group, rounded to 0.1.
 _DARK_FLOORS = [
     (
         "ink et encre douce sur un fond de texte",
-        6.2,
+        5.8,
         [(fg, bg) for fg in ("ink", "ink-soft") for bg in _TEXT_BACKGROUNDS],
     ),
-    ("on-vivid sur un fond vif", 5.8, [("on-vivid", bg) for bg in _VIVID]),
+    ("on-vivid sur un fond vif", 5.2, [("on-vivid", bg) for bg in _VIVID]),
     (
         "disciplines sur surface et surface-raised",
         4.9,
@@ -390,7 +390,7 @@ _DARK_FLOORS = [
     ),
     (
         "encre sur les fonds produits",
-        7.4,
+        6.7,
         [(fg, bg) for fg in ("ink", "ink-soft") for bg in ("produced-soft", "reasoning-soft")],
     ),
     (

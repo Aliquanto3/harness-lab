@@ -51,19 +51,19 @@ context:
 
 ## Code Map
 
-- `src/wavestack/web/static/app.js` `renderSchema` (l.2031-2173) : à réécrire. Garder `renderedSchemaKey` (reconstruction seulement si la clé change), `robotPose` (l.1958), `openAudit`, `select`. `robot()` (l.1979) : garder le dessin, le sortir dans un `<svg>` propre avec « Modèle » et le nom du modèle en HTML. `BRICK_ICONS` (l.1947) pour les puces ; `HOOK_ICONS` (l.1176) pour la bande.
+- `src/harness_lab/web/static/app.js` `renderSchema` (l.2031-2173) : à réécrire. Garder `renderedSchemaKey` (reconstruction seulement si la clé change), `robotPose` (l.1958), `openAudit`, `select`. `robot()` (l.1979) : garder le dessin, le sortir dans un `<svg>` propre avec « Modèle » et le nom du modèle en HTML. `BRICK_ICONS` (l.1947) pour les puces ; `HOOK_ICONS` (l.1176) pour la bande.
 - `app.js` `applyEnvelope` : cases `tool_started` (l.205) et `hook_decided` (l.250) : ajouter `component: envelope.component` à l'étape (champ de projection, pas d'état calculé). `shownTurns()`, `activeTurn()` pour lire l'étape en action.
-- Nœuds (`src/wavestack/session/app_session.py:389-475`, lecture seule) : ids `core.harness`, `core.model`, `short_memory.history` / `system_prompt.prompt` (`kind: brick`), `tools.<nom>`, `mcp.<serveur>` (`kind: mcp_server`, `contact`, `tools`), `skills.<id>` (`loaded`), `hooks.h1|h2|h3|h5`, `file.demo_dir`, `file.audit`. Arêtes `{from, to, crosses_boundary}`. Outils du harnais (`load_tool_doc`, skills) : `component` = `core.harness`.
-- `src/wavestack/web/static/index.html` (l.140-142) : remplacer `<svg id="schema-svg">` par un conteneur HTML.
-- `src/wavestack/web/static/app.css` (l.1157-1190, 1524-1575, 1603-1733) : remplacer les styles `.arch-node`, `.arch-edge`, `.arch-harness*`, `.arch-chip` ; adapter `.robot*`.
-- `src/wavestack/web/static/tokens.css:98` et frontmatter de `DESIGN.md` (`spacing.architecture-band-height`) : 200px → 250px ; `tests/test_web_tokens.py` compare les deux, sans valeur en dur.
+- Nœuds (`src/harness_lab/session/app_session.py:389-475`, lecture seule) : ids `core.harness`, `core.model`, `short_memory.history` / `system_prompt.prompt` (`kind: brick`), `tools.<nom>`, `mcp.<serveur>` (`kind: mcp_server`, `contact`, `tools`), `skills.<id>` (`loaded`), `hooks.h1|h2|h3|h5`, `file.demo_dir`, `file.audit`. Arêtes `{from, to, crosses_boundary}`. Outils du harnais (`load_tool_doc`, skills) : `component` = `core.harness`.
+- `src/harness_lab/web/static/index.html` (l.140-142) : remplacer `<svg id="schema-svg">` par un conteneur HTML.
+- `src/harness_lab/web/static/app.css` (l.1157-1190, 1524-1575, 1603-1733) : remplacer les styles `.arch-node`, `.arch-edge`, `.arch-harness*`, `.arch-chip` ; adapter `.robot*`.
+- `src/harness_lab/web/static/tokens.css:98` et frontmatter de `DESIGN.md` (`spacing.architecture-band-height`) : 200px → 250px ; `tests/test_web_tokens.py` compare les deux, sans valeur en dur.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/web/static/app.js` -- stocker `component` sur les étapes `tool` et `hook` ; réécrire `renderSchema` en HTML (zones, frontière, cadre, bande, bacs, nœuds) plus un calque SVG pour tronc, rails, chemin et marqueurs, tracé après mise en page et à chaque redimensionnement (`ResizeObserver`) -- B1, B3.
-- [x] `src/wavestack/web/static/index.html` -- conteneur du schéma -- B1.
-- [x] `src/wavestack/web/static/app.css` -- styles `arch-zone-*`, `arch-boundary`, `arch-group`, formes par catégorie, `arch-hook-strip`, `arch-trunk`, chemin et marqueurs selon DESIGN.md (`{rounded.sm}` partout, traits ≥ `{spacing.stroke-min}`) -- B3, B5.
+- [x] `src/harness_lab/web/static/app.js` -- stocker `component` sur les étapes `tool` et `hook` ; réécrire `renderSchema` en HTML (zones, frontière, cadre, bande, bacs, nœuds) plus un calque SVG pour tronc, rails, chemin et marqueurs, tracé après mise en page et à chaque redimensionnement (`ResizeObserver`) -- B1, B3.
+- [x] `src/harness_lab/web/static/index.html` -- conteneur du schéma -- B1.
+- [x] `src/harness_lab/web/static/app.css` -- styles `arch-zone-*`, `arch-boundary`, `arch-group`, formes par catégorie, `arch-hook-strip`, `arch-trunk`, chemin et marqueurs selon DESIGN.md (`{rounded.sm}` partout, traits ≥ `{spacing.stroke-min}`) -- B3, B5.
 - [x] `tokens.css`, `DESIGN.md` (frontmatter et phrase `[ASSUMPTION]` de Layout & Spacing) -- 250 px -- B4.
 
 **Acceptance Criteria:**
@@ -82,11 +82,11 @@ Disposition (maquette `drawWires`) : colonnes du Poste = [Outils], [Serveurs MCP
 ## Verification
 
 **Commands:**
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 - `uv run ruff check .` et `uv run pytest` -- expected: tout passe, `test_web_tokens.py` compris
 
 **Manual checks:**
-- Rejeu SSE scripté ou `uv run wavestack` : LLM nu ; toutes briques ; outil local, outil réseau, MCP public ; H5 en attente ; blocage H1 ; H2 ; serveur public indisponible ; mode focus et masquage d'un volet ; 1280×650.
+- Rejeu SSE scripté ou `uv run harness-lab` : LLM nu ; toutes briques ; outil local, outil réseau, MCP public ; H5 en attente ; blocage H1 ; H2 ; serveur public indisponible ; mode focus et masquage d'un volet ; 1280×650.
 
 ## Implementation Notes
 
@@ -95,7 +95,7 @@ Disposition (maquette `drawWires`) : colonnes du Poste = [Outils], [Serveurs MCP
 - Calque SVG retracé par `scheduleWires` après reconstruction, à chaque `ResizeObserver` de `#schema` et au chargement des polices.
 - Ajouts hors spec : table `TOOL_ICONS` (tuile ronde des outils) ; skill chargé marqué d'une pastille « ✓ » (« Chargé » dans l'infobulle et le nom accessible) ; outil ou serveur réseau non contacté avec la pastille « non contacté ». Nœuds locaux sur fond blanc à bordure violette, comme la maquette : le token `arch-node-local` de DESIGN.md (fond violet) n'est pas appliqué, les formes de catégorie y seraient illisibles.
 - Hauteur : toutes briques voulues, la bande de 250 px déborde de 50 à 70 px (cadre avec 4 hooks, colonne Réseau pleine) : le schéma défile ; mode focus et 8f pour ajuster.
-- Vérifié par `node --check`, `ruff`, `pytest` (266 passés, `test_web_tokens.py` compris ; `uv run pytest` bute ici sur le lanceur du venv, `uv run python -m pytest` passe) et dans Chrome contre un rejeu SSE scripté (lignes de la matrice). Pas lancé sous `uv run wavestack` avec un vrai modèle, ni à 1280×650 exact.
+- Vérifié par `node --check`, `ruff`, `pytest` (266 passés, `test_web_tokens.py` compris ; `uv run pytest` bute ici sur le lanceur du venv, `uv run python -m pytest` passe) et dans Chrome contre un rejeu SSE scripté (lignes de la matrice). Pas lancé sous `uv run harness-lab` avec un vrai modèle, ni à 1280×650 exact.
 - Audit de la matrice : pas de banc de test JavaScript dans le dépôt et aucune nouvelle dépendance permise ; les lignes de la matrice sont couvertes par le rejeu scripté dans Chrome, pas par un test automatisé (même écart que 5b, 6, 6b, 6c, 8c, 8d).
 
 ## Spec Change Log

@@ -16,7 +16,7 @@ deferred:
     evidence: |-
       Faute de réseau, aucun vrai serveur ici : `with_pieces`, `stop_type`, `tokens_predicted`, `default_generation_settings.n_ctx` (llama-server), `prompt_eval_count` avec cache et `done_reason` (Ollama) viennent de la documentation. Un tour réel avec chacun des deux serveurs, sur le PC cible, tranche.
     location: >-
-      src/wavestack/models/servers.py
+      src/harness_lab/models/servers.py
     severity: medium (unverified)
 ---
 
@@ -26,7 +26,7 @@ deferred:
 
 **Problem:** La découverte repère déjà Ollama (`127.0.0.1:11434`) et llama-server (`127.0.0.1:8080`) sans les lancer, mais un serveur trouvé reste inutilisable : sans fichier GGUF chargeable, la session démarre sans modèle (« son adaptateur arrive au palier 2 »). Or sur le PC cible les Qwen3.5 d'Ollama ne se chargent pas dans llama-cpp-python 0.3.35, alors qu'un serveur déjà lancé les fait tourner. C'est la seconde moitié de CAP-36 (FR-34).
 
-**Approach:** Deux adaptateurs de texte rendu derrière le port `Engine` (AD-5). `llama_server` envoie les ids par `/completion` et tokenise par `/tokenize`. `ollama_raw` envoie le texte par `/api/generate` en `raw: true`, avec `num_ctx` égal à la fenêtre effective, et tokenise avec le GGUF du modèle ouvert en `vocab_only`. Le harnais construit toujours le texte envoyé, gabarit compris (AD-4). Chaque modèle servi devient un candidat `{kind: server, ref}` qu'on choisit comme un fichier, au diagnostic et à chaud (story 17). En mode serveur, le modèle en processus est libéré et la mémoire du modèle servi est comptée ; en quittant un modèle Ollama, WaveStack envoie `keep_alive: 0` (AD-8). Le schéma dessine ce modèle comme un processus local distinct du harnais.
+**Approach:** Deux adaptateurs de texte rendu derrière le port `Engine` (AD-5). `llama_server` envoie les ids par `/completion` et tokenise par `/tokenize`. `ollama_raw` envoie le texte par `/api/generate` en `raw: true`, avec `num_ctx` égal à la fenêtre effective, et tokenise avec le GGUF du modèle ouvert en `vocab_only`. Le harnais construit toujours le texte envoyé, gabarit compris (AD-4). Chaque modèle servi devient un candidat `{kind: server, ref}` qu'on choisit comme un fichier, au diagnostic et à chaud (story 17). En mode serveur, le modèle en processus est libéré et la mémoire du modèle servi est comptée ; en quittant un modèle Ollama, HarnessLab envoie `keep_alive: 0` (AD-8). Le schéma dessine ce modèle comme un processus local distinct du harnais.
 
 ## Boundaries & Constraints
 
@@ -47,7 +47,7 @@ deferred:
   - si `prompt_eval_count` ≠ `len(ids)`, l'adaptateur émet `harness_error` « transparence réduite », avec les deux comptes ;
   - un champ `thinking` non vide émet le même `harness_error`, une fois par appel ;
   - tokenizer, `token_pieces` et métadonnées viennent du GGUF (blob du manifeste Ollama) ouvert en `vocab_only`, par le même code que `LlamaCppEngine`, factorisé.
-- HTTP par `net` seulement (AD-15) : un client boucle locale, sans proxy (`trust_env=False`), qui refuse tout hôte hors boucle locale ; appels sous `origin = model`, non tracés en `outbound_request` (boucle locale). Délais dans `wavestack.toml`.
+- HTTP par `net` seulement (AD-15) : un client boucle locale, sans proxy (`trust_env=False`), qui refuse tout hôte hors boucle locale ; appels sous `origin = model`, non tracés en `outbound_request` (boucle locale). Délais dans `harness-lab.toml`.
 - Candidats serveur (AD-7) : un candidat par modèle servi, `source = server`, `engine` (`ollama` ou `llama_server`), `server_url`, `name`, `ref`. Refs : `ollama/{nom:tag}` (`/api/tags`), `llama_server/{nom du fichier de /props model_path}`. Un modèle Ollama sans blob GGUF lisible (couche `image.tensor`, blob absent) est `incompatible`, avec la raison. `settings.json` mémorise `selected_model = {kind: server, ref}`.
 - Choix : `select_model{kind: server, ref}` suit le chemin de `kind: file` (classe b ; en diagnostic, chargement immédiat ; à chaud, chemin de la story 17). Un serveur n'est jamais choisi d'office. Au lancement, un choix mémorisé est repris si le serveur répond et sert encore ce modèle ; sinon, avertissement puis règle de démarrage.
 - Mode serveur (AD-8) :
@@ -84,49 +84,49 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/models/engine.py` -- `Engine` (60), `Fragment` (42), `cut_stop` (82). `LlamaCppEngine` (91) : `_read_metadata` (107), `tokenize` (129) et `token_pieces` (132) sont à factoriser dans une classe `VocabTokenizer(model_path)`, en `Llama(vocab_only=True)`, que `LlamaCppEngine` réutilise. `llama_token_to_piece` réagrandit son tampon ; `detokenize` est interdit.
-- `src/wavestack/models/openai_chat.py` -- modèle de lecture en flux, de `CancelToken` et de fabrique injectable (`transport`, 204). Rien à y changer.
-- `src/wavestack/models/discovery.py` -- `ModelCandidate` (25) reçoit `engine`, `ref` et `served_bytes`. `_ollama_candidates` (70) fait déjà la correspondance nom → blob, à réutiliser. `_server_candidates` (109) sonde `/api/tags` et `/health` et renvoie un candidat par serveur : il doit renvoyer un candidat par modèle servi (`transport` injectable).
-- `src/wavestack/models/capabilities.py` -- `capabilities_for` (29) : sans architecture (llama-server), un gabarit qui contient `<|im_start|>` et `<tool_call>` choisit la famille `qwen3`, avec le parseur `qwen3_coder` si `<function=` est présent, sinon `hermes`.
-- `src/wavestack/net/factory.py` -- `create_client` (55) : ajouter la variante boucle locale (hôte vérifié par `is_loopback` de `net/guard.py:30`).
-- `src/wavestack/session/diagnostic.py` :
+- `src/harness_lab/models/engine.py` -- `Engine` (60), `Fragment` (42), `cut_stop` (82). `LlamaCppEngine` (91) : `_read_metadata` (107), `tokenize` (129) et `token_pieces` (132) sont à factoriser dans une classe `VocabTokenizer(model_path)`, en `Llama(vocab_only=True)`, que `LlamaCppEngine` réutilise. `llama_token_to_piece` réagrandit son tampon ; `detokenize` est interdit.
+- `src/harness_lab/models/openai_chat.py` -- modèle de lecture en flux, de `CancelToken` et de fabrique injectable (`transport`, 204). Rien à y changer.
+- `src/harness_lab/models/discovery.py` -- `ModelCandidate` (25) reçoit `engine`, `ref` et `served_bytes`. `_ollama_candidates` (70) fait déjà la correspondance nom → blob, à réutiliser. `_server_candidates` (109) sonde `/api/tags` et `/health` et renvoie un candidat par serveur : il doit renvoyer un candidat par modèle servi (`transport` injectable).
+- `src/harness_lab/models/capabilities.py` -- `capabilities_for` (29) : sans architecture (llama-server), un gabarit qui contient `<|im_start|>` et `<tool_call>` choisit la famille `qwen3`, avec le parseur `qwen3_coder` si `<function=` est présent, sinon `hermes`.
+- `src/harness_lab/net/factory.py` -- `create_client` (55) : ajouter la variante boucle locale (hôte vérifié par `is_loopback` de `net/guard.py:30`).
+- `src/harness_lab/session/diagnostic.py` :
   - `__init__` (87) lit `selected_model` `file` ou `cloud` ;
   - `_check_model_locked` (314), branche « Serveur local trouvé » (361-369) : à remplacer par un choix bloquant ;
   - `_select_model_locked` (401), `_save_choice` (448) ;
   - `hand_to` (453) démarre `boot_cloud` ou `boot` ;
   - `next_launch_fr` (465) et `boot_finished` (495) comparent `booted_path` et `booted_cloud` : ajouter `booted_server`.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/session/app_session.py` :
   - `_CORE_MODEL` (116), `_SERVER_ONLY_FR` (128, à retirer) ;
   - `active_model` (455), `_emit_architecture` (533-541, le modèle cloud sert d'exemple) ;
   - `close` (794) ;
   - `_boot` (822) et `_boot_cloud` (885) servent de modèle à `boot_server(candidate)` : état `model_load` « Préparation du modèle servi par {provider}… », fermeture du moteur précédent, fabrique injectable `server_factory`, `capabilities_for`, fenêtre, `_emit_preview` ;
   - `_render` (1300) et `_call_model` (2661) : le mode texte rendu sert tel quel, puisque `prompt_tokens = len(rendered.ids)`.
-- `src/wavestack/config.py` -- `selected_model` (302) accepte déjà `server`. Lire les délais et le budget ici.
-- `wavestack.toml` -- `[net.loopback_ports]` existe. Ajouter `[model_servers]` : `connect_timeout_s = 2`, `read_timeout_s = 300`. Ajouter `[models] memory_budget_mb = 4096`, sauf si la story 17 l'a posé.
-- `src/wavestack/web/app.py` -- `SelectModelIntention.kind` (31) passe à `file | server | cloud`. `/api/diagnostic` (225) ajoute `selected` et `loaded`, de forme `{kind, ref}` ou `null`, et garde les champs existants.
-- `src/wavestack/web/static/diagnostic.html` -- `renderCandidates` (≈115-155) : ligne serveur (tag Local, `provider · nom`, adresse, mémoire servie), « Choisir » → `select_model{kind: server, ref}` (`chooseModel`, 344) ; retirer « utilisable au palier 2 ».
-- `src/wavestack/web/static/app.js` -- `renderModelIndicator` (1095) : tag « Local · {provider} », infobulle « Modèle servi par {provider} sur ce poste ({adresse}) : processus distinct de WaveStack ; le texte envoyé est construit par le harnais. ». `buildSchema` (3209) : la boîte `arch-cloud-model` (3255) sert d'exemple pour une boîte locale `arch-server-model`. `app.css` : style de cette boîte (jetons existants).
+- `src/harness_lab/config.py` -- `selected_model` (302) accepte déjà `server`. Lire les délais et le budget ici.
+- `harness-lab.toml` -- `[net.loopback_ports]` existe. Ajouter `[model_servers]` : `connect_timeout_s = 2`, `read_timeout_s = 300`. Ajouter `[models] memory_budget_mb = 4096`, sauf si la story 17 l'a posé.
+- `src/harness_lab/web/app.py` -- `SelectModelIntention.kind` (31) passe à `file | server | cloud`. `/api/diagnostic` (225) ajoute `selected` et `loaded`, de forme `{kind, ref}` ou `null`, et garde les champs existants.
+- `src/harness_lab/web/static/diagnostic.html` -- `renderCandidates` (≈115-155) : ligne serveur (tag Local, `provider · nom`, adresse, mémoire servie), « Choisir » → `select_model{kind: server, ref}` (`chooseModel`, 344) ; retirer « utilisable au palier 2 ».
+- `src/harness_lab/web/static/app.js` -- `renderModelIndicator` (1095) : tag « Local · {provider} », infobulle « Modèle servi par {provider} sur ce poste ({adresse}) : processus distinct de HarnessLab ; le texte envoyé est construit par le harnais. ». `buildSchema` (3209) : la boîte `arch-cloud-model` (3255) sert d'exemple pour une boîte locale `arch-server-model`. `app.css` : style de cette boîte (jetons existants).
 - Tests : `tests/fake_engine.py` (moteur factice, octet = token). `tests/test_cli_diagnostic.py:601` (`test_server_only_is_ready_without_a_file_to_load`) change de comportement. Les stubs `_server_candidates` de `test_cli_diagnostic.py:40`, `test_cloud.py:398`, `test_discovery.py:46` et `test_web_app.py:27` gardent leur signature `(cfg)`.
 - `_bmad-output/implementation-artifacts/deferred-work.md`, première entrée : un test de `_server_candidates` avec un transport simulé la ferme.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/models/engine.py` -- extraire `VocabTokenizer` (`tokenize`, `token_pieces`, `metadata`, `close`) et le faire utiliser par `LlamaCppEngine` -- un seul code de tokenizer local (AD-5, `ollama_raw`).
-- [x] `src/wavestack/net/factory.py` -- `create_loopback_client(timeout, transport=None)` : sans proxy, refuse (`NetworkBlocked`) tout hôte hors boucle locale -- AD-15, proxy d'entreprise en boucle locale (story 1e).
-- [x] `src/wavestack/models/servers.py` (nouveau) -- `LlamaServerEngine(url, transport=None)`, `OllamaRawEngine(url, name, gguf_path, n_ctx, tokenizer=None, transport=None)`, `list_served(cfg, transport=None)`, `served_bytes(...)` et `release_ollama(url, name)` (`keep_alive: 0`). Les erreurs HTTP deviennent une exception française (adresse, cause) -- AD-5, AD-8, AD-16.
-- [x] `src/wavestack/models/discovery.py` -- `_server_candidates(cfg, transport=None)` : un candidat par modèle servi, `ref`, `engine`, `served_bytes`, blob Ollama résolu par `_ollama_candidates`, `incompatible` avec la raison -- AD-7.
-- [x] `src/wavestack/models/capabilities.py` -- détection par le gabarit quand `architecture is None` -- AD-6.
-- [x] `src/wavestack/session/diagnostic.py` -- `selected_model` `server`, `booted_server`, `select_server(ref)` (même parcours que `_select_model_locked`, candidat relu par la découverte), `DiagnosticResult.server`, `hand_to` → `boot_server`. Serveurs seuls : contrôle `model` bloquant, jamais de choix d'office. Choix mémorisé repris si servi -- AD-7, AD-21.
-- [x] `src/wavestack/session/app_session.py` -- `boot_server`, `server_factory`, budget (AD-8), `release_ollama` en quittant un modèle Ollama et dans `close`, `active_model` et `core.model` (`process: external`, arête locale), fenêtre `server`. Brancher `kind: server` dans le changement à chaud de la story 17. Retirer `_SERVER_ONLY_FR`.
-- [x] `src/wavestack/web/app.py`, `static/diagnostic.html`, `static/app.js`, `static/app.css` -- intention `kind: server`, champs `selected` et `loaded`, lignes serveur, indicateur, boîte du schéma. Le sélecteur de modèle de la story 17 liste aussi les modèles servis.
-- [x] `wavestack.toml`, `README.md` -- délais `[model_servers]`, budget, section française « Utiliser un serveur déjà lancé (Ollama, llama-server) » : lancement du serveur par l'utilisateur, ports, `raw`, transparence réduite, `keep_alive`.
+- [x] `src/harness_lab/models/engine.py` -- extraire `VocabTokenizer` (`tokenize`, `token_pieces`, `metadata`, `close`) et le faire utiliser par `LlamaCppEngine` -- un seul code de tokenizer local (AD-5, `ollama_raw`).
+- [x] `src/harness_lab/net/factory.py` -- `create_loopback_client(timeout, transport=None)` : sans proxy, refuse (`NetworkBlocked`) tout hôte hors boucle locale -- AD-15, proxy d'entreprise en boucle locale (story 1e).
+- [x] `src/harness_lab/models/servers.py` (nouveau) -- `LlamaServerEngine(url, transport=None)`, `OllamaRawEngine(url, name, gguf_path, n_ctx, tokenizer=None, transport=None)`, `list_served(cfg, transport=None)`, `served_bytes(...)` et `release_ollama(url, name)` (`keep_alive: 0`). Les erreurs HTTP deviennent une exception française (adresse, cause) -- AD-5, AD-8, AD-16.
+- [x] `src/harness_lab/models/discovery.py` -- `_server_candidates(cfg, transport=None)` : un candidat par modèle servi, `ref`, `engine`, `served_bytes`, blob Ollama résolu par `_ollama_candidates`, `incompatible` avec la raison -- AD-7.
+- [x] `src/harness_lab/models/capabilities.py` -- détection par le gabarit quand `architecture is None` -- AD-6.
+- [x] `src/harness_lab/session/diagnostic.py` -- `selected_model` `server`, `booted_server`, `select_server(ref)` (même parcours que `_select_model_locked`, candidat relu par la découverte), `DiagnosticResult.server`, `hand_to` → `boot_server`. Serveurs seuls : contrôle `model` bloquant, jamais de choix d'office. Choix mémorisé repris si servi -- AD-7, AD-21.
+- [x] `src/harness_lab/session/app_session.py` -- `boot_server`, `server_factory`, budget (AD-8), `release_ollama` en quittant un modèle Ollama et dans `close`, `active_model` et `core.model` (`process: external`, arête locale), fenêtre `server`. Brancher `kind: server` dans le changement à chaud de la story 17. Retirer `_SERVER_ONLY_FR`.
+- [x] `src/harness_lab/web/app.py`, `static/diagnostic.html`, `static/app.js`, `static/app.css` -- intention `kind: server`, champs `selected` et `loaded`, lignes serveur, indicateur, boîte du schéma. Le sélecteur de modèle de la story 17 liste aussi les modèles servis.
+- [x] `harness-lab.toml`, `README.md` -- délais `[model_servers]`, budget, section française « Utiliser un serveur déjà lancé (Ollama, llama-server) » : lancement du serveur par l'utilisateur, ports, `raw`, transparence réduite, `keep_alive`.
 - [x] `tests/test_model_servers.py` (nouveau) -- une ligne de la matrice par test, par `httpx.MockTransport` et un tokenizer factice octet = token. À vérifier aussi : corps envoyés (ids, `num_ctx`, `raw`), `_server_candidates` (ferme l'entrée de `deferred-work.md`), refus d'un hôte non local par le client boucle locale, `keep_alive: 0` à la fermeture. Adapter `test_cli_diagnostic.py:601` au choix bloquant.
 
 **Acceptance Criteria:**
 - Given un llama-server simulé qui sert un modèle, when l'utilisateur le choisit au diagnostic puis envoie un message, then Contexte LLM montre le texte rendu par le harnais, gabarit compris, et la somme des segments égale `prompt_tokens`.
 - Given un modèle servi actif, when la page est rechargée, then l'indicateur « Local · {provider} » et le robot hors du cadre Harnais, en zone Poste de travail, réapparaissent depuis `/api/state` et `/api/architecture` (AD-1).
-- Given un modèle Ollama actif, when l'utilisateur choisit un autre modèle ou ferme WaveStack, then le transport simulé reçoit `keep_alive: 0` pour ce modèle, et aucun moteur en processus ne coexiste avec le modèle servi.
+- Given un modèle Ollama actif, when l'utilisateur choisit un autre modèle ou ferme HarnessLab, then le transport simulé reçoit `keep_alive: 0` pour ce modèle, et aucun moteur en processus ne coexiste avec le modèle servi.
 - Given aucun serveur, when on lance la suite, then `uv run python -m pytest` passe, et le rendu de référence Qwen3.5 et les scénarios fournis restent inchangés.
 
 ## Spec Change Log
@@ -137,8 +137,8 @@ deferred:
 - Revue par l'agent d'implémentation lui-même (aucun outil de sous-agent dans cette exécution) ; une revue indépendante suit.
 - verdicts: 6 findings — high 0, medium 1, low 3, false 1, maybe-false 1
 - findings:
-  - `[medium]` `[patch]` `release_ollama` passait par le client de l'adaptateur, au délai de lecture de 300 s : à la fermeture de WaveStack, un Ollama bloqué pouvait retenir l'arrêt cinq minutes — délai propre au déchargement (`RELEASE_TIMEOUT`, 10 s, connexion 2 s).
-  - `[low]` `[patch]` Le parcours E2E complet échouait une fois sur deux sur « wavestack-fake est actif. » : sur une page de diagnostic dont le flux rejoue un long journal, le repli de 3 s affichait « Le modèle choisi est actif. » avant l'événement — `/api/diagnostic.loaded` porte `label`, et le repli nomme le modèle comme `model_load_ended`.
+  - `[medium]` `[patch]` `release_ollama` passait par le client de l'adaptateur, au délai de lecture de 300 s : à la fermeture de HarnessLab, un Ollama bloqué pouvait retenir l'arrêt cinq minutes — délai propre au déchargement (`RELEASE_TIMEOUT`, 10 s, connexion 2 s).
+  - `[low]` `[patch]` Le parcours E2E complet échouait une fois sur deux sur « harness-lab-fake est actif. » : sur une page de diagnostic dont le flux rejoue un long journal, le repli de 3 s affichait « Le modèle choisi est actif. » avant l'événement — `/api/diagnostic.loaded` porte `label`, et le repli nomme le modèle comme `model_load_ended`.
   - `[low]` `[reject]` Les métadonnées de llama-server envoient une requête `/tokenize` par marqueur de `[cloud] neutralize_markers` (17) au chargement — quelques millisecondes en boucle locale ; les regrouper demanderait un découpage des pièces par marqueur.
   - `[low]` `[reject]` Le cache id → octets de `LlamaServerEngine` n'est pas borné — il ne dépasse pas la taille du vocabulaire (≈ 150 000 entrées), libéré avec l'adaptateur.
   - `[false]` `[reject]` « Une sonde enfant pourrait être lancée pour un modèle servi » — `_load` ne sonde que `choice.kind == "file"` ; `select_server` appelle `_discover(None, probe_only=set())`.
@@ -165,14 +165,14 @@ elif result.model_path or (launch and result.ready): app_session.boot(result.mod
 
 ## Hypothèses à valider
 
-1. **Dépendance à la story 17.** Elle est livrée avant celle-ci et fournit `select_model` à chaud (classe b), le sélecteur de modèle de la barre haute et le contrôle de budget d'AD-8. La story 18 y ajoute seulement `kind: server` et le coût du modèle servi. Si le contrôle de budget manque au démarrage de l'implémentation, créer `src/wavestack/models/budget.py`, avec `check_budget(cost_bytes, freed_bytes) -> str | None` : RSS psutil de WaveStack et de ses enfants, moins la mémoire libérée, plus le coût, comparé à `[models] memory_budget_mb`. Si le changement à chaud manque, le choix d'un serveur après chargement suit la règle « prochain lancement » existante.
-2. **Jamais choisi d'office.** Un modèle servi n'entre pas dans la règle « un seul fichier utilisable » de la story 1b, car le choisir fait charger le modèle par Ollama, hors de WaveStack. Serveurs seuls : choix bloquant. Le comportement actuel « prêt sans modèle » disparaît.
+1. **Dépendance à la story 17.** Elle est livrée avant celle-ci et fournit `select_model` à chaud (classe b), le sélecteur de modèle de la barre haute et le contrôle de budget d'AD-8. La story 18 y ajoute seulement `kind: server` et le coût du modèle servi. Si le contrôle de budget manque au démarrage de l'implémentation, créer `src/harness_lab/models/budget.py`, avec `check_budget(cost_bytes, freed_bytes) -> str | None` : RSS psutil de HarnessLab et de ses enfants, moins la mémoire libérée, plus le coût, comparé à `[models] memory_budget_mb`. Si le changement à chaud manque, le choix d'un serveur après chargement suit la règle « prochain lancement » existante.
+2. **Jamais choisi d'office.** Un modèle servi n'entre pas dans la règle « un seul fichier utilisable » de la story 1b, car le choisir fait charger le modèle par Ollama, hors de HarnessLab. Serveurs seuls : choix bloquant. Le comportement actuel « prêt sans modèle » disparaît.
 3. **Texte d'Ollama.** Il est reconstruit à partir des ids (voir Design Notes), sans nouveau champ au port.
 4. **Transparence réduite.** La règle est appliquée à la lettre (`prompt_eval_count` ≠ compte du harnais). Hypothèse : les versions actuelles d'Ollama renvoient le compte complet même quand le cache sert. Le message cite les deux causes possibles (tokenisation d'Ollama, cache). Un champ `thinking` reçu en `raw` déclenche le même événement.
 5. **Métadonnées de llama-server.** Elles viennent du serveur seul (`/props`, `/v1/models`, `/tokenize`), sans `vocab_only`. La famille est détectée par le gabarit, puisque l'architecture n'est pas exposée. L'hypothèse s'appuie sur les champs actuels de llama-server (`model_path`, `default_generation_settings.n_ctx`, `with_pieces`, `parse_special`), non vérifiés ici faute de réseau.
 6. **Qwen3.5 d'Ollama et `vocab_only`.** *(corrigée à la revue indépendante)* En `vocab_only`, llama-cpp-python 0.3.35 ne lit pas les hyperparamètres (`n_ctx_train()` vaut 0, voir 11) : il lit l'architecture et le tokenizer seulement. Un GGUF synthétique étiqueté `qwen35` s'ouvre ainsi en `vocab_only` ; l'échec des blobs `qwen35` d'Ollama en chargement complet (deferred-work, story 9) ne dit donc rien de leur tokenizer, à vérifier sur le PC cible. Si le tokenizer est refusé, la raison affichée le dit et renvoie vers llama-server, qui tokenise lui-même ; le modèle précédent reste actif.
 7. **Client sans proxy.** Il est réservé à la boucle locale : avec `HTTP_PROXY` défini sur le PC pro, un client `trust_env` enverrait `127.0.0.1` au proxy.
-8. **`keep_alive: 0`.** Il est envoyé au changement de modèle et à la fermeture de WaveStack, lecture de « en quittant Ollama ». Au lancement, aucun préchargement : Ollama charge le modèle au premier appel, et le coût mesuré devient celui de `/api/ps` dès qu'il existe.
+8. **`keep_alive: 0`.** Il est envoyé au changement de modèle et à la fermeture de HarnessLab, lecture de « en quittant Ollama ». Au lancement, aucun préchargement : Ollama charge le modèle au premier appel, et le coût mesuré devient celui de `/api/ps` dès qu'il existe.
 9. **Formes choisies ici.** Les refs `ollama/{nom}` et `llama_server/{fichier}`, ainsi que `process: "external"` sur `core.model`, sont des choix de forme de cette story : AD-12 ne fixe que `hosting`.
 
 10. **(ajoutée à l'implémentation) Budget en Go.** La matrice dit « message chiffré en Mo » ; le refus reprend le message du `LoadRegistry` de la story 17 (« demande environ 5,0 Go ; … budget de 4,0 Go »), déjà livré et testé : un seul format pour tous les refus de changement. Le coût du modèle servi est chiffré, comme celui d'un fichier.
@@ -190,7 +190,7 @@ elif result.model_path or (launch and result.ready): app_session.boot(result.mod
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur
 - `uv run python -m pytest` -- expected: tout passe, sans accès réseau
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks (if no CLI):**
 - Avec `ollama serve` (un modèle au GGUF lisible) puis `llama-server -m <gguf> --port 8080`, lancés à la main : les deux apparaissent au diagnostic. Choisir chacun, faire un tour avec `get_datetime` et vérifier le texte rendu, les tokens, le schéma (robot hors du Harnais), l'indicateur et `ollama ps` vide après un changement de modèle.
@@ -213,17 +213,17 @@ boîte « {provider} · {adresse} » dans la zone Poste de travail ; indicateur 
 Serveurs seuls : choix bloquant, jamais d'office ; choix mémorisé repris s'il est encore servi.
 
 **Fichiers.**
-- `src/wavestack/models/servers.py` (nouveau) : `LlamaServerEngine`, `OllamaRawEngine`, `ServerError`, `list_served`, `served_bytes`, `release_ollama`, `open_engine`.
-- `src/wavestack/models/engine.py` : `VocabTokenizer` factorisé (`vocab_only` ou modèle chargé), réutilisé par `LlamaCppEngine` ; `EngineMetadata.server_context`.
-- `src/wavestack/net/factory.py` : `create_loopback_client` (sans proxy, boucle locale seule).
-- `src/wavestack/models/discovery.py` : un candidat par modèle servi (`engine`, `ref`, `provider`, `served_bytes`, `gguf_path`), blob Ollama vérifié.
-- `src/wavestack/models/capabilities.py` : famille `qwen3` par le gabarit quand l'architecture manque.
-- `src/wavestack/models/load_registry.py` : `ModelChoice.served`, `server`, `provider`.
-- `src/wavestack/session/app_session.py` : `boot_server`, `server_factory`, coût servi, installation serveur (fenêtre `server`), `active_model` et `core.model` (`process: external`, arête locale), erreur « serveur local injoignable » ; `_SERVER_ONLY_FR` retiré.
-- `src/wavestack/session/diagnostic.py` : `selected_server`, `select_server`, `DiagnosticResult.server`, reprise du choix mémorisé, serveurs seuls bloquants, `hand_to`/`switch` serveur.
-- `src/wavestack/trace/catalog.py` : `ActiveModel.kind = server`, `server_url` ; `ArchitectureNode.process`, `server_url`.
-- `src/wavestack/web/app.py`, `static/diagnostic.html`, `static/app.js`, `static/app.css` : intention `kind: server`, `selected`/`loaded`, lignes serveur, sélecteur, indicateur, boîte `arch-server-model`.
-- `src/wavestack/config.py`, `wavestack.toml` : `[model_servers]` (délais), `loopback_ports`.
+- `src/harness_lab/models/servers.py` (nouveau) : `LlamaServerEngine`, `OllamaRawEngine`, `ServerError`, `list_served`, `served_bytes`, `release_ollama`, `open_engine`.
+- `src/harness_lab/models/engine.py` : `VocabTokenizer` factorisé (`vocab_only` ou modèle chargé), réutilisé par `LlamaCppEngine` ; `EngineMetadata.server_context`.
+- `src/harness_lab/net/factory.py` : `create_loopback_client` (sans proxy, boucle locale seule).
+- `src/harness_lab/models/discovery.py` : un candidat par modèle servi (`engine`, `ref`, `provider`, `served_bytes`, `gguf_path`), blob Ollama vérifié.
+- `src/harness_lab/models/capabilities.py` : famille `qwen3` par le gabarit quand l'architecture manque.
+- `src/harness_lab/models/load_registry.py` : `ModelChoice.served`, `server`, `provider`.
+- `src/harness_lab/session/app_session.py` : `boot_server`, `server_factory`, coût servi, installation serveur (fenêtre `server`), `active_model` et `core.model` (`process: external`, arête locale), erreur « serveur local injoignable » ; `_SERVER_ONLY_FR` retiré.
+- `src/harness_lab/session/diagnostic.py` : `selected_server`, `select_server`, `DiagnosticResult.server`, reprise du choix mémorisé, serveurs seuls bloquants, `hand_to`/`switch` serveur.
+- `src/harness_lab/trace/catalog.py` : `ActiveModel.kind = server`, `server_url` ; `ArchitectureNode.process`, `server_url`.
+- `src/harness_lab/web/app.py`, `static/diagnostic.html`, `static/app.js`, `static/app.css` : intention `kind: server`, `selected`/`loaded`, lignes serveur, sélecteur, indicateur, boîte `arch-server-model`.
+- `src/harness_lab/config.py`, `harness-lab.toml` : `[model_servers]` (délais), `loopback_ports`.
 - `tests/test_model_servers.py` (nouveau, 26 tests), `tests/conftest.py` (aucun serveur réel en test), `tests/test_cli_diagnostic.py` (serveurs seuls bloquants).
 - `tools/e2e/fake_local_server.py` (nouveau), `stack.py`, `run_e2e.py` (scénario `local_server`), `README.md`, capture `23-serveur-local-llama-server.jpg`.
 - `README.md` : section « Utiliser un serveur déjà lancé (Ollama, llama-server) » ; `deferred-work.md` : première entrée fermée.
@@ -256,4 +256,4 @@ sélecteur, schéma, tour complet avec `get_datetime`, ids reçus = texte rendu,
 - Budget : la taille d'Ollama (`/api/ps`) après chargement, et le cas d'un modèle Ollama déjà
   chargé par un autre client (compté, jamais refusé ni déchargé).
 - Arrêt pendant le chargement d'un gros modèle par Ollama : « Arrêter » et la fermeture de
-  WaveStack doivent rendre la main en moins d'une seconde (coupure de la socket).
+  HarnessLab doivent rendre la main en moins d'une seconde (coupure de la socket).

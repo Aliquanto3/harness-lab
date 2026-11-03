@@ -2,7 +2,7 @@
 
 [← Retour au README](../README.md)
 
-WaveStack s'installe sans droits administrateur, depuis le dépôt Git ou une archive zip. La
+HarnessLab s'installe sans droits administrateur, depuis le dépôt Git ou une archive zip. La
 cible est un PC Windows professionnel ; macOS et Linux suivent la même procédure, à quelques
 commandes près.
 
@@ -19,7 +19,7 @@ commandes près.
 
 ## Prérequis
 
-- Un accès au dépôt privé WaveStack et Git, ou une archive zip de WaveStack (téléchargée depuis
+- Le dépôt public HarnessLab et Git, ou une archive zip de HarnessLab (téléchargée depuis
   le dépôt, ou remise par votre formateur sur un partage interne).
 - [`uv`](https://docs.astral.sh/uv/) installé pour l'utilisateur courant (aucun droit
   administrateur requis). `uv run` télécharge lui-même Python 3.13 (dans le profil utilisateur,
@@ -47,7 +47,7 @@ commandes près.
   `uv` lui-même et Python), PyPI (`pypi.org`, `files.pythonhosted.org`), `abetlen.github.io`
   (roue CPU de `llama-cpp-python`), `github.com` et ses domaines de téléchargement,
   dont `raw.githubusercontent.com` (installeur en une commande) et `codeload.github.com`
-  (archive zip ou tar.gz de WaveStack quand Git manque), `huggingface.co` et `*.hf.co`.
+  (archive zip ou tar.gz de HarnessLab quand Git manque), `huggingface.co` et `*.hf.co`.
 - Pour l'extra `guardrails` (modèle spaCy français) et pour llama-server, facultatif (voir [Obtenir llama-server sans droits d'administrateur](modeles.md#obtenir-llama-server-sans-droits-dadministrateur-windows)) :
   `api.github.com`, et les hôtes de téléchargement des releases GitHub,
   `objects.githubusercontent.com` et `release-assets.githubusercontent.com`.
@@ -66,17 +66,17 @@ Dans PowerShell, `$env:UV_SYSTEM_CERTS = "1"` ne vaut que pour le terminal en co
 `setx UV_SYSTEM_CERTS 1` enregistre la variable pour les terminaux ouverts ensuite (pas pour
 celui-ci). Il en va de même pour `UV_PYTHON_INSTALL_MIRROR`.
 
-Ces réglages de proxy concernent l'installation (via `uv`), pas WaveStack lui-même : une fois
+Ces réglages de proxy concernent l'installation (via `uv`), pas HarnessLab lui-même : une fois
 lancée, l'application ne peut sortir que vers les hôtes de sa propre liste blanche
-(`wavestack.toml`, section `[net] allowed_hosts`). Pour autoriser un hôte supplémentaire (par
+(`harness-lab.toml`, section `[net] allowed_hosts`). Pour autoriser un hôte supplémentaire (par
 exemple un miroir interne de modèles), ajoutez-le dans `settings.json`, dans le dossier de
-données (`%LOCALAPPDATA%\WaveStack` sous Windows, `~/.local/share/wavestack` ailleurs) :
+données (`%LOCALAPPDATA%\HarnessLab` sous Windows, `~/.local/share/harness-lab` ailleurs) :
 
 ```json
 { "net": { "allowed_hosts": ["mon-miroir-interne.exemple.com"] } }
 ```
 
-Ce fichier surcharge `wavestack.toml` sans le modifier ; les hôtes en boucle locale
+Ce fichier surcharge `harness-lab.toml` sans le modifier ; les hôtes en boucle locale
 (`127.0.0.1`, `localhost`) et les hôtes de proxy détectés sont toujours autorisés.
 
 ## Ouvrir PowerShell
@@ -91,40 +91,40 @@ Les commandes Windows de cette page se tapent dans PowerShell, pas dans l'invite
    commence par `C:\` sans `PS`, vous êtes dans CMD : tapez `powershell`, puis Entrée.
 3. Collez la commande avec Ctrl+V ou un clic droit, puis appuyez sur Entrée.
 
-Pour ouvrir PowerShell directement dans un dossier, par exemple un clone de WaveStack, ouvrez ce
+Pour ouvrir PowerShell directement dans un dossier, par exemple un clone de HarnessLab, ouvrez ce
 dossier dans l'Explorateur, tapez `powershell` dans la barre d'adresse, puis Entrée.
 
 ## Installeur en une commande
 
 `install.ps1` (Windows), `install.bat` (double-clic ou CMD, qui délègue à `install.ps1`) et
 `install.sh` (macOS, Linux) font en une seule commande ce que fait tout le pas à pas ci-dessous :
-installer `uv` s'il manque, récupérer WaveStack, déposer le modèle Qwen, puis lancer
-`uv run wavestack`. Lancé depuis un clone ou un zip décompressé (le dossier du script contient
+installer `uv` s'il manque, récupérer HarnessLab, déposer le modèle Qwen, puis lancer
+`uv run harness-lab`. Lancé depuis un clone ou un zip décompressé (le dossier du script contient
 `pyproject.toml`), il installe sur place ; lancé depuis le web (`irm … | iex`, `curl … | bash`),
-il récupère WaveStack dans `Documents\WaveStack` ou `~/Documents/WaveStack`. Idempotent :
-relancer la même commande plus tard rouvre WaveStack sans retélécharger ce qui est déjà en
+il récupère HarnessLab dans `Documents\HarnessLab` ou `~/Documents/HarnessLab`. Idempotent :
+relancer la même commande plus tard rouvre HarnessLab sans retélécharger ce qui est déjà en
 place. Voir la [commande du README](../README.md#installation-sous-windows) ; sous macOS ou
 Linux, dans un terminal (avec `bash`, pas `sh`) :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Aliquanto3/wavestack/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Aliquanto3/harness-lab/main/install.sh | bash
 ```
 
 Surcharges utiles pour un cas particulier : `-InstallDir`/`-DataDir` (PowerShell) ou
-`WAVESTACK_INSTALL_DIR`/`WAVESTACK_DATA_DIR` (bash) changent les dossiers ; `-DryRun`/
-`WAVESTACK_DRY_RUN=1` affiche les dossiers résolus sans rien installer ni télécharger ;
-`-NoLaunch`/`WAVESTACK_NO_LAUNCH=1` n'ouvre pas l'application à la fin. Les options
+`HARNESS_LAB_INSTALL_DIR`/`HARNESS_LAB_DATA_DIR` (bash) changent les dossiers ; `-DryRun`/
+`HARNESS_LAB_DRY_RUN=1` affiche les dossiers résolus sans rien installer ni télécharger ;
+`-NoLaunch`/`HARNESS_LAB_NO_LAUNCH=1` n'ouvre pas l'application à la fin. Les options
 PowerShell se passent à `.\install.ps1` ou à `install.bat` depuis un clone (par exemple
 `.\install.ps1 -DryRun`) ; `irm … | iex` n'en transmet aucune, utilisez alors
 `& ([scriptblock]::Create((irm <url de install.ps1>))) -DryRun`. Côté bash, les variables se
-placent devant `bash` : `curl -fsSL <url de install.sh> | WAVESTACK_DRY_RUN=1 bash`.
+placent devant `bash` : `curl -fsSL <url de install.sh> | HARNESS_LAB_DRY_RUN=1 bash`.
 
-**Modèles locaux facultatifs.** `-Models id1,id2` (PowerShell) ou `WAVESTACK_MODELS=id1,id2` (bash,
+**Modèles locaux facultatifs.** `-Models id1,id2` (PowerShell) ou `HARNESS_LAB_MODELS=id1,id2` (bash,
 et PowerShell sous `irm … | iex`) télécharge en plus les modèles choisis, à côté de Qwen3.5-2B,
 avec le même schéma idempotent (`.part`, puis renommage) et une vérification d'empreinte SHA-256
 (un fichier non conforme est supprimé et l'installeur s'arrête). Sans l'option, rien ne change :
 seul Qwen3.5-2B est téléchargé. Un identifiant inconnu arrête l'installeur avant tout
-téléchargement ; `-Models list` (ou `WAVESTACK_MODELS=list`) affiche la table et s'arrête.
+téléchargement ; `-Models list` (ou `HARNESS_LAB_MODELS=list`) affiche la table et s'arrête.
 
 | Identifiant | Fichier | Taille | Licence |
 |---|---|---|---|
@@ -134,7 +134,7 @@ téléchargement ; `-Models list` (ou `WAVESTACK_MODELS=list`) affiche la table 
 | `granite-4.0-1b` | `granite-4.0-1b-Q4_K_M.gguf` | 1,0 Go | Apache-2.0 |
 
 Exemples : `.\install.ps1 -Models qwen3.5-0.8b` ; `curl -fsSL <url de install.sh> |
-WAVESTACK_MODELS=qwen3.5-0.8b bash`. `-WithMiniCPM` et `WAVESTACK_WITH_MINICPM=1` restent des
+HARNESS_LAB_MODELS=qwen3.5-0.8b bash`. `-WithMiniCPM` et `HARNESS_LAB_WITH_MINICPM=1` restent des
 alias de `minicpm5`. Voir [Le modèle local](#le-modèle-local).
 
 Si l'installeur échoue (politique du poste, proxy), suivez le pas à pas manuel ci-dessous.
@@ -148,41 +148,41 @@ le terminal pour que la commande `uv` soit reconnue :
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-Dans le nouveau terminal PowerShell (pas CMD), récupérez WaveStack, déposez le modèle (1,28 Go), puis lancez :
+Dans le nouveau terminal PowerShell (pas CMD), récupérez HarnessLab, déposez le modèle (1,28 Go), puis lancez :
 
 ```powershell
 git clone <adresse-du-dépôt>
 cd <dossier-cloné>
 
-New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\WaveStack\models" | Out-Null
+New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\HarnessLab\models" | Out-Null
 $ProgressPreference = "SilentlyContinue"   # sinon PowerShell 5.1 télécharge très lentement
-Invoke-WebRequest -UseBasicParsing "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf" -OutFile "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf"
+Invoke-WebRequest -UseBasicParsing "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf" -OutFile "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf"
 
-uv run wavestack
+uv run harness-lab
 ```
 
 Si le téléchargement du modèle échoue derrière le proxy (erreur 407 notamment), prenez
 [le fichier](https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf)
-avec le navigateur et copiez-le dans `%LOCALAPPDATA%\WaveStack\models`.
+avec le navigateur et copiez-le dans `%LOCALAPPDATA%\HarnessLab\models`.
 
 Au premier clone, Git vous demande de vous authentifier auprès de l'hébergeur du dépôt. Avec
 l'archive zip, décompressez-la, ouvrez un terminal dans le dossier obtenu, puis lancez
-`uv run wavestack`.
+`uv run harness-lab`.
 
-Placez WaveStack hors de OneDrive et des lecteurs réseau, par exemple dans
-`%USERPROFILE%\wavestack` : son environnement Python compte des milliers de fichiers. Lancez
+Placez HarnessLab hors de OneDrive et des lecteurs réseau, par exemple dans
+`%USERPROFILE%\harness-lab` : son environnement Python compte des milliers de fichiers. Lancez
 les commandes depuis le dossier qui contient `pyproject.toml` (une archive zip décompressée
 par l'Explorateur ajoute souvent un niveau de dossier).
 
-Le premier `uv run wavestack` télécharge plusieurs centaines de Mo et prend quelques minutes.
-Pour arrêter WaveStack, faites Ctrl+C dans le terminal (ou fermez-le) ; pour le relancer,
-retapez `uv run wavestack` dans le même dossier. Si le port 8420 est pris, choisissez-en un
-autre : `uv run wavestack --port 8421`.
+Le premier `uv run harness-lab` télécharge plusieurs centaines de Mo et prend quelques minutes.
+Pour arrêter HarnessLab, faites Ctrl+C dans le terminal (ou fermez-le) ; pour le relancer,
+retapez `uv run harness-lab` dans le même dossier. Si le port 8420 est pris, choisissez-en un
+autre : `uv run harness-lab --port 8421`.
 
 Si la politique du poste refuse le script d'installation de `uv`, utilisez l'une des autres
 méthodes de la [documentation d'uv](https://docs.astral.sh/uv/getting-started/installation/)
 (archive autonome à décompresser dans le profil, par exemple). Si le poste bloque l'exécution
-de programmes depuis le profil utilisateur (AppLocker, WDAC), `uv`, Python et WaveStack ne
+de programmes depuis le profil utilisateur (AppLocker, WDAC), `uv`, Python et HarnessLab ne
 peuvent pas tourner : demandez une exception pour eux à votre service informatique, sans
 contourner le blocage.
 
@@ -194,28 +194,28 @@ La procédure est la même ; seules l'installation de `uv` et le dossier de donn
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source "$HOME/.local/bin/env"   # uv dans ce terminal, sans le rouvrir
 git clone <adresse-du-dépôt> && cd <dossier-cloné>
-mkdir -p ~/.local/share/wavestack/models
-curl -fL -o ~/.local/share/wavestack/models/Qwen3.5-2B-Q4_K_M.gguf \
+mkdir -p ~/.local/share/harness-lab/models
+curl -fL -o ~/.local/share/harness-lab/models/Qwen3.5-2B-Q4_K_M.gguf \
   https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf
-uv run wavestack
+uv run harness-lab
 ```
 
-- **Dossier de données** : `~/.local/share/wavestack` (sous macOS aussi), au lieu de
-  `%LOCALAPPDATA%\WaveStack`.
+- **Dossier de données** : `~/.local/share/harness-lab` (sous macOS aussi), au lieu de
+  `%LOCALAPPDATA%\HarnessLab`.
 - **Linux** : x86_64 et ARM64 ; c'est la plateforme des tests de bout en bout du projet.
 - **macOS** : puces Apple seulement (le moteur `llama-cpp-python` n'est publié que pour
   `arm64`), et non vérifié sur un vrai poste à ce jour.
 - **Le reste de la documentation** donne les commandes en PowerShell : remplacez
-  `%LOCALAPPDATA%\WaveStack` par `~/.local/share/wavestack`, `$env:NOM = "valeur"` par
+  `%LOCALAPPDATA%\HarnessLab` par `~/.local/share/harness-lab`, `$env:NOM = "valeur"` par
   `export NOM=valeur` dans le terminal, et `setx NOM valeur` par cette même ligne dans votre
   profil de shell.
 
 ## Le modèle local
 
 Le modèle recommandé est **Qwen3.5-2B en Q4_K_M** (GGUF amont publié par unsloth, licence
-Apache-2.0), validé sur le PC cible. WaveStack ne le télécharge pas : copiez le fichier `.gguf`
-dans le dossier `models/` du dossier de données (`%LOCALAPPDATA%\WaveStack\models` sous
-Windows, `~/.local/share/wavestack/models` ailleurs), ou indiquez son chemin sur la page Modèles.
+Apache-2.0), validé sur le PC cible. HarnessLab ne le télécharge pas : copiez le fichier `.gguf`
+dans le dossier `models/` du dossier de données (`%LOCALAPPDATA%\HarnessLab\models` sous
+Windows, `~/.local/share/harness-lab/models` ailleurs), ou indiquez son chemin sur la page Modèles.
 Un blob GGUF d'Ollama choisi comme un fichier peut être refusé par llama-cpp-python 0.3.35
 (fichier incompatible, raison expliquée, modèle précédent gardé) : préférez le fichier amont.
 Servi par Ollama lui-même, le même modèle fonctionne avec un Ollama récent (`qwen3.5:2b` au test
@@ -223,25 +223,25 @@ du 2026-09-27), ou par llama-server (voir [Utiliser un serveur déjà lancé](mo
 
 **MiniCPM5-2B, modèle local facultatif.** `MiniCPM5-2B-Q4_K_M.gguf` (OpenBMB, licence Apache-2.0,
 1,5 Go), entraîné à l'appel d'outils : il offre les briques Outils, MCP, Skills et sous-agents,
-comme Qwen3.5-2B. WaveStack le reconnaît à son gabarit de conversation. Les installateurs le
-téléchargent avec `-Models minicpm5` (ou `-WithMiniCPM`, `WAVESTACK_WITH_MINICPM=1`) ; à la main, depuis la révision
+comme Qwen3.5-2B. HarnessLab le reconnaît à son gabarit de conversation. Les installateurs le
+téléchargent avec `-Models minicpm5` (ou `-WithMiniCPM`, `HARNESS_LAB_WITH_MINICPM=1`) ; à la main, depuis la révision
 épinglée ([le fichier](https://huggingface.co/openbmb/MiniCPM5-2B-GGUF/resolve/2079a22f3beaa4e306449978533478fe0522f4b3/MiniCPM5-2B-Q4_K_M.gguf)). Qwen3.5-2B reste le modèle recommandé : avec les deux fichiers
-dans `models/` et sans choix mémorisé, WaveStack charge Qwen3.5-2B, sans enregistrer ce choix.
+dans `models/` et sans choix mémorisé, HarnessLab charge Qwen3.5-2B, sans enregistrer ce choix.
 
 **Qwen3.5-0.8B, modèle local facultatif.** `Qwen3.5-0.8B-Q4_K_M.gguf` (Unsloth, licence Apache-2.0,
 0,5 Go), de la même famille que Qwen3.5-2B, donc avec le même gabarit : les briques Outils, MCP,
 Skills et sous-agents fonctionnent, avec une qualité plus faible. Les installateurs le
-téléchargent avec `-Models qwen3.5-0.8b` ou `WAVESTACK_MODELS=qwen3.5-0.8b` ; à la main, depuis la
+téléchargent avec `-Models qwen3.5-0.8b` ou `HARNESS_LAB_MODELS=qwen3.5-0.8b` ; à la main, depuis la
 révision épinglée ([le fichier](https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/6ab461498e2023f6e3c1baea90a8f0fe38ab64d0/Qwen3.5-0.8B-Q4_K_M.gguf)).
 
 **Granite 4.0 Nano, modèles locaux facultatifs.** `granite-4.0-350m` (0,2 Go) et `granite-4.0-1b`
 (1,0 Go), d'IBM, licence Apache-2.0, en Q4_K_M. Ils écrivent leurs appels d'outils en JSON
 `<tool_call>` (lecteur `hermes`) et ne raisonnent pas. Installation par `-Models granite-4.0-1b` ou
-`WAVESTACK_MODELS=granite-4.0-1b` ; à la main, depuis la révision épinglée
+`HARNESS_LAB_MODELS=granite-4.0-1b` ; à la main, depuis la révision épinglée
 ([350M](https://huggingface.co/ibm-granite/granite-4.0-350m-GGUF/resolve/b8208a86a58427e1739265318028eb5895b74bf2/granite-4.0-350m-Q4_K_M.gguf),
 [1B](https://huggingface.co/ibm-granite/granite-4.0-1b-GGUF/resolve/b27c2fe3f211b7f44e80fa620177aea371099aaa/granite-4.0-1b-Q4_K_M.gguf)).
 
-Sans modèle local, WaveStack fonctionne aussi avec un modèle cloud : collez une clé API au
+Sans modèle local, HarnessLab fonctionne aussi avec un modèle cloud : collez une clé API au
 diagnostic (voir [Modèles cloud](modeles.md#modèles-cloud)).
 
 ## Modèles du RAG
@@ -249,7 +249,7 @@ diagnostic (voir [Modèles cloud](modeles.md#modèles-cloud)).
 La brique RAG (et l'Atelier RAG) utilise deux petits modèles GGUF, distincts du modèle de
 conversation et jamais proposés comme tel ; l'Atelier RAG en propose deux de plus pour son
 étape Embedding et un pour son étape Reranking. Chacun est nommé dans une seule section de
-`wavestack.toml`, qui donne aussi son adresse de téléchargement et son sha256 :
+`harness-lab.toml`, qui donne aussi son adresse de téléchargement et son sha256 :
 
 | Rôle | Fichier | Taille | Section | Dossier |
 |---|---|---|---|---|
@@ -260,12 +260,12 @@ conversation et jamais proposés comme tel ; l'Atelier RAG en propose deux de pl
 | Reranking de l'Atelier RAG (facultatif) | `qwen3-reranker-0.6b-q8_0.gguf` (Qwen, Apache-2.0) | 639 Mo | `[[rag_lab.rerankers]]` | `models/reranker/` |
 
 Les dossiers sont relatifs au dossier `models/` du dossier de données
-(`%LOCALAPPDATA%\WaveStack\models\embedding\` sous Windows,
-`~/.local/share/wavestack/models/embedding/` ailleurs ; de même pour `reranker\`).
+(`%LOCALAPPDATA%\HarnessLab\models\embedding\` sous Windows,
+`~/.local/share/harness-lab/models/embedding/` ailleurs ; de même pour `reranker\`).
 
 **Les télécharger.** Depuis la carte RAG de l'Atelier Harnais, sans ligne de commande :
 « Télécharger le modèle d'embedding », puis, dans la sous-option « Reranking », « Télécharger
-le modèle de reranking ». WaveStack vérifie la taille et le sha256 de chaque fichier.
+le modèle de reranking ». HarnessLab vérifie la taille et le sha256 de chaque fichier.
 
 **Les modèles d'embedding de l'Atelier RAG** (multilingual-e5-small, Qwen3-Embedding 0.6B) sont
 des options de son étape Embedding, à côté de celui de la brique. Pour les télécharger, ouvrez
@@ -275,9 +275,9 @@ l'étape, celui de la brique compris : 2 sur une installation neuve où il est d
 passe en mode Composer et choisit la ligne Embedding de la séquence, où chaque modèle absent a
 son bouton « Télécharger (≈ taille) » (taille et sha256 vérifiés). En mode Composer, ces boutons
 sont visibles sans rien choisir. Sinon, téléchargez-les à la main (adresses `url` des entrées
-`[[rag_lab.embeddings]]` de `wavestack.toml`) et copiez-les sous ces noms exacts dans
+`[[rag_lab.embeddings]]` de `harness-lab.toml`) et copiez-les sous ces noms exacts dans
 `models/embedding/`. Sans son fichier, l'option est grisée, la raison nomme le fichier attendu ;
-WaveStack vérifie son sha256 au chargement. **Le modèle de reranking de l'Atelier RAG**
+HarnessLab vérifie son sha256 au chargement. **Le modèle de reranking de l'Atelier RAG**
 (Qwen3-Reranker 0.6B) se télécharge de même : « N modèles à télécharger » sous la tuile
 Reranker (celui de la brique compris s'il manque), puis le bouton de la ligne Reranking. Une chaîne sans étape Reranking (préréglages « RAG dense », « RAG hybride ») n'a ni
 tuile ni ligne Reranking : au pied du groupe MODÈLES, une phrase dit d'ajouter l'étape, et son
@@ -286,10 +286,10 @@ son nom exact, dans `models/reranker/` (adresse `url` de l'entrée `[[rag_lab.re
 
 **Hors ligne, ou derrière un proxy qui bloque Hugging Face.** Téléchargez les fichiers sur un
 autre poste (adresses `url` des sections `[rag.embedding]` et `[rag.reranker]` de
-`wavestack.toml`, et, pour l'Atelier RAG, des entrées `[[rag_lab.embeddings]]` et
+`harness-lab.toml`, et, pour l'Atelier RAG, des entrées `[[rag_lab.embeddings]]` et
 `[[rag_lab.rerankers]]`), copiez-les sous ces noms exacts dans `models/embedding/` et
 `models/reranker/`, puis cliquez de nouveau sur la carte RAG ou rechargez l'Atelier RAG (ou
-relancez WaveStack).
+relancez HarnessLab).
 
 **Les index.** Les index du corpus sont livrés avec le dépôt, un par langue :
 `data/rag_index.sqlite` (français), `data/rag_index.en.sqlite` et `data/rag_index.de.sqlite`.
@@ -316,7 +316,7 @@ uv run python scripts/build_rag_index.py --lang de
 
 ## Premier lancement et diagnostic
 
-Au lancement, WaveStack vérifie la mémoire disponible, la présence d'un modèle GGUF, l'accès
+Au lancement, HarnessLab vérifie la mémoire disponible, la présence d'un modèle GGUF, l'accès
 réseau et la disponibilité du port — chaque résultat s'affiche en français dans le terminal et
 sur la page Modèles. Pour ce test de présence, seuls le dossier des modèles, les chemins
 explicites (dont le modèle enregistré dans `settings.json`) et Ollama (un appel à son serveur
@@ -338,7 +338,7 @@ scénarios, les ateliers), voir le [guide d'utilisation](guide.md).
 - Aux lancements suivants, il s'ouvre une fois le diagnostic terminé : sur l'interface principale
   (`/`) si tout est prêt, sinon sur le diagnostic. Si le diagnostic dure plus de 30 s, le
   diagnostic s'ouvre.
-- Si WaveStack tourne déjà, la commande ouvre l'interface principale quand l'instance est prête,
+- Si HarnessLab tourne déjà, la commande ouvre l'interface principale quand l'instance est prête,
   sinon le diagnostic.
 - Le diagnostic reste accessible par l'indicateur de modèle de la barre du bas et par le lien
   « 🛠️ Modèles » de la barre de navigation, en haut de chaque page.
@@ -354,14 +354,14 @@ de modèles Ollama, comptez une dizaine de minutes (18 modèles le 2026-10-02) ;
 
 ## Mise à jour
 
-`git pull` (ou un nouveau zip), puis `uv run wavestack`, qui resynchronise sur `uv.lock`. Si
+`git pull` (ou un nouveau zip), puis `uv run harness-lab`, qui resynchronise sur `uv.lock`. Si
 vous utilisez un extra (ci-dessous), relancez aussi `uv sync` avec tous vos extras, par exemple
 `uv sync --extra compression` : un `uv sync` qui omet un extra le désinstalle.
 
 ## Extras optionnels
 
-Quatre briques ou ateliers demandent des dépendances supplémentaires, que `uv run wavestack`
-seul n'installe pas. Ajoutez-les depuis le dossier de WaveStack, puis après chaque mise à jour,
+Quatre briques ou ateliers demandent des dépendances supplémentaires, que `uv run harness-lab`
+seul n'installe pas. Ajoutez-les depuis le dossier de HarnessLab, puis après chaque mise à jour,
 en gardant tous les extras voulus dans la même commande :
 
 ```bash
@@ -376,10 +376,10 @@ uv sync --extra compression --extra rag-alt --extra greenops
 | `guardrails` | La brique Garde-fous (toxicité ONNX, Presidio et spaCy français) ; le modèle de toxicité (≈ 140 Mo) se télécharge depuis Hugging Face à la première utilisation | ≈ 500 Mo | Le modèle spaCy `fr_core_news_sm` vient des releases GitHub de spaCy : autoriser `github.com`, `objects.githubusercontent.com` et `release-assets.githubusercontent.com` derrière un proxy |
 
 Depuis la brique Garde-fous, un bouton **Installer** lance cette même commande (`uv sync
---extra guardrails --inexact --no-install-project`) dans l'environnement de WaveStack et
+--extra guardrails --inexact --no-install-project`) dans l'environnement de HarnessLab et
 affiche la progression ; cette étape ne s'interrompt pas (pas de bouton « Arrêter » : un `uv
 sync` coupé en route laisserait l'environnement à moitié installé). Si l'installation réussit,
-la brique s'utilise sans relancer WaveStack, sauf message contraire affiché par le bouton.
+la brique s'utilise sans relancer HarnessLab, sauf message contraire affiché par le bouton.
 
 **Garde-fou injection (Prompt Guard 2, optionnel)** : un poids ONNX quantifié (≈ 70 Mo, repris
 de `gravitee-io/Llama-Prompt-Guard-2-22M-onnx`, sans torch) protégé par la licence Llama 4
@@ -387,12 +387,12 @@ Community. Dans la brique Garde-fous, dépliez « Comment l'installer » : crée
 [huggingface.co](https://huggingface.co), acceptez la licence sur la fiche de
 `meta-llama/Llama-Prompt-Guard-2-22M`, générez un jeton d'accès (lecture suffit), cochez « J'ai
 accepté la licence Llama 4 Community sur Hugging Face », collez le jeton et cliquez sur
-**Installer**. Avant tout téléchargement, WaveStack demande avec ce jeton un petit fichier du
+**Installer**. Avant tout téléchargement, HarnessLab demande avec ce jeton un petit fichier du
 dépôt officiel de Meta (`config.json`, sans les poids) : si Hugging Face refuse l'accès (licence
 non acceptée par ce compte, ou jeton invalide), rien n'est téléchargé. Une fois installé, la
 brique affiche « Built with Llama », comme l'exige la licence. Derrière un proxy, le
 téléchargement passe par `huggingface.co` puis par ses serveurs de fichiers sous `*.hf.co`
-(par exemple `cas-bridge.xethub.hf.co`), déjà dans la liste blanche de WaveStack : le proxy
+(par exemple `cas-bridge.xethub.hf.co`), déjà dans la liste blanche de HarnessLab : le proxy
 doit autoriser les deux. Le jeton est enregistré hors du dépôt
-(`<dossier de données WaveStack>/hf_token.json`) ; supprimez ce fichier pour le retirer. Il
+(`<dossier de données HarnessLab>/hf_token.json`) ; supprimez ce fichier pour le retirer. Il
 n'apparaît jamais dans le journal, la trace ni les journaux.
