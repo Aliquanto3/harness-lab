@@ -18,7 +18,7 @@ context:
 
 **Problem:** GPT-6 Luna n'appelle d'outils par Chat Completions que raisonnement éteint (doc OpenAI relue le 2026-10-03), et ne renvoie jamais son raisonnement par cette API : les briques Outils, MCP, Sous-agent et Raisonnement exigent l'API Responses.
 
-**Approach:** Un adaptateur `openai_responses` (engine + traducteur du pivot, sur les registres des stories 1 et 3) écrit le corps Responses sans état (`store: false`), lit le flux SSE, renvoie verbatim les items `reasoning` chiffrés reçus, et une entrée `openai_luna` (`gpt-6-luna`) rejoint `wavestack.toml`, `gpt-6.1-sol` en commentaire. Les questions ouvertes (Luna accepte-t-il `temperature`/`top_p` ; quel effort montre un résumé sans gonfler le coût) sont tranchées par quelques appels réels, plafond 5 $ (CAP-3).
+**Approach:** Un adaptateur `openai_responses` (engine + traducteur du pivot, sur les registres des stories 1 et 3) écrit le corps Responses sans état (`store: false`), lit le flux SSE, renvoie verbatim les items `reasoning` chiffrés reçus, et une entrée `openai_luna` (`gpt-6-luna`) rejoint `harness-lab.toml`, `gpt-6.1-sol` en commentaire. Les questions ouvertes (Luna accepte-t-il `temperature`/`top_p` ; quel effort montre un résumé sans gonfler le coût) sont tranchées par quelques appels réels, plafond 5 $ (CAP-3).
 
 ## Boundaries & Constraints
 
@@ -54,22 +54,22 @@ context:
 
 ## Code Map
 
-- `src/wavestack/models/anthropic_messages.py` -- modèle direct de l'adaptateur (lecture SSE, usage pivot, erreurs avec usage attaché, `_merge`) ; nouveau `src/wavestack/models/openai_responses.py`.
-- `src/wavestack/context/render.py` -- `_anthropic_messages`, `_tool_input`, `verbatim`, `TRANSLATORS` ; ajouter `_openai_responses`.
-- `src/wavestack/models/cloud_base.py` -- `ChatEnd.thinking_blocks`, `ProviderError.usage`/`dropped`, `run_call` (masquage des blocs dans `traced`).
-- `src/wavestack/session/app_session.py` -- `_assistant_message` (l. ~3873-3900, forme `thinking_blocks`), `_assistant_step` (l. ~5118), `out.thinking` (l. ~8013) : réutiliser pour `reasoning_items`.
-- `src/wavestack/config.py` -- `CloudModel.api`, `CloudReasoning.format`, `max_tokens_field`, `sampling_sent` (l. ~308).
-- `wavestack.toml` (entrées Claude de la story 3 comme modèle), `README.md` (section Claude comme modèle), `content/models/publishers.yaml` (+ en, de).
+- `src/harness_lab/models/anthropic_messages.py` -- modèle direct de l'adaptateur (lecture SSE, usage pivot, erreurs avec usage attaché, `_merge`) ; nouveau `src/harness_lab/models/openai_responses.py`.
+- `src/harness_lab/context/render.py` -- `_anthropic_messages`, `_tool_input`, `verbatim`, `TRANSLATORS` ; ajouter `_openai_responses`.
+- `src/harness_lab/models/cloud_base.py` -- `ChatEnd.thinking_blocks`, `ProviderError.usage`/`dropped`, `run_call` (masquage des blocs dans `traced`).
+- `src/harness_lab/session/app_session.py` -- `_assistant_message` (l. ~3873-3900, forme `thinking_blocks`), `_assistant_step` (l. ~5118), `out.thinking` (l. ~8013) : réutiliser pour `reasoning_items`.
+- `src/harness_lab/config.py` -- `CloudModel.api`, `CloudReasoning.format`, `max_tokens_field`, `sampling_sent` (l. ~308).
+- `harness-lab.toml` (entrées Claude de la story 3 comme modèle), `README.md` (section Claude comme modèle), `content/models/publishers.yaml` (+ en, de).
 - `tests/test_anthropic_messages.py` -- modèle des tests sur faux serveur SSE.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/config.py` -- `openai_responses`, `reasoning_items`, `max_output_tokens`, `sampling_sent` étendu.
-- [x] `src/wavestack/models/openai_responses.py` -- engine ; enregistrement dans `ENGINES`.
-- [x] `src/wavestack/context/render.py` -- traducteur `openai_responses`.
-- [x] `src/wavestack/session/app_session.py` (si besoin) -- items `reasoning` au format `reasoning_items`.
-- [x] `wavestack.toml`, `README.md`, `content/models/publishers.yaml` (+ en, de) -- entrée `openai_luna`, Sol en commentaire, clé et conditions.
+- [x] `src/harness_lab/config.py` -- `openai_responses`, `reasoning_items`, `max_output_tokens`, `sampling_sent` étendu.
+- [x] `src/harness_lab/models/openai_responses.py` -- engine ; enregistrement dans `ENGINES`.
+- [x] `src/harness_lab/context/render.py` -- traducteur `openai_responses`.
+- [x] `src/harness_lab/session/app_session.py` (si besoin) -- items `reasoning` au format `reasoning_items`.
+- [x] `harness-lab.toml`, `README.md`, `content/models/publishers.yaml` (+ en, de) -- entrée `openai_luna`, Sol en commentaire, clé et conditions.
 - [x] `tests/test_openai_responses.py` -- chaque ligne de la matrice, corps envoyé = tracé, corps de `openai_luna` raisonnement allumé et éteint.
 - [x] Mesures réelles -- `mesures-openai-2026-10.md`, SPEC.md. Mesures 1 et 4 tranchées l'après-midi à la validation (compte sans crédit) ; 2, 3, 5 et la recette « clé réelle » jouées le soir, crédit rechargé.
 
@@ -82,7 +82,7 @@ context:
 
 Revue de la PR #20 du 2026-10-03, groupe 1 (voir aussi la story 3 : les tests d'arrêt et la règle « une réponse finie reste finie » couvrent aussi Responses).
 
-- [x] [Review][Patch] Import montant `models` → `context` : `openai_responses.py` importe `FOLLOWS` de `context/render.py`, contre le sens des flèches de l'ARCHITECTURE-SPINE. Définir `FOLLOWS` dans `models/cloud_base.py` et l'importer depuis `render.py` (`context` → `models`, autorisé). [`src/wavestack/context/render.py:534`]
+- [x] [Review][Patch] Import montant `models` → `context` : `openai_responses.py` importe `FOLLOWS` de `context/render.py`, contre le sens des flèches de l'ARCHITECTURE-SPINE. Définir `FOLLOWS` dans `models/cloud_base.py` et l'importer depuis `render.py` (`context` → `models`, autorisé). [`src/harness_lab/context/render.py:534`]
 
 **Rejetées (Responses) :**
 - `false` : `arguments` non textuel dans le traducteur. En mode chat, `arguments` est toujours la `Part` d'`arguments_json`, une chaîne.
@@ -92,7 +92,7 @@ Revue de la PR #20 du 2026-10-03, groupe 1 (voir aussi la story 3 : les tests d'
 
 Revue de la PR #20 du 2026-10-03, groupe 2 (voir la story 3 : les deux décisions, le renvoi pour une entrée `always`, le test des marqueurs au niveau session et le rejeu de « Tester » valent aussi pour Responses et l'exemple Sol).
 
-- [x] [Review][Patch] `pricing.checked = "2026-10-03"` pour Luna alors que le commentaire dit « (à revérifier) » et que la doc d'OpenAI a répondu 403 : dire ce qui a été lu (la fiche du modèle) et ce qui ne l'a pas été (la page des prix). [`wavestack.toml:555`]
+- [x] [Review][Patch] `pricing.checked = "2026-10-03"` pour Luna alors que le commentaire dit « (à revérifier) » et que la doc d'OpenAI a répondu 403 : dire ce qui a été lu (la fiche du modèle) et ce qui ne l'a pas été (la page des prix). [`harness-lab.toml:555`]
 
 Revue de la PR #20 du 2026-10-03, groupe 4a (tests ; voir la story 3 : branches d'erreur, sous-agent, second tour d'acceptation et U+200B valent aussi pour Responses).
 

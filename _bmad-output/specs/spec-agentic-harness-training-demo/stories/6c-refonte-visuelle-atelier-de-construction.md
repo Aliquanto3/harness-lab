@@ -53,25 +53,25 @@ context:
 
 ## Code Map
 
-- `src/wavestack/web/static/tokens.css` : à réécrire depuis le frontmatter (nouveaux `relief`, `relief-active`, `dot`, `pane-subtitle`, rayons 18/26, `relief-offset*`, `dot-grid` ; plus aucun `letter-spacing`).
-- `src/wavestack/web/static/fonts.css` (nouveau) + `static/fonts/*.woff2` et `*-OFL.txt` : fichiers téléchargés depuis `cdn.jsdelivr.net/npm/@fontsource/{fredoka,atkinson-hyperlegible,jetbrains-mono}/files/*-latin-*-normal.woff2` (copie de travail déjà dans le scratchpad). Servis par le montage `/static` existant (`web/app.py` L106), rien à changer côté serveur.
-- `src/wavestack/web/static/index.html` : lier `fonts.css` avant `tokens.css` ; dans chaque `.pane-header`, envelopper `h2.pane-title` et un `p.pane-subtitle` dans un `div.pane-heading`.
-- `src/wavestack/web/static/app.css` : `body` (pois, `padding`/`gap` en `gutter`, `font-variant-numeric: tabular-nums`) ; `.top-bar` (carte flottante) ; `.layout/.right/.top-row` (gap `gutter`, plus de fond `line` en 1 px) ; `.pane` (rayon lg, relief) ; `.pane-title` (L170, sans majuscules ni `letter-spacing`) ; boutons (L185, L497, L781, L803) ; `.bubble*` (L286) ; `.brick-card*` (L617) ; `.edit-drawer` et `.pane-menu-list` (ombres `rgba` L88, L820 remplacées) ; rayons de `.ctx-segment`, `.step`, `.harness-event`, `.overflow-card`, `.outbound-payload` ; `.gauge-figures` largeur fixe ; retirer les usages de `--typography-*-letter-spacing` (L49, L174, L702) ; nouvelles règles du cadre, des puces et du robot.
-- `src/wavestack/web/static/app.js` `renderSchema` (L1050) : réécrit. Réutiliser `svgEl`, `select`, `activeTurn`, `store.bricks.bricks` (`id`, `label_fr`, `wanted`, `available`, `reason_fr`), les classes `arch-node`/`is-network`/`is-unavailable`/`is-not-contacted` et la logique de titre/état existante (L1093-1114). Mémoriser les entrées dessinées (architecture, briques, pose, sélection) et ne pas reconstruire le SVG si rien n'a changé : `render()` tourne à chaque `model_delta` et relancerait l'animation de l'antenne.
-- `src/wavestack/trace/catalog.py` `ArchitectureNode` (L50) : `model: str | None = None`.
-- `src/wavestack/session/app_session.py` `_emit_architecture` (L302) : le nœud `core.model` porte `model` = nom (sans extension) du fichier chargé, `None` sans moteur ; retenir ce nom dans `_boot` (L502) au succès du chargement.
+- `src/harness_lab/web/static/tokens.css` : à réécrire depuis le frontmatter (nouveaux `relief`, `relief-active`, `dot`, `pane-subtitle`, rayons 18/26, `relief-offset*`, `dot-grid` ; plus aucun `letter-spacing`).
+- `src/harness_lab/web/static/fonts.css` (nouveau) + `static/fonts/*.woff2` et `*-OFL.txt` : fichiers téléchargés depuis `cdn.jsdelivr.net/npm/@fontsource/{fredoka,atkinson-hyperlegible,jetbrains-mono}/files/*-latin-*-normal.woff2` (copie de travail déjà dans le scratchpad). Servis par le montage `/static` existant (`web/app.py` L106), rien à changer côté serveur.
+- `src/harness_lab/web/static/index.html` : lier `fonts.css` avant `tokens.css` ; dans chaque `.pane-header`, envelopper `h2.pane-title` et un `p.pane-subtitle` dans un `div.pane-heading`.
+- `src/harness_lab/web/static/app.css` : `body` (pois, `padding`/`gap` en `gutter`, `font-variant-numeric: tabular-nums`) ; `.top-bar` (carte flottante) ; `.layout/.right/.top-row` (gap `gutter`, plus de fond `line` en 1 px) ; `.pane` (rayon lg, relief) ; `.pane-title` (L170, sans majuscules ni `letter-spacing`) ; boutons (L185, L497, L781, L803) ; `.bubble*` (L286) ; `.brick-card*` (L617) ; `.edit-drawer` et `.pane-menu-list` (ombres `rgba` L88, L820 remplacées) ; rayons de `.ctx-segment`, `.step`, `.harness-event`, `.overflow-card`, `.outbound-payload` ; `.gauge-figures` largeur fixe ; retirer les usages de `--typography-*-letter-spacing` (L49, L174, L702) ; nouvelles règles du cadre, des puces et du robot.
+- `src/harness_lab/web/static/app.js` `renderSchema` (L1050) : réécrit. Réutiliser `svgEl`, `select`, `activeTurn`, `store.bricks.bricks` (`id`, `label_fr`, `wanted`, `available`, `reason_fr`), les classes `arch-node`/`is-network`/`is-unavailable`/`is-not-contacted` et la logique de titre/état existante (L1093-1114). Mémoriser les entrées dessinées (architecture, briques, pose, sélection) et ne pas reconstruire le SVG si rien n'a changé : `render()` tourne à chaque `model_delta` et relancerait l'animation de l'antenne.
+- `src/harness_lab/trace/catalog.py` `ArchitectureNode` (L50) : `model: str | None = None`.
+- `src/harness_lab/session/app_session.py` `_emit_architecture` (L302) : le nœud `core.model` porte `model` = nom (sans extension) du fichier chargé, `None` sans moteur ; retenir ce nom dans `_boot` (L502) au succès du chargement.
 - `tests/test_web_tokens.py` : réutiliser `_expected_tokens` / `_css_custom_properties`.
 - `tests/test_bricks.py` `test_wanted_brick_is_drawn_linked_to_the_harness` (L285) : `booted_session` démarre sur `fake.gguf`.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/web/static/fonts/` + `fonts.css` -- copier les 5 WOFF2 et les 3 licences, déclarer 5 `@font-face` -- polices locales (NFR-3, NFR-4)
-- [x] `src/wavestack/web/static/tokens.css` -- aligner sur le frontmatter -- test rouge
-- [x] `src/wavestack/web/static/index.html` -- lien `fonts.css`, sous-titres des 5 volets -- DESIGN > Components
-- [x] `src/wavestack/web/static/app.css` -- relief, rayons, pois, gouttières, titres, compteurs à largeur fixe, styles du schéma -- direction « atelier »
-- [x] `src/wavestack/trace/catalog.py`, `src/wavestack/session/app_session.py` -- champ `model` du nœud `core.model` -- nom sous le robot
-- [x] `src/wavestack/web/static/app.js` -- `renderSchema` à cadre, puces et robot ; `robotPose()` -- schéma
+- [x] `src/harness_lab/web/static/fonts/` + `fonts.css` -- copier les 5 WOFF2 et les 3 licences, déclarer 5 `@font-face` -- polices locales (NFR-3, NFR-4)
+- [x] `src/harness_lab/web/static/tokens.css` -- aligner sur le frontmatter -- test rouge
+- [x] `src/harness_lab/web/static/index.html` -- lien `fonts.css`, sous-titres des 5 volets -- DESIGN > Components
+- [x] `src/harness_lab/web/static/app.css` -- relief, rayons, pois, gouttières, titres, compteurs à largeur fixe, styles du schéma -- direction « atelier »
+- [x] `src/harness_lab/trace/catalog.py`, `src/harness_lab/session/app_session.py` -- champ `model` du nœud `core.model` -- nom sous le robot
+- [x] `src/harness_lab/web/static/app.js` -- `renderSchema` à cadre, puces et robot ; `robotPose()` -- schéma
 - [x] `tests/test_web_tokens.py` -- test inverse (aucun token orphelin), test « aucun `fonts.googleapis.com` dans `static/` », test « chaque `url()` de `fonts.css` existe » -- garde-fous
 - [x] `tests/test_bricks.py` -- `model == "fake"` sur le nœud `core.model` -- champ testé
 - [x] DESIGN.md et `.memlog.md` -- commités avec le code, sans modification
@@ -141,7 +141,7 @@ function robotPose() {
 **Commands:**
 - `uv run pytest` -- expected: tout vert, dont `tests/test_web_tokens.py`
 - `uv run ruff check . && uv run ruff format --check .` -- expected: propre
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks (if no CLI):**
 - Page d'accueil dans Chrome à 1280×650 : `document.documentElement.scrollHeight <= innerHeight` et `scrollWidth <= innerWidth` ; `document.fonts` montre les trois familles chargées ; capture d'écran relue (relief, pois, sous-titres, cadre et robot).

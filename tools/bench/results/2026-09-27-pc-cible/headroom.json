@@ -16,7 +16,7 @@
  "strace": false,
  "naive": {
   "variant": "naive",
-  "guard": "wavestack.net.guard",
+  "guard": "harness_lab.net.guard",
   "python": "3.13.5",
   "import_s": 0.049,
   "rss_before_import_mb": 36,
@@ -80,7 +80,7 @@
  },
  "configured": {
   "variant": "configured",
-  "guard": "wavestack.net.guard",
+  "guard": "harness_lab.net.guard",
   "python": "3.13.5",
   "import_s": 0.043,
   "rss_before_import_mb": 36,

@@ -1,6 +1,6 @@
 # Exemplia email change note
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this note describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this note describes no real company. -->
 
 This note explains the move from version 1 to version 2 of the email charter, effective since 1 January 2026.
 

@@ -40,7 +40,7 @@ existants que ces stories ont changées.
     `calendrier.api.gouv.fr` ; pour llama-server, facultatif (section 2.1) : `api.github.com`,
     `objects.githubusercontent.com` et `release-assets.githubusercontent.com` ;
   - les GGUF Qwen3.5-2B Q4_K_M amont (unsloth) et Qwen3.5-4B, dans
-    `%LOCALAPPDATA%\WaveStack\models` ;
+    `%LOCALAPPDATA%\HarnessLab\models` ;
   - environ 4 Go libres : 2,1 Go pour le banc, 285 Mo pour l'extra `compression`, plus
     Chromium pour l'E2E ; les modèles d'embedding et de reranker sont déjà en place depuis le
     2026-09-27 ;
@@ -52,7 +52,7 @@ existants que ces stories ont changées.
     ≈ 1 Go). Edge se relance seul en arrière-plan après sa fermeture (`--no-startup-window`,
     ≈ 1 Go, constaté le 2026-09-27 au soir) : quittez-le depuis l'icône de la zone de
     notification et vérifiez avec `Get-Process msedge`.
-- **Ordre** : 1 → 2 → 3 → 4 → 5, avec les bancs avant de lancer WaveStack. Ensuite 6, dans
+- **Ordre** : 1 → 2 → 3 → 4 → 5, avec les bancs avant de lancer HarnessLab. Ensuite 6, dans
   l'ordre des modules, puis le métier et les modèles, et 7. La séance s'arrête à « Où
   consigner » (section 8). Les résultats du 2026-09-28 sont rappelés dans le cahier, test par
   test (« Déjà mesuré » : « Le 28/09 : … ») ; le filtre « À faire » du cahier suffit pour s'y
@@ -70,19 +70,19 @@ existants que ces stories ont changées.
   à droite, les volets numérotés 1 Vue humain (« Rejouer le dernier prompt », « Vider la
   conversation »), 2 Contexte LLM (« Comparer »), 3 Orchestration (avec, en bas, « Journal des
   événements (N) ») et 4 Schéma d'architecture.
-- **Revenir en arrière** : `git switch main`, puis `uv run wavestack`, resynchronisent sur le
+- **Revenir en arrière** : `git switch main`, puis `uv run harness-lab`, resynchronisent sur le
   `uv.lock` de `main`. Le dossier de données contient déjà les données du palier 2
   (`probed_models`, `selected_model`, `memory.json`) : pour revenir au palier 1, restaurez la
-  sauvegarde prise avant le test du 2026-09-27, `sauvegarde-palier-1`, WaveStack arrêté.
+  sauvegarde prise avant le test du 2026-09-27, `sauvegarde-palier-1`, HarnessLab arrêté.
   Prenez aussi, avant cette séance, une copie de l'état actuel, `sauvegarde-palier-2` : elle
   sert à défaire les manipulations des sections 5 à 7.
 
 ```powershell
-$d = "$env:LOCALAPPDATA\WaveStack"
+$d = "$env:LOCALAPPDATA\HarnessLab"
 # Copie de l'état actuel (palier 2), avant la séance :
 New-Item -ItemType Directory -Force "$d\sauvegarde-palier-2" | Out-Null
 Copy-Item "$d\settings.json", "$d\api_keys.json", "$d\memory.json" "$d\sauvegarde-palier-2\" -ErrorAction SilentlyContinue
-# Retour au palier 1, WaveStack arrêté, après git switch main :
+# Retour au palier 1, HarnessLab arrêté, après git switch main :
 Copy-Item "$d\sauvegarde-palier-1\*" "$d\" -Force
 ```
 
@@ -124,11 +124,11 @@ uv sync --extra compression    # headroom-ai 0.38.0 (environ 40 paquets, 285 Mo)
 
 - [ ] `uv lock --check` passe.
 
-**Premier lancement**, puis arrêt avant les sections 3 et 4 (les bancs se lancent WaveStack
+**Premier lancement**, puis arrêt avant les sections 3 et 4 (les bancs se lancent HarnessLab
 arrêté) :
 
 ```powershell
-uv run wavestack          # Ctrl+C pour l'arrêter une fois les points ci-dessous relevés
+uv run harness-lab          # Ctrl+C pour l'arrêter une fois les points ci-dessous relevés
 ```
 
 - [ ] Sonde du lot E (E2) : le 2B enregistré est resondé une fois, ce premier lancement prend
@@ -146,7 +146,7 @@ garde. Relancez `uv sync --extra compression` après chaque mise à jour.
 
 Pour C9, C10 et, en section 6, « llama-server » (cahier : test `P3`). Le 2026-09-28,
 `llama-server` n'était pas installé : « n'est pas reconnu comme nom d'applet de commande ».
-WaveStack ne l'installe pas. On prend l'archive CPU officielle de llama.cpp,
+HarnessLab ne l'installe pas. On prend l'archive CPU officielle de llama.cpp,
 `llama-bNNNNN-bin-win-cpu-x64.zip`, publiée sur `github.com/ggml-org/llama.cpp`, décompressée
 dans le profil (`%LOCALAPPDATA%\llama.cpp\<version>`, un dossier par version), et l'exécutable
 se lance par son chemin complet, `$llama` : rien ne s'installe, rien ne demande d'élévation.
@@ -166,12 +166,12 @@ Invoke-WebRequest -UseBasicParsing @px $asset.browser_download_url -OutFile $zip
 if ($asset.digest) { if (("sha256:" + (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()) -ne $asset.digest) { throw "Empreinte SHA-256 différente de celle publiée par GitHub : archive refusée." } else { "Empreinte SHA-256 vérifiée." } }
 Expand-Archive $zip -DestinationPath $dest -Force; Get-ChildItem $dest -Recurse | Unblock-File
 $llama = "$dest\llama-server.exe"; & $llama --version
-& $llama -m "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096
+& $llama -m "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096
 ```
 
 - Ne lancez pas la dernière ligne ici : c'est le lancement, fait en C10 et en section 6. Ne
-  lancez jamais llama-server sans `-c` quand le 2B est chargé dans WaveStack (C9 le fait
-  exprès, WaveStack sur un petit modèle).
+  lancez jamais llama-server sans `-c` quand le 2B est chargé dans HarnessLab (C9 le fait
+  exprès, HarnessLab sur un petit modèle).
 - [ ] `$asset.name` vaut `llama-bNNNNN-bin-win-cpu-x64.zip` ; « Empreinte SHA-256 vérifiée. »
   s'affiche si l'API donne l'empreinte ; l'archive est décompressée dans
   `%LOCALAPPDATA%\llama.cpp\bNNNNN` ; `& $llama --version` affiche la version, puis
@@ -258,28 +258,28 @@ uv run pytest -q
   sont sautés (« … (extra) absent ») : 931 réussis, 7 sautés. Référence Linux au
   commit du lot G : 934 réussis, 3 sautés avec l'extra (les 3 tests propres à Windows), 930 et
   7 sans ; un de plus depuis le lot J. Tout autre échec est un écart à remonter.
-- `WAVESTACK_TEST_WINDOWS_FILES=1` ne sert qu'à simuler les règles de Windows sous Linux :
+- `HARNESS_LAB_TEST_WINDOWS_FILES=1` ne sert qu'à simuler les règles de Windows sous Linux :
   inutile ici.
 
 **Tests `model`**, avec les vrais fichiers (adaptez le nom du GGUF) :
 
 ```powershell
-$env:WAVESTACK_TEST_GGUF = "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf"
-$env:WAVESTACK_TEST_MODELS_DIR = "$env:LOCALAPPDATA\WaveStack\models"
+$env:HARNESS_LAB_TEST_GGUF = "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf"
+$env:HARNESS_LAB_TEST_MODELS_DIR = "$env:LOCALAPPDATA\HarnessLab\models"
 uv run python -m pytest -m model
 ```
 
-- [ ] Attendu : **6 réussis**. Sans `WAVESTACK_TEST_GGUF`, 4 sont sautés ; sans
-  `WAVESTACK_TEST_MODELS_DIR`, 2, chacun avec sa raison :
-  - `WAVESTACK_TEST_GGUF` : `test_probe_real_gguf_loads_successfully`,
+- [ ] Attendu : **6 réussis**. Sans `HARNESS_LAB_TEST_GGUF`, 4 sont sautés ; sans
+  `HARNESS_LAB_TEST_MODELS_DIR`, 2, chacun avec sa raison :
+  - `HARNESS_LAB_TEST_GGUF` : `test_probe_real_gguf_loads_successfully`,
     `test_real_gguf_passes_checks_4_and_6`, `test_real_gguf_reuses_its_cache_between_two_turns`
     (lot A : au second tour, le moteur n'évalue que les tokens nouveaux, à 1 près) et
     `test_real_gguf_state_restored_after_a_divergent_prompt` (lot A : état restauré sur le
     modèle hybride) ;
-  - `WAVESTACK_TEST_MODELS_DIR` (lot G) : `test_real_embedding_model_finds_the_password_document`
+  - `HARNESS_LAB_TEST_MODELS_DIR` (lot G) : `test_real_embedding_model_finds_the_password_document`
     et `test_real_reranker_puts_the_password_document_first`.
 - Gardez ces deux variables dans ce terminal pour le test `fits` (section 4.4). Depuis le
-  lot J, avec `WAVESTACK_TEST_GGUF` posée, ce test charge le vrai modèle (≈ 20 s de plus,
+  lot J, avec `HARNESS_LAB_TEST_GGUF` posée, ce test charge le vrai modèle (≈ 20 s de plus,
   ≈ 1,3 Go) : pour un `uv run pytest -q` rapide, lancez-le dans un terminal sans ces variables.
 
 **Parcours E2E Playwright**, facultatif : il rejoue l'interface avec un faux modèle. Chromium
@@ -293,7 +293,7 @@ git restore tools/e2e/screenshots            # le parcours réécrit les capture
 
 - [ ] Attendu : **0 échec, sur ce poste connecté** (30 échecs le 2026-09-27, tous dus à
   l'hypothèse « pas d'Internet »). Depuis le lot D, le lanceur coupe lui-même le réseau
-  sortant de WaveStack (proxy fermé sur la boucle locale) : `public_holidays`, Wikipédia,
+  sortant de HarnessLab (proxy fermé sur la boucle locale) : `public_holidays`, Wikipédia,
   data.gouv.fr et Microsoft Learn sont tracés, puis échouent « Service injoignable », comme
   hors ligne. Sous Windows, chaque échec prend 1 à 2 s (connexion refusée retentée).
 - Référence Linux avec l'extra `compression`, au commit du lot G : 356 vérifications
@@ -304,7 +304,7 @@ git restore tools/e2e/screenshots            # le parcours réécrit les capture
 
 ## 4. Préparer les modèles et les données
 
-### 4.1 Bancs de la story 12 (WaveStack arrêté)
+### 4.1 Bancs de la story 12 (HarnessLab arrêté)
 
 À refaire : le lot F a changé la mesure (RSS ajoutée au pic, modèle chargé) et le comptage de
 Headroom (`gpt-4`, table `cl100k_base`).
@@ -314,7 +314,7 @@ uv run --with headroom-ai==0.38.0 python tools/bench/story12_bench.py headroom -
 uv run --with huggingface-hub --with fastembed python tools/bench/story12_bench.py embed --download --json | Out-File -Encoding utf8 bench-embed.json
 ```
 
-`embed --download` reprend les fichiers déjà présents dans `~\.cache\wavestack-bench`
+`embed --download` reprend les fichiers déjà présents dans `~\.cache\harness-lab-bench`
 (environ 2,1 Go au total). Sous Windows, `strace` n'existe pas : le banc ne voit que la garde
 Python, c'est normal. Avec `--json`, le banc n'écrit pas le verdict en texte : lisez-le dans
 les rapports.
@@ -350,8 +350,8 @@ uv run python tools/bench/story12_bench.py embed --only e5small_q8; $LASTEXITCOD
 ### 4.2 Modèles d'embedding et de reranker
 
 Fait le 2026-09-27 : sha256 identiques à l'oid LFS de Hugging Face, URL épinglées sur le
-commit, dans `wavestack.toml`. À parcourir seulement :
-- [ ] `%LOCALAPPDATA%\WaveStack\models\embedding\granite-embedding-107m-multilingual-Q8_0.gguf`
+commit, dans `harness-lab.toml`. À parcourir seulement :
+- [ ] `%LOCALAPPDATA%\HarnessLab\models\embedding\granite-embedding-107m-multilingual-Q8_0.gguf`
   (121 020 096 octets) et `…\reranker\bge-reranker-v2-m3-Q4_K_M.gguf` (438 376 864 octets)
   sont présents.
 
@@ -365,7 +365,7 @@ section 5.7.
 ### 4.4 Instantanés des serveurs MCP publics et test `fits`
 
 Les instantanés sont committés (`content/mcp_snapshots/` : datagouv 10 outils, mslearn 3).
-Depuis le lot J, quand `WAVESTACK_TEST_GGUF` est posée, le test `fits` démarre ce GGUF en mode
+Depuis le lot J, quand `HARNESS_LAB_TEST_GGUF` est posée, le test `fits` démarre ce GGUF en mode
 local et lit la jauge exacte (gabarit compris : `mcp_full` 3 204 / 3 584) ; sinon il compte à 2
 caractères par token, avec un facteur de sécurité de 1,1. Il réserve la place d'un premier
 résultat borné.
@@ -382,10 +382,10 @@ uv run pytest -s tests/test_program.py -k fits    # dans le terminal de la secti
 Avant le parcours complet. Pour chaque lot : le geste, l'attendu et le critère d'acceptation
 du plan ; « Hypothèse » signale une décision prise par défaut ou un point non vérifiable sans
 ce poste. Conditions : Edge, Outlook et Teams fermés, Qwen3.5-2B sur le moteur intégré
-(défaut). Bancs finis, lancez WaveStack pour toute la section :
+(défaut). Bancs finis, lancez HarnessLab pour toute la section :
 
 ```powershell
-uv run wavestack
+uv run harness-lab
 ```
 
 Où lire les mesures :
@@ -477,7 +477,7 @@ Où lire les mesures :
     courte », brique Raisonnement allumée (section 5.1) : vérifié le 2026-09-27 au soir, 22
     tokens évalués au second tour.
   - Mesure : ≈ 9,5 tokens/s de réflexion (et non 11) ; le 2B va au budget même sur « Bonjour ».
-    Au-delà de 120 s, WaveStack arrêté, baissez le budget dans `settings.json`
+    Au-delà de 120 s, HarnessLab arrêté, baissez le budget dans `settings.json`
     (`{"reasoning": {"budget_tokens": 640}}`, borné de 128 à 1 408), rejouez et notez la valeur
     qui tient.
 
@@ -490,43 +490,43 @@ Où lire les mesures :
   hors du poste » du schéma : il ouvre la même étape).
   - Attendu : `wikipedia_summary` ou `fetch_page` renvoie le contenu de l'article, plus de 403
     « Please respect our robot policy ». Depuis la story 23, le bloc montre les sections
-    « Requête », « En-têtes » et « Corps » : l'en-tête `User-Agent: WaveStack/0.1
+    « Requête », « En-têtes » et « Corps » : l'en-tête `User-Agent: HarnessLab/0.1
     (demonstrateur pedagogique; https://github.com/Aliquanto3/agentic-harness-training-demo)`
     se lit dans « En-têtes » (le 2026-09-28, aucun en-tête n'était affiché : KO).
 - [ ] **E2E sur ce poste connecté** : 0 échec (section 3).
 
 ### 5.5 Lot E : modèles, mémoire, refus, arrêt
 
-- [ ] **llama-server sans `-c`** (E1). Arrêtez d'abord WaveStack (Ctrl+C). Attention :
-  llama-server sans `-c` réserve ≈ 5 Go ; à côté de WaveStack qui tient le 2B, le total peut
-  dépasser la RAM du poste. Pour cette mesure, choisissez dans WaveStack un petit modèle ou un
+- [ ] **llama-server sans `-c`** (E1). Arrêtez d'abord HarnessLab (Ctrl+C). Attention :
+  llama-server sans `-c` réserve ≈ 5 Go ; à côté de HarnessLab qui tient le 2B, le total peut
+  dépasser la RAM du poste. Pour cette mesure, choisissez dans HarnessLab un petit modèle ou un
   modèle cloud avant de l'arrêter (le dernier chargé revient au lancement), puis lancez
-  llama-server, puis WaveStack :
+  llama-server, puis HarnessLab :
 
 ```powershell
 # $llama : section 2.1 (dans un nouveau terminal, la commande « retrouvez l'exécutable »)
-& $llama -m "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1
+& $llama -m "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1
 ```
 
   - Attendu au diagnostic : une mémoire d'environ 5 Go, proche des 5 137 Mo mesurés alors (et
     non plus la seule taille du fichier), et l'avertissement « llama-server a été lancé avec un
-    contexte de 262 144 tokens, alors que WaveStack n'en utilise que 4 096 : il réserve la
+    contexte de 262 144 tokens, alors que HarnessLab n'en utilise que 4 096 : il réserve la
     mémoire de tout ce contexte. Arrêtez-le et relancez-le avec `-c 4096`. »
   - Si la ligne dit « sans son cache de contexte (fichier du modèle illisible depuis
-    WaveStack) », le lecteur GGUF n'a pas lu le vrai fichier Qwen3.5 : écart à remonter.
-  - Arrêtez WaveStack, puis llama-server (Ctrl+C dans sa fenêtre), avant de le relancer avec
+    HarnessLab) », le lecteur GGUF n'a pas lu le vrai fichier Qwen3.5 : écart à remonter.
+  - Arrêtez HarnessLab, puis llama-server (Ctrl+C dans sa fenêtre), avant de le relancer avec
     `-c 4096` (section 6, « Modèles ») : plus d'avertissement.
 - [ ] **Sonde et 4B** (E2, E3, décision N5). La sonde du 2B se relève au premier lancement
   (section 2). Avec le 2B actif, **éteignez d'abord la brique RAG** : ses modèles
-  d'embedding et de reranker comptent dans la mémoire de WaveStack. Choisissez ensuite le 4B.
-  WaveStack contrôle le budget avec l'ancienne estimation avant de libérer le 2B et de sonder :
+  d'embedding et de reranker comptent dans la mémoire de HarnessLab. Choisissez ensuite le 4B.
+  HarnessLab contrôle le budget avec l'ancienne estimation avant de libérer le 2B et de sonder :
   le refus peut donc venir tout de suite, sans nouvelle sonde ; sinon le 4B est resondé, puis
   refusé.
-  - Attendu : « Changement refusé : … demande environ … ; WaveStack occupe … sans le modèle
-    actif, pour un budget de … » avec la vraie mémoire de WaveStack (en Mo sous 1 Go, jamais
+  - Attendu : « Changement refusé : … demande environ … ; HarnessLab occupe … sans le modèle
+    actif, pour un budget de … » avec la vraie mémoire de HarnessLab (en Mo sous 1 Go, jamais
     « 0 Mo » ni « 0,0 Go » : N entre 80 et 400 Mo) ; le 2B reste ou redevient actif. Depuis la
     story 24, le budget est dynamique : il vaut le budget B relevé au diagnostic au lancement
-    (ligne « Budget mémoire de WaveStack : B Mo (…) », cahier P2), au plus 4 096 Mo, suivi de son
+    (ligne « Budget mémoire de HarnessLab : B Mo (…) », cahier P2), au plus 4 096 Mo, suivi de son
     calcul, par exemple « budget de 4,0 Go (= plafond [memory] budget_mb) », ou moins si la RAM
     disponible au lancement est faible (fermez Edge, Outlook et Teams).
   - Critère : le 4B est refusé par le budget B (au plus 4 096 Mo, N5) : 4,27 Go
@@ -534,38 +534,38 @@ Où lire les mesures :
     de toute la fenêtre et les tampons de calcul (3,4 Go estimés avant le lot E). Relevez
     l'estimation affichée, et si le 4B a été resondé, la durée de la sonde.
   - Mesuré le 2026-09-27 au soir : sonde du 4B ≈ 53 s (libération du 2B comprise), RSS
-    4 262 Mo, refus « demande environ 4,4 Go ; WaveStack occupe 118 Mo sans le modèle actif,
+    4 262 Mo, refus « demande environ 4,4 Go ; HarnessLab occupe 118 Mo sans le modèle actif,
     pour un budget de 4,0 Go ». Une sonde prend 30 à 60 s selon le modèle.
 - [ ] **« Arrêter » pendant un chargement** (E4, C4), sur le chargement d'un GGUF, assez long
   pour cliquer : la sonde d'un fichier jamais sondé, ou le 4B avec un budget relevé (section 6,
   « Changement à chaud »). « Changer de modèle… », le fichier, « Charger » ; pendant le
   chronomètre de chargement, dans les 5 s, cliquez « Arrêter » (à droite du champ de message,
   dans la Vue humain). Si le 4B est refusé tout de suite (sonde déjà faite, refus immédiat),
-  prenez une copie du 2B jamais sondée, créée **WaveStack lancé** (le diagnostic de lancement
+  prenez une copie du 2B jamais sondée, créée **HarnessLab lancé** (le diagnostic de lancement
   sonde tout GGUF jamais sondé : ne relancez pas) et choisie à chaud :
-  1. WaveStack lancé, 2B actif : premier bloc ci-dessous (copie du 2B).
+  1. HarnessLab lancé, 2B actif : premier bloc ci-dessous (copie du 2B).
   2. Dans un second onglet, http://127.0.0.1:8420/diagnostic : collez le chemin de la copie
      sous « Ou indiquez le chemin d'un fichier GGUF : », cliquez « Choisir ce fichier »
      (changement à chaud), revenez aussitôt à l'onglet de l'atelier et cliquez « Arrêter »
      dans les 5 s.
-  3. WaveStack arrêté, supprimez la copie (second bloc). Si sa sonde a abouti, son entrée reste
+  3. HarnessLab arrêté, supprimez la copie (second bloc). Si sa sonde a abouti, son entrée reste
      dans `probed_models` de `settings.json` : sans effet, elle peut rester.
 
-  Un modèle Ollama ne charge côté WaveStack que son tokenizer, trop vite pour cliquer :
+  Un modèle Ollama ne charge côté HarnessLab que son tokenizer, trop vite pour cliquer :
   facultatif.
 
 ```powershell
-# Copier le 2B (WaveStack lancé)
-$m = "$env:LOCALAPPDATA\WaveStack\models"
+# Copier le 2B (HarnessLab lancé)
+$m = "$env:LOCALAPPDATA\HarnessLab\models"
 Copy-Item "$m\Qwen3.5-2B-Q4_K_M.gguf" "$m\Qwen3.5-2B-copie-C4.gguf"; "$m\Qwen3.5-2B-copie-C4.gguf"
-# Supprimer la copie (WaveStack arrêté)
-Remove-Item "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-copie-C4.gguf"
+# Supprimer la copie (HarnessLab arrêté)
+Remove-Item "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-copie-C4.gguf"
 ```
 
   - Attendu : « Arrêt demandé · Chargement du modèle … » dans la barre haute (son infobulle :
     « Un chargement du moteur en cours se termine avant l'arrêt ; une sonde est interrompue
     tout de suite. »), puis l'issue « Chargement arrêté : {modèle précédent} est de nouveau
-    actif. » Depuis la story 24, une sonde s'arrête aussitôt ; un chargement dans WaveStack, à
+    actif. » Depuis la story 24, une sonde s'arrête aussitôt ; un chargement dans HarnessLab, à
     la fin de son étape (libération ou chargement). Le 2026-09-28 : arrêt effectif après
     ≈ 25 s, à la fin de la sonde (KO).
 - [ ] **Briques indisponibles** (E5, C5) : `llama3.2:3b` via Ollama (« Changer de modèle… »,
@@ -584,7 +584,7 @@ Remove-Item "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-copie-C4.gguf"
     modèle précédent reste actif. Depuis la story 24, les accents sont justes (« abîmé »,
     « modèle ») : le 2026-09-28, la raison s'affichait « abÃ®mÃ© », « modÃ¨le ».
 - [ ] Refus chiffré d'un modèle Ollama trop gros (`olmo-3:7b` le 2026-09-27), si vous l'avez :
-  WaveStack occupe ≈ 200 Mo sans le modèle actif (et non « 0,0 Go »).
+  HarnessLab occupe ≈ 200 Mo sans le modèle actif (et non « 0,0 Go »).
 
 ### 5.6 Lot F : Headroom hors ligne et banc
 
@@ -602,8 +602,8 @@ Remove-Item "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-copie-C4.gguf"
 
 - [ ] `uv run pytest -q` : ≈ 1 294 réussis et 3 sautés (5 sans l'extra `rag-alt`), les deux
   tests G1 compris (section 3).
-- [ ] Tests `model` du RAG avec `WAVESTACK_TEST_MODELS_DIR` : réussis (section 3).
-- [ ] **Script pendant une session** : WaveStack lancé, un tour du scénario RAG (l'index est
+- [ ] Tests `model` du RAG avec `HARNESS_LAB_TEST_MODELS_DIR` : réussis (section 3).
+- [ ] **Script pendant une session** : HarnessLab lancé, un tour du scénario RAG (l'index est
   ouvert), puis, dans un second terminal :
 
 ```powershell
@@ -611,15 +611,15 @@ uv run python scripts/build_rag_index.py
 $LASTEXITCODE
 ```
 
-  - Attendu : « L'index est ouvert par un autre programme (WaveStack, un antivirus ou un outil
+  - Attendu : « L'index est ouvert par un autre programme (HarnessLab, un antivirus ou un outil
     de synchronisation) : il ne peut pas être remplacé. Construisez-le depuis la carte RAG, ou
-    arrêtez WaveStack, puis relancez ce script. », code de sortie 1, index intact.
-  - Si le script réussit (WaveStack ne tenait pas l'index), WaveStack arrêté :
+    arrêtez HarnessLab, puis relancez ce script. », code de sortie 1, index intact.
+  - Si le script réussit (HarnessLab ne tenait pas l'index), HarnessLab arrêté :
     `git restore data/rag_index.sqlite`.
 
 ## 6. Parcours fonctionnel
 
-Lancez `uv run wavestack` avec Qwen3.5-2B. Choisissez chaque scénario dans le sélecteur de
+Lancez `uv run harness-lab` avec Qwen3.5-2B. Choisissez chaque scénario dans le sélecteur de
 la barre haute : ses prompts apparaissent au-dessus du champ de saisie, sa consigne dans la
 Vue humain. Les points validés le 2026-09-27 (plan, « Ce qui marche déjà ») se parcourent :
 relevez surtout les trois mesures.
@@ -636,7 +636,7 @@ relevez surtout les trois mesures.
   (colonne `Pic Mo`), ou dans le Gestionnaire des tâches :
 
 ```powershell
-Get-Process python*, wavestack*, llama-server*, ollama* -ErrorAction SilentlyContinue |
+Get-Process python*, harness-lab*, llama-server*, ollama* -ErrorAction SilentlyContinue |
   Select-Object Name, Id, @{n = "Mo"; e = { [math]::Round($_.WorkingSet64 / 1MB) } },
     @{n = "Pic Mo"; e = { [math]::Round($_.PeakWorkingSet64 / 1MB) } }
 ```
@@ -685,26 +685,26 @@ actions forcées », en haut du Panneau des briques, est activé ; désactivez-l
   Camille. »…, marquées « démonstration ») sont revenues ; envoyez « Bonjour » : Orchestration
   titre ce tour « Tour 1 » (story 22 ; l'identifiant `t{n}` du journal, lui, continue).
 - [ ] **D11, mémoire globale pleine** (20 entrées de 300 caractères) :
-  1. WaveStack arrêté (Ctrl+C), lancez le premier bloc ci-dessous, **une seule fois** : il
+  1. HarnessLab arrêté (Ctrl+C), lancez le premier bloc ci-dessous, **une seule fois** : il
      sauvegarde `memory.json` en `memory.json.avant-d11` (ou note qu'il n'existait pas), refuse
      de continuer si une sauvegarde D11 existe déjà (ne le relancez pas : restaurez d'abord),
      écrit 20 entrées au format de `memory.json` (liste de `{id, text, created_at, source}`, un
      texte sur une ligne) et répond « 20 entrees ».
-  2. Relancez `uv run wavestack`. Ne lancez ni le scénario « Mémoire globale » ni
+  2. Relancez `uv run harness-lab`. Ne lancez ni le scénario « Mémoire globale » ni
      « ⟲ Réinitialiser » : ils restaurent la démonstration. Allumez la brique « Mémoire
      globale » à la main, par son interrupteur dans le Panneau des briques, puis la brique
      « Raisonnement » (le pire cas : 2 560 utilisables).
   3. Lisez la ligne d'état de la carte (« 20 entrées · N tokens »), le total de la jauge de la
      barre haute (« … / 2 560 tokens · … % ») et, au survol, son segment « Mémoire globale ».
      « Modifier la mémoire » : 20 entrées. Fermez par « × ».
-  4. WaveStack arrêté, restaurez la sauvegarde (second bloc : il ne touche à rien sans
+  4. HarnessLab arrêté, restaurez la sauvegarde (second bloc : il ne touche à rien sans
      sauvegarde D11), puis relancez.
   - Attendu : la mémoire compte ≈ 1 550 tokens (estimation du dépôt, à relever) ; la jauge
     reste sous la fenêtre utilisable, sans « contexte dépassé ».
 
 ```powershell
-# Mémoire pleine (D11), WaveStack arrêté : une seule fois
-$d = "$env:LOCALAPPDATA\WaveStack"
+# Mémoire pleine (D11), HarnessLab arrêté : une seule fois
+$d = "$env:LOCALAPPDATA\HarnessLab"
 if ((Test-Path "$d\memory.json.avant-d11") -or (Test-Path "$d\memory.json.d11-sans-fichier")) { throw "Sauvegarde D11 déjà présente : restaurez d'abord (bloc « Restaurer la mémoire »), ne relancez pas ce bloc." }
 if (Test-Path "$d\memory.json") { Copy-Item "$d\memory.json" "$d\memory.json.avant-d11" } else { New-Item "$d\memory.json.d11-sans-fichier" | Out-Null }
 $base = "preference de test pour la jauge, memoire globale pleine : reponses courtes, sources citees, vocabulaire simple, exemples tires de la cybersecurite, pas de jargon inutile, et un resume final en trois points. "
@@ -717,15 +717,15 @@ $e = foreach ($i in 1..20) {
 [IO.File]::WriteAllText("$d\memory.json", (ConvertTo-Json @($e) -Depth 3), (New-Object Text.UTF8Encoding $false))
 "$((Get-Content "$d\memory.json" -Raw | ConvertFrom-Json).Count) entrees"
 
-# Restaurer la mémoire (D11), WaveStack arrêté
-$d = "$env:LOCALAPPDATA\WaveStack"
+# Restaurer la mémoire (D11), HarnessLab arrêté
+$d = "$env:LOCALAPPDATA\HarnessLab"
 if (Test-Path "$d\memory.json.avant-d11") { Move-Item "$d\memory.json.avant-d11" "$d\memory.json" -Force; "memory.json restauré" }
 elseif (Test-Path "$d\memory.json.d11-sans-fichier") { Remove-Item "$d\memory.json", "$d\memory.json.d11-sans-fichier"; "memory.json de test retiré (il n'existait pas avant D11)" }
 else { "Aucune sauvegarde D11 : rien n'est touché." }
 ```
 
 Le fichier est écrit en UTF-8 sans BOM (`Set-Content -Encoding utf8` de PowerShell 5.1 en
-ajoute un, que WaveStack refuse). Sans `memory.json`, WaveStack repart de la démonstration.
+ajoute un, que HarnessLab refuse). Sans `memory.json`, HarnessLab repart de la démonstration.
 
 **Module 2 : Outils** (cahier : M2)
 - [ ] **Outils natifs** : « Module 2 · Outils · 45 min » → « Outils natifs », prompt de
@@ -765,7 +765,7 @@ Orchestration ; l'index est le nœud « Index RAG (rag_index.sqlite) » du Sché
 - [ ] **Lazy loading** : jauge bien plus légère ; premier prompt : chargement de la
   documentation dans Orchestration. Si rien n'est chargé : « Afficher les actions forcées »,
   carte MCP, dépliez « Serveurs : … », « Charger la documentation » sur « Glossaire
-  WaveStack », outil `local__define_term`, « Armer », puis « Rejouer le dernier prompt ».
+  HarnessLab », outil `local__define_term`, « Armer », puis « Rejouer le dernier prompt ».
   Second prompt (data.gouv.fr) : si le modèle appelle la recherche, « Résultat tronqué par le
   harnais : N tokens sur M (borne [tools] result_max_tokens) », N ≤ 1 200. Un appel d'outil MCP
   ne se force pas (story 27).
@@ -809,9 +809,9 @@ Orchestration ; l'index est le nœud « Index RAG (rag_index.sqlite) » du Sché
 **Transverses et métier** (cahier : X1 à X4)
 - [ ] **Où vont mes données ?** (X1) : « Transverses et métier » → « Où vont mes données ? ».
   Depuis les stories 22 et 27, le scénario allume la brique MCP lui-même, en lazy loading, avec
-  « Glossaire WaveStack » et « data.gouv.fr » : rien à allumer ni à cocher. Carte MCP : résumé
+  « Glossaire HarnessLab » et « data.gouv.fr » : rien à allumer ni à cocher. Carte MCP : résumé
   « Serveurs : 2 activés sur 3 · Lazy loading » (brique éteinte, il dirait « · brique
-  éteinte »). Schéma : outils et « Glossaire WaveStack » dans « 🖥 Poste de travail »,
+  éteinte »). Schéma : outils et « Glossaire HarnessLab » dans « 🖥 Poste de travail »,
   « data.gouv.fr » dans « 🌐 RÉSEAU · hors du poste » ; décochez puis recochez « data.gouv.fr »
   dans la carte MCP : le seul flux qui franchit la frontière disparaît, puis revient. Envoyez
   le prompt, cliquez le nœud « data.gouv.fr » : Orchestration montre ses « Données
@@ -844,21 +844,21 @@ Orchestration ; l'index est le nœud « Index RAG (rag_index.sqlite) » du Sché
 - [ ] **Changement à chaud** (story 17, lot E ; cahier D1) :
   - après un tour avec le 2B : « Changer de modèle… » → 4B → « Charger » : refus chiffré
     (section 5.5), le 2B reste ou redevient actif. Pour utiliser le 4B, il faut relever le
-    budget (`budget_mode` = `fixed`, `budget_mb` = 6144, sous `memory`) : WaveStack arrêté,
+    budget (`budget_mode` = `fixed`, `budget_mb` = 6144, sous `memory`) : HarnessLab arrêté,
     sauvegardez `settings.json` (une seule fois), modifiez seulement ces deux valeurs par
-    WaveStack lui-même (pas à la main : le Bloc-notes ou `Set-Content` de PowerShell 5.1
+    HarnessLab lui-même (pas à la main : le Bloc-notes ou `Set-Content` de PowerShell 5.1
     peuvent ajouter un BOM), puis restaurez la sauvegarde à la fin (blocs ci-dessous). C'est un
     écart à N5 : les mesures faites avec ce budget ne valent pas pour le budget par défaut ;
 
 ```powershell
-# Sauvegarder settings.json (WaveStack arrêté, une seule fois)
-$d = "$env:LOCALAPPDATA\WaveStack"
+# Sauvegarder settings.json (HarnessLab arrêté, une seule fois)
+$d = "$env:LOCALAPPDATA\HarnessLab"
 if (Test-Path "$d\settings.json.avant-4b") { throw "Sauvegarde settings.json.avant-4b déjà présente : restaurez d'abord, ne relancez pas ce bloc." }
 Copy-Item "$d\settings.json" "$d\settings.json.avant-4b"
 # Budget fixe de 6 144 Mo, sans toucher au reste de la section memory
-uv run python -c "from wavestack import config; m = config.read_settings().get('memory', {}); m.update({'budget_mode': 'fixed', 'budget_mb': 6144}); config.save_setting('memory', m); print(config.read_settings()['memory'])"
-# À la fin, WaveStack arrêté : restaurer settings.json
-$d = "$env:LOCALAPPDATA\WaveStack"
+uv run python -c "from harness_lab import config; m = config.read_settings().get('memory', {}); m.update({'budget_mode': 'fixed', 'budget_mb': 6144}); config.save_setting('memory', m); print(config.read_settings()['memory'])"
+# À la fin, HarnessLab arrêté : restaurer settings.json
+$d = "$env:LOCALAPPDATA\HarnessLab"
 if (Test-Path "$d\settings.json.avant-4b") { Move-Item "$d\settings.json.avant-4b" "$d\settings.json" -Force; "settings.json restauré" } else { "Aucune sauvegarde : rien n'est touché." }
 ```
 
@@ -872,11 +872,11 @@ if (Test-Path "$d\settings.json.avant-4b") { Move-Item "$d\settings.json.avant-4
     fichier · Qwen3.5-2B-Q4_K_M.gguf … » → « Charger » ;
   - un fichier incompatible ramène au modèle précédent, avec une explication en français
     (section 5.5).
-- [ ] **llama-server** (story 18, lot E ; cahier C10), lancé **avant** WaveStack, toujours
+- [ ] **llama-server** (story 18, lot E ; cahier C10), lancé **avant** HarnessLab, toujours
   avec `-c 4096`, par `$llama` (section 2.1) :
 
 ```powershell
-& $llama -m "$env:LOCALAPPDATA\WaveStack\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096
+& $llama -m "$env:LOCALAPPDATA\HarnessLab\models\Qwen3.5-2B-Q4_K_M.gguf" --port 8080 -np 1 -c 4096
 ```
 
   - Le diagnostic affiche « Local », l'adresse, la mémoire et « Choisir », sans avertissement
@@ -900,7 +900,7 @@ if (Test-Path "$d\settings.json.avant-4b") { Move-Item "$d\settings.json.avant-4
      compté … » donne les deux comptes à noter. Une ligne « Cache du serveur local » n'est
      qu'une information.
   4. `ollama ps` : `qwen3.5:2b` chargé ; retour au 2B intégré : `ollama ps` vide ; rechoisissez
-     `qwen3.5:2b`, un tour, Ctrl+C sur WaveStack : `ollama ps` vide (sauf un modèle chargé par
+     `qwen3.5:2b`, un tour, Ctrl+C sur HarnessLab : `ollama ps` vide (sauf un modèle chargé par
      un autre programme).
 - [ ] **Groq et Mistral avec le raisonnement** (story 13 ; cahier D3m) : saisissez la clé au
   diagnostic (section « Modèles cloud » : « Enregistrer la clé », « Tester »), ou faites
@@ -915,7 +915,7 @@ if (Test-Path "$d\settings.json.avant-4b") { Move-Item "$d\settings.json.avant-4
     le Journal des événements (capacité saturée ou quota), puis vérifiez le quota dans la
     console Mistral ;
   - D9 (cahier Z3), avec un quota disponible : section 7.
-- [ ] **Relance** (cahier D4m) : Ctrl+C, puis `uv run wavestack` ; le dernier modèle chargé
+- [ ] **Relance** (cahier D4m) : Ctrl+C, puis `uv run harness-lab` ; le dernier modèle chargé
   revient.
 
 ## 7. Décisions à trancher pendant le test
@@ -935,45 +935,45 @@ D5 et D6 passent au lot H ; D7 à D18 se confirment en passant (par exemple D11 
 une mémoire globale pleine, section 6).
 
 **D2, sans le fichier du reranker** (cahier : Z1) :
-1. WaveStack arrêté (Ctrl+C), mettez le reranker de côté (premier bloc ci-dessous).
-2. Relancez `uv run wavestack`, puis « Module 3 · RAG · 45 min » → « RAG avec reranking ».
+1. HarnessLab arrêté (Ctrl+C), mettez le reranker de côté (premier bloc ci-dessous).
+2. Relancez `uv run harness-lab`, puis « Module 3 · RAG · 45 min » → « RAG avec reranking ».
 3. Carte RAG (Panneau des briques) : lisez la raison sous l'interrupteur « Reranking ». Ne
    cliquez pas « Télécharger le modèle de reranking (≈ … Mo) » : il retéléchargerait le
    fichier.
 4. Premier prompt suggéré, « Envoyer » ; dépliez l'étape « Recherche RAG » d'Orchestration.
-5. WaveStack arrêté, remettez le fichier (second bloc), puis relancez : la raison disparaît.
+5. HarnessLab arrêté, remettez le fichier (second bloc), puis relancez : la raison disparaît.
 - Attendu : sous « Reranking », « Indisponible : modèle absent. Le modèle de reranking … n'est
   pas sur le poste. … Le RAG fonctionne sans reranking. » ; le tour aboutit, « Recherche RAG »
   dit pourquoi le reranking n'a pas eu lieu, sans étape « Reranking » ; la brique RAG reste
   disponible (RAG simple).
 
 ```powershell
-# Mettre le reranker de côté, WaveStack arrêté
-$m = "$env:LOCALAPPDATA\WaveStack\models\reranker"
+# Mettre le reranker de côté, HarnessLab arrêté
+$m = "$env:LOCALAPPDATA\HarnessLab\models\reranker"
 Rename-Item "$m\bge-reranker-v2-m3-Q4_K_M.gguf" "bge-reranker-v2-m3-Q4_K_M.gguf.bak"
-# Le remettre, WaveStack arrêté
-$m = "$env:LOCALAPPDATA\WaveStack\models\reranker"
+# Le remettre, HarnessLab arrêté
+$m = "$env:LOCALAPPDATA\HarnessLab\models\reranker"
 Rename-Item "$m\bge-reranker-v2-m3-Q4_K_M.gguf.bak" "bge-reranker-v2-m3-Q4_K_M.gguf"
 ```
 
 **D3, serveurs seuls, sans GGUF ni clé** (cahier : Z2). Rien n'est déplacé ni supprimé, aucune
 variable utilisateur ni machine n'est touchée : tout se passe dans un seul terminal, sur un
-dossier de données temporaire et vide (`WAVESTACK_DATA_DIR`). Il faut llama-server
-(section 2.1) : WaveStack compte les fichiers d'Ollama comme des GGUF, et les rend illisibles
+dossier de données temporaire et vide (`HARNESS_LAB_DATA_DIR`). Il faut llama-server
+(section 2.1) : HarnessLab compte les fichiers d'Ollama comme des GGUF, et les rend illisibles
 dès qu'on lui cache leur dossier ; sans llama-server, D3 est « non fait (poste) ».
 1. **D'abord**, dans un terminal : les clés posées pour tout le poste (premier bloc). Une valeur
-   affichée : notez-le ; la suite la retire seulement du terminal de WaveStack.
+   affichée : notez-le ; la suite la retire seulement du terminal de HarnessLab.
 2. Dans un autre terminal, lancez llama-server (section 2.1, « retrouvez l'exécutable », puis
    la dernière ligne du bloc d'installation) : le 2B reste à sa place.
 3. Quittez Ollama (icône de la zone de notification, « Quit Ollama »). S'il reste lancé, ses
    modèles apparaissent au diagnostic comme incompatibles (« Fichier GGUF du modèle introuvable
    dans le dossier d'Ollama (…) ») : c'est attendu.
-4. WaveStack arrêté, nouveau terminal à la racine du clone : second bloc. Il retire les clés de
-   ce terminal (`Remove-Item Env:GROQ_API_KEY`, idem Mistral), pointe `WAVESTACK_DATA_DIR`
+4. HarnessLab arrêté, nouveau terminal à la racine du clone : second bloc. Il retire les clés de
+   ce terminal (`Remove-Item Env:GROQ_API_KEY`, idem Mistral), pointe `HARNESS_LAB_DATA_DIR`
    vers un dossier temporaire vide (ni `api_keys.json`, ni `settings.json`, ni modèles),
    `OLLAMA_MODELS` et `HF_HOME` vers des dossiers vides, pour ce terminal seulement, liste les
    GGUF de LM Studio, puis refuse de lancer (`throw`) si une clé est encore visible. Si des
-   fichiers de LM Studio sont listés, WaveStack les proposera au lieu de demander un modèle
+   fichiers de LM Studio sont listés, HarnessLab les proposera au lieu de demander un modèle
    servi : notez-le (« non fait (poste) »), ou lisez seulement les lignes des clés.
 5. Lisez le diagnostic : « Modèles détectés », puis « Modèles cloud » (lignes Groq et Mistral).
    - Attendu : « Aucun fichier GGUF, mais un serveur local sert 1 modèle : choisissez un modèle
@@ -982,8 +982,8 @@ dès qu'on lui cache leur dossier ; sans llama-server, D3 est « non fait (poste
      GROQ_API_KEY, puis ouvrez un nouveau terminal. » (idem `MISTRAL_API_KEY`). Relevez le
      libellé exact.
 6. **Défaire** : Ctrl+C, puis fermez ce terminal ; arrêtez llama-server. Rien à restaurer ; le
-   dossier temporaire (`%TEMP%\wavestack-z2-…`) peut rester. Contrôle : dans un nouveau
-   terminal, `uv run wavestack` comme d'habitude retrouve vos clés et le 2B (cahier : « Clés et
+   dossier temporaire (`%TEMP%\harness-lab-z2-…`) peut rester. Contrôle : dans un nouveau
+   terminal, `uv run harness-lab` comme d'habitude retrouve vos clés et le 2B (cahier : « Clés et
    modèles intacts après le test »).
 
 ```powershell
@@ -992,33 +992,33 @@ dès qu'on lui cache leur dossier ; sans llama-server, D3 est « non fait (poste
 ```
 
 ```powershell
-# 4. Nouveau terminal : WaveStack sans clé ni données
+# 4. Nouveau terminal : HarnessLab sans clé ni données
 Remove-Item Env:GROQ_API_KEY, Env:MISTRAL_API_KEY -ErrorAction SilentlyContinue
-$z = Join-Path $env:TEMP ("wavestack-z2-" + (Get-Date -Format yyyyMMdd-HHmmss))
+$z = Join-Path $env:TEMP ("harness-lab-z2-" + (Get-Date -Format yyyyMMdd-HHmmss))
 New-Item -ItemType Directory -Force "$z\data", "$z\ollama", "$z\hf" | Out-Null
-$env:WAVESTACK_DATA_DIR = "$z\data"; $env:OLLAMA_MODELS = "$z\ollama"; $env:HF_HOME = "$z\hf"
+$env:HARNESS_LAB_DATA_DIR = "$z\data"; $env:OLLAMA_MODELS = "$z\ollama"; $env:HF_HOME = "$z\hf"
 Remove-Item Env:HF_HUB_CACHE -ErrorAction SilentlyContinue
 Get-ChildItem "$HOME\.lmstudio\models", "$HOME\.cache\lm-studio\models" -Recurse -Filter *.gguf -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
 if ($env:GROQ_API_KEY -or $env:MISTRAL_API_KEY) { throw "Une clé est encore visible dans ce terminal : Z2 arrêté, rien n'est lancé." }
 $env:UV_SYSTEM_CERTS = "1"
-uv run wavestack
+uv run harness-lab
 ```
 
-**D9, Mistral `resend`** (cahier : Z3), avec un quota disponible : WaveStack arrêté,
+**D9, Mistral `resend`** (cahier : Z3), avec un quota disponible : HarnessLab arrêté,
 sauvegardez `settings.json` (une seule fois), ajoutez seulement `reasoning.resend = true` à
 l'entrée `mistral` de `cloud.models` (créée au besoin, sans toucher au reste), relancez, passez
 sur Mistral, jouez un tour avec outil (« Outils natifs », prompt de l'heure) puis un second
-tour. Un 400 veut dire refus. WaveStack arrêté, restaurez `settings.json`.
+tour. Un 400 veut dire refus. HarnessLab arrêté, restaurez `settings.json`.
 
 ```powershell
-# Sauvegarder settings.json (WaveStack arrêté, une seule fois)
-$d = "$env:LOCALAPPDATA\WaveStack"
+# Sauvegarder settings.json (HarnessLab arrêté, une seule fois)
+$d = "$env:LOCALAPPDATA\HarnessLab"
 if (Test-Path "$d\settings.json.avant-z3") { throw "Sauvegarde settings.json.avant-z3 déjà présente : restaurez d'abord, ne relancez pas ce bloc." }
 Copy-Item "$d\settings.json" "$d\settings.json.avant-z3"
 # Ajouter resend
-uv run python -c "from wavestack import config; s = config.read_settings(); c = s.get('cloud', {}); ms = c.setdefault('models', []); e = next((m for m in ms if m.get('id') == 'mistral'), None) or ms.append({'id': 'mistral'}) or ms[-1]; e.setdefault('reasoning', {})['resend'] = True; config.save_setting('cloud', c); print(config.read_settings()['cloud'])"
-# À la fin, WaveStack arrêté : restaurer settings.json
-$d = "$env:LOCALAPPDATA\WaveStack"
+uv run python -c "from harness_lab import config; s = config.read_settings(); c = s.get('cloud', {}); ms = c.setdefault('models', []); e = next((m for m in ms if m.get('id') == 'mistral'), None) or ms.append({'id': 'mistral'}) or ms[-1]; e.setdefault('reasoning', {})['resend'] = True; config.save_setting('cloud', c); print(config.read_settings()['cloud'])"
+# À la fin, HarnessLab arrêté : restaurer settings.json
+$d = "$env:LOCALAPPDATA\HarnessLab"
 if (Test-Path "$d\settings.json.avant-z3") { Move-Item "$d\settings.json.avant-z3" "$d\settings.json" -Force; "settings.json restauré" } else { "Aucune sauvegarde : rien n'est touché." }
 ```
 

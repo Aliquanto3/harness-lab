@@ -205,7 +205,7 @@ Revue 1 (2026-09-30, trois relecteurs : aveugle (B), cas limites (EC), trous de 
 
 ## Design Notes
 
-- Le chemin de l'index se déduit de la langue, et non d'une entrée de `wavestack.toml` par langue : un seul réglage, et le français reste identique.
+- Le chemin de l'index se déduit de la langue, et non d'une entrée de `harness-lab.toml` par langue : un seul réglage, et le français reste identique.
 - L'index porte les titres (`title_fr`, lus comme `title_text`). Un index par langue suffit donc à traduire les titres des extraits, sans toucher à `retriever.py`.
 - Le contrôle de fraîcheur compare l'empreinte du corpus de la langue. Un index `fr` copié sous le nom `de` est donc vu comme périmé.
 - Pas de mode projection sur les pages annexes : les captures se font en mode normal seulement.

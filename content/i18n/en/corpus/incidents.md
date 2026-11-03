@@ -1,6 +1,6 @@
 # Reporting and handling security incidents at Exemplia
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this procedure describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this procedure describes no real company. -->
 
 A security incident is any event that threatens the confidentiality, integrity or availability of Exemplia's information: a phishing email opened, a laptop lost, a virus detected, a confidential document sent to the wrong recipient, a suspicious login.
 

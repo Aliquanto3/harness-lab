@@ -6,15 +6,15 @@ code du commit `175eb5a` (PR 2), testé au commit `3ed8482` qui ajoute le cahier
 
 ---
 
-Tu vas vérifier toi-même, sur ce poste, le plus possible des tests de recette de WaveStack pour
+Tu vas vérifier toi-même, sur ce poste, le plus possible des tests de recette de HarnessLab pour
 les stories 22 à 27 et 31 à 34, afin qu'Anaël n'ait plus à faire à la main que ce qu'une machine
 ne peut pas juger. Travaille en français.
 
 ## Contexte
 
 - Poste : Windows 11, PowerShell, **sans droits d'administrateur**, CPU seulement, 16 Go de RAM.
-  Modèles réels : Qwen3.5-2B et Qwen3.5-4B en GGUF (dossier des modèles de WaveStack, en général
-  `%LOCALAPPDATA%\WaveStack\models`), Ollama s'il tourne, clés Groq et Mistral éventuelles
+  Modèles réels : Qwen3.5-2B et Qwen3.5-4B en GGUF (dossier des modèles de HarnessLab, en général
+  `%LOCALAPPDATA%\HarnessLab\models`), Ollama s'il tourne, clés Groq et Mistral éventuelles
   (variables d'environnement ou `api_keys.json`). Navigateurs : Chrome et Edge.
 - Dépôt : branche `claude/lucid-cori-1rkbjf`, commit à tester `3ed8482` : le code de la fin de
   la story 31 (`175eb5a`) plus le cahier de recette. Les commits suivants de la branche
@@ -31,7 +31,7 @@ ne peut pas juger. Travaille en français.
 
 1. **Ne modifie rien sans l'accord d'Anaël** : ni le code, ni la configuration du dépôt, ni son
    dossier de données réel. Tes scripts vivent hors du dépôt (dossier temporaire) et utilisent un
-   dossier de données jetable (`WAVESTACK_DATA_DIR` vers une copie, `models` en jonction vers le
+   dossier de données jetable (`HARNESS_LAB_DATA_DIR` vers une copie, `models` en jonction vers le
    vrai dossier). Si un test échoue, décris l'anomalie et propose un correctif : ne l'applique pas.
 2. **Mesures** : avant toute mesure de temps ou de mémoire, demande à Anaël de fermer Edge,
    Outlook et Teams, attends sa confirmation, et note l'état réel (Edge se relance parfois seul :
@@ -57,10 +57,10 @@ uv sync --extra compression
 uv run ruff check .
 uv run ruff format --check .
 uv run pytest -q
-$env:WAVESTACK_TEST_GGUF = "<chemin du Qwen3.5-2B .gguf>"
-$env:WAVESTACK_TEST_MODELS_DIR = "$env:LOCALAPPDATA\WaveStack\models"
+$env:HARNESS_LAB_TEST_GGUF = "<chemin du Qwen3.5-2B .gguf>"
+$env:HARNESS_LAB_TEST_MODELS_DIR = "$env:LOCALAPPDATA\HarnessLab\models"
 uv run pytest -q -m model
-$env:WAVESTACK_TEST_WINDOWS_FILES = "1"; uv run pytest -q; Remove-Item Env:WAVESTACK_TEST_WINDOWS_FILES
+$env:HARNESS_LAB_TEST_WINDOWS_FILES = "1"; uv run pytest -q; Remove-Item Env:HARNESS_LAB_TEST_WINDOWS_FILES
 uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py
 ```
 
@@ -103,7 +103,7 @@ journal d'événements et relève la RSS (processus et enfants). Cible au moins 
 
 ### 4. Playwright sur la vraie application
 
-Lance WaveStack normalement sur le vrai 2B, puis pilote-le avec Playwright (Chromium) :
+Lance HarnessLab normalement sur le vrai 2B, puis pilote-le avec Playwright (Chromium) :
 mises en page à 1 280, 1 366, 1 440 et 1 600 px de large, en normal et en mode projection
 (barre haute sur une ligne, « Réinitialiser » visible, puces « · lié » lisibles) ; balayage des
 contrastes en clair et en sombre (volets, tiroirs, panneau « Fenêtre », liste « Volets », pages

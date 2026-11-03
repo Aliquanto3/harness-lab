@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from wavestack import config
+from harness_lab import config
 
 ROOT = config.repo_root()
 README = ROOT / "README.md"
@@ -71,6 +71,6 @@ def test_relative_links_resolve(path):
 def test_readme_is_a_short_onboarding_page():
     text = README.read_text(encoding="utf-8")
     assert len(text.splitlines()) <= 100
-    assert "docs/assets/wavestack-demo.gif" in text
+    assert "docs/assets/harness-lab-demo.gif" in text
     for doc in ("docs/installation.md", "docs/guide.md", "docs/modeles.md", "CONTRIBUTING.md"):
         assert f"]({doc})" in text, doc

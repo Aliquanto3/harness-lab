@@ -17,7 +17,7 @@ deferred:
     evidence: |-
       Revue du 2026-10-01 (IA3, IA4, BH16) : tests/test_mcp_lab.py force l'état par `_set_state("turn")` et arrête par `session.stop()` ; l'E2E `s_mcp_lab` couvre connexion, appel valide et terme inconnu. À étendre dans l'E2E (`page.route` pour le hors ligne), avec l'accord d'Anaël.
     location: >-
-      src/wavestack/web/static/mcp.js ; tools/e2e/run_e2e.py (s_mcp_lab)
+      src/harness_lab/web/static/mcp.js ; tools/e2e/run_e2e.py (s_mcp_lab)
     severity: medium
     closed: >-
       2026-10-01 (lot des restes, spec-restes-2026-10-01.md) — nouveau scénario E2E `mcp_lab_page` (`tools/e2e/run_e2e.py`) : `/api/mcp_lab` coupé par `page.route` (alerte « Atelier MCP indisponible (…) », puis la page se rétablit seule) ; tour réel et lent de l'atelier (bandeau « Occupé » avec la raison, « Se connecter » grisé avec son infobulle, appel direct 409, « Arrêter » de l'atelier MCP grisé) ; « Arrêter » pressé pendant la poignée de main du glossaire (connexion « Échange arrêté », `open_server` nul, `idle`, gagné au premier essai) ; préréglage « MCP » puis appel ; page rechargée : `last_session` rejoué à l'identique (messages, outils, appel, connexion ouverte) ; data.gouv.fr hors réseau : POST sortant affiché, connexion en erreur dite ; `last_session` servi par `page.route` (serveur public, paramètres texte, entier, objet, booléen, appel borné) : « servie … non traduite », un champ par type, JSON invalide dit sans requête, arguments convertis (requête interceptée), note « Borné : 512 tokens gardés sur 2 048. », requête sortante de l'appel. `mcp_lab_page` 12/12 ; capture 66.
@@ -79,16 +79,16 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/mcp/connection.py` -- `McpConnection(server, loop, *, connect_timeout, call_timeout, language)` l.78 (`idle_scope`/`scope` lus par le crochet HTTP l.93-94), `_transport` l.102-109 (stdio : `StdioServerParameters(sys.executable, -m wavestack.mcp.local_server, lang)` ; HTTP : `create_async_client(scope=…)` puis `streamable_http_client`), `_serve` l.111 (`mcp.Client(transport, mode="legacy")`, `list_tools`, file d'appels `call_tool` sous `anyio.fail_after`), `start` l.152, `aclose` l.162, `call` l.188, `close` l.211 ; `describe_error` l.44-64, `result_text` l.67.
-- `src/wavestack/mcp/servers.py` -- `McpServer` l.16-31, `mcp_servers(cfg)` l.34, `ServerText` l.44, `CallPreset` l.58, `McpContent` l.66, `load_mcp_content(lang)` l.76 ; `src/wavestack/mcp/local_server.py` (glossaire, `list_terms`, `define_term`, terme inconnu → `is_error`).
-- `src/wavestack/tools/registry.py:131-135,192-208` -- `exposed_name`, `definition(name)`.
-- `src/wavestack/session/app_session.py` -- état MCP de la brique l.855-861, 953-954 ; `_mcp_connect` l.5000, `_mcp_apply` l.5058, `_mcp_spec` l.5097 (aperçu `tools/call` l.5109-5115), `aclose_mcp` l.5150, `close()` l.1568, changement de langue l.5272 ; `_tool_definitions` l.3846, `_doc_catalog` l.3872, `LOAD_TOOL_DOC` l.217, `_load_tool_doc_spec` l.4790 ; `_count_tokens` l.4576, `_bound_result` l.6507-6550 ; modèle de classe (b) : `run_rag_lab` l.8282-8316 (verrou, refus, `CancelToken`, état, `_executor.submit`, `finally` → `idle` l.8411-8413), `_RAG_LAB_FR` l.322, `rag_lab_state()` l.8254-8274, `_rag_lab_scope` l.8164-8179, `_rag_lab_emit` l.8415 ; `stop()` l.5508-5530.
-- `src/wavestack/trace/catalog.py` -- `SessionState` l.64-75, payloads MCP l.634-644, `PAYLOAD_MODELS` ~l.1279 ; `trace/journal.py:38` `emit`, `trace/scope.py` `scoped`.
-- `src/wavestack/web/app.py` -- routes des ateliers (modèle : `RagLabRunIntention` l.186, route l.402-411, 409 par `SendRefused`), `stop` l.661, pages l.~300.
-- `src/wavestack/net/factory.py:50,144` -- crochet `_check_and_trace` (`outbound_request`), `create_async_client`.
-- `src/wavestack/rag/lab.py:100-201` -- modèle de contenu strict et chargeur à cache (à copier pour `mcp_lab.yaml`) ; `config.clear_content_caches` l.1113.
-- `src/wavestack/web/static/rag.html`, `rag.js` (lecteur SSE l.735-771, `refresh` l.788-820, `main` l.822), `rag.css` -- gabarit de page ; barre commune dans les cinq HTML (`nav.site-nav`).
-- `src/wavestack/web/static/app.js` -- `renderBricks()` l.1106, corps de carte l.1216-1239 (lien vers `/mcp` près de `brick-outbound` l.1230), `eventSummary` ~l.6175.
+- `src/harness_lab/mcp/connection.py` -- `McpConnection(server, loop, *, connect_timeout, call_timeout, language)` l.78 (`idle_scope`/`scope` lus par le crochet HTTP l.93-94), `_transport` l.102-109 (stdio : `StdioServerParameters(sys.executable, -m harness_lab.mcp.local_server, lang)` ; HTTP : `create_async_client(scope=…)` puis `streamable_http_client`), `_serve` l.111 (`mcp.Client(transport, mode="legacy")`, `list_tools`, file d'appels `call_tool` sous `anyio.fail_after`), `start` l.152, `aclose` l.162, `call` l.188, `close` l.211 ; `describe_error` l.44-64, `result_text` l.67.
+- `src/harness_lab/mcp/servers.py` -- `McpServer` l.16-31, `mcp_servers(cfg)` l.34, `ServerText` l.44, `CallPreset` l.58, `McpContent` l.66, `load_mcp_content(lang)` l.76 ; `src/harness_lab/mcp/local_server.py` (glossaire, `list_terms`, `define_term`, terme inconnu → `is_error`).
+- `src/harness_lab/tools/registry.py:131-135,192-208` -- `exposed_name`, `definition(name)`.
+- `src/harness_lab/session/app_session.py` -- état MCP de la brique l.855-861, 953-954 ; `_mcp_connect` l.5000, `_mcp_apply` l.5058, `_mcp_spec` l.5097 (aperçu `tools/call` l.5109-5115), `aclose_mcp` l.5150, `close()` l.1568, changement de langue l.5272 ; `_tool_definitions` l.3846, `_doc_catalog` l.3872, `LOAD_TOOL_DOC` l.217, `_load_tool_doc_spec` l.4790 ; `_count_tokens` l.4576, `_bound_result` l.6507-6550 ; modèle de classe (b) : `run_rag_lab` l.8282-8316 (verrou, refus, `CancelToken`, état, `_executor.submit`, `finally` → `idle` l.8411-8413), `_RAG_LAB_FR` l.322, `rag_lab_state()` l.8254-8274, `_rag_lab_scope` l.8164-8179, `_rag_lab_emit` l.8415 ; `stop()` l.5508-5530.
+- `src/harness_lab/trace/catalog.py` -- `SessionState` l.64-75, payloads MCP l.634-644, `PAYLOAD_MODELS` ~l.1279 ; `trace/journal.py:38` `emit`, `trace/scope.py` `scoped`.
+- `src/harness_lab/web/app.py` -- routes des ateliers (modèle : `RagLabRunIntention` l.186, route l.402-411, 409 par `SendRefused`), `stop` l.661, pages l.~300.
+- `src/harness_lab/net/factory.py:50,144` -- crochet `_check_and_trace` (`outbound_request`), `create_async_client`.
+- `src/harness_lab/rag/lab.py:100-201` -- modèle de contenu strict et chargeur à cache (à copier pour `mcp_lab.yaml`) ; `config.clear_content_caches` l.1113.
+- `src/harness_lab/web/static/rag.html`, `rag.js` (lecteur SSE l.735-771, `refresh` l.788-820, `main` l.822), `rag.css` -- gabarit de page ; barre commune dans les cinq HTML (`nav.site-nav`).
+- `src/harness_lab/web/static/app.js` -- `renderBricks()` l.1106, corps de carte l.1216-1239 (lien vers `/mcp` près de `brick-outbound` l.1230), `eventSummary` ~l.6175.
 - `content/mcp.yaml` et `content/i18n/{en,de}/mcp.yaml` ; `content/bricks/mcp.yaml` ; `content/ui.yaml` (`common.links` l.74-82, sections `llm` l.852, `rag` l.877) ; `content/messages.yaml:70` (`session.state.*`).
 - `tests/test_mcp.py` -- fixtures `loop` l.63, `web` l.115 (`McpWeb` l.74-112 : serveur JSON-RPC en processus, `offline`, `delay`, `error`), `local_servers()`/`no_local_server_left()` l.186-202, helpers l.128-161 ; `tests/test_web_app.py:51` (`SITE_PAGES`), `tests/test_ui_texts.py:29-32,221` (`PAGES`), `tests/test_web_tokens.py:536,588`.
 - `tools/e2e/run_e2e.py` -- `s_mcp_full` l.2744, `s_mcp_lazy` l.2783, `s_rag_lab` l.7696 (gabarit, `_site_nav_problems`) ; captures 61 et 62.
@@ -97,10 +97,10 @@ deferred:
 ## Tasks & Acceptance
 
 **Execution (incrément 1 : sections 1 à 3 ; incrément 2 : sections 4 et 5) :**
-- `src/wavestack/mcp/lab.py` (nouveau) -- capture ou reconstruction JSON-RPC, calcul des poids, contenu `McpLabContent`.
-- `src/wavestack/session/app_session.py` -- `mcp_lab_state`, `mcp_lab_connect`, `mcp_lab_call`, état `mcp_lab`, `stop`, fermetures.
-- `src/wavestack/trace/catalog.py`, `src/wavestack/web/app.py` -- état, payloads, routes.
-- `src/wavestack/web/static/mcp.html`, `mcp.js`, `mcp.css` ; barre commune des cinq pages ; `i18n.js` ; `app.js` (lien de carte, `eventSummary`).
+- `src/harness_lab/mcp/lab.py` (nouveau) -- capture ou reconstruction JSON-RPC, calcul des poids, contenu `McpLabContent`.
+- `src/harness_lab/session/app_session.py` -- `mcp_lab_state`, `mcp_lab_connect`, `mcp_lab_call`, état `mcp_lab`, `stop`, fermetures.
+- `src/harness_lab/trace/catalog.py`, `src/harness_lab/web/app.py` -- état, payloads, routes.
+- `src/harness_lab/web/static/mcp.html`, `mcp.js`, `mcp.css` ; barre commune des cinq pages ; `i18n.js` ; `app.js` (lien de carte, `eventSummary`).
 - `content/mcp_lab.yaml` et surcouches, `content/ui.yaml` et surcouches, `content/messages.yaml` et surcouches.
 - `tests/test_mcp_lab.py` -- serveur local réel en stdio et `McpWeb` pour le public : matrice complète, brique intacte, aucun processus restant, refus 409, arrêt ; `test_web_app`, `test_ui_texts`, `test_web_tokens`, `test_i18n` étendus à la sixième page.
 - `tools/e2e/run_e2e.py` -- `s_mcp_lab` : connexion au glossaire local, messages affichés, poids, appel valide puis terme inconnu, barre commune ; captures `61-atelier-mcp-poignee-de-main`, `62-atelier-mcp-appel` ; inscrit dans `SCENARIOS`.
@@ -154,7 +154,7 @@ Implémentation livrée en entier (incréments 1 et 2, sections 1 à 5), **non v
   - `[medium]` `[patch]` BH2 : « Arrêter » pendant un appel qui finit en `MCPError` disait « refusé » — groupé avec VG6 : la branche `MCPError` regarde d'abord `cancel.cancelled` (`session.mcp_lab.stopped`).
   - `[low]` `[patch]` BH3 : `mcp.error.closed` conseille « décochez puis recochez », sans objet dans l'atelier — une `ConnectionError` à la connexion dit `session.mcp_lab.closed` (« reconnectez-vous au serveur ») ; à l'appel c'était déjà le cas.
   - `[medium]` `[patch]` BH4 : arrêt entre la vérification de `cancel` et `conn.start()` laissait une connexion vivante — après `future.result(...)`, `cancel.cancelled` lève `ConnectionError`, et le `except` ferme la connexion et dit « arrêté ».
-  - `[low]` `[patch]` BH5 : README « Arrêter ferme la connexion » sans nuance — README : « pendant un échange, l'interrompt et ferme la connexion ; sinon elle reste ouverte jusqu'à la connexion suivante, un changement de langue ou la fermeture de WaveStack » ; un bouton « Se déconnecter » n'est pas demandé par la spec.
+  - `[low]` `[patch]` BH5 : README « Arrêter ferme la connexion » sans nuance — README : « pendant un échange, l'interrompt et ferme la connexion ; sinon elle reste ouverte jusqu'à la connexion suivante, un changement de langue ou la fermeture de HarnessLab » ; un bouton « Se déconnecter » n'est pas demandé par la spec.
   - `[low]` `[reject]` BH6 : réponses du serveur jamais expliquées — la spec demande sens et durée ; la réponse suit sa requête expliquée et son JSON se lit tel quel.
   - `[low]` `[reject]` BH7 : `methods` exige exactement `METHODS` — l'égalité attrape une clé mal écrite ; expliquer une méthode de plus demande de toute façon du code.
   - `[low]` `[reject]` BH8 : « aller-retour » pour tout message du serveur, notification comprise — les trois serveurs n'envoient pas de notification dans les échanges de l'atelier ; distinguer demande d'analyser le JSON-RPC dans la page.

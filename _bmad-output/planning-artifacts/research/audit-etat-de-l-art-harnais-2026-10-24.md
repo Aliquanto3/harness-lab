@@ -1,8 +1,8 @@
 # Audit état de l'art des harnais (2026-10-24)
 
-Produit en session Claude Code le 2026-10-24, à la demande d'Anaël : vérifier que WaveStack est à l'état de l'art des harnais agentiques, sur le fond et sur la pédagogie. Sources fournies : arXiv 2609.00006, walkinglabs/learn-harness-engineering, OCTO, SFEIR. Suite donnée : `../sprint-change-proposal-2026-10-24-etat-de-l-art-harnais.md`.
+Produit en session Claude Code le 2026-10-24, à la demande d'Anaël : vérifier que HarnessLab est à l'état de l'art des harnais agentiques, sur le fond et sur la pédagogie. Sources fournies : arXiv 2609.00006, walkinglabs/learn-harness-engineering, OCTO, SFEIR. Suite donnée : `../sprint-change-proposal-2026-10-24-etat-de-l-art-harnais.md`.
 
-Les quatre sources sont globalement correctes, mais de fiabilité inégale. WaveStack applique déjà l'essentiel de leurs principes, et parfois mieux qu'elles ne le décrivent. J'ai repéré cinq écarts, surtout de pédagogie, et un seul touche au fond (le RAG).
+Les quatre sources sont globalement correctes, mais de fiabilité inégale. HarnessLab applique déjà l'essentiel de leurs principes, et parfois mieux qu'elles ne le décrivent. J'ai repéré cinq écarts, surtout de pédagogie, et un seul touche au fond (le RAG).
 
 ## 1. Vérification des sources
 
@@ -15,7 +15,7 @@ Les quatre sources sont globalement correctes, mais de fiabilité inégale. Wave
 
 J'ai ajouté une source qui vaut d'être citée : **Böckeler** ([martinfowler.com](https://martinfowler.com/articles/harness-engineering.html)). Son cadre est très pédagogique : des **guides**, qui orientent l'agent avant qu'il agisse, et des **capteurs**, qui contrôlent après coup ; des contrôles **calculés** (tests, lint) ou **déduits par un modèle** (IA qui juge).
 
-## 2. Ce que WaveStack applique déjà bien
+## 2. Ce que HarnessLab applique déjà bien
 
 - **La définition** : « Le modèle prédit du texte ; le harnais en fait un agent », « même modèle, harnais différent, comportement différent » (`content/demo_files/guide_harnais.md`). C'est exactement « Agent = Model + Harness ».
 - **Le contexte comme ressource rare**, avec un gain et un coût pour chaque brique : c'est le cœur de l'article OCTO et du *context engineering* d'Anthropic.
@@ -29,14 +29,14 @@ J'ai ajouté une source qui vaut d'être citée : **Böckeler** ([martinfowler.c
 
 ## 3. Écarts et pistes, par priorité
 
-1. **Le RAG (sur le fond).** WaveStack présente le RAG vectoriel injecté à chaque tour comme *la* brique de recherche. Or aucun des 11 harnais étudiés n'utilise d'embeddings sur le code (observation 9). Ils cherchent **au moment où ils en ont besoin, avec des outils déterministes** (grep, glob, lecture de fichier), et Anthropic recommande la même chose. Sur un corpus documentaire, le RAG vectoriel reste légitime, mais il faudrait ajouter dans `content/bricks/rag.yaml` un paragraphe « RAG injecté ou recherche agentique ». Un outil de recherche dans le corpus (`search_files`) permettrait même de comparer les deux sur un scénario.
+1. **Le RAG (sur le fond).** HarnessLab présente le RAG vectoriel injecté à chaque tour comme *la* brique de recherche. Or aucun des 11 harnais étudiés n'utilise d'embeddings sur le code (observation 9). Ils cherchent **au moment où ils en ont besoin, avec des outils déterministes** (grep, glob, lecture de fichier), et Anthropic recommande la même chose. Sur un corpus documentaire, le RAG vectoriel reste légitime, mais il faudrait ajouter dans `content/bricks/rag.yaml` un paragraphe « RAG injecté ou recherche agentique ». Un outil de recherche dans le corpus (`search_files`) permettrait même de comparer les deux sur un scénario.
 2. **Une carte d'ensemble absente.** Le programme avance brique par brique, sans récapitulatif qui situe chaque brique dans les 7 sous-systèmes du papier (ou les 5 couches). Une carte finale, par exemple une fiche « À retenir » ou un écran, est peu coûteuse et donnerait une base commune avec le papier de vos collègues.
 3. **Des catégories discutables.** « Raisonnement » est classé *prompt engineering*, alors que c'est une capacité du modèle que le harnais active (sous-système « intégration LLM »). « Garde-fous » est classé « harnais » alors que les autres briques sont « harness engineering ». Dans la littérature, les trois disciplines s'emboîtent : prompt ⊂ contexte ⊂ harnais.
 4. **La compaction est nommée, jamais montrée.** Le débordement est refusé et les stratégies sont seulement listées (`content/messages.yaml:140`). Le papier note que la compaction est devenue standard (7 harnais sur 11) et que la piste la plus récente est la façon d'écrire la mémoire. Avec une fenêtre de 4 096 tokens, une démonstration de compaction ou de fenêtre glissante serait très parlante, au prix d'un appel de résumé sur CPU. C'est une candidate pour la V1.2 ou après.
 5. **Il manque des notions récentes, toutes peu coûteuses à ajouter.**
    - Les **fichiers de contexte hiérarchiques** (AGENTS.md, CLAUDE.md), convention présente dans les 11 harnais (R6) : une phrase dans la brique Prompt système.
    - Le cadre **guides et capteurs** de Böckeler, qui classe d'un coup prompt, skills, hooks et garde-fous.
-   - L'**échafaudage à alléger quand le modèle progresse** (thèse OCTO). WaveStack en est l'illustration inverse : ses prompts nomment l'outil parce que le petit modèle en a besoin. Le dire aux apprenants transforme une contrainte en leçon.
+   - L'**échafaudage à alléger quand le modèle progresse** (thèse OCTO). HarnessLab en est l'illustration inverse : ses prompts nomment l'outil parce que le petit modèle en a besoin. Le dire aux apprenants transforme une contrainte en leçon.
    - Les **skills tiers à traiter comme des paquets** (vérification, quarantaine), à placer dans les scénarios sécurité.
 
 Hors périmètre, je pense, de ce démonstrateur : la plateformisation (ACP, places de marché), les bacs à sable au niveau du système d'exploitation, les modes de permission plan / défaut / sans confirmation. Un rappel d'une ligne suffirait.

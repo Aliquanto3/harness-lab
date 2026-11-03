@@ -2,8 +2,8 @@
 
 Poste : PC pro Windows 11 Enterprise 10.0.26200, `HTTPS_PROXY=http://127.0.0.1:9000` (proxy en
 boucle locale), pas de proxy dans le registre. Branche `nuit/integration-2026-10-01`, commit
-`e075ebe`, lancée par `uv run wavestack` depuis la racine du dépôt (`/api/health` : `"commit":
-"e075ebe"`). Dossier de données réel (`%LOCALAPPDATA%\WaveStack`), `settings.json` sauvegardé
+`e075ebe`, lancée par `uv run harness-lab` depuis la racine du dépôt (`/api/health` : `"commit":
+"e075ebe"`). Dossier de données réel (`%LOCALAPPDATA%\HarnessLab`), `settings.json` sauvegardé
 avant la séance. Pilotage par Claude in Chrome (extension reliée), sans Playwright. Aucun code
 modifié.
 
@@ -18,14 +18,14 @@ lecture du DOM, `element.click()` et les API du serveur (`/api/diagnostic`, flux
 
 | # | Geste | Attendu | Observé | Verdict |
 |---|---|---|---|---|
-| 1 | Scénario `network_tools`, prompt suggéré « What are the public holidays in France this year? », modèle cloud gemma | `public_holidays` contacté ; Orchestration montre les données sortantes | Tour en 7,9 s, 3 appels au modèle : `get_datetime`, puis `public_holidays(year=2026)`. Étape « Runs the tool outside the workstation · Public holidays », `🌐 NETWORK → calendrier.api.gouv.fr`, OK en 0,1 s. Bloc « NETWORK · Outbound data » : `GET https://calendrier.api.gouv.fr/jours-feries/metropole/2026.json`, en-têtes (User-Agent WaveStack), « No body: only the address leaves the workstation. » Résultat : 11 jours fériés. Schéma : nœud « Public holidays » `contacted`. Bandeau : « data left the workstation 4 times […] and to Public holidays (the requested year, 1 request) ». | OK |
+| 1 | Scénario `network_tools`, prompt suggéré « What are the public holidays in France this year? », modèle cloud gemma | `public_holidays` contacté ; Orchestration montre les données sortantes | Tour en 7,9 s, 3 appels au modèle : `get_datetime`, puis `public_holidays(year=2026)`. Étape « Runs the tool outside the workstation · Public holidays », `🌐 NETWORK → calendrier.api.gouv.fr`, OK en 0,1 s. Bloc « NETWORK · Outbound data » : `GET https://calendrier.api.gouv.fr/jours-feries/metropole/2026.json`, en-têtes (User-Agent HarnessLab), « No body: only the address leaves the workstation. » Résultat : 11 jours fériés. Schéma : nœud « Public holidays » `contacted`. Bandeau : « data left the workstation 4 times […] and to Public holidays (the requested year, 1 request) ». | OK |
 | 2 | Atelier MCP (`/mcp`), Connect sur data.gouv.fr | Connexion et liste des outils | « data.gouv.fr: connection open in 530 ms · 10 tools listed ». `initialize` tracé comme « Outbound HTTP request (network guard) » `POST https://mcp.data.gouv.fr/mcp`. Outils : `search_datasets`, `search_organizations`, `search_dataservices`, `get_dataservice_info`, `get_dataservice_openapi_spec`, `query_resource_data`, `get_dataset_info`, `list_dataset_resources`, `get_resource_info`, `get_metrics` (préfixe `datagouv__`). | OK |
 | 3a | Diagnostic, Test de Gemini (gemini-3.5-flash-lite) | Le test répond | « Test passed: Google AI Studio answers, 538 tokens/s. Tool call received: get_datetime. » | OK |
 | 3b | Test de Gemma (gemma-4-26b-a4b-it) | Le test répond | « Test passed: Google AI Studio answers, 311 tokens/s. Tool call received: get_datetime. » | OK |
 | 3c | Test de Groq (openai/gpt-oss-120b) | Le test répond | « Test passed: Groq answers, 682 tokens/s. Tool call received: get_datetime. » | OK |
 | 3d | Test de Mistral (mistral-small-latest) | Message clair ; depuis D6, un 429 avec `x-ratelimit-limit-req-minute: 0` dit « aucun quota actif » | Message : « Test failed: Mistral AI refuses the call. No active quota on this account: check the plan in the provider's console. Provider's message: Rate limit exceeded ». Action : « Go back to the local model from the model selector in the top bar. » Journal : `outbound_request` (`POST https://api.mistral.ai/v1/chat/completions`, Authorization masqué), puis `model_call_ended` avec `stop_reason: "error"` en 288 ms, puis `diagnostic_check` `status: "fail"`. Le journal ne trace **ni le statut HTTP ni les en-têtes `x-ratelimit-*`**. Ce message ne peut sortir que d'un 429 dont `x-ratelimit-limit-req-minute` vaut `0` (`openai_chat.py:498`, `_no_quota`). | OK pour D6 ; voir R2 |
-| 4 | Téléchargement Hugging Face (carte RAG) : démarrer, annuler, supprimer le partiel | La progression démarre, l'annulation ne laisse rien | Non fait. Le seul téléchargement de l'application concerne les modèles du RAG (`rag_embedding`, `rag_reranker`), et les deux fichiers sont déjà dans `%LOCALAPPDATA%\WaveStack\models` : rien à télécharger. Le renommage temporaire du reranker a été refusé par la garde de Claude Code (fichier de données réel). | Non testé |
-| 5 | Second `uv run wavestack` pendant que le premier tourne | Message « déjà lancée » | « WaveStack is already running on port 8420, from C:\Users\anael.yahi\Documents\GitHub\agentic-harness-training-demo (e075ebe). Opening the browser. », code de sortie 0. | OK |
+| 4 | Téléchargement Hugging Face (carte RAG) : démarrer, annuler, supprimer le partiel | La progression démarre, l'annulation ne laisse rien | Non fait. Le seul téléchargement de l'application concerne les modèles du RAG (`rag_embedding`, `rag_reranker`), et les deux fichiers sont déjà dans `%LOCALAPPDATA%\HarnessLab\models` : rien à télécharger. Le renommage temporaire du reranker a été refusé par la garde de Claude Code (fichier de données réel). | Non testé |
+| 5 | Second `uv run harness-lab` pendant que le premier tourne | Message « déjà lancée » | « HarnessLab is already running on port 8420, from C:\Users\anael.yahi\Documents\GitHub\agentic-harness-training-demo (e075ebe). Opening the browser. », code de sortie 0. | OK |
 
 ### Diagnostic vide au premier chargement (observation du 02/10)
 
@@ -86,8 +86,8 @@ cette attente, la page n'affiche aucun indicateur de chargement.
   jauge, modèle) est apparue au milieu de la fenêtre, puis plus du tout après un nouveau
   défilement. Vu une fois, avec une fenêtre de 624 px de haut. À revoir sur un écran normal
   avant de conclure.
-- **Vérification 4 à refaire.** Moyen sans toucher au dossier réel : lancer WaveStack avec
-  `WAVESTACK_DATA_DIR` vers un dossier jetable dont `models\reranker` est vide (comme la séance
+- **Vérification 4 à refaire.** Moyen sans toucher au dossier réel : lancer HarnessLab avec
+  `HARNESS_LAB_DATA_DIR` vers un dossier jetable dont `models\reranker` est vide (comme la séance
   du 29/09), puis lancer et annuler le téléchargement depuis la carte « RAG with reranking ».
 
 ## Suites (02/10, `spec-recette-2026-10-02-markdown-diagnostic-quota.md`)
@@ -99,7 +99,7 @@ cette attente, la page n'affiche aucun indicateur de chargement.
   le gestionnaire (middleware limité à la route), durée d'`active_choice`, `cloud_rows`,
   `_models` et `shown` en ms, temps écoulé depuis la création de l'application. En `debug`
   sous `SLOW_DIAGNOSTIC_S = 1.0`, en `warning` au-delà, donc visible dans la console de
-  `uv run wavestack`. Aucun événement de journal. La cause des 9,9 s reste à lire dans cette
+  `uv run harness-lab`. Aucun événement de journal. La cause des 9,9 s reste à lire dans cette
   ligne au prochain premier lancement lent.
 - **R2, fermé.** Nouvel événement `outbound_response` (« Réponse d'erreur reçue »), émis par
   la fabrique HTTP (crochet `response` des clients synchrone et asynchrone) pour tout statut
@@ -137,7 +137,7 @@ cette attente, la page n'affiche aucun indicateur de chargement.
 ## Recette des suites sur le PC pro (02/10 au soir, commit `31ec98f`)
 
 Pilotage par Claude in Chrome (extension reliée, fenêtre visible, 1 696 × 675 px de page),
-`uv run wavestack` lancé depuis la racine du dépôt, console capturée dans un fichier. Dossier de
+`uv run harness-lab` lancé depuis la racine du dépôt, console capturée dans un fichier. Dossier de
 données réel ; `settings.json` sauvegardé avant et identique après (`en`, cloud `gemma`).
 
 | Point | Geste | Observé | Verdict |
@@ -157,14 +157,14 @@ recherche : c'est sans doute pourquoi le premier appel portait les 9,9 s. Procha
 mesurer l'intérieur de `models_payload` (par candidat : lecture des métadonnées GGUF, éditeurs,
 fenêtres) avant tout correctif.
 
-Reste à faire : la vérification 4 (téléchargement HF avec un `WAVESTACK_DATA_DIR` jetable).
+Reste à faire : la vérification 4 (téléchargement HF avec un `HARNESS_LAB_DATA_DIR` jetable).
 
 ## Cause de R1 mesurée et corrigée, vérification 4 (02/10, nuit, commit `a263d30`)
 
 **R1.** Spec `spec-r1-lenteur-models-payload.md` (`done`). La ligne de log R1 détaille désormais
 `_models` : `load_publishers`, `local_entries` (avec `headers` et chaque candidat d'au moins
 1 ms : lecture d'en-tête + reste), `cloud_entries`, `group_models`. Reproduit sur ce PC avec le
-vrai serveur (`uv run wavestack` sans navigateur, dossier de données réel, 39 candidats dont
+vrai serveur (`uv run harness-lab` sans navigateur, dossier de données réel, 39 candidats dont
 21 fichiers GGUF distincts, Ollama compris) :
 
 | Premier `/api/diagnostic` après la recherche | Total | `_models` | dont en-têtes GGUF | Appel suivant |
@@ -182,7 +182,7 @@ Le reste (1,2 s) n'apparaît que si toutes les sondes sont en cache : la recherc
 juste après la découverte, avant la fin du préchauffage. Un cache des en-têtes sur disque le
 supprimerait (non fait).
 
-**Vérification 4 (téléchargement Hugging Face).** `WAVESTACK_DATA_DIR` vers un dossier jetable
+**Vérification 4 (téléchargement Hugging Face).** `HARNESS_LAB_DATA_DIR` vers un dossier jetable
 du scratchpad (`settings.json` et modèle d'embedding copiés, `models\reranker` vide, sans clés),
 serveur sur le port 8421. Le cloud gemma n'ayant pas de clé, le modèle choisi a été
 `granite4:350m` (Ollama) pour atteindre l'état `idle`. Pilotage par Claude in Chrome ; la

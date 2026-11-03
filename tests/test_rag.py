@@ -21,16 +21,16 @@ from test_bricks import HEADERS
 from test_cloud import GROQ_TEXT, SENTINEL, Provider
 from test_turn import _run
 
-from wavestack import config
-from wavestack.models.embedding import LlamaCppEmbedder
-from wavestack.models.load_registry import EMBEDDING, LoadRegistry
-from wavestack.rag import index as rag_index
-from wavestack.rag.corpus import chunk_corpus, load_rag_content, split_text
-from wavestack.rag.retriever import SqliteVecRetriever
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.models.embedding import LlamaCppEmbedder
+from harness_lab.models.load_registry import EMBEDDING, LoadRegistry
+from harness_lab.rag import index as rag_index
+from harness_lab.rag.corpus import chunk_corpus, load_rag_content, split_text
+from harness_lab.rag.retriever import SqliteVecRetriever
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 COVERED = "Combien de caractères doit compter au minimum un mot de passe chez Exemplia ?"
 OFF_CORPUS = "Quelle est la capitale du Pérou ?"
@@ -80,7 +80,7 @@ REPLACED_WHILE_OPEN = pytest.param(
     False,
     id="replaced-while-open",
     marks=pytest.mark.skipif(
-        sys.platform == "win32" or os.environ.get("WAVESTACK_TEST_WINDOWS_FILES") == "1",
+        sys.platform == "win32" or os.environ.get("HARNESS_LAB_TEST_WINDOWS_FILES") == "1",
         reason="Windows refuse de remplacer un fichier qu'une connexion tient ouvert",
     ),
 )
@@ -307,7 +307,7 @@ def test_budget_exceeded_refuses_in_figures_and_loads_nothing(index):
     assert rag["available"] is False
     assert rag["reason_text"] == (
         "Indisponible : Mémoire insuffisante pour charger le modèle d'embedding Faux "
-        "embedding : WaveStack occupe 200 Mo, il en faut environ 1 de plus, au-delà du budget "
+        "embedding : HarnessLab occupe 200 Mo, il en faut environ 1 de plus, au-delà du budget "
         "de 100 Mo (= plafond [memory] budget_mb). Désactivez une brique ou relevez "
         "[memory] budget_mb dans settings.json."
     )
@@ -322,7 +322,7 @@ def test_registry_refusal_uses_the_injected_measure():
     cost = registry.component_cost(None, [121_020_096])
     assert cost == 121_020_096 + 128 * 1024**2
     refusal = registry.check_component("le modèle d'embedding X", cost, EMBEDDING)
-    assert refusal is not None and "WaveStack occupe 4 000 Mo" in refusal
+    assert refusal is not None and "HarnessLab occupe 4 000 Mo" in refusal
     assert "environ 243 de plus" in refusal and "budget de 4 096 Mo" in refusal
     assert registry.component_cost(300, [1]) == 300 * 1024**2  # the measure, when declared
 
@@ -569,7 +569,7 @@ def test_real_embedding_model_finds_the_password_document(tmp_path, real_models_
 
 
 def test_the_embedding_model_is_never_offered_as_a_chat_model(monkeypatch):
-    from wavestack.models import discovery
+    from harness_lab.models import discovery
 
     model, _ = config.load_config().rag_embedding
     embedding = config.models_dir() / model.load_path

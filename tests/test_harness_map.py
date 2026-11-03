@@ -7,11 +7,11 @@ import pytest
 from fake_engine import FakeEngine, booted_session
 from pydantic import ValidationError
 
-from wavestack import ui_texts
-from wavestack.bricks.contract import SUBSYSTEMS, BrickDeclaration, Component
-from wavestack.bricks.registry import BRICKS
-from wavestack.trace.catalog import BrickState
-from wavestack.trace.journal import get_journal
+from harness_lab import ui_texts
+from harness_lab.bricks.contract import SUBSYSTEMS, BrickDeclaration, Component
+from harness_lab.bricks.registry import BRICKS
+from harness_lab.trace.catalog import BrickState
+from harness_lab.trace.journal import get_journal
 
 LANGS = ["fr", "en", "de"]
 ROLE_KEYS = ["guide", "sensor_computed", "sensor_inferred", "capability"]

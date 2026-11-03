@@ -12,10 +12,10 @@ import yaml
 from test_bricks import _client
 from test_i18n import _session
 
-from wavestack import config, glossary
+from harness_lab import config, glossary
 
 CONTENT = config.content_dir()
-STATIC = config.repo_root() / "src" / "wavestack" / "web" / "static"
+STATIC = config.repo_root() / "src" / "harness_lab" / "web" / "static"
 TRANSLATED = ("en", "de")
 PAGES = ("index", "llm", "rag", "mcp", "security", "diagnostic")
 # The glossaries themselves (and the MCP demo's) are not citing texts.

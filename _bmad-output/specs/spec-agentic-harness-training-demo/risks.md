@@ -1,4 +1,4 @@
-# Risques et parades — WaveStack
+# Risques et parades — HarnessLab
 
 | Risque | Parade |
 |---|---|

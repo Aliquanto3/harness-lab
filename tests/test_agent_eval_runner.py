@@ -15,13 +15,13 @@ import pytest
 from fake_engine import FakeEngine
 from test_tools import QWEN, call
 
-from wavestack import config
-from wavestack.agent_eval import store
-from wavestack.agent_eval.cases import AgentCase, Provenance, load_provided_cases
-from wavestack.messages import msg
-from wavestack.models.cloud_base import CallCost, record_spend
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.agent_eval import store
+from harness_lab.agent_eval.cases import AgentCase, Provenance, load_provided_cases
+from harness_lab.messages import msg
+from harness_lab.models.cloud_base import CallCost, record_spend
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.trace.journal import get_journal
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNING_FR = msg("agent_eval.refused.running", "fr")
@@ -554,7 +554,7 @@ PRIVATE = re.compile(
 def test_no_private_configuration_access_outside_the_session():
     sources = [
         *sorted((ROOT / "tools" / "eval").glob("*.py")),
-        ROOT / "src" / "wavestack" / "session" / "agent_eval_runner.py",
+        ROOT / "src" / "harness_lab" / "session" / "agent_eval_runner.py",
         ROOT / "tests" / "test_agent_cases_provided.py",
     ]
     found = [str(p) for p in sources if PRIVATE.search(p.read_text(encoding="utf-8"))]
@@ -574,7 +574,7 @@ def test_unknown_ids_of_a_session_case_are_ignored_and_shown(closing):
 
 
 def test_the_window_option_is_for_the_tests_only(closing):
-    for folder in ("src/wavestack/web", "tools"):
+    for folder in ("src/harness_lab/web", "tools"):
         for path in (ROOT / folder).rglob("*"):
             if path.suffix in (".py", ".js", ".html"):
                 assert "check_window" not in path.read_text(encoding="utf-8"), path
@@ -647,7 +647,7 @@ def test_a_thread_that_fails_to_start_leaves_the_session_idle(closing, monkeypat
     real, failed = threading.Thread.start, []
 
     def start(self):  # noqa: ANN001, ANN202 - the run's thread fails once
-        if self.name == "wavestack-agent-eval" and not failed:
+        if self.name == "harness-lab-agent-eval" and not failed:
             failed.append(1)
             raise RuntimeError("can't start new thread")
         return real(self)

@@ -1,11 +1,11 @@
-"""Starts the fake OpenAI server and WaveStack on a throwaway data dir (end-to-end tests).
+"""Starts the fake OpenAI server and HarnessLab on a throwaway data dir (end-to-end tests).
 
 The fake model is declared as a cloud model in that data dir's `settings.json`, never in
-`wavestack.toml`; its key comes from the variable its `key_env` names. WaveStack opens no
+`harness-lab.toml`; its key comes from the variable its `key_env` names. HarnessLab opens no
 browser (`BROWSER=true`) and finds no local GGUF (`HF_HOME`, `OLLAMA_MODELS` in the dir).
 Story 18: a fake llama-server and a fake Ollama (`fake_local_server.py`) run on free ports,
 which `settings.json` gives as `[net.loopback_ports]`.
-Lot D: WaveStack's outbound network is cut by the launcher itself (`_env`, closed proxy), so
+Lot D: HarnessLab's outbound network is cut by the launcher itself (`_env`, closed proxy), so
 the run gives the same result on a connected workstation, behind a proxy or offline.
 
 Run alone to explore by hand: `uv run python tools/e2e/stack.py` (Ctrl+C stops both);
@@ -32,7 +32,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-KEY_ENV = "WAVESTACK_FAKE_API_KEY"
+KEY_ENV = "HARNESS_LAB_FAKE_API_KEY"
 MODEL_ENTRY_ID = "fake"
 # Story 17: a second fake model, for the hot switch; `launch_app.py` slows its loading.
 SECOND_ENTRY_ID = "fake_b"
@@ -41,7 +41,7 @@ SECOND_MODEL = "faux-modele-b"
 REASONING_ENTRY_ID = "fake_r"
 REASONING_MODEL = "faux-modele-raisonne"
 # A fourth fake model shaped as Gemini 3.x (`fake_openai.py`'s Gemini mode, by its name):
-# the reasoning of the real `gemini` preset, read in wavestack.toml.
+# the reasoning of the real `gemini` preset, read in harness-lab.toml.
 GEMINI_ENTRY_ID = "fake_g"
 GEMINI_MODEL = "gemini-e2e-flash-lite"
 GEMINI_PROVIDER = "Faux Gemini (e2e)"
@@ -97,14 +97,14 @@ def _entry(
 
 
 def preset(preset_id: str) -> dict:
-    """An entry of wavestack.toml's `[[cloud.models]]`, as declared (never modified)."""
-    with (REPO / "wavestack.toml").open("rb") as f:
+    """An entry of harness-lab.toml's `[[cloud.models]]`, as declared (never modified)."""
+    with (REPO / "harness-lab.toml").open("rb") as f:
         models = tomllib.load(f)["cloud"]["models"]
     return next(m for m in models if m["id"] == preset_id)
 
 
 def gemini_preset() -> dict:
-    """The `gemini` entry of wavestack.toml, as declared (never modified)."""
+    """The `gemini` entry of harness-lab.toml, as declared (never modified)."""
     return preset("gemini")
 
 
@@ -181,7 +181,7 @@ def settings(fake_port: int, data_dir: Path, llama_port: int = 0, ollama_port: i
         "rag": rag_settings(fake_port, data_dir),
         "cloud": {
             "models": [
-                _entry(fake_port, MODEL_ENTRY_ID, "Faux fournisseur (e2e)", "wavestack-fake"),
+                _entry(fake_port, MODEL_ENTRY_ID, "Faux fournisseur (e2e)", "harness-lab-fake"),
                 _entry(fake_port, SECOND_ENTRY_ID, "Faux fournisseur B (e2e)", SECOND_MODEL),
                 _entry(
                     fake_port,
@@ -232,7 +232,7 @@ class Stack:
     env: dict[str, str]
     llama_url: str = ""
     ollama_url: str = ""
-    # Fake servers first, WaveStack last (`restart_app` pops it).
+    # Fake servers first, HarnessLab last (`restart_app` pops it).
     procs: list[subprocess.Popen] = field(default_factory=list)
     launches: int = 0
 
@@ -246,13 +246,13 @@ class Stack:
             return json.loads(r.read().decode("utf-8"))
 
     def start_app(self) -> None:
-        """Launch WaveStack (again) on the same port and data dir; its log is numbered."""
+        """Launch HarnessLab (again) on the same port and data dir; its log is numbered."""
         self.launches += 1
         suffix = "" if self.launches == 1 else f"-{self.launches}"
-        log = open(self.log_dir / f"wavestack{suffix}.log", "w", encoding="utf-8")  # noqa: SIM115
+        log = open(self.log_dir / f"harness-lab{suffix}.log", "w", encoding="utf-8")  # noqa: SIM115
         self.procs.append(
             subprocess.Popen(
-                [sys.executable, str(HERE / "wavestack_e2e.py"), "--port", str(self.app_port)],
+                [sys.executable, str(HERE / "harness_lab_e2e.py"), "--port", str(self.app_port)],
                 cwd=REPO,
                 env=self.env,
                 stdout=log,
@@ -262,12 +262,12 @@ class Stack:
         wait_http(f"{self.app_url}/api/health")
 
     def restart_app(self) -> None:
-        """Stop WaveStack, then launch it again: a « prochain lancement »."""
+        """Stop HarnessLab, then launch it again: a « prochain lancement »."""
         _stop(self.procs.pop())
         self.start_app()
 
 
-# Lot D: the run cuts WaveStack's outbound network itself, so that it gives the same result
+# Lot D: the run cuts HarnessLab's outbound network itself, so that it gives the same result
 # on a connected workstation, behind an office proxy or offline. Its proxy variables name a
 # loopback port on which nothing listens (`closed_port`): a request to a public host still
 # passes the network guard and is traced (`outbound_request`, which `network_tools` and H5
@@ -302,7 +302,7 @@ def _env(data_dir: Path, proxy_port: int | None) -> dict[str, str]:
                 env[name.lower()] = value
     env.update(
         {
-            "WAVESTACK_DATA_DIR": str(data_dir),
+            "HARNESS_LAB_DATA_DIR": str(data_dir),
             KEY_ENV: "e2e-fake-key",
             "BROWSER": "true",  # webbrowser.open runs `true`: nothing opens
             "HF_HOME": str(data_dir / "hf"),
@@ -320,10 +320,10 @@ def running_stack(
     keep: bool = False,
     network: bool = False,
 ) -> Iterator[Stack]:
-    """Both servers, stopped on exit; the data dir is removed unless `keep`. WaveStack's
+    """Both servers, stopped on exit; the data dir is removed unless `keep`. HarnessLab's
     outbound network is cut unless `network` (manual exploration only)."""
     owned = data_dir is None
-    data_dir = data_dir or Path(tempfile.mkdtemp(prefix="wavestack-e2e-"))
+    data_dir = data_dir or Path(tempfile.mkdtemp(prefix="harness-lab-e2e-"))
     log_dir = log_dir or data_dir
     log_dir.mkdir(parents=True, exist_ok=True)
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -388,7 +388,7 @@ def running_stack(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Faux modèle et WaveStack, pour explorer.")
+    parser = argparse.ArgumentParser(description="Faux modèle et HarnessLab, pour explorer.")
     parser.add_argument(
         "--network",
         action="store_true",
@@ -396,7 +396,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     with running_stack(keep=True, network=args.network) as stack:
-        print(f"WaveStack : {stack.app_url}/diagnostic")
+        print(f"HarnessLab : {stack.app_url}/diagnostic")
         print(f"Faux modèle : {stack.fake_url}/v1 (clé via {KEY_ENV})")
         print(f"Faux llama-server : {stack.llama_url} · faux Ollama : {stack.ollama_url}")
         print(f"Dossier de données : {stack.data_dir}")

@@ -1,6 +1,6 @@
 [project]
-name = "wavestack"
-version = "1.7.4"
+name = "harness-lab"
+version = "2.0.0"
 description = "Démonstrateur pédagogique d'un harnais agentique, brique par brique, en local sur CPU."
 readme = "README.md"
 license = "Apache-2.0"
@@ -26,14 +26,14 @@ dependencies = [
 ]
 
 [project.scripts]
-wavestack = "wavestack.cli:main"
+harness-lab = "harness_lab.cli:main"
 
 [project.optional-dependencies]
 compression = [
     "headroom-ai==0.38.0",
 ]
 # Story 4 (vague 2, CAP-5): the guardrails brick — toxicity (ONNX) and personal data
-# (Presidio + spaCy FR). No torch; WaveStack starts without this extra.
+# (Presidio + spaCy FR). No torch; HarnessLab starts without this extra.
 guardrails = [
     "onnxruntime==1.23.2",
     "tokenizers==0.22.1",
@@ -52,13 +52,13 @@ greenops = [
     "codecarbon==3.3.1",
 ]
 # V1.2 story 8 (CAP-6): System One's local classifier (deberta_xsmall, a zero-shot NLI in
-# ONNX), without the guardrails' Presidio and spaCy. No torch; WaveStack starts without it.
+# ONNX), without the guardrails' Presidio and spaCy. No torch; HarnessLab starts without it.
 decision = [
     "onnxruntime==1.23.2",
     "tokenizers==0.22.1",
 ]
 # V1.2 story 16 (CAP-12): the OTLP export of the workshop's tree, GenAI conventions. The SDK
-# builds the spans and the OTLP encoder makes their protobuf; WaveStack's factory sends them
+# builds the spans and the OTLP encoder makes their protobuf; HarnessLab's factory sends them
 # (AD-15), so the HTTP exporter (and its `requests`) is not needed. Pure Python, no service;
 # same release as the `opentelemetry-api` the base already locks.
 otel = [
@@ -91,7 +91,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/wavestack"]
+packages = ["src/harness_lab"]
 
 [tool.ruff]
 line-length = 100

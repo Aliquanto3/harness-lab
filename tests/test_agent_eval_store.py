@@ -8,9 +8,9 @@ import os
 import pytest
 from fake_engine import FakeEngine, booted_session
 
-from wavestack import config
-from wavestack.agent_eval import store
-from wavestack.agent_eval.cases import AgentCase, load_provided_cases, new_case_id
+from harness_lab import config
+from harness_lab.agent_eval import store
+from harness_lab.agent_eval.cases import AgentCase, load_provided_cases, new_case_id
 
 
 def session_case(case_id: str | None = None, **fields) -> AgentCase:

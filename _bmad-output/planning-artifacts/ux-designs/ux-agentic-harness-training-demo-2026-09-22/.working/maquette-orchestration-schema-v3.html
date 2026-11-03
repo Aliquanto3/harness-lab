@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WaveStack · maquette Orchestration et schéma</title>
+<title>HarnessLab · maquette Orchestration et schéma</title>
 <!-- Polices locales de l'application (chemin relatif au dépôt) ; repli système sinon. -->
-<link rel="stylesheet" href="../../../../../src/wavestack/web/static/fonts.css">
+<link rel="stylesheet" href="../../../../../src/harness_lab/web/static/fonts.css">
 <style>
 /* Maquette du sprint change du 2026-09-25 : propositions A (Orchestration) et B (schéma).
    Tokens repris de tokens.css (DESIGN.md) ; --k porte le réglage « Aa ». */
 :root {
-  --primary: #451DC7; --primary-deep: #250F6B; --primary-soft: #EDE7FE;
-  --accent: #04F06A; --ink: #0A0A14; --ink-soft: #4A4A5E; --muted: #8A8A9E;
-  --line: #E6E6EC; --surface: #F6F5FA; --white: #FFFFFF;
-  --warning: #FFCA4A; --danger: #FF2A49;
+  --primary: #0B6B78; --primary-deep: #084E58; --primary-soft: #DCEFF1;
+  --accent: #B4500F; --ink: #0A0A14; --ink-soft: #4A4A5E; --muted: #8A8A9E;
+  --line: #E6E6EC; --surface: #F7F8F6; --white: #FFFFFF;
+  --warning: #E8A317; --danger: #B42318;
   --relief: #D9D0F6; --relief-active: #C9BCF5; --dot: #D6CCF5;
   --seg-system: #6B4EE6; --seg-memory: #27B060; --seg-tools: #2A78D6; --seg-history: #B39CF7;
   --seg-rag: #0E8C7E; --seg-results: #E0762B; --seg-message: #9C5BB5;
@@ -339,7 +339,7 @@ main { flex: 1; min-height: 0; display: flex; gap: 8px; }
 </div>
 
 <header class="top-bar">
-  <span class="brand">WaveStack</span>
+  <span class="brand">HarnessLab</span>
   <span class="pill scenario">Module 4 · Hooks et outils ▾</span>
   <div class="gauge" title="Contexte de l'appel le plus récent">
     <div class="gauge-bar" id="gauge-bar"></div>
@@ -491,7 +491,7 @@ function outboundHTML(host, request) {
   return `<div class="outbound"><div class="ob-head">🌐 RÉSEAU · données envoyées à <b>${esc(host)}</b></div><pre class="code">${esc(request)}</pre></div>`;
 }
 const PREP = [
-  { id: "prep.glossary", comp: "mcp.glossary", icon: "🔌", title: "Glossaire WaveStack", key: "connecté · 2 outils",
+  { id: "prep.glossary", comp: "mcp.glossary", icon: "🔌", title: "Glossaire HarnessLab", key: "connecté · 2 outils",
     body: `<p>Serveur MCP <b>local</b> : un processus distinct du harnais, lancé sur le poste (stdio). Rien ne sort du poste.</p><p class="lbl">Outils trouvés : 2</p><pre class="code">list_terms\ndefine_term</pre><p class="meta">Temps : 0,4 s</p>` },
   { id: "prep.datagouv", comp: "mcp.datagouv", icon: "🔌", title: "data.gouv.fr", net: "mcp.data.gouv.fr", key: "connecté · 5 outils",
     body: `<p>Serveur MCP <b>public</b>. Pour connaître ses outils, le harnais lui envoie une requête : elle quitte le poste.</p>` +
@@ -537,8 +537,8 @@ function launchJournal() {
   log("session_state", "État de la session", "prête", { state: "idle" });
   log("bricks_changed", "Briques modifiées", "6 briques voulues", { bricks: BRICKS.map((b) => ({ id: b.id, wanted: true, available: true })) });
   log("architecture_changed", "Schéma mis à jour", "22 nœuds, 21 liens", { nodes: [{ id: "core.harness", kind: "harness", hosting: "local" }, { id: "core.model", kind: "model", hosting: "local" }, { id: "tools.public_holidays", kind: "tool", hosting: "network" }, "… 19 autres"], edges: "… 21 liens" });
-  log("mcp_connect_started", "Connexion MCP commencée", "Glossaire WaveStack (local)", { server: "glossary", transport: "stdio" });
-  log("mcp_connect_ended", "Connexion MCP terminée", "Glossaire WaveStack : 2 outils", { server: "glossary", status: "ok", tools: ["list_terms", "define_term"], duration_ms: 412 });
+  log("mcp_connect_started", "Connexion MCP commencée", "Glossaire HarnessLab (local)", { server: "glossary", transport: "stdio" });
+  log("mcp_connect_ended", "Connexion MCP terminée", "Glossaire HarnessLab : 2 outils", { server: "glossary", status: "ok", tools: ["list_terms", "define_term"], duration_ms: 412 });
   log("mcp_connect_started", "Connexion MCP commencée", "data.gouv.fr (RÉSEAU)", { server: "datagouv", transport: "streamable_http" });
   log("outbound_request", "Données sortantes", "POST mcp.data.gouv.fr", { method: "POST", url: "https://mcp.data.gouv.fr/mcp", body: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' });
   log("mcp_connect_ended", "Connexion MCP terminée", "data.gouv.fr : 5 outils", { server: "datagouv", status: "ok", tools: ["search_datasets", "get_dataset", "list_resources", "query_resource", "search_organizations"], duration_ms: 1204 });
@@ -551,7 +551,7 @@ function launchJournal() {
 function buildSegments(turn, extra, preview = false) {
   const b = S.bricks;
   const segs = [];
-  if (b.system_prompt) segs.push({ kind: "system", comp: "system_prompt", label: "Prompt système", tokens: 412, text: "Tu es l'assistant de démonstration WaveStack. Réponds en français, en phrases courtes. Utilise un outil quand la question porte sur une donnée que tu ne peux pas connaître." });
+  if (b.system_prompt) segs.push({ kind: "system", comp: "system_prompt", label: "Prompt système", tokens: 412, text: "Tu es l'assistant de démonstration HarnessLab. Réponds en français, en phrases courtes. Utilise un outil quand la question porte sur une donnée que tu ne peux pas connaître." });
   const desc = [];
   let dt = 0;
   if (b.tools) { desc.push("get_datetime() : date et heure du poste.", "calculator(expression) : calcule une expression.", "read_file(path) : lit un fichier du dossier de démonstration.", "public_holidays(year) : jours fériés en France (RÉSEAU).", "wikipedia_summary(title) : résumé d'un article (RÉSEAU).", "fetch_page(url) : lit une page web (RÉSEAU)."); dt += 640; }

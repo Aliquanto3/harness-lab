@@ -1,6 +1,6 @@
 # Aufbewahrungsfristen für personenbezogene Daten bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Fristen beschreiben kein reales Unternehmen und sind keine Rechtsberatung. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Fristen beschreiben kein reales Unternehmen und sind keine Rechtsberatung. -->
 
 Personenbezogene Daten werden nur so lange aufbewahrt, wie es der Zweck erfordert, für den sie erhoben wurden. Das Verarbeitungsverzeichnis von Exemplia legt für jede Verarbeitung eine aktive Frist fest, in der die Abteilungen die Daten nutzen, und danach eine Archivierungsfrist, in der nur die Rechtsabteilung darauf zugreifen kann.
 

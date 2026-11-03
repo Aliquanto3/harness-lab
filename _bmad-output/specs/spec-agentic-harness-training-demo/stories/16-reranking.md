@@ -16,14 +16,14 @@ deferred:
     evidence: |-
       Aucun modèle téléchargeable ici (huggingface.co bloqué). L'adaptateur est exercé dans la suite par défaut sur des GGUF BERT synthétiques (tests/fixtures/tiny-bert-rank.gguf et tiny-bert-cls.gguf : paire, score, troncature, progression, refus d'un GGUF d'embedding). À trancher sur le PC cible : `uv run python -m pytest -m model tests/test_rag_rerank.py`, puis le scénario « RAG avec reranking » (RSS ajouté ≤ 800 Mo, seuil de la story 12, NFR-2 ; durée de l'étape « Reranking », NFR-1 < 30 s au premier token). Reporté dans deferred-work.md.
     location: >-
-      src/wavestack/models/reranker.py:LlamaCppReranker
+      src/harness_lab/models/reranker.py:LlamaCppReranker
     severity: medium (unverified)
   - summary: >-
       L'URL du reranker vise resolve/main et son sha256 n'est pas renseigné.
     evidence: |-
       Le connecteur Hugging Face donne la taille (438 376 864 octets) mais ni l'oid LFS ni le commit. Le premier téléchargement sur le PC cible trace le sha256 (effet model_download) : le recopier dans [rag.reranker] files[].sha256 et épingler l'URL sur le commit.
     location: >-
-      wavestack.toml:[rag.reranker]
+      harness-lab.toml:[rag.reranker]
     severity: medium
   - summary: >-
       AD-21 amendé dans le spine, « à valider » : sans son modèle, seule la sous-option « Reranking » est indisponible, le RAG simple continue.
@@ -45,14 +45,14 @@ deferred:
 
 ## Intent
 
-**Problem:** La brique RAG de la story 15 place les `top_k` extraits les plus proches par embedding, sans deuxième passe : WaveStack ne peut pas montrer ce qu'un reranker change à l'ordre des extraits (CAP-19, FR-18, UJ-5 « l'ordre des extraits change, visible avant/après »).
+**Problem:** La brique RAG de la story 15 place les `top_k` extraits les plus proches par embedding, sans deuxième passe : HarnessLab ne peut pas montrer ce qu'un reranker change à l'ordre des extraits (CAP-19, FR-18, UJ-5 « l'ordre des extraits change, visible avant/après »).
 
 **Approach:** Une sous-option « Reranking » de la brique RAG (case sur sa carte, comme « Lazy loading » pour MCP). Activée et disponible, la recherche retient `[rag] rerank_candidates` candidats, puis une étape « Reranking » du rail les fait noter par le reranker local (bge-reranker-v2-m3 Q4_K_M, verdict provisoire de la story 12, llama-cpp-python en pooling `RANK`) et montre l'ordre avant et après ; seuls les `top_k` premiers après reranking entrent dans le contexte. Le modèle passe par le registre de chargement (emplacement `reranker`), le téléchargement « Télécharger » et les contrôles d'identité de la story 15.
 
 ## Boundaries & Constraints
 
 **Always:**
-- **Point d'injection du verdict** : une section `[rag.reranker]` de `wavestack.toml`, seul endroit qui nomme le reranker (`id`, `backend = "llama_cpp"`, `label_fr`, `license`, `max_tokens`, `load_path`, `measured_rss_mb` facultatif, `files`), validée par un modèle strict comme `EmbeddingModel` ; `[rag] rerank_candidates` (8 par défaut, jamais moins que `top_k`, 20 au plus). Section absente ou invalide : sous-option indisponible avec la raison, jamais de plantage.
+- **Point d'injection du verdict** : une section `[rag.reranker]` de `harness-lab.toml`, seul endroit qui nomme le reranker (`id`, `backend = "llama_cpp"`, `label_fr`, `license`, `max_tokens`, `load_path`, `measured_rss_mb` facultatif, `files`), validée par un modèle strict comme `EmbeddingModel` ; `[rag] rerank_candidates` (8 par défaut, jamais moins que `top_k`, 20 au plus). Section absente ou invalide : sous-option indisponible avec la raison, jamais de plantage.
 - **Adaptateur** (`models/reranker.py`) : port `Reranker{model_id, score(query, passages, cancelled) → list[float], close()}`, scores dans [0, 1] (sigmoïde de la sortie brute). `LlamaCppReranker` ouvre `Llama(embedding=True, pooling_type=RANK, n_ctx = n_batch = n_ubatch = max_tokens)`, forme la paire `[BOS] q [EOS] [SEP] d [EOS]` (drapeaux du vocabulaire, comme `format_rerank` de llama-server), tronque le passage pour tenir dans `max_tokens`, lit le score par `llama_get_embeddings_seq(ctx, 0)[0]` après un `decode` par paire (jamais `Llama.embed()`), et sonde une paire au chargement (score fini, sinon `ValueError` en français). `llama_cpp` importé paresseusement.
 - **Sous-option** : état de session `_rag_rerank` (faux au lancement, remis à faux par la réinitialisation), intention de classe (a) `POST /api/intentions/rag_rerank {enabled}`, effet au tour suivant (« Prend effet au prochain tour » sur la carte RAG), champ `rag_rerank` des scénarios.
 - **Disponibilité de la sous-option**, calculée par la session, dans cet ordre : section invalide ; fichiers absents (« modèle absent », offre `download_model{target: "rag_reranker"}`, chemin de copie manuelle) ; chargement en cours ; refus chiffré du registre ou échec du chargement. La brique RAG reste disponible quand seule la sous-option ne l'est pas : le tour cherche alors sans reranking, sans étape « Reranking ».
@@ -83,17 +83,17 @@ deferred:
 
 ## Code Map
 
-- `wavestack.toml` : `[rag]` (ajouter `rerank_candidates`) et nouvelle section `[rag.reranker]` après `[rag.embedding]`. Verdict (story 12, L212) : `gpustack/bge-reranker-v2-m3-GGUF`, `bge-reranker-v2-m3-Q4_K_M.gguf`, 438 376 864 octets (taille reconfirmée par le connecteur HF), Apache-2.0, pooling RANK.
-- `src/wavestack/config.py` : `EmbeddingFile`, `_relative_path`, `EmbeddingModel` (L162-229) comme modèle de `RerankerModel` ; accesseurs `rag_embedding` (L346-365), `rag_top_k` (L367) → `rag_reranker`, `rag_rerank_candidates`.
-- `src/wavestack/models/embedding.py` : style de l'adaptateur et de la sonde. `tools/bench/story12_bench.py:1007-1073` : `_decode_sequence`, `_llama_scores_rerank` (paire, drapeaux, lecture du score) à reprendre.
-- `src/wavestack/models/load_registry.py` : `EMBEDDING`, `embedding_cost`, `check_component`, `grant`, `release` → emplacement `RERANKER`.
-- `src/wavestack/models/download.py` : `missing_files`, `download_files` réutilisés tels quels.
-- `src/wavestack/models/discovery.py:50-60,195-200` : exclure aussi `[rag.reranker]` et `models/reranker/`.
-- `src/wavestack/rag/retriever.py` : `SqliteVecRetriever.search(query)` → paramètre `k` facultatif ; `Excerpt`.
-- `src/wavestack/rag/corpus.py` : `RagContent` (strict) → textes du reranking.
-- `src/wavestack/bricks/registry.py:193-206` : composant `rag.reranker` de la brique `rag`.
-- `src/wavestack/trace/catalog.py` : `DownloadOffer.target` (L279), `BrickState` (L292) → champ `rerank` ; paires `rag_search_*` (L583-606) comme modèle ; `PAYLOAD_MODELS`.
-- `src/wavestack/session/app_session.py` :
+- `harness-lab.toml` : `[rag]` (ajouter `rerank_candidates`) et nouvelle section `[rag.reranker]` après `[rag.embedding]`. Verdict (story 12, L212) : `gpustack/bge-reranker-v2-m3-GGUF`, `bge-reranker-v2-m3-Q4_K_M.gguf`, 438 376 864 octets (taille reconfirmée par le connecteur HF), Apache-2.0, pooling RANK.
+- `src/harness_lab/config.py` : `EmbeddingFile`, `_relative_path`, `EmbeddingModel` (L162-229) comme modèle de `RerankerModel` ; accesseurs `rag_embedding` (L346-365), `rag_top_k` (L367) → `rag_reranker`, `rag_rerank_candidates`.
+- `src/harness_lab/models/embedding.py` : style de l'adaptateur et de la sonde. `tools/bench/story12_bench.py:1007-1073` : `_decode_sequence`, `_llama_scores_rerank` (paire, drapeaux, lecture du score) à reprendre.
+- `src/harness_lab/models/load_registry.py` : `EMBEDDING`, `embedding_cost`, `check_component`, `grant`, `release` → emplacement `RERANKER`.
+- `src/harness_lab/models/download.py` : `missing_files`, `download_files` réutilisés tels quels.
+- `src/harness_lab/models/discovery.py:50-60,195-200` : exclure aussi `[rag.reranker]` et `models/reranker/`.
+- `src/harness_lab/rag/retriever.py` : `SqliteVecRetriever.search(query)` → paramètre `k` facultatif ; `Excerpt`.
+- `src/harness_lab/rag/corpus.py` : `RagContent` (strict) → textes du reranking.
+- `src/harness_lab/bricks/registry.py:193-206` : composant `rag.reranker` de la brique `rag`.
+- `src/harness_lab/trace/catalog.py` : `DownloadOffer.target` (L279), `BrickState` (L292) → champ `rerank` ; paires `rag_search_*` (L583-606) comme modèle ; `PAYLOAD_MODELS`.
+- `src/harness_lab/session/app_session.py` :
   - `TurnState` (L298) : `rag_rerank: bool = False` ;
   - `__init__` (L418-570) : `reranker_factory`, état du reranker ; `_apply_launch_config` (L571) : `_rag_rerank = False` ;
   - `_drawn_components` (L637), `_emit_architecture` (L694-826 : libellé, `detail_fr`, disponibilité du nœud) ;
@@ -104,22 +104,22 @@ deferred:
   - `launch_scenario`/`_reconfigure` (L3530-3585), `close` (L1023) ;
   - `download_model`, `_download_fr`, `_run_download` (L3614-3737) : cible `rag_reranker` ;
   - `_turn` (L3968-3973), `_rag_search` (L4110) : candidats, puis `_rag_rerank`.
-- `src/wavestack/web/app.py` : `McpModeIntention`/`mcp_mode` (L70, L424) comme modèle de la route `rag_rerank`.
-- `src/wavestack/web/static/app.js` : `applyEnvelope` (L370-381), `renderBricks`/`downloadParts` (L837, L914-967), `setOption` (L1345), `turnRows` (L3047-3062), `ragBody` (L2711), `EVENT_LABELS`/`eventSummary` (L3952, L4033), `BRICK_ICONS` (L4184, puces L4408), `schemaActivity` (L4305-4314) ; `app.css` (L2969-3000).
-- `content/rag.yaml`, `content/bricks/rag.yaml`, `content/scenarios.yaml` (module « RAG » L32-34, scénario `rag` L222-240), `src/wavestack/scenarios.py:17-29`.
+- `src/harness_lab/web/app.py` : `McpModeIntention`/`mcp_mode` (L70, L424) comme modèle de la route `rag_rerank`.
+- `src/harness_lab/web/static/app.js` : `applyEnvelope` (L370-381), `renderBricks`/`downloadParts` (L837, L914-967), `setOption` (L1345), `turnRows` (L3047-3062), `ragBody` (L2711), `EVENT_LABELS`/`eventSummary` (L3952, L4033), `BRICK_ICONS` (L4184, puces L4408), `schemaActivity` (L4305-4314) ; `app.css` (L2969-3000).
+- `content/rag.yaml`, `content/bricks/rag.yaml`, `content/scenarios.yaml` (module « RAG » L32-34, scénario `rag` L222-240), `src/harness_lab/scenarios.py:17-29`.
 - Tests : `tests/fake_embedder.py`, `tests/test_rag.py` (`rag_values`, `rag_session`, `Embedders`, `card`, `turn_events`), `tests/test_rag_download.py` (MockTransport), `tests/test_scenarios.py`, `tests/test_bricks.py`.
-- E2E : `tools/e2e/wavestack_e2e.py` (faux embedder), `stack.py:63-83` (`rag_settings`), `fake_openai.py:420-437` (fichier servi), `run_e2e.py:1218-1420` (`s_rag`), `SCENARIOS` L1870, `README.md`.
+- E2E : `tools/e2e/harness_lab_e2e.py` (faux embedder), `stack.py:63-83` (`rag_settings`), `fake_openai.py:420-437` (fichier servi), `run_e2e.py:1218-1420` (`s_rag`), `SCENARIOS` L1870, `README.md`.
 - GGUF synthétique de reranker (story 12, aléatoire) dans le scratchpad : sert à exercer l'adaptateur, pas à le qualifier.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `wavestack.toml`, `src/wavestack/config.py` -- `[rag] rerank_candidates`, `[rag.reranker]`, `RerankerModel`, accesseurs -- point d'injection unique du verdict.
-- [x] `src/wavestack/models/reranker.py` (nouveau) -- port, `LlamaCppReranker`, `open_reranker`, `sigmoid`, `pair_tokens` -- adaptateur du verdict.
-- [x] `src/wavestack/models/load_registry.py`, `models/discovery.py` -- emplacement `reranker` ; exclusion des fichiers du reranker.
-- [x] `src/wavestack/rag/retriever.py`, `rag/corpus.py`, `content/rag.yaml`, `content/bricks/rag.yaml` -- `k` de recherche ; textes du reranking.
-- [x] `src/wavestack/bricks/registry.py`, `trace/catalog.py`, `session/app_session.py`, `web/app.py`, `scenarios.py` -- composant, événements, carte, disponibilité, chargement, tour, téléchargement, route, scénario.
-- [x] `src/wavestack/web/static/app.js`, `app.css` -- case et bouton sur la carte, étape du rail avant/après, schéma, journal.
+- [x] `harness-lab.toml`, `src/harness_lab/config.py` -- `[rag] rerank_candidates`, `[rag.reranker]`, `RerankerModel`, accesseurs -- point d'injection unique du verdict.
+- [x] `src/harness_lab/models/reranker.py` (nouveau) -- port, `LlamaCppReranker`, `open_reranker`, `sigmoid`, `pair_tokens` -- adaptateur du verdict.
+- [x] `src/harness_lab/models/load_registry.py`, `models/discovery.py` -- emplacement `reranker` ; exclusion des fichiers du reranker.
+- [x] `src/harness_lab/rag/retriever.py`, `rag/corpus.py`, `content/rag.yaml`, `content/bricks/rag.yaml` -- `k` de recherche ; textes du reranking.
+- [x] `src/harness_lab/bricks/registry.py`, `trace/catalog.py`, `session/app_session.py`, `web/app.py`, `scenarios.py` -- composant, événements, carte, disponibilité, chargement, tour, téléchargement, route, scénario.
+- [x] `src/harness_lab/web/static/app.js`, `app.css` -- case et bouton sur la carte, étape du rail avant/après, schéma, journal.
 - [x] `content/scenarios.yaml` -- scénario `rag_rerank` dans le module « RAG ».
 - [x] `tests/fake_reranker.py`, `tests/test_rag_rerank.py` (nouveaux) -- une ligne de la matrice par test, plus pairage, sigmoïde, config, route, discovery, test `model` sur le vrai GGUF (sauté s'il est absent).
 - [x] `tools/e2e/` et `README.md` -- faux reranker au lanceur, fichier servi, scénario E2E `rag_rerank` (modèle absent, téléchargement, étape avant/après, contexte, schéma, désactivation), capture, documentation.
@@ -224,7 +224,7 @@ Ajoutées après la revue indépendante (2026-09-26) :
 - `uv lock --check --offline` -- expected: à jour.
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur.
 - `uv run python -m pytest -q` -- expected: tout passe, sans réseau.
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur.
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur.
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` -- expected: 0 échec.
 
 **Manual checks (if no CLI):**
@@ -238,12 +238,12 @@ Blocking condition: aucune.
 **Résumé.** Sous-option « Reranking » de la brique RAG : case sur la carte RAG (intention `rag_rerank`, classe a, « Prend effet au prochain tour »), modèle nommé dans la seule section `[rag.reranker]` (bge-reranker-v2-m3 Q4_K_M, verdict provisoire de la story 12), adaptateur llama.cpp en pooling RANK (paire `[BOS] q [EOS] [SEP] d [EOS]`, score lu par `llama_get_embeddings_seq`, sigmoïde), emplacement `reranker` du registre (refus chiffré), « Télécharger le modèle de reranking » (même code que l'embedding, cible `rag_reranker`). Activée et disponible : la recherche retient 8 candidats, l'étape « Reranking » (paire `rag_rerank_started/ended`) les note et trace l'ordre avant et après, et seuls les 3 premiers entrent dans le message. Modèle absent, budget refusé ou reranker en échec : la sous-option seule est indisponible, le RAG continue. Scénario `rag_rerank` dans le module « RAG » (45 min).
 
 **Fichiers.**
-- `wavestack.toml`, `src/wavestack/config.py` : `[rag] rerank_candidates`, `[rag.reranker]`, `RerankerModel`, `rag_reranker`, `rag_rerank_candidates`.
-- `src/wavestack/models/reranker.py` (nouveau) : port `Reranker`, `LlamaCppReranker`, `pair_tokens`, `sigmoid`, `open_reranker`.
-- `src/wavestack/models/load_registry.py`, `models/discovery.py` : emplacement `reranker` ; `models/reranker/` jamais proposé comme modèle de conversation.
-- `src/wavestack/rag/retriever.py`, `rag/corpus.py`, `content/rag.yaml`, `content/bricks/rag.yaml` : `k` de recherche, textes de la sous-option, explication de la brique.
-- `src/wavestack/bricks/registry.py`, `trace/catalog.py`, `session/app_session.py`, `web/app.py`, `scenarios.py` : composant `rag.reranker`, `RerankOption`, événements, disponibilité, chargement, tour, téléchargement, route, champ de scénario.
-- `src/wavestack/web/static/app.js`, `app.css` : case et bouton sur la carte, ligne « ↕️ Reranking » du rail (avant/après, gardés/écartés), puce du schéma, journal.
+- `harness-lab.toml`, `src/harness_lab/config.py` : `[rag] rerank_candidates`, `[rag.reranker]`, `RerankerModel`, `rag_reranker`, `rag_rerank_candidates`.
+- `src/harness_lab/models/reranker.py` (nouveau) : port `Reranker`, `LlamaCppReranker`, `pair_tokens`, `sigmoid`, `open_reranker`.
+- `src/harness_lab/models/load_registry.py`, `models/discovery.py` : emplacement `reranker` ; `models/reranker/` jamais proposé comme modèle de conversation.
+- `src/harness_lab/rag/retriever.py`, `rag/corpus.py`, `content/rag.yaml`, `content/bricks/rag.yaml` : `k` de recherche, textes de la sous-option, explication de la brique.
+- `src/harness_lab/bricks/registry.py`, `trace/catalog.py`, `session/app_session.py`, `web/app.py`, `scenarios.py` : composant `rag.reranker`, `RerankOption`, événements, disponibilité, chargement, tour, téléchargement, route, champ de scénario.
+- `src/harness_lab/web/static/app.js`, `app.css` : case et bouton sur la carte, ligne « ↕️ Reranking » du rail (avant/après, gardés/écartés), puce du schéma, journal.
 - `content/scenarios.yaml` : scénario `rag_rerank`.
 - `tests/fake_reranker.py`, `tests/test_rag_rerank.py` (nouveaux), `tests/test_scenarios.py` (16 scénarios).
 - `tools/e2e/` : faux reranker au lanceur, fichier servi, `rag_settings`, scénario `rag_rerank`, README, capture `25-reranking-avant-apres.jpg` ; `README.md` : section « Reranking ».
@@ -251,7 +251,7 @@ Blocking condition: aucune.
 **Revue.** 2 corrections (low), 3 reports (dont 1 medium non vérifiable ici), 2 rejets motivés (Review Triage Log). Relecture de suivi recommandée : non selon la règle (aucune correction medium ou high) ; une revue indépendante est prévue par l'appelant.
 
 **Vérifications.**
-- `uv lock --check --offline` : OK ; `uv run ruff check .`, `uv run ruff format --check .` : OK ; `node --check src/wavestack/web/static/app.js` : OK.
+- `uv lock --check --offline` : OK ; `uv run ruff check .`, `uv run ruff format --check .` : OK ; `node --check src/harness_lab/web/static/app.js` : OK.
 - `uv run python -m pytest -q` : 673 réussis, 4 sautés, 4 désélectionnés (`model`).
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` : 286 vérifications réussies, 0 échec (dont 19 pour `rag_rerank`).
 - Adaptateur exercé sur les GGUF synthétiques de la story 12 : chargement en RANK, drapeaux du vocabulaire, trois paires notées, texte long tronqué, GGUF d'embedding refusé en français.

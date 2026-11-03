@@ -49,12 +49,12 @@ context:
 
 ## Code Map
 
-- `src/wavestack/session/llm_lab.py` -- `TransfoStage` (l.~338) : `example_ids: list[int]`, validateur « même longueur qu'`example_tokens` » ; `InputStage` (l.~260) : `example_tag_text`, `example_text`, `example_cloud_text` ; `OutputStage` (l.~369) : `example: OutputExample` (nouveaux `ExampleCandidate {text, p}` et `OutputExample {tag_text, note_text, unsupported_text, candidates (6, décroissants), tail}`, somme + reste ≈ 1).
-- `src/wavestack/session/app_session.py` -- `llm_distribution` (l.~8854) : ajoute `"example": False` ; nouvelle `llm_example_distribution(sampling)` juste après : contenu via `_lab_content()`, `distribution(...)` et `dropped_by(...)` déjà importés ; `DistributionMissing` si contenu illisible.
-- `src/wavestack/web/app.py` -- `LlmExampleDistributionRequest {sampling}` après `LlmDistributionRequest` (l.~227) ; route `POST /api/llm_lab/example_distribution` après `/api/llm_lab/distribution` (l.~524), 404 sur `DistributionMissing`. Chemin distinct : les `page.route("**/api/llm_lab/distribution")` des E2E ne l'interceptent pas.
-- `src/wavestack/web/static/llm.html` -- tags `#input-tag`, `#output-tag` (sans `data-text`) ; `<p class="llm-note" id="token-example" hidden>` après `#token-bos`.
-- `src/wavestack/web/static/llm.js` -- `inputExample()` + `renderInput` (l.~294 : colonnes d'exemple `is-example`, badge, note, compteurs inchangés) ; `transfoModel` (l.~460) prend les `example_ids` ; `samplingRow` (l.~964) : champs compacts jamais `disabled`, raison + `unsupported_text` ; `renderDistributionIdle` (l.~1107) → demande l'exemple (`fetchExample`, même `ticket`, valeurs brutes des curseurs) ; `renderDistribution` (l.~1179) : mode exemple (badge, légende des Logits sur les tokens d'exemple, pas de `is-chosen` ni de puce marquée, `#distribution-empty` = `note_text` + raison ou `distribution.empty_text`) ; `autoStart()` appelée dans `main()` avant `streamEvents`, reprise dans `renderTokenized` (`store.auto`), `stepEvent` ne déplace pas l'étape OUTPUT pour le pas automatique ; `applyEnvelope` (`session_state` `llm_lab`) n'efface pas les barres pendant notre propre pas.
-- `src/wavestack/web/static/llm.css` -- `.llm-stage-tag.is-example` (comme `is-illustrative`), colonnes `is-example` en pointillés.
+- `src/harness_lab/session/llm_lab.py` -- `TransfoStage` (l.~338) : `example_ids: list[int]`, validateur « même longueur qu'`example_tokens` » ; `InputStage` (l.~260) : `example_tag_text`, `example_text`, `example_cloud_text` ; `OutputStage` (l.~369) : `example: OutputExample` (nouveaux `ExampleCandidate {text, p}` et `OutputExample {tag_text, note_text, unsupported_text, candidates (6, décroissants), tail}`, somme + reste ≈ 1).
+- `src/harness_lab/session/app_session.py` -- `llm_distribution` (l.~8854) : ajoute `"example": False` ; nouvelle `llm_example_distribution(sampling)` juste après : contenu via `_lab_content()`, `distribution(...)` et `dropped_by(...)` déjà importés ; `DistributionMissing` si contenu illisible.
+- `src/harness_lab/web/app.py` -- `LlmExampleDistributionRequest {sampling}` après `LlmDistributionRequest` (l.~227) ; route `POST /api/llm_lab/example_distribution` après `/api/llm_lab/distribution` (l.~524), 404 sur `DistributionMissing`. Chemin distinct : les `page.route("**/api/llm_lab/distribution")` des E2E ne l'interceptent pas.
+- `src/harness_lab/web/static/llm.html` -- tags `#input-tag`, `#output-tag` (sans `data-text`) ; `<p class="llm-note" id="token-example" hidden>` après `#token-bos`.
+- `src/harness_lab/web/static/llm.js` -- `inputExample()` + `renderInput` (l.~294 : colonnes d'exemple `is-example`, badge, note, compteurs inchangés) ; `transfoModel` (l.~460) prend les `example_ids` ; `samplingRow` (l.~964) : champs compacts jamais `disabled`, raison + `unsupported_text` ; `renderDistributionIdle` (l.~1107) → demande l'exemple (`fetchExample`, même `ticket`, valeurs brutes des curseurs) ; `renderDistribution` (l.~1179) : mode exemple (badge, légende des Logits sur les tokens d'exemple, pas de `is-chosen` ni de puce marquée, `#distribution-empty` = `note_text` + raison ou `distribution.empty_text`) ; `autoStart()` appelée dans `main()` avant `streamEvents`, reprise dans `renderTokenized` (`store.auto`), `stepEvent` ne déplace pas l'étape OUTPUT pour le pas automatique ; `applyEnvelope` (`session_state` `llm_lab`) n'efface pas les barres pendant notre propre pas.
+- `src/harness_lab/web/static/llm.css` -- `.llm-stage-tag.is-example` (comme `is-illustrative`), colonnes `is-example` en pointillés.
 - `content/llm_lab.yaml`, `content/i18n/{en,de}/llm_lab.yaml` -- clés ci-dessus.
 - `tests/test_llm_lab.py` -- tests en fin de fichier.
 - `tools/e2e/run_e2e.py` -- `_llm_loop_cloud` (l.~12749), `_llm_loop_output` (l.~12988, 13062), `_LoopLab.tokenize` (compte les appels), nouveau `_llm_loop_first_load` ; vérifications de l'ancien état vide à mettre à jour : `_llm_screen` (l.~11778, 11812), `_distribution_unavailable` (l.~12011), `_llm_live` (l.~12426).
@@ -63,9 +63,9 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/session/llm_lab.py` + les trois `llm_lab.yaml` -- modèles et textes d'exemple -- l'exemple vient du contenu.
-- [x] `src/wavestack/session/app_session.py`, `src/wavestack/web/app.py` -- `llm_example_distribution` et sa route -- AD-1.
-- [x] `src/wavestack/web/static/llm.html`, `llm.js`, `llm.css` -- exemple étiqueté, curseurs actifs, démarrage automatique.
+- [x] `src/harness_lab/session/llm_lab.py` + les trois `llm_lab.yaml` -- modèles et textes d'exemple -- l'exemple vient du contenu.
+- [x] `src/harness_lab/session/app_session.py`, `src/harness_lab/web/app.py` -- `llm_example_distribution` et sa route -- AD-1.
+- [x] `src/harness_lab/web/static/llm.html`, `llm.js`, `llm.css` -- exemple étiqueté, curseurs actifs, démarrage automatique.
 - [x] `tests/test_llm_lab.py` -- contenu valide (3 langues, ids alignés, 6 candidats), exemple = `distribution`/`dropped_by` pour plusieurs réglages, en cloud, sans modèle et hors `idle`, route 200/422, `example` faux sur `/distribution`.
 - [x] `tools/e2e/run_e2e.py` -- scénarios ci-dessus.
 - [x] `EXPERIENCE.md`, `notes-de-fusion.md` -- états « avant toute tokenisation », « serveur ou cloud », flux 2, fichiers carrefour.

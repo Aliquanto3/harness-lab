@@ -1,5 +1,5 @@
 # Modèles cloud (story 11, AD-19). Textes communs à tous les fournisseurs ; les mentions
-# propres à un fournisseur sont dans sa déclaration [[cloud.models]] (wavestack.toml).
+# propres à un fournisseur sont dans sa déclaration [[cloud.models]] (harness-lab.toml).
 # {fournisseur}, {hebergement}, {entrainement}, {essai} et {modele} sont remplacés.
 
 # Avertissement affiché au clic sur « Choisir », repris dans l'infobulle de l'indicateur.
@@ -40,7 +40,7 @@ uncertain_text: "Estimation incertaine : le fournisseur tranchera."
 # l'utilisateur. Deux appels au plus : le second renvoie la réponse fixe de l'outil.
 test:
   prompt: >-
-    Test de connexion WaveStack. Appelle l'outil get_datetime, puis réponds en une phrase
+    Test de connexion HarnessLab. Appelle l'outil get_datetime, puis réponds en une phrase
     courte avec la date obtenue.
   tool:
     name: get_datetime

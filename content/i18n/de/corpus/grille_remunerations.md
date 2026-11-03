@@ -1,6 +1,6 @@
 # Vergütungstabelle von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Tabelle beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Tabelle beschreibt kein reales Unternehmen. -->
 
 Dieses Dokument beschreibt die Vergütungsstruktur von Exemplia; es ist als vertraulich eingestuft, und der Zugang ist der Personalabteilung und der Geschäftsleitung vorbehalten.
 

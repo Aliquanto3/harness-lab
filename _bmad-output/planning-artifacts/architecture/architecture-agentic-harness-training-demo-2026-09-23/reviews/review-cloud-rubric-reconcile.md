@@ -25,7 +25,7 @@ Les numéros de ligne renvoient à l'arbre de travail non commité de `spec/clou
 | 5 | Haute | AD-4 l. 140-143, AD-5 l. 187-191 | Titres et Prevents d'AD-4 et d'AD-5 contredits par leur Rule ; signature du port `Engine` non étendue |
 | 6 | Haute | AD-9 l. 254 ; D7 | `max_window` borne un appel, pas un tour : avec 8 000 tokens/min, le 2e appel d'un tour avec outils déclenche presque sûrement un 429 |
 | 7 | Haute | AD-6 l. 218, AD-15 l. 386, AD-20 l. 455, AD-21 l. 472-474, conventions l. 540 | `[[cloud.models]]` sans schéma ; `model_id` non défini ; persistance du modèle cloud choisi non fixée |
-| 8 | Moyenne | Conventions l. 543, AD-15 l. 386 ; `config.py` l. 37-44 | Fusion `wavestack.toml`/`settings.json` : une liste dans `settings.json` remplace les préréglages ; `settings.json` écrit à la fois par la session et à la main |
+| 8 | Moyenne | Conventions l. 543, AD-15 l. 386 ; `config.py` l. 37-44 | Fusion `harness-lab.toml`/`settings.json` : une liste dans `settings.json` remplace les préréglages ; `settings.json` écrit à la fois par la session et à la main |
 | 9 | Moyenne | AD-15 l. 387-390, AD-2 l. 119 | Appel au modèle rangé parmi les sorties « hors brique, `turn_id = null` » ; `origin` de la `TraceScope` sans `model` |
 | 10 | Moyenne | AD-3 l. 129-133, AD-21 l. 472 | `set_api_key` et `test_cloud_model` hors des classes d'intentions ; comportement après démarrage ; confirmation de l'avertissement non située |
 | 11 | Moyenne | AD-21 l. 471-474, AD-7 l. 226 | Liste cloud imbriquée sous « échec bloquant » ; spine non aligné sur la story 1b ; « jamais chargé d'office » face au choix mémorisé |
@@ -182,9 +182,9 @@ CloudModel{id: str (snake_case, [a-z0-9_]+, unique), provider: str, provider_lab
 - Déclarer `api_keys.json` sous la forme `{key_ref: key}`.
 - Mémoriser le choix dans `selected_model = "cloud:{id}"`. Ajouter `cloud:{id}` à la table des identifiants.
 
-### 8. Fusion `wavestack.toml` / `settings.json` : les ajouts effacent les préréglages (Moyenne)
+### 8. Fusion `harness-lab.toml` / `settings.json` : les ajouts effacent les préréglages (Moyenne)
 
-**Emplacement.** Conventions, l. 543 (« Défauts dans `wavestack.toml`, surcharges dans `settings.json`, écrites par la session seule ») ; AD-15, l. 386 (« `settings.json` édité à la main ») ; D3 (proposition l. 79 : « ajouts dans `settings.json` »). Code : `src/wavestack/config.py` l. 37-44.
+**Emplacement.** Conventions, l. 543 (« Défauts dans `harness-lab.toml`, surcharges dans `settings.json`, écrites par la session seule ») ; AD-15, l. 386 (« `settings.json` édité à la main ») ; D3 (proposition l. 79 : « ajouts dans `settings.json` »). Code : `src/harness_lab/config.py` l. 37-44.
 
 **Problème.**
 - `_deep_merge` fusionne les dictionnaires mais **remplace** les listes. Une liste `cloud.models` ajoutée à `settings.json` pour un point d'accès interne fait disparaître Groq et Mistral, alors que D3 parle d'**ajout**.
@@ -192,7 +192,7 @@ CloudModel{id: str (snake_case, [a-z0-9_]+, unique), provider: str, provider_lab
 
 **Correctif.**
 - Conventions : « Les listes d'entrées identifiées (`cloud.models`) se fusionnent **par `id`** : une entrée de `settings.json` ajoute ou remplace l'entrée de même `id`, et `enabled = false` la masque. »
-- Préciser que `settings.json` peut être édité à la main quand WaveStack est arrêté, et que la session le réécrit par lecture-modification-écriture en conservant les clés inconnues, ce que fait déjà `save_setting`.
+- Préciser que `settings.json` peut être édité à la main quand HarnessLab est arrêté, et que la session le réécrit par lecture-modification-écriture en conservant les clés inconnues, ce que fait déjà `save_setting`.
 
 ### 9. Appel au modèle rangé parmi les sorties « hors brique, `turn_id = null` » (Moyenne)
 
@@ -299,7 +299,7 @@ CloudModel{id: str (snake_case, [a-z0-9_]+, unique), provider: str, provider_lab
 **Emplacement.** AD-19, l. 439 (« Tout contenu pédagogique est un fichier en français sous `content/` ») ; AD-1, l. 77 ; D15 (« la partie propre au fournisseur vient de sa déclaration ») ; EXPERIENCE l. 122, 146, 147.
 
 **Problème.**
-- L'infobulle et l'avertissement combinent un texte commun (`content/`) et des éléments propres au fournisseur. Si ces éléments sont des phrases en français dans `wavestack.toml`, AD-19 est contourné sans être amendé.
+- L'infobulle et l'avertissement combinent un texte commun (`content/`) et des éléments propres au fournisseur. Si ces éléments sont des phrases en français dans `harness-lab.toml`, AD-19 est contourné sans être amendé.
 - AD-1 exige que toute donnée affichée vienne d'un événement ou d'une lecture de l'API. Or le `model-indicator` (fournisseur, étiquette RÉSEAU, infobulle) n'a ni champ dans `/api/state` ni événement désigné.
 
 **Correctif.**
@@ -378,7 +378,7 @@ Le délai conseillé et la portée du quota (minute ou jour), qu'affiche la cart
 - **Carte, l. 680.** La ligne FR-43 omet AD-2 (événements), AD-3 (intentions), AD-8, AD-12 (schéma) et AD-16 (refus), pourtant amendés pour elle.
 - **AD-12, l. 315.** Seule l'arête `core.harness → core.model` est dite `crosses_boundary`. Celle vers `core.model_sub` doit l'être aussi.
 - **Companion.** `architecture-view.html` ne contient aucune mention de cloud ni d'`openai_chat` (0 occurrence). Il est listé dans `companions` et n'est plus à jour.
-- **Arborescence, l. 647 et 656.** Les commentaires de `wavestack.toml` (`[[cloud.models]]`) et de `models/` (adaptateur `openai_chat`, `api_keys`) ne sont pas mis à jour.
+- **Arborescence, l. 647 et 656.** Les commentaires de `harness-lab.toml` (`[[cloud.models]]`) et de `models/` (adaptateur `openai_chat`, `api_keys`) ne sont pas mis à jour.
 - **EXPERIENCE l. 157.** L'état « Aucun tour » place le nœud Modèle « dans la zone Poste de travail ». Avec un modèle cloud actif, il est en zone Réseau (EXPERIENCE l. 182, AD-12).
 - **AD-13 et AD-14.** Il faut écrire que H5 (validation avant sortie réseau) ne s'applique pas à l'appel au modèle : l'avertissement confirmé au choix en tient lieu. Sinon, un développeur de hooks posera la question, ou l'ajoutera.
 - **README (AD-21, l. 466).** La clé API et le test avant chaque séance (D12) ne figurent pas dans la liste de ce que documente le README.

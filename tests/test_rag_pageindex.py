@@ -14,9 +14,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from wavestack import config
-from wavestack.rag import pageindex
-from wavestack.rag.corpus import DocText, load_rag_content, read_documents
+from harness_lab import config
+from harness_lab.rag import pageindex
+from harness_lab.rag.corpus import DocText, load_rag_content, read_documents
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = [

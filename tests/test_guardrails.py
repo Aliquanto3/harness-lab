@@ -3,8 +3,8 @@ test downloads the gravitee ONNX model or Presidio's spaCy model (an optional de
 
 from __future__ import annotations
 
-from wavestack.guardrails.contract import Classification, Entity
-from wavestack.guardrails.manager import GuardrailsManager
+from harness_lab.guardrails.contract import Classification, Entity
+from harness_lab.guardrails.manager import GuardrailsManager
 
 
 class FakeClassifier:
@@ -142,7 +142,7 @@ def test_unload_idle_clears_instances_and_calls_unload() -> None:
 def test_french_patterns_match_their_examples_only() -> None:
     import re
 
-    from wavestack.guardrails.pii import _FR_PATTERNS
+    from harness_lab.guardrails.pii import _FR_PATTERNS
 
     patterns = {entity: re.compile(regex) for entity, regex, _, _ in _FR_PATTERNS}
     assert patterns["NIR_FR"].search("NIR 1 85 05 78 006 084 36")
@@ -155,7 +155,7 @@ def test_french_patterns_match_their_examples_only() -> None:
 
 
 def test_toxicity_scores_each_sentence() -> None:
-    from wavestack.guardrails.toxicity import _SENTENCES
+    from harness_lab.guardrails.toxicity import _SENTENCES
 
     text = "Le comité se réunit mardi. Franchement, t'es nul !\nMerci."
     parts = [s for s in _SENTENCES.split(text) if s.strip()]
@@ -168,7 +168,7 @@ def test_real_presidio_masks_the_guardrails_md_example() -> None:
 
     pytest.importorskip("presidio_analyzer")
     pytest.importorskip("fr_core_news_sm")
-    from wavestack.guardrails.pii import PiiGuardrail
+    from harness_lab.guardrails.pii import PiiGuardrail
 
     pii = PiiGuardrail()
     text = (

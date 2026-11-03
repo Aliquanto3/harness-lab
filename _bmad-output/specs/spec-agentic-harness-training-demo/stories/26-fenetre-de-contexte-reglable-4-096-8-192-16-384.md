@@ -47,7 +47,7 @@ deferred:
 
 ## Intent
 
-**Problem:** Recette du 2026-09-28 (M4). Avec les trois serveurs MCP en lazy loading, charger une documentation fait déborder la fenêtre de 4 096 tokens. La fenêtre ne se règle que dans `wavestack.toml` (`[context] window`), alors que le spine (AD-9) la dit « réglable dans l'interface ». Rien ne montre ce qu'une fenêtre plus grande coûte en mémoire et en temps de lecture sur un CPU. Décision du 2026-09-28 : 4 096 par défaut, 8 192 ou 16 384 au choix.
+**Problem:** Recette du 2026-09-28 (M4). Avec les trois serveurs MCP en lazy loading, charger une documentation fait déborder la fenêtre de 4 096 tokens. La fenêtre ne se règle que dans `harness-lab.toml` (`[context] window`), alors que le spine (AD-9) la dit « réglable dans l'interface ». Rien ne montre ce qu'une fenêtre plus grande coûte en mémoire et en temps de lecture sur un CPU. Décision du 2026-09-28 : 4 096 par défaut, 8 192 ou 16 384 au choix.
 
 **Approach:** Un réglage « Fenêtre » dans la barre haute ouvre un panneau avec les trois choix. Pour chacun, la session calcule le coût (AD-1) : mémoire du cache de contexte du modèle actif, temps de lecture d'une fenêtre pleine au débit mesuré, verdict du budget mémoire (AD-8) et borne native, serveur ou quota. Un nouvel événement porte ces chiffres. Une intention applique le choix :
 - modèle local ou servi : rechargement par le chemin unique `_load`, budget contrôlé avant toute libération, conversation gardée ;
@@ -65,7 +65,7 @@ Le choix est mémorisé dans `settings.json` et repris au lancement suivant.
 - Jamais deux modèles génératifs. La réserve de sortie garde sa règle (512 ou 1 536). La jauge, `usable`, l'aperçu et `context_overflow` suivent la fenêtre effective, déjà lue dans `self._window`.
 - Réutiliser les apports des stories 24 et 25 s'ils sont livrés : `MemoryBudget` et son `calc_fr()`, `served_bytes(…, window)`, `window_for(meta, configured)`, `catalog`. Sinon, leurs équivalents actuels : `effective_window` + `server_context`, `file_cost`.
 - Jetons de couleur seulement (story 33, `tests/test_web_tokens.py`).
-- Mettre à jour EXPERIENCE.md, DESIGN.md, SPEC.md, README, `wavestack.toml` (commentaire) et le spine (AD-2, AD-8, AD-9). Compléter le parcours E2E. `pytest` complet vert.
+- Mettre à jour EXPERIENCE.md, DESIGN.md, SPEC.md, README, `harness-lab.toml` (commentaire) et le spine (AD-2, AD-8, AD-9). Compléter le parcours E2E. `pytest` complet vert.
 
 **Never:**
 - D'autres valeurs que 4 096, 8 192 et 16 384 par l'interface : une valeur saisie à la main dans la configuration reste lue, mais n'est pas proposée.
@@ -98,14 +98,14 @@ Le choix est mémorisé dans `settings.json` et repris au lancement suivant.
 
 Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32, 24 et 25. On se repère aux symboles.
 
-- `src/wavestack/config.py`
+- `src/harness_lab/config.py`
   - `Config.context_window` : lit `[context] window`, 4 096 par défaut, déjà surchargé par `settings.json` par `_deep_merge` dans `load_config`.
   - `cloud_window(entry, configured) -> (window, source)` ; `OUTPUT_RESERVE`, `MAX_RESERVE`.
   - `save_setting`, `read_settings`. `settings.json` porte déjà `selected_model`.
-- `src/wavestack/context/window.py`
+- `src/harness_lab/context/window.py`
   - `effective_window` ; `gauge(…, window, reserve, window_source)` pour `context_rendered`, `context_preview` et `context_reconciled`.
   - La story 25 y ajoute `window_for(meta, configured)`.
-- `src/wavestack/session/app_session.py`
+- `src/harness_lab/session/app_session.py`
   - `__init__` : `self._window = self.cfg.context_window`, `self._window_source`, `LoadRegistry(...)`.
   - `_cost(choice)` : lit `self.cfg.context_window`. Serveur résident : `served_bytes` ; non résident : `file_cost` du blob, que la story 24 remplace. Fichier : `file_cost(ref, window)`.
   - `_checked` : serveur résident jamais refusé.
@@ -115,24 +115,24 @@ Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32,
   - `_install_cloud(entry)` : `cloud_window(entry, self.cfg.context_window)`.
   - `emit_initial` ; `_emit_preview`, qui tourne sur le worker ; `_emit_overflow`, qui cite la fenêtre et la réserve ; `_availability` (`reasoning` si `self._window <= MAX_RESERVE`) ; `_refusal_reason` ; `stop`, qui arme `_load_cancel` en `model_load`.
   - Émission locale de `model_call_ended`, dans la fonction interne `end()` de la génération. Elle a `prompt_ms` et `evaluated_tokens` : c'est là qu'on relève le débit de lecture. Le cloud passe par `models/openai_chat.py`, sans relevé.
-- `src/wavestack/models/load_registry.py`
+- `src/harness_lab/models/load_registry.py`
   - `file_cost(path, window)` : sonde (`rss_bytes`, `probe_window`, `kv_bytes_per_token`), KV au-delà de la fenêtre de sonde, marge.
   - `check`, `_without`, `_size`. La story 24 y ajoute le calcul du budget.
-- `src/wavestack/models/probe.py` -- `probed_entry(path)` (`kv_bytes_per_token`) ; `gguf_kv_bytes_per_token(path)`, lecteur Python pur de l'en-tête (blob Ollama, fichier jamais sondé).
-- `src/wavestack/models/servers.py`
+- `src/harness_lab/models/probe.py` -- `probed_entry(path)` (`kv_bytes_per_token`) ; `gguf_kv_bytes_per_token(path)`, lecteur Python pur de l'en-tête (blob Ollama, fichier jamais sondé).
+- `src/harness_lab/models/servers.py`
   - `OllamaEngine.use_window`, `num_ctx`.
   - `served_bytes`, `served_kv`, pour llama-server à son `n_ctx`. La story 24 ajoute `served_bytes(…, window)` pour Ollama.
   - `context_warning_fr(n_ctx, window, slot_ctx)`.
-- `src/wavestack/session/diagnostic.py` -- `_probe_candidate` sonde à `self.cfg.context_window`, la fenêtre du lancement. `discovery._server_candidates` calcule `warning_fr` de llama-server à cette même fenêtre. Ces deux points restent inchangés.
-- `src/wavestack/trace/catalog.py` -- `ContextWindowPayload` (`window_source`), `ContextOverflowPayload`, `PAYLOAD_MODELS`.
-- `src/wavestack/session/effects.py` -- `SettingWrite`, `apply_setting`, l'applicateur unique (AD-23).
-- `src/wavestack/web/app.py`
+- `src/harness_lab/session/diagnostic.py` -- `_probe_candidate` sonde à `self.cfg.context_window`, la fenêtre du lancement. `discovery._server_candidates` calcule `warning_fr` de llama-server à cette même fenêtre. Ces deux points restent inchangés.
+- `src/harness_lab/trace/catalog.py` -- `ContextWindowPayload` (`window_source`), `ContextOverflowPayload`, `PAYLOAD_MODELS`.
+- `src/harness_lab/session/effects.py` -- `SettingWrite`, `apply_setting`, l'applicateur unique (AD-23).
+- `src/harness_lab/web/app.py`
   - Modèles d'intention (`SelectModelIntention`…) ; `select_model`, modèle de route, avec 409 sur `SendRefused` ; `_diagnostic_class_b`.
   - `diagnostic_state`, où la story 25 construit `models` avec la fenêtre de chaque modèle.
-- `src/wavestack/web/static/index.html` -- `.top-bar` : `#gauge` puis `#pane-chips`, `.pane-menu` (menu déroulant à imiter), `#model-picker`.
-- `src/wavestack/web/static/app.js`
+- `src/harness_lab/web/static/index.html` -- `.top-bar` : `#gauge` puis `#pane-chips`, `.pane-menu` (menu déroulant à imiter), `#model-picker`.
+- `src/harness_lab/web/static/app.js`
   - `applyEnvelope` : `switch` sur `kind`, `isLive`, `store` ; `renderGauge` (`root.title` « Fenêtre de … ») ; `renderModelPicker`, modèle « noter puis appliquer » ; `postIntention` ; `closePaneMenu` et la touche Échap ; `fmt`, qui sépare les milliers par U+202F.
-- `src/wavestack/web/static/app.css` -- `.pane-menu`, `.pane-menu-list`, à imiter. Barre haute foncée de la story 33.
+- `src/harness_lab/web/static/app.css` -- `.pane-menu`, `.pane-menu-list`, à imiter. Barre haute foncée de la story 33.
 - `tools/e2e/run_e2e.py`
   - `s_model_switch`, `s_local_server` : bascule vers le faux llama-server (`N_CTX = 8192`, `n_ctx_train` 32 768), retour au faux cloud A (`context` 32 768).
   - `SCENARIOS`, `Run.check`, `Run.shot`, `r.stack.data_dir`.
@@ -141,16 +141,16 @@ Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32,
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/config.py` -- `WINDOW_CHOICES = (4096, 8192, 16384)` et `DEFAULT_WINDOW = 4096`. `Config.context_window` inchangé : un réglage enregistré arrive par `settings.json`, sous la clé `context.window`. -- Une seule liste, lue par l'intention et par le panneau.
-- `src/wavestack/models/load_registry.py` -- `check_window(label, window, current, cost) -> str | None`. Même `_without` et même budget que `check`. Texte : « Fenêtre de {window} tokens refusée : {label} demanderait environ {coût} ; WaveStack occupe {base} sans le modèle actif, pour un budget de {budget} ({calcul, story 24}). {label} reste actif avec {current} tokens. Choisissez une fenêtre plus petite. » -- Le refus chiffré d'AD-8, propre à la fenêtre.
-- `src/wavestack/context/window.py` -- Fonctions pures, testables :
+- `src/harness_lab/config.py` -- `WINDOW_CHOICES = (4096, 8192, 16384)` et `DEFAULT_WINDOW = 4096`. `Config.context_window` inchangé : un réglage enregistré arrive par `settings.json`, sous la clé `context.window`. -- Une seule liste, lue par l'intention et par le panneau.
+- `src/harness_lab/models/load_registry.py` -- `check_window(label, window, current, cost) -> str | None`. Même `_without` et même budget que `check`. Texte : « Fenêtre de {window} tokens refusée : {label} demanderait environ {coût} ; HarnessLab occupe {base} sans le modèle actif, pour un budget de {budget} ({calcul, story 24}). {label} reste actif avec {current} tokens. Choisissez une fenêtre plus petite. » -- Le refus chiffré d'AD-8, propre à la fenêtre.
+- `src/harness_lab/context/window.py` -- Fonctions pures, testables :
   - `bound_fr(source, window, provider)` : textes par source. `native` : « bornée à N par le contexte natif du modèle ». `server` : « … par llama-server (-c) ». `tpm` : « … par le quota du fournisseur ». `override` : « fixée à N par la déclaration du modèle ».
   - `read_time_fr(window, tps)` : « au moins ≈ 45 s », « ≈ 1 min 40 s » ; au-delà de 30 s, ajouter « , au-delà des 30 s visées au premier token (NFR-1) ».
   - `kv_fr(bytes)`, au format `_size`.
-- `src/wavestack/trace/catalog.py` -- Deux modèles pydantic, `WindowChoicePayload` et `ContextWindowStatePayload`, puis `"context_window_state"` dans `PAYLOAD_MODELS`. -- AD-2 : l'événement qui porte la fenêtre.
+- `src/harness_lab/trace/catalog.py` -- Deux modèles pydantic, `WindowChoicePayload` et `ContextWindowStatePayload`, puis `"context_window_state"` dans `PAYLOAD_MODELS`. -- AD-2 : l'événement qui porte la fenêtre.
   - `WindowChoicePayload` : `window`, `effective`, `source`, `bound_fr | None`, `kv_bytes | None`, `kv_fr`, `read_s | None`, `read_fr`, `fits`, `refusal_fr | None`, `current`.
   - `ContextWindowStatePayload` : `configured`, `default`, `window`, `window_source`, `model_label | None`, `hosting` (`file|server|cloud|None`), `read_tps | None`, `read_note_fr`, `locked_fr | None`, `choices`.
-- `src/wavestack/session/app_session.py` --
+- `src/harness_lab/session/app_session.py` --
   - `self._configured_window` part de `cfg.context_window`, avec une propriété publique `configured_window`. Tout lecteur de `self.cfg.context_window` passe par elle : `_cost`, `_install`, `_install_cloud`.
   - `_cost(choice, window=None, *, reload=False)` : sans `reload`, le comportement actuel est inchangé. Avec `reload` (changement de fenêtre) :
     - un Ollama résident coûte comme un non résident à `window` ;
@@ -169,11 +169,11 @@ Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32,
   - `_save_window(n)` : `apply_setting(SettingWrite(key="context", value={**read_settings().get("context", {}), "window": n}))`. Un échec d'écriture est signalé comme dans `_save_choice`.
   - Débit : `end()`, hors cloud, relève `evaluated_tokens` (sinon `prompt_tokens`) / `prompt_ms` quand ≥ 64 tokens évalués et `prompt_ms` > 0, rangé dans `self._read_tps[model_label]`.
   - `_emit_window_state()` : construit les trois choix avec `window_for` (ou `effective_window` + `server_context`) et `cloud_window`, le KV et le débit, et le verdict par `check_window`. Appelée par `emit_initial`, dans le `finally` de `_load`, après un changement cloud et après `turn_ended`.
-- `src/wavestack/web/app.py` -- Intention et route :
+- `src/harness_lab/web/app.py` -- Intention et route :
   - `ContextWindowIntention(window: Literal[4096, 8192, 16384])` ;
   - `POST /api/intentions/context_window` : `_diagnostic_class_b()`, puis `app_session.set_context_window`, avec 409 sur `SendRefused` ; réponse `{switching, message_fr}`.
   - Si `diagnostic_state` construit la colonne Fenêtre (story 25), lui passer `app_session.configured_window` au lieu de `cfg.context_window`.
-- `src/wavestack/web/static/index.html`, `app.css`, `app.js` -- `window-picker` :
+- `src/harness_lab/web/static/index.html`, `app.css`, `app.js` -- `window-picker` :
   - Après `#gauge`, un bouton `#window-toggle` « Fenêtre {effective} ▾ », avec `aria-haspopup="dialog"` et `aria-expanded`. Son infobulle donne la borne s'il y en a une.
   - Le panneau `#window-panel`, `role="dialog"`, fermé par Échap, « Fermer » ou un clic dehors. Il contient :
     - le titre « Fenêtre de contexte » ;
@@ -195,16 +195,16 @@ Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32,
   - (c) sur le faux llama-server, 16 384 noté : « bornée à 8 192 par llama-server » visible avant d'appliquer ;
   - (d) retour au faux cloud A et à 4 096, pour que `relaunch` reste inchangé.
   Capture `fenetre-contexte-reglage`, numérotée à la suite, ajoutée au README des captures.
-- `EXPERIENCE.md`, `DESIGN.md`, `SPEC.md`, `README.md`, `wavestack.toml`, `ARCHITECTURE-SPINE.md` --
+- `EXPERIENCE.md`, `DESIGN.md`, `SPEC.md`, `README.md`, `harness-lab.toml`, `ARCHITECTURE-SPINE.md` --
   - EXPERIENCE : ligne `window-picker` ; barre haute (ligne 32 et schéma ASCII) ; `context-gauge`.
   - DESIGN : composant `window-picker`, fait de jetons existants.
   - SPEC : CAP-33, fenêtre réglable et coût affiché.
   - README : « Fenêtre de contexte » ; `-c` de llama-server égal à la fenêtre choisie.
-  - `wavestack.toml` : commentaire de `[context] window`.
+  - `harness-lab.toml` : commentaire de `[context] window`.
   - Spine : AD-2 (`context_window_state`), AD-8 (contrôle avant rechargement pour la fenêtre, Ollama recompté à la nouvelle fenêtre), AD-9 (choix, mémorisation, bornes, débit mesuré).
 
 **Acceptance Criteria:**
-- Given WaveStack lancé sans réglage, when on ouvre le panneau « Fenêtre », then 4 096 est « (actuelle) » et chaque choix montre son cache de contexte, son temps de lecture ou « pas encore mesuré », et son verdict.
+- Given HarnessLab lancé sans réglage, when on ouvre le panneau « Fenêtre », then 4 096 est « (actuelle) » et chaque choix montre son cache de contexte, son temps de lecture ou « pas encore mesuré », et son verdict.
 - Given un modèle local actif et un choix qui tient, when on clique « Appliquer », then le modèle est rechargé avec la nouvelle fenêtre, la conversation reste, la jauge montre la nouvelle fenêtre, et le choix est repris au lancement suivant (`Config.context_window`).
 - Given un choix qui dépasse le budget, when on l'applique, then le refus chiffré s'affiche, et le modèle actif reste chargé à l'ancienne fenêtre, sans écriture.
 - Given la pile E2E, when le parcours joue `s_context_window`, then les vérifications (a) à (d) passent, sans FAIL ailleurs.
@@ -223,7 +223,7 @@ Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32,
   - `[low]` `[patch]` (blind) choix refusé encore sélectionnable, contraire à AD-9 — désactivé et relié à sa raison.
   - `[low]` `[patch]` (blind) « 4 096 » écrit en dur dans l'aide — lu dans l'événement.
   - `[low]` `[patch]` (blind + edge) double clic sur « Appliquer » — requête gardée.
-  - `[low]` `[patch]` (blind) réglage de l'interface qui masque `wavestack.toml`, commentaire faux, valeur hors liste inexpliquée — source affichée, commentaire corrigé.
+  - `[low]` `[patch]` (blind) réglage de l'interface qui masque `harness-lab.toml`, commentaire faux, valeur hors liste inexpliquée — source affichée, commentaire corrigé.
   - `[low]` `[defer]` (blind) formateur des milliers en trois exemplaires — mise en commun avec les aides de la story 25.
   - `[low]` `[patch]` (blind + vérif. ×4) comportements documentés sans test (Réinitialiser, verrou cloud, exemption llama-server, coût Ollama hors rechargement, fenêtre des lignes locales, `window` de `model_load_started`) — tests ajoutés.
   - `[low]` `[patch]` (blind) restes CSS — nettoyés.
@@ -246,7 +246,7 @@ Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32,
 
 ## Design Notes
 
-- Mémoriser sous `context.window` dans `settings.json` : `load_config` fusionne déjà `settings.json` sur `wavestack.toml`. Au relancement, la sonde, la découverte et l'avertissement `-c` de llama-server suivent donc la fenêtre choisie, sans nouveau lecteur. En cours de session, seule l'application fait foi, par `configured_window`.
+- Mémoriser sous `context.window` dans `settings.json` : `load_config` fusionne déjà `settings.json` sur `harness-lab.toml`. Au relancement, la sonde, la découverte et l'avertissement `-c` de llama-server suivent donc la fenêtre choisie, sans nouveau lecteur. En cours de session, seule l'application fait foi, par `configured_window`.
 - Le coût d'un choix est un coût total, poids compris, comme pour un changement de modèle : `check_window` compare `base + coût(fenêtre) ≤ budget`, le modèle actif étant retiré par `_without`. Le cache affiché, lui, est le KV complet à la fenêtre effective, soit `kv_bytes_per_token × effective`, calculé en f16 : c'est une borne haute.
 - Le débit de lecture est mesuré sur un appel qui a évalué au moins 64 tokens, pour ne pas mesurer un succès du cache (lot A). Le temps affiché est une borne basse, car le débit baisse quand le contexte s'allonge.
 - Exemple de choix : `{window: 16384, effective: 8192, source: "server", bound_fr: "bornée à 8 192 par llama-server (-c)", kv_fr: "Cache de contexte : réservé par llama-server (-c 8 192), inchangé", read_fr: "au moins ≈ 55 s, au-delà des 30 s visées au premier token (NFR-1)", fits: true}`.
@@ -257,13 +257,13 @@ Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32,
 - `uv run ruff check .` -- expected: aucun problème
 - `uv run ruff format --check .` -- expected: aucun fichier à reformater
 - `uv run pytest -q` -- expected: tout vert, test fits compris, toujours à 4 096
-- `node --check src/wavestack/web/static/app.js` -- expected: pas d'erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: pas d'erreur
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` -- expected: aucun FAIL ; captures de `tools/e2e/screenshots` mises à jour et commitées
 
 ## Décisions prises par défaut
 
 - **Emplacement du réglage.** Il va dans la barre haute, par un bouton et un panneau déroulant, sur le modèle de « Volets ▾ ». Le panneau reste visible pendant la démo et n'est pas modal (EXPERIENCE : seuls les tiroirs et les listes se superposent). Le diagnostic reste une page du lancement.
-- **Mémorisation.** Le choix est rangé sous `context.window` dans `settings.json`, et non sous une clé de premier niveau. Il est ainsi relu sans nouveau code et reste visible comme une surcharge de `wavestack.toml` (AD-20).
+- **Mémorisation.** Le choix est rangé sous `context.window` dans `settings.json`, et non sous une clé de premier niveau. Il est ainsi relu sans nouveau code et reste visible comme une surcharge de `harness-lab.toml` (AD-20).
 - **Modèle cloud.** Pas de rechargement, et « Appliquer » désactivé quand `window` est déclaré : c'est ce que dit déjà AD-9.
 - **Chemin de rechargement.** Local et servi rechargent par `_load` (`previous` = le même modèle) : un seul chemin, avec retour arrière et « Arrêter » gratuits. Pour llama-server, aucun contrôle du budget : sa mémoire est fixée par son `-c`.
 - **Ollama.** Quand la fenêtre change, il est recompté comme non résident, parce qu'il recharge le modèle à un nouveau `num_ctx`. C'est la borne sûre.
@@ -277,12 +277,12 @@ Numéros de ligne omis : `app_session.py` bouge avec les stories 33, 23, 34, 32,
 ## À vérifier sur PC
 
 - **Geste** : Edge, Outlook et Teams fermés. Qwen3.5-2B actif, envoyer « Bonjour », ouvrir « Fenêtre ▾ » et lire les trois choix. — **Attendu** : cache, temps de lecture et verdict pour 4 096, 8 192 et 16 384. — **Critère** : le cache du 2B égale `kv_bytes_per_token × fenêtre`, à comparer à l'entrée `probed_models` de `settings.json`. Le débit affiché est à ±20 % de `evaluated_tokens / prompt_ms` du dernier `model_call_ended`, lu dans le journal. — **Moyen** : script AppSession et Claude in Chrome.
-- **Geste** : choisir 8 192, cliquer « Appliquer ». — **Attendu** : rechargement, conversation gardée, jauge à 8 192. — **Critère** : rechargement en 30 s au plus ; RSS de WaveStack après rechargement à ±30 % du coût annoncé ; `settings.json` contient `"context": {"window": 8192}`. — **Moyen** : script AppSession et PowerShell (`Get-Process`).
+- **Geste** : choisir 8 192, cliquer « Appliquer ». — **Attendu** : rechargement, conversation gardée, jauge à 8 192. — **Critère** : rechargement en 30 s au plus ; RSS de HarnessLab après rechargement à ±30 % du coût annoncé ; `settings.json` contient `"context": {"window": 8192}`. — **Moyen** : script AppSession et PowerShell (`Get-Process`).
 - **Geste** : 2B à 16 384, remplir le contexte (MCP complet, trois serveurs), puis envoyer. — **Attendu** : pas de débordement là où 4 096 débordait (M4). — **Critère** : premier token mesuré face au temps annoncé ; noter s'il dépasse 30 s (NFR-1). — **Moyen** : script AppSession, puis Claude in Chrome pour la jauge.
 - **Geste** : 4B actif, choisir 16 384. — **Attendu** : refus chiffré si le budget ne suffit pas. — **Critère** : texte « Fenêtre de 16 384 tokens refusée » avec budget et calcul ; le 4B reste actif à la fenêtre précédente. — **Moyen** : Claude in Chrome.
 - **Geste** : Ollama avec `llama3.2:3b` choisi, passer à 8 192 puis envoyer un message ; relever `ollama ps`. — **Attendu** : Ollama recharge le modèle avec `num_ctx` 8192. — **Critère** : la taille de `ollama ps` augmente d'environ le KV annoncé (±30 %). — **Moyen** : PowerShell et script AppSession.
 - **Geste** : llama-server lancé avec `-c 4096`, puis choisir 8 192. — **Attendu** : « bornée à 4 096 par llama-server (-c) ». — **Critère** : la jauge reste à 4 096, `window_source=server`. — **Moyen** : Claude in Chrome.
-- **Geste** : relancer WaveStack après avoir choisi 8 192. — **Attendu** : 8 192 repris ; le diagnostic conseille `-c 8192` pour llama-server. — **Critère** : bouton « Fenêtre 8 192 » au premier affichage. — **Moyen** : Playwright ou à la main.
+- **Geste** : relancer HarnessLab après avoir choisi 8 192. — **Attendu** : 8 192 repris ; le diagnostic conseille `-c 8192` pour llama-server. — **Critère** : bouton « Fenêtre 8 192 » au premier affichage. — **Moyen** : Playwright ou à la main.
 - **Geste** : lire le panneau vidéoprojeté, sous Chrome et Edge, à 125 % et à 150 %. — **Attendu** : barre haute sur une ligne, panneau lisible et non coupé. — **Critère** : aucune commande de la barre haute sur deux lignes à 1280×650. — **Moyen** : à la main seulement.
 
 ## Auto Run Result
@@ -291,7 +291,7 @@ Statut : done (2026-09-29, orchestrateur de nuit ; étapes 1 à 4 menées par l'
 
 **Changement :** bouton « Fenêtre N ▾ » dans la barre haute et panneau non modal à trois choix (4 096 par défaut, 8 192, 16 384). Chaque choix affiche, calculés par la session : cache de contexte du modèle actif, temps de lecture d'une fenêtre pleine au débit mesuré (note NFR-1 au-delà de 30 s), borne du modèle (contexte natif, `-c` de llama-server, déclaration cloud) et verdict du budget mémoire. Nouvel événement `context_window_state`, nouvelle intention `POST /api/intentions/context_window` (200, 409, 422). Un modèle local ou servi est rechargé par `_load` (budget contrôlé avant libération, conversation gardée, ancienne fenêtre rétablie en cas d'échec ou d'arrêt) ; un choix sans effet est enregistré sans rechargement ; un modèle cloud est borné. Même règle de coût pour le contrôle et la réservation. Choix mémorisé dans `settings.json` (`context.window`), valeurs invalides ramenées au défaut. Les scénarios restent conçus pour 4 096 (test `fits` inchangé).
 
-**Fichiers :** `config.py`, `models/load_registry.py`, `context/window.py`, `trace/catalog.py`, `session/app_session.py`, `models/catalog.py`, `web/app.py`, `web/static/{app.js,app.css,index.html}`, `tests/test_context_window_setting.py` (nouveau) et tests associés, `tools/e2e/{run_e2e.py,launch_app.py,fake_local_server.py,README.md}`, EXPERIENCE.md, DESIGN.md, SPEC.md (CAP-33), README, wavestack.toml, ARCHITECTURE-SPINE.md (AD-2, AD-8, AD-9, AD-20), capture 45.
+**Fichiers :** `config.py`, `models/load_registry.py`, `context/window.py`, `trace/catalog.py`, `session/app_session.py`, `models/catalog.py`, `web/app.py`, `web/static/{app.js,app.css,index.html}`, `tests/test_context_window_setting.py` (nouveau) et tests associés, `tools/e2e/{run_e2e.py,launch_app.py,fake_local_server.py,README.md}`, EXPERIENCE.md, DESIGN.md, SPEC.md (CAP-33), README, harness-lab.toml, ARCHITECTURE-SPINE.md (AD-2, AD-8, AD-9, AD-20), capture 45.
 
 **Revue :** 27 constats — 16 corrigés (4 medium, 12 low), 5 différés, 6 regroupés ; aucun rejet ; voir le triage. Décision prise à la correction : une fenêtre configurée ≤ 512 (et non ≤ 1 536) retombe sur le défaut, pour garder les tests existants à petites fenêtres. Revue de suivi recommandée : false.
 

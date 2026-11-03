@@ -19,17 +19,17 @@ import pytest
 from pydantic import SecretStr
 from test_cloud import SENTINEL, _journal_text, _no_sentinel, _of, _turn
 
-from wavestack import config
-from wavestack.cloud import chat_fields
-from wavestack.context import render as render_module
-from wavestack.context.render import render_chat_body
-from wavestack.context.segments import Part, SegmentKind
-from wavestack.models.cloud_api import create_cloud_engine
-from wavestack.models.cloud_base import ChatBody, ProviderError, reset_spend, run_call
-from wavestack.models.engine import DEFAULT_SAMPLING, CancelToken
-from wavestack.models.openai_responses import OpenAIResponsesEngine
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.cloud import chat_fields
+from harness_lab.context import render as render_module
+from harness_lab.context.render import render_chat_body
+from harness_lab.context.segments import Part, SegmentKind
+from harness_lab.models.cloud_api import create_cloud_engine
+from harness_lab.models.cloud_base import ChatBody, ProviderError, reset_spend, run_call
+from harness_lab.models.engine import DEFAULT_SAMPLING, CancelToken
+from harness_lab.models.openai_responses import OpenAIResponsesEngine
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 # An encrypted reasoning holding the key's last 4 characters: verbatim in the body sent,
 # masked in the events that do not trace the bytes sent (AD-15).
@@ -823,7 +823,7 @@ def test_a_reasoning_item_without_encrypted_content_nor_content_is_not_sent_back
 
 
 def test_the_commented_mistral_responses_example_validates_as_a_cloud_model():
-    text = (Path(config.__file__).resolve().parents[2] / "wavestack.toml").read_text("utf-8")
+    text = (Path(config.__file__).resolve().parents[2] / "harness-lab.toml").read_text("utf-8")
     block = text[text.index('# {"id": "mistral_responses"') :].split("\n\n")[0]
     raw = "\n".join(line[2:] if line.startswith("# ") else line[1:] for line in block.splitlines())
     entry = config.CloudModel.model_validate(json.loads(raw))
@@ -1145,7 +1145,7 @@ def test_the_llm_lab_sends_sampling_only_with_the_reasoning_off():
 
 def test_the_diagnostic_test_runs_through_the_responses_api():
     """« Tester » (CAP-3): the fixed tool call, then its output, in the Responses shapes."""
-    from wavestack.session.diagnostic import DiagnosticSession
+    from harness_lab.session.diagnostic import DiagnosticSession
 
     cfg = config.load_config()
     entry = _entry()

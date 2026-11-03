@@ -1,7 +1,7 @@
 # V1.2 story 20 (CAP-18): die zusammengestellte Kette der RAG-Werkstatt als MCP-Server, nur lesend.
 # Dieselben Schlüssel und Variablen wie `content/rag_mcp.yaml`.
 server:
-  instructions_text: "Demonstrationsserver von WaveStack: Er durchsucht das fiktive Exemplia-Korpus mit der in der Werkstatt zusammengestellten RAG-Architektur und liefert zitierte Passagen. Er schreibt nichts: Sie verfassen die Antwort aus den Passagen und zitieren sie."
+  instructions_text: "Demonstrationsserver von HarnessLab: Er durchsucht das fiktive Exemplia-Korpus mit der in der Werkstatt zusammengestellten RAG-Architektur und liefert zitierte Passagen. Er schreibt nichts: Sie verfassen die Antwort aus den Passagen und zitieren sie."
 tools:
   search_documents:
     description_text: "Sucht im fiktiven Exemplia-Korpus (ein erfundenes Unternehmen) die Passagen, die einer Frage am nächsten sind, mit der freigegebenen RAG-Architektur. Liefert höchstens top_k gereihte Passagen, jede mit Dokument, Titel, Position, Score und Zitat. Nur lesend; der Personalabteilung vorbehaltene Dokumente werden nie geliefert."
@@ -19,7 +19,7 @@ describe:
   composed_label_text: "Zusammengestellte Kette"
   stage_text: "{stage}: {option}"
   header_text: "Freigegebene Architektur: {architecture}."
-  corpus_text: "Korpus: die mit WaveStack ausgelieferten fiktiven Dokumente von Exemplia, nie die Arbeitskopie der Werkstatt."
+  corpus_text: "Korpus: die mit HarnessLab ausgelieferten fiktiven Dokumente von Exemplia, nie die Arbeitskopie der Werkstatt."
   hr_text: "Zugriffsprofil „alle“: Die Passagen der Personalabteilung vorbehaltener Dokumente werden vor der Antwort entfernt, ihre Anzahl wird genannt."
   frozen_text: "Die Kette wird beim Start des Servers eingefroren: Eine Änderung in der Werkstatt zählt erst nach einem Stopp und einem Start."
   not_run_text: "Der Server führt die Aufteilung, das Embedding, den Index und die Suche aus; weder der Kontext noch die Generierung laufen für Sie."

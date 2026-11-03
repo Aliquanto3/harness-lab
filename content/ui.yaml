@@ -1,5 +1,5 @@
 # Textes de l'interface (langues 2/5, AD-19) : servis par GET /api/ui_texts, lus par t() de
-# src/wavestack/web/static/i18n.js. Le français est ici ; l'anglais et l'allemand sont sous
+# src/harness_lab/web/static/i18n.js. Le français est ici ; l'anglais et l'allemand sont sous
 # content/i18n/{en,de}/ui.yaml, avec les mêmes clés et les mêmes variables.
 # - Clés en anglais, snake_case, hiérarchiques : main.top_bar.reset.
 # - Variables {name} ; un nombre passé en variable est formaté dans la langue.
@@ -14,7 +14,7 @@ common:
     name: "Langue"
     help: "Langue de l'interface, des briques et des scénarios, des ateliers et des pages annexes, de ce qui part vers le modèle (prompt système, outils, fichiers de démonstration, skills, hooks, mémoire, glossaire, RAG et son corpus) et des noms d'outils, de hooks, de skills et de serveurs MCP."
     locked: "Videz d'abord la conversation (« Vider la conversation » ou « Réinitialiser ») : la langue ne se change que sur une conversation vide."
-    failed: "WaveStack ne répond pas : la langue n'a pas changé."
+    failed: "HarnessLab ne répond pas : la langue n'a pas changé."
     refused: "Changement de langue refusé."
   format:
     usd: "{amount} $"
@@ -22,13 +22,13 @@ common:
     quote: "« {text} »"
     label_value: "{label} : {value}"
   unavailable_outside_turn: "Disponible hors d'un tour."
-  busy: "WaveStack est occupé."
+  busy: "HarnessLab est occupé."
   action_refused: "Action refusée."
   in_progress: "En cours…"
   cancel: "Annuler"
   save: "Enregistrer"
   close: "Fermer"
-  unreachable: "WaveStack ne répond pas : rechargez la page."
+  unreachable: "HarnessLab ne répond pas : rechargez la page."
   refused_http: "Refusé (HTTP {status})."
   count:
     token:
@@ -71,7 +71,7 @@ common:
       one: "{count} outil"
       other: "{count} outils"
   links:
-    pages: "Pages de WaveStack"
+    pages: "Pages de HarnessLab"
     home: "Harnais"
     diagnostic: "🛠️ Modèles"
     llm: "LLM"
@@ -199,7 +199,7 @@ common:
 
 main:
   # Lot 1 of 2026-10-04 (D2): the full title, in <title> and the visually hidden h1.
-  page_title: "WaveStack — Atelier Harnais"
+  page_title: "HarnessLab — Atelier Harnais"
   title: "Atelier Harnais"
   pane_titles:
     bricks: "Panneau des briques"
@@ -218,9 +218,9 @@ main:
     local: "Local"
   request_failed: "La demande n'a pas abouti : {error}. Réessayez."
   top_bar:
-    reset_done: "WaveStack réinitialisé : LLM nu."
+    reset_done: "HarnessLab réinitialisé : LLM nu."
     reset_title: "Retour au LLM nu, conversation vide."
-    reset_no_answer: "WaveStack ne répond pas : rien n'a été réinitialisé."
+    reset_no_answer: "HarnessLab ne répond pas : rien n'a été réinitialisé."
     connection_lost: "Connexion au serveur perdue, nouvel essai…"
     scenario: "Scénario"
     reset: "Réinitialiser"
@@ -265,7 +265,7 @@ main:
     notice_cause: "Cause : {cause}."
     stop_download: "Arrêter le téléchargement"
     stop_build: "Arrêter la construction"
-    no_answer_nothing_started: "WaveStack ne répond pas : rien n'a commencé."
+    no_answer_nothing_started: "HarnessLab ne répond pas : rien n'a commencé."
     option_nouns:
       tools: "Outils"
       mcp: "Serveurs"
@@ -279,7 +279,7 @@ main:
     unsaved: "Modification non enregistrée. Enregistrer ou abandonner ?"
     default_restored: "Prompt par défaut rétabli."
     saved: "Prompt système enregistré."
-    save_no_answer: "Enregistrement refusé : WaveStack ne répond pas. Réessayez."
+    save_no_answer: "Enregistrement refusé : HarnessLab ne répond pas. Réessayez."
     title: "Prompt système"
     help: "Placé avant la conversation, relu par le modèle à chaque appel. Prend effet au prochain tour."
     text_label: "Texte du prompt système"
@@ -304,7 +304,7 @@ main:
     delete: "Supprimer"
     entry_delete: "Supprimer l'entrée {n}"
     edit_refused: "Modification refusée."
-    edit_no_answer: "WaveStack ne répond pas : la mémoire n'a pas été modifiée."
+    edit_no_answer: "HarnessLab ne répond pas : la mémoire n'a pas été modifiée."
     close: "Fermer la mémoire globale"
     help: "Placée dans le message système au début de chaque conversation. Une entrée écrite ou ajoutée n'y entre qu'à la prochaine conversation (après « Vider la conversation » ou un changement de scénario) ; une suppression ou une modification s'applique aussitôt."
     list_label: "Entrées de la mémoire globale"
@@ -316,15 +316,15 @@ main:
     subagent_phase: "Sous-agent · {label}"
     no_turn: "Aucun tour pour l'instant. Envoyez un message : le contexte envoyé au modèle apparaîtra ici."
     cleared: "Conversation vidée : le prochain message repart sans historique. Les tours précédents restent dans le journal des événements (replié, en bas d'Orchestration)."
-    clear_no_answer: "WaveStack ne répond pas : la conversation n'a pas été vidée."
+    clear_no_answer: "HarnessLab ne répond pas : la conversation n'a pas été vidée."
     replay_refused: "Rejeu refusé."
-    replay_no_answer: "WaveStack ne répond pas : le rejeu n'a pas eu lieu."
+    replay_no_answer: "HarnessLab ne répond pas : le rejeu n'a pas eu lieu."
     note:
       overflow: "Contexte dépassé : le modèle n'a pas été appelé."
       cut_reasoning: "Sortie coupée pendant le raisonnement : la limite de {tokens} tokens a été atteinte avant toute réponse. Le raisonnement reçu reste visible dans Contexte LLM."
       cut: "Sortie coupée : la réponse a atteint la limite de {tokens} tokens. Le texte reçu est conservé."
       cancelled: "Arrêté à votre demande : le texte déjà reçu est conservé."
-      error: "Erreur : {errors} WaveStack reste utilisable."
+      error: "Erreur : {errors} HarnessLab reste utilisable."
       interrupted: "le tour s'est interrompu."
     model_line: "Modèle : {model}"
     replay_badge: "Rejeu"
@@ -345,7 +345,7 @@ main:
     clear: "Vider la conversation"
     clear_cache: "Vider le cache"
     clear_cache_cloud: "Le cache d'un fournisseur cloud ne se purge pas : il expire de son côté."
-    clear_cache_no_answer: "WaveStack ne répond pas : le cache n'a pas été vidé."
+    clear_cache_no_answer: "HarnessLab ne répond pas : le cache n'a pas été vidé."
     compact: "Compacter"
     compact_menu:
       compaction: "Compaction : résumer les anciens échanges (un appel au modèle)"
@@ -354,16 +354,16 @@ main:
       turn: "Un tour est en cours : attendez sa fin pour compacter."
       empty: "Aucun échange à compacter : la conversation est vide."
       short_memory: "La brique Mémoire courte est éteinte : il n'y a pas d'historique à compacter."
-    compact_no_answer: "WaveStack ne répond pas : la stratégie n'a pas été appliquée."
+    compact_no_answer: "HarnessLab ne répond pas : la stratégie n'a pas été appliquée."
     compaction_title: "Résumé (compaction)"
     tools_used: "Outils consultés pendant ce tour :"
     tools_used_title: "Voir l'étape « {tool} » dans Orchestration"
   composer:
     not_sent: "Message non envoyé : {reason}"
-    not_ready: "WaveStack n'est pas prêt à recevoir un message."
+    not_ready: "HarnessLab n'est pas prêt à recevoir un message."
     empty: "Écrivez un message avant d'envoyer."
     refused: "Envoi refusé."
-    no_answer: "WaveStack ne répond pas : l'envoi n'a pas eu lieu."
+    no_answer: "HarnessLab ne répond pas : l'envoi n'a pas eu lieu."
     label: "Message"
     placeholder: "Écrivez un message, puis Entrée"
     send: "Envoyer"
@@ -377,10 +377,10 @@ main:
     unavailable:
       one: "Brique du scénario indisponible avec ce modèle :"
       other: "Briques du scénario indisponibles avec ce modèle :"
-    no_answer: "WaveStack ne répond pas : le scénario n'a pas été lancé."
+    no_answer: "HarnessLab ne répond pas : le scénario n'a pas été lancé."
     prompts_label: "Prompts suggérés"
   model:
-    served_title: "Modèle servi par {provider} sur ce poste ({url}) : processus distinct de WaveStack ; le texte envoyé est construit par le harnais."
+    served_title: "Modèle servi par {provider} sur ce poste ({url}) : processus distinct de HarnessLab ; le texte envoyé est construit par le harnais."
     local_title: "Modèle local {model}, sur ce poste. Cliquez pour ouvrir la page Modèles."
     active_label: "Modèle actif : {model}. {title}"
     list_unavailable: "Liste des modèles indisponible : nouvel essai dans quelques secondes."
@@ -425,7 +425,7 @@ main:
     fits: "Tient dans le budget"
     refused: "Fenêtre refusée."
     toggle: "Fenêtre"
-    saved_help: "Le choix appliqué est mémorisé dans settings.json, qui prend le pas sur [context] window de wavestack.toml au lancement suivant."
+    saved_help: "Le choix appliqué est mémorisé dans settings.json, qui prend le pas sur [context] window de harness-lab.toml au lancement suivant."
     size_legend: "Taille de la fenêtre"
     apply: "Appliquer"
     claude_cache_legend: "Cache de prompt de Claude"
@@ -591,7 +591,7 @@ main:
         cannot_fail: "Ce cas ne peut pas échouer sur ce tour. Il ne détectera pas la défaillance que vous avez vue."
         pending: "Calcul du verdict…"
         incomplete: "Complétez les vérifications pour voir le verdict."
-        unavailable: "WaveStack ne répond pas : le verdict n'a pas pu être calculé."
+        unavailable: "HarnessLab ne répond pas : le verdict n'a pas pu être calculé."
       save: "Enregistrer"
       saving: "Enregistrement…"
       cancel: "Annuler"
@@ -603,7 +603,7 @@ main:
       open_view: "Ouvrir Évaluer l'agent"
       close: "Fermer"
       error:
-        no_answer: "WaveStack ne répond pas : le cas n'a pas été enregistré."
+        no_answer: "HarnessLab ne répond pas : le cas n'a pas été enregistré."
   agent_eval:
     toggle: "Évaluer l'agent"
     title: "Évaluer l'agent"
@@ -719,7 +719,7 @@ main:
       "yes": "Effacer"
       "no": "Annuler"
     error:
-      no_answer: "WaveStack ne répond pas : la vue n'a pas pu être mise à jour."
+      no_answer: "HarnessLab ne répond pas : la vue n'a pas pu être mise à jour."
   orch:
     catalog:
       one: "{count} outil décrit au modèle dans le contexte : {tokens} tokens."
@@ -829,7 +829,7 @@ main:
       tool_destination: "Outil : {tool} · Destination : {destination}"
       decision: "Décision : {decision}"
       answer_refused: "Réponse refusée."
-      answer_no_answer: "WaveStack ne répond pas : la réponse n'a pas été transmise."
+      answer_no_answer: "HarnessLab ne répond pas : la réponse n'a pas été transmise."
       allow: "Autoriser"
       refuse: "Refuser"
       allow_always: "Autoriser et ne plus demander"
@@ -1020,8 +1020,8 @@ main:
       other: "{count} appels payants"
     spend_sentence: "Dépense API estimée de la séance : entrée {input}, sortie {output}, soit {total} ({calls}, estimation à partir des prix déclarés)."
     footprint_sentence: "Empreinte estimée de la séance : {energy} · {grams} ({calls}). Deux périmètres s'y additionnent : en cloud, le cycle de vie d'EcoLogits (électricité des serveurs et part de leur fabrication) ; en local, l'électricité consommée seulement (CodeCarbon, kWh × intensité), sans la fabrication du poste."
-    reset_total: "Seul un relancement de WaveStack remet ce total à zéro."
-    reset_totals: "Seul un relancement de WaveStack remet ces totaux à zéro."
+    reset_total: "Seul un relancement de HarnessLab remet ce total à zéro."
+    reset_totals: "Seul un relancement de HarnessLab remet ces totaux à zéro."
     cap_sentence: "Plafond de dépense de la séance : {total} sur {cap} ; une fois le plafond atteint, aucun appel payant ne part."
     free_sentence: "Dépense API de la séance : 0 $, offre gratuite ({calls}, aucun prix déclaré)."
   log:
@@ -1198,11 +1198,11 @@ main:
     reading: "Lecture du journal…"
     failed: "Lecture impossible : {cause}."
     empty: "Journal vide"
-    no_answer: "Lecture impossible : WaveStack ne répond pas."
+    no_answer: "Lecture impossible : HarnessLab ne répond pas."
   harness_map:
     open: "Carte du harnais"
     title: "Carte du harnais"
-    intro: "Les briques de WaveStack dans les 7 sous-systèmes d'un harnais."
+    intro: "Les briques de HarnessLab dans les 7 sous-systèmes d'un harnais."
     legend_roles: "Légende : ◆ [[g:guide]]   ◉ [[g:sensor_computed]]   ◎ [[g:sensor_inferred]]   · capacité"
     legend_discipline: "Couleur de la pastille = discipline (prompt ⊂ contexte ⊂ harnais)"
     off_note: "Briques éteintes : grisées, toujours placées."
@@ -1302,7 +1302,7 @@ main:
     leads_out: "Clic : ses données sortantes dans Orchestration"
 
 llm:
-  page_title: "WaveStack — Atelier LLM"
+  page_title: "HarnessLab — Atelier LLM"
   token_list: "Tokens du texte"
   generated_list: "Tokens produits"
   invalid_intention: "Intention invalide : {detail}"
@@ -1330,7 +1330,7 @@ llm:
   distribution_list: "Candidats du token choisi"
 
 rag:
-  page_title: "WaveStack — Atelier recherche documentaire"
+  page_title: "HarnessLab — Atelier recherche documentaire"
   chain: "Chaîne {label}"
   rank:
     one: "{count}er"
@@ -1499,7 +1499,7 @@ rag:
 # Story 6 (2026-09-30), then lot 4 of 2026-10-04: the MCP workshop in sequence (`/mcp`); its
 # pedagogical texts are in mcp_lab.yaml.
 mcp:
-  page_title: "WaveStack — Atelier MCP"
+  page_title: "HarnessLab — Atelier MCP"
   title: "Atelier MCP"
   unavailable: "Atelier MCP indisponible ({cause}) : rechargez la page."
   # The main screen's log (app.js).
@@ -1680,7 +1680,7 @@ mcp:
   close_causes:
     language: "changement de langue"
     reset: "réinitialisation"
-    session_close: "arrêt de WaveStack"
+    session_close: "arrêt de HarnessLab"
     lost: "le serveur ne répond plus"
   error_kinds:
     jsonrpc_error: "erreur JSON-RPC"
@@ -1710,10 +1710,10 @@ mcp:
     deny: "Refuser"
   security_journal:
     download: "Télécharger le journal (CSV)"
-  # CAP-4 : bloc GitHub de l'atelier MCP (connexion par code, OAuth App WaveStack).
+  # CAP-4 : bloc GitHub de l'atelier MCP (connexion par code, OAuth App HarnessLab).
   github:
     title: "GitHub"
-    intro: "Connexion avec votre compte GitHub par OAuth (une autorisation déléguée, sans partager votre mot de passe), application WaveStack, par un code à saisir. WaveStack n'obtient que les droits que vous acceptez, sous forme d'un jeton (une preuve d'accès limitée à ces droits)."
+    intro: "Connexion avec votre compte GitHub par OAuth (une autorisation déléguée, sans partager votre mot de passe), application HarnessLab, par un code à saisir. HarnessLab n'obtient que les droits que vous acceptez, sous forme d'un jeton (une preuve d'accès limitée à ces droits)."
     connect: "Se connecter à GitHub"
     reconnect: "Se reconnecter"
     disconnect: "Se déconnecter"
@@ -1797,7 +1797,7 @@ mcp:
     network_label: "🌐 RÉSEAU · hors du poste"
     boundary: "frontière du poste"
     user: "👤 Utilisateur"
-    host: "Hôte · WaveStack"
+    host: "Hôte · HarnessLab"
     client: "Client MCP → {server}"
     analogy: "Au restaurant : {place}, {meaning}."
     where_local: "sur le poste"
@@ -1818,12 +1818,12 @@ mcp:
     failure: "Échec : {label}, {reason}"
 
 diagnostic:
-  page_title: "WaveStack — Modèles"
+  page_title: "HarnessLab — Modèles"
   title: "Modèles"
   candidates_title: "💻 Modèles locaux détectés"
   cloud_title: "☁️ Modèles cloud"
   cloud_help: "Hors du poste : chaque appel envoie tout le contexte au fournisseur."
-  cloud_cap: "Plafond de dépense de la séance : {total} dépensés sur {cap}. Une fois le plafond atteint, WaveStack n'envoie plus d'appel payant ; le plafond se règle par [finops] max_session_usd dans settings.json, WaveStack arrêté, puis relancé."
+  cloud_cap: "Plafond de dépense de la séance : {total} dépensés sur {cap}. Une fois le plafond atteint, HarnessLab n'envoie plus d'appel payant ; le plafond se règle par [finops] max_session_usd dans settings.json, HarnessLab arrêté, puis relancé."
   path_label: "Ou indiquez le chemin d'un fichier GGUF :"
   path_placeholder: 'C:\chemin\vers\modele.gguf'
   path_button: "Choisir ce fichier"
@@ -1911,10 +1911,10 @@ diagnostic:
     unknown: "inconnue"
     resident: "déjà en mémoire"
     on_first_call: "chargé par le serveur au premier appel"
-    no_cache: ", sans son cache de contexte (fichier du modèle illisible depuis WaveStack)"
-    memory: "Mémoire du modèle servi : {size}{cache}, {where} (processus distinct de WaveStack)"
+    no_cache: ", sans son cache de contexte (fichier du modèle illisible depuis HarnessLab)"
+    memory: "Mémoire du modèle servi : {size}{cache}, {where} (processus distinct de HarnessLab)"
     unusable: "Modèle inutilisable."
-  no_cloud: "Aucun modèle cloud déclaré (voir wavestack.toml)."
+  no_cloud: "Aucun modèle cloud déclaré (voir harness-lab.toml)."
   key:
     from_env: "Clé lue dans {env} (en saisir une pour la remplacer)"
     saved: "Clé enregistrée (la saisir de nouveau pour la remplacer)"
@@ -1947,7 +1947,7 @@ models:
     price: "Prix"
   note: "Capacités lues comme au chargement : mêmes règles que les cartes des briques."
   list_unavailable: "Liste des modèles indisponible ({cause}) : rechargez la page."
-  table_unavailable: "Tableau des modèles indisponible : voir le terminal de WaveStack."
+  table_unavailable: "Tableau des modèles indisponible : voir le terminal de HarnessLab."
   count:
     one: "{count} modèle au dernier diagnostic."
     other: "{count} modèles au dernier diagnostic."
@@ -1985,7 +1985,7 @@ models:
 
 # Story 10 (CAP-3, CAP-8, CAP-9) : la page Sécurité (security.html, security.js).
 security:
-  page_title: "WaveStack — Sécurité du harnais"
+  page_title: "HarnessLab — Sécurité du harnais"
   title: "Sécurité du harnais"
   subtitle: "Ce que le harnais contrôle, refuse et journalise pendant cette séance. Les réglages se font là où ils agissent."
   questions:
@@ -2039,7 +2039,7 @@ security:
     legend_ask: "vous décidez à chaque appel."
     legend_deny: "l'appel n'a jamais lieu."
     glossary:
-      why: "Il lit un fichier livré avec WaveStack, rien de vous."
+      why: "Il lit un fichier livré avec HarnessLab, rien de vous."
     system:
       why: "Il lit la mémoire libre et le modèle du processeur, rien de personnel."
     create_path:

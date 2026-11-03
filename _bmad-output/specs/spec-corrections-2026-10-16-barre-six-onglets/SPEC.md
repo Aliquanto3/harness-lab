@@ -3,8 +3,8 @@ id: SPEC-corrections-2026-10-16-barre-six-onglets
 status: review
 companions: []
 sources:
-  - ../spec-wavestack-v1-1-vague-2/SPEC.md
-  - ../spec-wavestack-v1-1-vague-2/ux/DESIGN.md
+  - ../spec-harness-lab-v1-1-vague-2/SPEC.md
+  - ../spec-harness-lab-v1-1-vague-2/ux/DESIGN.md
 ---
 
 > **Canonical contract.** This SPEC is the complete contract for this correctif.

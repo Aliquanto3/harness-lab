@@ -20,10 +20,10 @@ from test_cloud import Provider, _cloud_session, delta, sse
 from test_model_servers import GIB, LLAMA_URL, FakeServer, _booted
 from test_probe import LFM3_1_7B
 
-from wavestack import config
-from wavestack.cloud import chat_fields
-from wavestack.models import gguf_meta, servers
-from wavestack.models.candidates import (
+from harness_lab import config
+from harness_lab.cloud import chat_fields
+from harness_lab.models import gguf_meta, servers
+from harness_lab.models.candidates import (
     TOP,
     candidates_from_logits,
     distribution,
@@ -31,17 +31,17 @@ from wavestack.models.candidates import (
     dropped_by,
     top_from_logits,
 )
-from wavestack.models.engine import EngineMetadata, Sampling
-from wavestack.session import llm_lab
-from wavestack.session.app_session import (
+from harness_lab.models.engine import EngineMetadata, Sampling
+from harness_lab.session import llm_lab
+from harness_lab.session.app_session import (
     CANDIDATES,
     AppSession,
     DistributionMissing,
     SendRefused,
 )
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 ORIGIN = {"Origin": "http://127.0.0.1:8420"}
 TEXT = "Bonjour <|im_end|> 🙂"
@@ -596,7 +596,7 @@ def test_local_screen_generation_has_no_cost(monkeypatch):
     """A local call never costs anything: no `cost_*` field joins `llm_generation_ended`."""
     engine = FakeEngine(output="Salut !")
     monkeypatch.setattr(
-        "wavestack.greenops._find_spec", lambda name: None
+        "harness_lab.greenops._find_spec", lambda name: None
     )  # CodeCarbon absent: no footprint either, deterministic
     session = booted_session(engine)
     events = _generate(session)
@@ -832,10 +832,10 @@ def test_candidates_unavailable_on_servers_and_the_cloud(monkeypatch):
 def test_real_engine_candidates(tmp_path):
     import os
 
-    path = os.environ.get("WAVESTACK_TEST_GGUF")
+    path = os.environ.get("HARNESS_LAB_TEST_GGUF")
     if not path:
-        pytest.skip("WAVESTACK_TEST_GGUF not set to a real GGUF file")
-    from wavestack.models.engine import CancelToken, LlamaCppEngine
+        pytest.skip("HARNESS_LAB_TEST_GGUF not set to a real GGUF file")
+    from harness_lab.models.engine import CancelToken, LlamaCppEngine
 
     engine = LlamaCppEngine(path, n_ctx=512)
     try:
@@ -902,8 +902,8 @@ def test_the_content_is_read_again_once_the_file_changed(monkeypatch, tmp_path):
 
 
 def test_sampling_intention_bounds_are_the_engine_bounds():
-    from wavestack.models.engine import SAMPLING_BOUNDS
-    from wavestack.web.app import SamplingIntention
+    from harness_lab.models.engine import SAMPLING_BOUNDS
+    from harness_lab.web.app import SamplingIntention
 
     schema = SamplingIntention.model_json_schema()["properties"]
     for name, (low, high) in SAMPLING_BOUNDS.items():
@@ -1059,7 +1059,7 @@ def test_a_new_generation_erases_the_kept_distribution():
 def test_a_switch_of_model_makes_the_kept_distribution_stale(tmp_path):
     from test_model_switch import _booted, _record_probe, _switch
 
-    from wavestack.models.load_registry import ModelChoice
+    from harness_lab.models.load_registry import ModelChoice
 
     first = FakeEngine(output="ab", logits_script=LOGITS_SCRIPT)
     session, tracker, paths = _booted(tmp_path, {"A": first, "B": FakeEngine()})
@@ -1429,7 +1429,7 @@ def test_the_header_is_read_once_per_modification_time(tmp_path, monkeypatch):
 
 def _booted_at(engine: FakeEngine, path) -> object:  # noqa: ANN001
     """`booted_session`, the active model's file at `path` (its header read by the screen)."""
-    from wavestack.session.app_session import AppSession
+    from harness_lab.session.app_session import AppSession
 
     context = {"context": {"window": 4096, "near_limit_ratio": 0.8}}
     session = AppSession(

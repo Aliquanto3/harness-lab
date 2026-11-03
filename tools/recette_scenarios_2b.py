@@ -1,11 +1,11 @@
 """The scenarios with Qwen3.5-2B, without a browser (finition V1, entries #4 to #6).
 
-Launches WaveStack in its own console (port 8420, the user's data dir: the session saves the
+Launches HarnessLab in its own console (port 8420, the user's data dir: the session saves the
 language, the model and the demo memory there, so `settings.json` and `memory.json` are first
-copied to `*.avant-recette-<date>` beside them, to put back by hand once WaveStack is stopped),
+copied to `*.avant-recette-<date>` beside them, to put back by hand once HarnessLab is stopped),
 selects Qwen3.5-2B and French, then plays each scenario's prompts by the API, as the trainer
 would; every event read from `/api/stream`, any H5 validation allowed. Writes
-`recette-scenarios-2b.json` in the current folder (ignored by git). `--attach`: use a WaveStack
+`recette-scenarios-2b.json` in the current folder (ignored by git). `--attach`: use a HarnessLab
 already running. First argument, optional: the scenarios, comma-separated. Needs about 4 GB
 of free RAM (the 2B loaded): close Edge, Teams and Outlook first. The server is left running
 (its pid printed), the 2B loaded.
@@ -27,7 +27,7 @@ import yaml
 
 REPO = Path(__file__).resolve().parents[1]
 BASE = "http://127.0.0.1:8420"
-DATA = Path(os.environ["LOCALAPPDATA"]) / "WaveStack"  # `config.data_dir()`, without the override
+DATA = Path(os.environ["LOCALAPPDATA"]) / "HarnessLab"  # `config.data_dir()`, without the override
 MODEL = str(DATA / "models" / "Qwen3.5-2B-Q4_K_M.gguf")
 SCENARIOS = (
     sys.argv[1].split(",")
@@ -107,9 +107,9 @@ def wait_idle(timeout: float = 600) -> None:
 def launch() -> subprocess.Popen:
     env = dict(os.environ)
     env["BROWSER"] = "C:/Windows/System32/where.exe /Q %s"  # no browser opened
-    env.pop("WAVESTACK_DATA_DIR", None)
+    env.pop("HARNESS_LAB_DATA_DIR", None)
     proc = subprocess.Popen(
-        ["uv", "run", "--no-sync", "wavestack"],
+        ["uv", "run", "--no-sync", "harness-lab"],
         cwd=REPO,
         env=env,
         creationflags=subprocess.CREATE_NEW_CONSOLE,
@@ -122,7 +122,7 @@ def launch() -> subprocess.Popen:
         except httpx.HTTPError:
             pass
         time.sleep(1)
-    raise TimeoutError("WaveStack ne répond pas")
+    raise TimeoutError("HarnessLab ne répond pas")
 
 
 def play(scenario_id: str, prompts: list[str]) -> dict:

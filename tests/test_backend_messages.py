@@ -14,10 +14,10 @@ from fake_engine import FakeEngine, booted_session
 from test_tools import QWEN, _segments, call
 from test_turn import _run
 
-from wavestack import config, messages
-from wavestack.messages import KeyedError, Message, MessageError, msg
-from wavestack.tools import native
-from wavestack.trace.journal import get_journal
+from harness_lab import config, messages
+from harness_lab.messages import KeyedError, Message, MessageError, msg
+from harness_lab.tools import native
+from harness_lab.trace.journal import get_journal
 
 CONTENT = config.content_dir()
 LANGS = config.LANGUAGES
@@ -166,7 +166,7 @@ def test_get_datetime_names_the_day_in_the_sessions_language():
 @fresh
 def test_the_glossary_answers_in_its_language(monkeypatch):
     """Matrix « Glossaire »: the local MCP server's unknown term, in English."""
-    from wavestack.mcp import local_server
+    from harness_lab.mcp import local_server
 
     monkeypatch.setattr(local_server, "LANGUAGE", "en")
     result = local_server.define_term("nowhere")
@@ -298,7 +298,7 @@ def test_the_cards_reasons_are_in_the_sessions_language(lang):
 
 # ---------- the static check: no French literal left in the perimeter ----------
 
-SRC = config.repo_root() / "src" / "wavestack"
+SRC = config.repo_root() / "src" / "harness_lab"
 _FRENCH = re.compile(r"[àâçéèêëîïôûùüÿœÀÂÇÉÈÊËÎÏÔÛÙÜŸŒ«»]")
 # The modules whose texts reach the model or the user (commit by commit).
 PERIMETER = (
@@ -375,7 +375,7 @@ EXCEPTIONS = {
     ("session/app_session.py", "ne peuvent pas s'afficher"),
     # Each language written in itself, for the selector (story 1).
     ("config.py", "Français"),
-    # Validation of wavestack.toml and settings.json: file validation, never translated.
+    # Validation of harness-lab.toml and settings.json: file validation, never translated.
     ("config.py", "L'en-tête"),
     ("config.py", "entrée"),
     ("config.py", "tracé en clair"),

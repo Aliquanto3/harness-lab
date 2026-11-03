@@ -18,13 +18,13 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from test_bricks import HEADERS
 
-from wavestack import config
-from wavestack.rag import erasure, workcopy
-from wavestack.rag import index as rag_index
-from wavestack.rag.corpus import chunk_corpus, load_rag_content
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.rag import erasure, workcopy
+from harness_lab.rag import index as rag_index
+from harness_lab.rag.corpus import chunk_corpus, load_rag_content
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.web.app import create_app
 
 LANGS = ("fr", "en", "de")
 CONTENT = config.repo_root() / "content"
@@ -396,34 +396,36 @@ def test_invalid_data_is_refused_at_the_load():
 
 
 def test_the_module_imports_only_the_permitted_names():
-    tree = ast.parse((config.repo_root() / "src/wavestack/rag/erasure.py").read_text("utf-8"))
+    tree = ast.parse((config.repo_root() / "src/harness_lab/rag/erasure.py").read_text("utf-8"))
     found = {
         (node.module, alias.name)
         for node in ast.walk(tree)
-        if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("wavestack")
+        if isinstance(node, ast.ImportFrom)
+        and node.module
+        and node.module.startswith("harness_lab")
         for alias in node.names
     }
     assert found == {
-        ("wavestack", "config"),
-        ("wavestack.messages", "msg"),
-        ("wavestack.rag.attack", "Provenance"),
-        ("wavestack.rag.attack", "provenance_text"),
-        ("wavestack.rag.contexts", "heuristic_entries"),
-        ("wavestack.rag.pageindex", "build_tree"),  # V1.2 story 11: the rule's tree, pure
-        ("wavestack.rag.graph", "build_graph"),  # V1.2 story 13: the rule's graph, pure
-        ("wavestack.rag.raptor", "build_tree"),  # V1.2 story 12: the rule's RAPTOR tree, pure
-        ("wavestack.rag.wiki", "build_wiki"),  # V1.2 story 14: the rule's wiki, pure
-        ("wavestack.rag.contexts", "load_book"),
-        ("wavestack.rag.corpus", "Chunk"),
-        ("wavestack.rag.corpus", "DocText"),
-        ("wavestack.rag.corpus", "RagContent"),
-        ("wavestack.rag.corpus", "chunk_documents"),
-        ("wavestack.rag.corpus", "load_rag_content"),
-        ("wavestack.rag.corpus", "read_documents"),
-        ("wavestack.rag.index", "passage_text"),
-        ("wavestack.rag.lab", "bm25"),
-        ("wavestack.rag.lab", "bm25_terms"),
-        ("wavestack.rag.lab", "lexical_index"),
+        ("harness_lab", "config"),
+        ("harness_lab.messages", "msg"),
+        ("harness_lab.rag.attack", "Provenance"),
+        ("harness_lab.rag.attack", "provenance_text"),
+        ("harness_lab.rag.contexts", "heuristic_entries"),
+        ("harness_lab.rag.pageindex", "build_tree"),  # V1.2 story 11: the rule's tree, pure
+        ("harness_lab.rag.graph", "build_graph"),  # V1.2 story 13: the rule's graph, pure
+        ("harness_lab.rag.raptor", "build_tree"),  # V1.2 story 12: the rule's RAPTOR tree, pure
+        ("harness_lab.rag.wiki", "build_wiki"),  # V1.2 story 14: the rule's wiki, pure
+        ("harness_lab.rag.contexts", "load_book"),
+        ("harness_lab.rag.corpus", "Chunk"),
+        ("harness_lab.rag.corpus", "DocText"),
+        ("harness_lab.rag.corpus", "RagContent"),
+        ("harness_lab.rag.corpus", "chunk_documents"),
+        ("harness_lab.rag.corpus", "load_rag_content"),
+        ("harness_lab.rag.corpus", "read_documents"),
+        ("harness_lab.rag.index", "passage_text"),
+        ("harness_lab.rag.lab", "bm25"),
+        ("harness_lab.rag.lab", "bm25_terms"),
+        ("harness_lab.rag.lab", "lexical_index"),
     }
 
 
@@ -505,16 +507,16 @@ def test_the_card_is_played_without_a_model_an_index_or_a_key():
 
 
 def test_the_page_script_has_no_colour_and_no_inner_html():
-    code = (config.repo_root() / "src/wavestack/web/static/rag-attack-erasure.js").read_text(
+    code = (config.repo_root() / "src/harness_lab/web/static/rag-attack-erasure.js").read_text(
         "utf-8"
     )
     assert "innerHTML" not in code and "insertAdjacentHTML" not in code
     assert 'registerTab("attack_erasure"' in code and 'registerTab("attack"' not in code
     assert not re.search(r"#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(", code)
-    css = (config.repo_root() / "src/wavestack/web/static/rag.css").read_text("utf-8")
+    css = (config.repo_root() / "src/harness_lab/web/static/rag.css").read_text("utf-8")
     block = css.split("V1.2 story 18")[1]
     assert not re.search(r"#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(", block)
-    html = (config.repo_root() / "src/wavestack/web/static/rag.html").read_text("utf-8")
+    html = (config.repo_root() / "src/harness_lab/web/static/rag.html").read_text("utf-8")
     panel = html.split('id="rag-panel-attack"')[1].split('id="rag-panel-sheets"')[0]
     assert "rag-soon" in panel and "rag-atk-soon" not in panel
     assert "rag-attack-erasure.js" in html and "rag-attack-access.js" in html

@@ -1,6 +1,6 @@
 # Exemplia remote work agreement
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this agreement describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this agreement describes no real company. -->
 
 Any employee on a permanent contract may work remotely up to 3 days a week, after an onboarding period of 2 months. Interns and work-study students are limited to 1 day a week, to keep in touch with their mentor.
 

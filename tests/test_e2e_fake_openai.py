@@ -1,5 +1,5 @@
 """The scripted OpenAI server of `tools/e2e` (no browser): its script and its stream, read
-by WaveStack's own `openai_chat` adapter through the ASGI app."""
+by HarnessLab's own `openai_chat` adapter through the ASGI app."""
 
 from __future__ import annotations
 
@@ -13,9 +13,9 @@ import pytest
 from pydantic import SecretStr
 from starlette.testclient import TestClient
 
-from wavestack.config import CloudModel
-from wavestack.models.engine import CancelToken
-from wavestack.models.openai_chat import ChatBody, ChatEnd, OpenAIChatEngine, ProviderError
+from harness_lab.config import CloudModel
+from harness_lab.models.engine import CancelToken
+from harness_lab.models.openai_chat import ChatBody, ChatEnd, OpenAIChatEngine, ProviderError
 
 _PATH = Path(__file__).resolve().parents[1] / "tools" / "e2e" / "fake_openai.py"
 
@@ -36,7 +36,7 @@ def _tool(name: str) -> dict:
 
 
 def _body(*messages: dict, tools: tuple[str, ...] = ()) -> dict:
-    body = {"model": "wavestack-fake", "stream": True, "messages": list(messages)}
+    body = {"model": "harness-lab-fake", "stream": True, "messages": list(messages)}
     if tools:
         body["tools"] = [_tool(t) for t in tools]
     return body
@@ -234,7 +234,7 @@ def _entry() -> CloudModel:
     )
 
 
-def test_wavestack_adapter_reads_the_fake_stream():
+def test_harness_lab_adapter_reads_the_fake_stream():
     """The chunks the fake server writes are what `openai_chat` expects (AD-5)."""
     reply = fake.plan_reply(_body(_user("Quelle heure est-il ?"), tools=("get_datetime",)))
     body = _body(_user("x")) | {"stream_options": {"include_usage": True}}
@@ -269,7 +269,7 @@ def _prompts(scenario_id: str) -> list[str]:
     """The scenario's prompts, as `content/scenarios.yaml` writes them (folded)."""
     import yaml
 
-    from wavestack import config
+    from harness_lab import config
 
     path = config.content_dir() / "scenarios.yaml"
     return yaml.safe_load(path.read_text(encoding="utf-8"))["scenarios"][scenario_id]["prompts"]
@@ -435,9 +435,9 @@ def test_gemini_mode_refuses_a_call_of_the_turn_sent_back_unsigned():
     assert fake.plan_reply(_body(ask, unsigned, reply, tools=("get_datetime",))).status == 200
 
 
-def test_wavestack_adapter_reads_the_fake_gemini_stream_with_the_preset():
+def test_harness_lab_adapter_reads_the_fake_gemini_stream_with_the_preset():
     """The preset's `<thought>` tags and the signature, read by `openai_chat` (AD-5)."""
-    from wavestack import config
+    from harness_lab import config
 
     entry = config.load_config().cloud_model("gemini")
     entry = entry.model_copy(update={"base_url": "http://127.0.0.1:9/v1"})

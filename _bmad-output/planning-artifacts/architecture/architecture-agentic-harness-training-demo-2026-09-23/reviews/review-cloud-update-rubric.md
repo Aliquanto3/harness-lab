@@ -196,7 +196,7 @@ Les numéros de ligne renvoient à `ARCHITECTURE-SPINE.md` dans son état du 202
 | D1 Option explicite | AD-21 l. 530 ; un scénario ne choisit pas de modèle (AD-19 l. 481) | — |
 | D2 Un adaptateur, sans dépendance | AD-5 l. 210-216 ; AD-15 ; Stack (httpx déjà présent) | — |
 | D3 Déclaration, en-tête configurable | AD-20 l. 498-509 | La proposition dit « `api-key` pour Azure » (l. 79 et 189). Le spine impose l'API v1 (N14). **À aligner dans la proposition.** |
-| D4 Préréglages Groq et Mistral | Seed l. 654 ; `enabled` l. 509 | Les exemples en commentaire relèvent de `wavestack.toml`, pas du spine. |
+| D4 Préréglages Groq et Mistral | Seed l. 654 ; `enabled` l. 509 | Les exemples en commentaire relèvent de `harness-lab.toml`, pas du spine. |
 | D5 Capacités, JSON invalide | AD-6 l. 232 ; AD-10 l. 301 | — |
 | D6 Tokens en mode chat | AD-4 l. 190-194 | « Tout ≈ » est devenu « ≈ sauf le total quand `usage_source = api` » (aligné sur CAP-31). N1 reste à corriger. |
 | D7 Fenêtre | AD-9 l. 270-272 | D7 est à jour, mais le §4.4 de la proposition (l. 200) cite encore `max_window`. **À aligner dans la proposition.** |

@@ -1,22 +1,22 @@
-<title>Architecture WaveStack</title>
+<title>Architecture HarnessLab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
   :root {
     color-scheme: light;
-    --primary: #451DC7;
-    --primary-deep: #250F6B;
-    --primary-soft: #EDE7FE;
-    --accent: #04F06A;
+    --primary: #0B6B78;
+    --primary-deep: #084E58;
+    --primary-soft: #DCEFF1;
+    --accent: #B4500F;
     --ink: #0A0A14;
     --ink-soft: #4A4A5E;
     --muted: #8A8A9E;
     --line: #E6E6EC;
-    --surface: #F6F5FA;
+    --surface: #F7F8F6;
     --raised: #FFFFFF;
-    --network: #FFCA4A;
-    --danger: #FF2A49;
+    --network: #E8A317;
+    --danger: #B42318;
     --seg-system: #6B4EE6;
     --seg-memory: #27B060;
     --seg-tools: #2A78D6;
@@ -24,8 +24,8 @@
     --seg-rag: #0E8C7E;
     --seg-results: #E0762B;
     --seg-message: #9C5BB5;
-    --font-ui: Aptos, Inter, system-ui, sans-serif;
-    --font-label: Manrope, Inter, system-ui, sans-serif;
+    --font-ui: Inter, system-ui, sans-serif;
+    --font-label: Inter, system-ui, sans-serif;
     --font-mono: 'Cascadia Mono', Consolas, 'JetBrains Mono', ui-monospace, monospace;
   }
   * { box-sizing: border-box; }
@@ -246,8 +246,8 @@
 
 <div class="wrap">
   <header class="top">
-    <div class="eyebrow">Spine d’architecture · WaveStack V1</div>
-    <h1>Architecture WaveStack</h1>
+    <div class="eyebrow">Spine d’architecture · HarnessLab V1</div>
+    <h1>Architecture HarnessLab</h1>
     <p class="thesis"><strong>Le harnais publie un journal ; l’écran n’en est qu’une lecture.</strong> Chaque décision ci-dessous découle de cette règle : ce que la salle voit est, par construction, ce que le harnais a réellement envoyé, décidé et exécuté.</p>
     <div class="meta">
       <span><b>Paradigme</b> moteur de tour à journal d’événements, ports et adaptateurs</span>
@@ -279,7 +279,7 @@
     </div>
     <div class="diagram-grid">
       <div class="panel svg-scroll">
-        <svg id="arch" viewBox="0 0 1000 540" role="group" aria-label="Schéma des processus de WaveStack">
+        <svg id="arch" viewBox="0 0 1000 540" role="group" aria-label="Schéma des processus de HarnessLab">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0,0 L10,5 L0,10 z" fill="#4A4A5E"/>
@@ -294,9 +294,9 @@
           <rect x="744" y="8" width="248" height="524" rx="16" fill="#FFFBF0" stroke="#E6E6EC"/>
           <text class="zone-label" x="762" y="34">RÉSEAU</text>
           <line x1="732" y1="8" x2="732" y2="532" stroke="#0A0A14" stroke-width="2.5"/>
-          <!-- processus WaveStack -->
-          <rect x="190" y="56" width="340" height="300" rx="14" fill="none" stroke="#451DC7" stroke-width="1.5" stroke-dasharray="3 4"/>
-          <text class="node-sub" x="204" y="76">Processus WaveStack · uv run wavestack</text>
+          <!-- processus HarnessLab -->
+          <rect x="190" y="56" width="340" height="300" rx="14" fill="none" stroke="#0B6B78" stroke-width="1.5" stroke-dasharray="3 4"/>
+          <text class="node-sub" x="204" y="76">Processus HarnessLab · uv run harness-lab</text>
 
           <!-- arêtes -->
           <path class="edge" d="M150,130 L214,130" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
@@ -318,75 +318,75 @@
 
           <!-- nœuds -->
           <g class="node" data-id="browser" tabindex="0" role="button" aria-label="Navigateur">
-            <rect x="26" y="100" width="124" height="62" rx="12" fill="#FFFFFF" stroke="#451DC7" stroke-width="2"/>
+            <rect x="26" y="100" width="124" height="62" rx="12" fill="#FFFFFF" stroke="#0B6B78" stroke-width="2"/>
             <text class="node-label" x="40" y="126">Navigateur</text>
             <text class="node-sub" x="40" y="146">5 volets, projection</text>
           </g>
           <g class="node" data-id="loop" tabindex="0" role="button" aria-label="Boucle asyncio">
-            <rect x="214" y="92" width="292" height="76" rx="12" fill="#451DC7" stroke="#451DC7" stroke-width="2"/>
+            <rect x="214" y="92" width="292" height="76" rx="12" fill="#0B6B78" stroke="#0B6B78" stroke-width="2"/>
             <text class="node-label inv" x="230" y="120">Boucle asyncio</text>
             <text class="node-sub inv" x="230" y="140">FastAPI 127.0.0.1 · flux SSE · intentions</text>
             <text class="node-sub inv" x="230" y="156">clients MCP</text>
           </g>
           <g class="node" data-id="worker" tabindex="0" role="button" aria-label="Thread de travail">
-            <rect x="214" y="196" width="292" height="72" rx="12" fill="#451DC7" stroke="#451DC7" stroke-width="2"/>
+            <rect x="214" y="196" width="292" height="72" rx="12" fill="#0B6B78" stroke="#0B6B78" stroke-width="2"/>
             <text class="node-label inv" x="230" y="224">Thread de travail</text>
             <text class="node-sub inv" x="230" y="244">session · briques · exécuteur d’outils</text>
             <text class="node-sub inv" x="230" y="259">hooks · journal d’événements</text>
           </g>
           <g class="node" data-id="engine" tabindex="0" role="button" aria-label="llama-cpp-python">
-            <rect x="214" y="288" width="292" height="56" rx="12" fill="#451DC7" stroke="#451DC7" stroke-width="2"/>
+            <rect x="214" y="288" width="292" height="56" rx="12" fill="#0B6B78" stroke="#0B6B78" stroke-width="2"/>
             <text class="node-label inv" x="230" y="312">llama-cpp-python</text>
             <text class="node-sub inv" x="230" y="331">modèle · embedding · reranker</text>
           </g>
           <g class="node" data-id="mcplocal" tabindex="0" role="button" aria-label="Serveur MCP local">
-            <rect x="566" y="90" width="148" height="58" rx="12" fill="#451DC7" stroke="#451DC7" stroke-width="2"/>
+            <rect x="566" y="90" width="148" height="58" rx="12" fill="#0B6B78" stroke="#0B6B78" stroke-width="2"/>
             <text class="node-label inv" x="580" y="114">MCP local</text>
             <text class="node-sub inv" x="580" y="134">processus enfant</text>
           </g>
           <g class="node" data-id="probe" tabindex="0" role="button" aria-label="Sonde GGUF">
-            <rect x="566" y="200" width="148" height="58" rx="12" fill="#451DC7" stroke="#451DC7" stroke-width="2"/>
+            <rect x="566" y="200" width="148" height="58" rx="12" fill="#0B6B78" stroke="#0B6B78" stroke-width="2"/>
             <text class="node-label inv" x="580" y="224">Sonde GGUF</text>
             <text class="node-sub inv" x="580" y="244">enfant, ponctuel</text>
           </g>
           <g class="node" data-id="ext" tabindex="0" role="button" aria-label="Ollama ou llama-server">
-            <rect x="566" y="300" width="148" height="62" rx="12" fill="#FFFFFF" stroke="#451DC7" stroke-width="2" stroke-dasharray="2 3"/>
+            <rect x="566" y="300" width="148" height="62" rx="12" fill="#FFFFFF" stroke="#0B6B78" stroke-width="2" stroke-dasharray="2 3"/>
             <text class="node-label" x="580" y="324">Ollama / llama-server</text>
             <text class="node-sub" x="580" y="344">facultatif, palier 2</text>
           </g>
           <g class="node" data-id="files" tabindex="0" role="button" aria-label="Données d’exécution">
-            <rect x="150" y="400" width="200" height="104" rx="12" fill="#EDE7FE" stroke="#451DC7" stroke-width="1.5"/>
+            <rect x="150" y="400" width="200" height="104" rx="12" fill="#DCEFF1" stroke="#0B6B78" stroke-width="1.5"/>
             <text class="node-label" x="166" y="426">Données d’exécution</text>
-            <text class="node-sub" x="166" y="446">%LOCALAPPDATA%\WaveStack</text>
+            <text class="node-sub" x="166" y="446">%LOCALAPPDATA%\HarnessLab</text>
             <text class="node-sub" x="166" y="466">models/ · memory.json</text>
             <text class="node-sub" x="166" y="484">audit.log · settings.json</text>
           </g>
           <g class="node" data-id="repo" tabindex="0" role="button" aria-label="Dépôt">
-            <rect x="380" y="400" width="200" height="104" rx="12" fill="#EDE7FE" stroke="#451DC7" stroke-width="1.5"/>
+            <rect x="380" y="400" width="200" height="104" rx="12" fill="#DCEFF1" stroke="#0B6B78" stroke-width="1.5"/>
             <text class="node-label" x="396" y="426">Dépôt</text>
             <text class="node-sub" x="396" y="446">content/ (en français)</text>
             <text class="node-sub" x="396" y="466">index sqlite-vec</text>
-            <text class="node-sub" x="396" y="484">wavestack.toml · uv.lock</text>
+            <text class="node-sub" x="396" y="484">harness-lab.toml · uv.lock</text>
           </g>
           <g class="node" data-id="mcppub" tabindex="0" role="button" aria-label="Serveurs MCP publics">
-            <rect x="766" y="70" width="210" height="70" rx="12" fill="#FFCA4A" stroke="#0A0A14" stroke-width="2" stroke-dasharray="7 5"/>
+            <rect x="766" y="70" width="210" height="70" rx="12" fill="#E8A317" stroke="#0A0A14" stroke-width="2" stroke-dasharray="7 5"/>
             <text class="node-label" x="782" y="96">MCP publics</text>
             <text class="node-sub" x="782" y="116">data.gouv.fr · Microsoft Learn</text>
             <text class="node-sub" x="782" y="132">contactés à l’activation</text>
           </g>
           <g class="node" data-id="apis" tabindex="0" role="button" aria-label="API publiques">
-            <rect x="766" y="200" width="210" height="70" rx="12" fill="#FFCA4A" stroke="#0A0A14" stroke-width="2" stroke-dasharray="7 5"/>
+            <rect x="766" y="200" width="210" height="70" rx="12" fill="#E8A317" stroke="#0A0A14" stroke-width="2" stroke-dasharray="7 5"/>
             <text class="node-label" x="782" y="226">API publiques</text>
             <text class="node-sub" x="782" y="246">jours fériés · Wikipedia</text>
             <text class="node-sub" x="782" y="262">pages web autorisées</text>
           </g>
           <g class="node" data-id="hf" tabindex="0" role="button" aria-label="Hugging Face">
-            <rect x="766" y="340" width="210" height="62" rx="12" fill="#FFCA4A" stroke="#0A0A14" stroke-width="2" stroke-dasharray="7 5"/>
+            <rect x="766" y="340" width="210" height="62" rx="12" fill="#E8A317" stroke="#0A0A14" stroke-width="2" stroke-dasharray="7 5"/>
             <text class="node-label" x="782" y="366">Hugging Face</text>
             <text class="node-sub" x="782" y="386">téléchargement du modèle</text>
           </g>
           <g class="node" data-id="llmcloud" tabindex="0" role="button" aria-label="Fournisseur LLM cloud">
-            <rect x="766" y="436" width="210" height="72" rx="12" fill="#FFCA4A" stroke="#0A0A14" stroke-width="2" stroke-dasharray="7 5"/>
+            <rect x="766" y="436" width="210" height="72" rx="12" fill="#E8A317" stroke="#0A0A14" stroke-width="2" stroke-dasharray="7 5"/>
             <text class="node-label" x="782" y="462">LLM cloud (option)</text>
             <text class="node-sub" x="782" y="482">Groq · Mistral · point déclaré</text>
             <text class="node-sub" x="782" y="498">clé jamais tracée</text>
@@ -447,7 +447,7 @@
   <section id="budget" aria-labelledby="h-budget">
     <div class="eyebrow">4 · AD-8</div>
     <h2 id="h-budget">Budget de 4 Go : mesurer, puis refuser</h2>
-    <p class="lead">Tout composant lourd passe par un seul registre de chargement. Il ajoute la mémoire mesurée de WaveStack et de ses processus enfants au coût estimé du composant, et refuse le chargement si le total dépasse 4 Go. Un modèle servi par Ollama ou llama-server compte aussi : c’est le même modèle, où qu’il tourne. Un modèle cloud, lui, ne coûte rien sur le poste.</p>
+    <p class="lead">Tout composant lourd passe par un seul registre de chargement. Il ajoute la mémoire mesurée de HarnessLab et de ses processus enfants au coût estimé du composant, et refuse le chargement si le total dépasse 4 Go. Un modèle servi par Ollama ou llama-server compte aussi : c’est le même modèle, où qu’il tourne. Un modèle cloud, lui, ne coûte rien sur le poste.</p>
     <div class="panel budget">
       <div class="controls">
         <label for="model" class="eyebrow">Modèle</label>
@@ -474,10 +474,10 @@
         <thead><tr><th>Question</th><th>Décision</th></tr></thead>
         <tbody>
           <tr><td>Moteur d’inférence<span class="who">addendum du PRD</span></td><td><b>llama-cpp-python 0.3.35</b>, dans le processus. Roue CPU précompilée sur l’index d’abetlen, épinglée, sans compilation. Testé avec Qwen3.5-2B : texte brut, tokenizer, gabarit lu dans le GGUF, mémoire libérée à la fermeture. <span class="note">(AD-5, AD-21)</span></td></tr>
-          <tr><td>FR-34 : modèles d’Ollama<span class="who">détection</span></td><td>Lecture directe des manifestes sur le disque, sans lancer Ollama. La couche <code>image.model</code> est un GGUF, chargé par WaveStack lui-même : transparence complète, et aucun second modèle en mémoire. <span class="note">(AD-7)</span></td></tr>
+          <tr><td>FR-34 : modèles d’Ollama<span class="who">détection</span></td><td>Lecture directe des manifestes sur le disque, sans lancer Ollama. La couche <code>image.model</code> est un GGUF, chargé par HarnessLab lui-même : transparence complète, et aucun second modèle en mémoire. <span class="note">(AD-7)</span></td></tr>
           <tr><td>FR-34 : texte brut vers un serveur local<span class="who">palier 2</span></td><td>Seulement les points d’entrée natifs en texte brut : <code>/api/generate</code> avec <code>raw: true</code> chez Ollama, <code>/completion</code> chez llama-server. <b>Pas d’interface « compatible OpenAI »</b> vers un serveur local en V1 : celle d’Ollama réapplique son propre gabarit. Le format chat ne sert qu’aux modèles cloud. <span class="note">(AD-5)</span></td></tr>
           <tr><td>FR-43 : modèle cloud<span class="who">ajout du 2026-09-24</span></td><td>Option explicite, choisie au diagnostic après un avertissement confirmé. Un seul adaptateur <code>openai_chat</code>, sur le client tracé de <code>net</code>, sans dépendance nouvelle. Préréglages Groq et Mistral déclarés en configuration. <span class="note">(AD-4, AD-5, AD-20, AD-21)</span></td></tr>
-          <tr><td>NFR-2 : serveur externe dans les 4 Go</td><td>Il compte dans le budget. WaveStack libère alors son propre modèle, et <b>refuse</b> un modèle qui ferait dépasser 4 Go. <span class="note">(AD-8)</span></td></tr>
+          <tr><td>NFR-2 : serveur externe dans les 4 Go</td><td>Il compte dans le budget. HarnessLab libère alors son propre modèle, et <b>refuse</b> un modèle qui ferait dépasser 4 Go. <span class="note">(AD-8)</span></td></tr>
           <tr><td>NFR-8 : appels au modèle par tour</td><td><b>6</b> dans le contexte principal, dont 2 nouveaux essais au plus après un appel mal formé ; <b>4</b> pour le sous-agent, sur un compteur propre. Une action forcée ne compte pas. Réglable dans l’interface, pour provoquer la limite en démonstration. <span class="note">(AD-10)</span></td></tr>
           <tr><td>NFR-1 : plafond de la fenêtre</td><td><b>4 096 tokens</b>, dont 512 réservés à la sortie (1 536 avec le raisonnement), réglable dans l’interface. La documentation complète s’illustre avec Microsoft Learn ; data.gouv.fr en documentation complète est le dépassement volontaire qui mène au lazy loading. Valeur définitive après le banc de mesure. <span class="note">(AD-9)</span></td></tr>
         </tbody>
@@ -489,7 +489,7 @@
   <section id="cloud" aria-labelledby="h-cloud">
     <div class="eyebrow">6 · FR-43, en option</div>
     <h2 id="h-cloud">Modèle cloud : le même harnais, une part hors du poste</h2>
-    <p class="lead">Un modèle cloud montre que le même harnais pilote des modèles beaucoup plus gros, et beaucoup plus vite. En contrepartie, le fournisseur applique lui-même le gabarit et lit les appels d’outils. WaveStack le montre au lieu de le cacher : estimations marquées « ≈ », modèle dessiné dans la zone Réseau, avertissement au choix.</p>
+    <p class="lead">Un modèle cloud montre que le même harnais pilote des modèles beaucoup plus gros, et beaucoup plus vite. En contrepartie, le fournisseur applique lui-même le gabarit et lit les appels d’outils. HarnessLab le montre au lieu de le cacher : estimations marquées « ≈ », modèle dessiné dans la zone Réseau, avertissement au choix.</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Sujet</th><th>Règle</th></tr></thead>
@@ -528,7 +528,7 @@
     </div>
   </section>
 
-  <footer>Vue lisible dérivée du spine d’architecture de WaveStack, 2026-09-24. En cas d’écart, le spine fait foi.</footer>
+  <footer>Vue lisible dérivée du spine d’architecture de HarnessLab, 2026-09-24. En cas d’écart, le spine fait foi.</footer>
 </div>
 
 <script>
@@ -541,7 +541,7 @@
     engine: { t: 'llama-cpp-python', tag: 'local', d: 'Le modèle tourne dans le processus. Il reçoit les ids de tokens déjà rendus par le harnais, gabarit compris : rien n’y est ajouté. Le sous-agent réutilise la même instance, avec son propre contexte. Quand un modèle cloud est choisi, ce modèle local est libéré.', ads: ['AD-4', 'AD-5', 'AD-6', 'AD-11'] },
     mcplocal: { t: 'Serveur MCP local', tag: 'local', d: 'Processus Python séparé, en stdio, lancé à l’activation de la brique MCP et arrêté à sa désactivation. Il montre qu’un serveur MCP est un processus distinct du harnais, même sur le poste.', ads: ['AD-21', 'AD-14'] },
     probe: { t: 'Sonde GGUF', tag: 'local', d: 'Tout GGUF jamais chargé est d’abord ouvert dans un processus enfant, qui mesure sa mémoire. Un fichier qui plante la sonde ne plante pas la démonstration.', ads: ['AD-7', 'AD-8'] },
-    ext: { t: 'Ollama ou llama-server', tag: 'local', d: 'Facultatif, déjà lancé par l’utilisateur, jamais par WaveStack. Utilisé seulement par ses points d’entrée en texte brut. Sa mémoire compte dans le budget de 4 Go.', ads: ['AD-5', 'AD-7', 'AD-8'] },
+    ext: { t: 'Ollama ou llama-server', tag: 'local', d: 'Facultatif, déjà lancé par l’utilisateur, jamais par HarnessLab. Utilisé seulement par ses points d’entrée en texte brut. Sa mémoire compte dans le budget de 4 Go.', ads: ['AD-5', 'AD-7', 'AD-8'] },
     files: { t: 'Données d’exécution', tag: 'file', d: 'Un seul dossier, hors du dépôt et hors de OneDrive. Seule la session y écrit, par des effets typés. Le schéma de l’application montre la mémoire globale et le journal d’audit comme fichiers locaux. Les clés des modèles cloud y sont dans api_keys.json, chacune liée à l’hôte pour lequel elle a été saisie.', ads: ['AD-20', 'AD-23'] },
     repo: { t: 'Dépôt', tag: 'file', d: 'Tout le contenu pédagogique est en français, sous forme de données : scénarios, explications, skills, corpus, mémoire de démonstration. Ajouter un scénario métier revient à ajouter un fichier. L’index RAG y est livré, déjà calculé.', ads: ['AD-19', 'AD-22'] },
     mcppub: { t: 'Serveurs MCP publics', tag: 'net', d: 'Contactés seulement à l’activation de leur sous-option. Chaque requête JSON-RPC est tracée avec son adresse et son contenu exact avant l’envoi. Un serveur injoignable reste dessiné, marqué indisponible.', ads: ['AD-15', 'AD-12'] },
@@ -708,7 +708,7 @@
   ];
   const PARTS = [
     { k: 'socle', n: 'Socle Python et serveur web', gb: 0.3, c: '#4A4A5E', fixed: true },
-    { k: 'model', n: 'Modèle de langage et son contexte', gb: 1.7, c: '#451DC7', fixed: true },
+    { k: 'model', n: 'Modèle de langage et son contexte', gb: 1.7, c: '#0B6B78', fixed: true },
     { k: 'mcp', n: 'Serveur MCP local (enfant)', gb: 0.06, c: '#6B4EE6', on: true },
     { k: 'emb', n: 'Embedding (Qwen3-Embedding 0.6B)', gb: 0.74, c: '#0E8C7E', on: true },
     { k: 'rer', n: 'Reranker (bge-reranker-v2-m3)', gb: 0.54, c: '#27B060', on: false }
@@ -767,7 +767,7 @@
     ['AD-15', 'outils', 'Sorties réseau : une fabrique, tout est tracé', 'Deux clients configurés à l’identique, trace avant envoi, liste autorisée figée ; clé cloud liée à son hôte, jamais tracée, sans redirection.', 'NFR-3, NFR-4, FR-22, FR-43', 'Une donnée qui sort sans être affichée ; une clé qui part ailleurs.'],
     ['AD-16', 'journal', 'Défaillances contenues', 'Toute erreur devient un événement en français ; le tour se termine proprement. Refus d’un fournisseur cloud : liste fermée, sans nouvel essai.', 'NFR-8, FR-43', 'Un plantage en pleine session.'],
     ['AD-17', 'journal', 'Instantané conversationnel et rejeu', 'Seul l’historique est restauré ; tout le reste est la configuration courante.', 'FR-7, FR-39', 'Un rejeu qui annule le changement à comparer.'],
-    ['AD-18', 'exploit', 'Interface web sans compilation, API protégée', 'JS natif, tout en local, contrôle de l’Origin et de l’hôte, Aptos jamais embarquée.', 'NFR-3, NFR-4, NFR-9', 'Une page tierce qui pilote WaveStack.'],
+    ['AD-18', 'exploit', 'Interface web sans compilation, API protégée', 'JS natif, tout en local, contrôle de l’Origin et de l’hôte, aucune police propriétaire embarquée.', 'NFR-3, NFR-4, NFR-9', 'Une page tierce qui pilote HarnessLab.'],
     ['AD-19', 'exploit', 'Contenus en données, en français', 'Scénarios, skills, corpus en fichiers validés ; un scénario métier = un fichier.', 'FR-38, FR-40, NFR-7', 'Des textes pédagogiques en dur dans le code.'],
     ['AD-20', 'exploit', 'Données d’exécution hors du dépôt', 'Un seul dossier, résolu par config, écrit par la session seule ; schéma unique des modèles cloud, fusionné par identifiant.', 'FR-12, H2, FR-43', 'Des modèles dans OneDrive.'],
     ['AD-21', 'exploit', 'Installation, lancement, diagnostic', 'uv verrouillé, port d’abord, diagnostic dans le terminal et le navigateur ; modèles cloud choisis au diagnostic, avertissement confirmé.', 'FR-35 à FR-37, NFR-5, FR-43', 'Une compilation sur un poste verrouillé.'],

@@ -18,9 +18,9 @@ from test_rag_lab import QUESTION, run, run_status, stage
 from test_rag_lab_decision import ready
 from test_rag_lab_no_index import lab, summary
 
-from wavestack.models.reranker import RerankScore
-from wavestack.rag import exposed
-from wavestack.rag import lab as rag_lab
+from harness_lab.models.reranker import RerankScore
+from harness_lab.rag import exposed
+from harness_lab.rag import lab as rag_lab
 
 LANGS = ("fr", "en", "de")
 

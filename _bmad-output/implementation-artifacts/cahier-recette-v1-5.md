@@ -23,7 +23,7 @@ Préparé le 2026-10-26 à partir de [rapport-run-v1-5.md](rapport-run-v1-5.md).
 
 ## A. Sur ce poste (poste de développement)
 
-Prérequis : WaveStack 1.6.2 lancé depuis `main`, un modèle local chargé, le réseau ouvert et une clé d'API cloud valide pour A3.
+Prérequis : HarnessLab 1.6.2 lancé depuis `main`, un modèle local chargé, le réseau ouvert et une clé d'API cloud valide pour A3.
 
 ### A1. Glossaire depuis les six pages
 - [ ] Ouvrir « Glossaire » depuis chacune des six pages : principale, Diagnostic, Atelier LLM, MCP, RAG, Sécurité.
@@ -39,11 +39,11 @@ Prérequis : WaveStack 1.6.2 lancé depuis `main`, un modèle local chargé, le 
 
 ### A3. Plafond `max_session_usd` atteint au milieu d'un cas (modèle cloud)
 1. [ ] Avec le plafond par défaut (5 $), choisir un modèle cloud et lancer une fois le cas `delegation_sous_agent` (5 appels au plus). Relever le coût d'un appel dans FinOps.
-2. [ ] Arrêter WaveStack. Dans `settings.json` du dossier de données, poser `"finops": {"max_session_usd": X}`, avec X compris entre le coût d'un appel et celui de deux. Relancer WaveStack, puis reprendre le même modèle cloud.
+2. [ ] Arrêter HarnessLab. Dans `settings.json` du dossier de données, poser `"finops": {"max_session_usd": X}`, avec X compris entre le coût d'un appel et celui de deux. Relancer HarnessLab, puis reprendre le même modèle cloud.
 3. [ ] Dans « Évaluer l'agent », lancer ce cas seul, puis lancer la suite.
 - Attendu : le premier appel part et l'appel qui dépasse le plafond n'est pas envoyé. Le cas est « Non lancé » avec la raison « plafond de dépense atteint (X) », jamais « Échoué ». La ligne de l'exécution affiche « · plafond de dépense atteint ». FinOps ne montre aucun appel payant après le refus, et la configuration de la séance est rétablie à la fin.
 - À noter : ce qui arrive aux cas suivants de la suite (non lancés ou lancés).
-4. [ ] Remettre `max_session_usd` à sa valeur et relancer WaveStack.
+4. [ ] Remettre `max_session_usd` à sa valeur et relancer HarnessLab.
 - Écart constaté :
 
 ### A4. Cas en `approval: approve` (H5 accepté, réseau ouvert)
@@ -71,10 +71,10 @@ Prérequis : WaveStack 1.6.2 lancé depuis `main`, un modèle local chargé, le 
 
 ## B. Sur le PC cible (16 Go, CPU seul)
 
-Prérequis : WaveStack 1.6.1 installé comme chez un stagiaire, le modèle local par défaut, la fenêtre par défaut (4 096).
+Prérequis : HarnessLab 1.6.1 installé comme chez un stagiaire, le modèle local par défaut, la fenêtre par défaut (4 096).
 
 ### B1. Mesure des plafonds des 8 cas fournis
-1. [ ] Fermer WaveStack, pour ne pas charger deux modèles sur 16 Go.
+1. [ ] Fermer HarnessLab, pour ne pas charger deux modèles sur 16 Go.
 2. [ ] Lancer `uv run python tools/eval/measure_cases.py --runs 3 --json mesures-pc-cible.json`. Un essai peut durer jusqu'à 15 minutes : prévoir la durée en conséquence.
 3. [ ] Lire le tableau. Attendu : un plafond proposé (max des essais réussis + 1) pour 7 cas. `h5_refuse_sans_rappel` reste à 2 (plafond fixé par le contrat), et aucun cas n'est « non mesurable ici » (la fenêtre est à 4 096).
 4. [ ] Pour un cas sans essai réussi, noter ses appels et ses erreurs, sans recopier de plafond : c'est un constat de recette.

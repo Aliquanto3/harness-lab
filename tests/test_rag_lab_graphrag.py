@@ -21,15 +21,15 @@ from test_rag_erasure import client_for
 from test_rag_lab import ended, stage, wait_idle
 from test_rag_lab_no_index import cloud, lab, preset, presets, summary, update
 
-from wavestack import config
-from wavestack.models.engine import CancelToken
-from wavestack.rag import graph as rag_graph
-from wavestack.rag import index as rag_index
-from wavestack.rag import lab as rag_lab
-from wavestack.rag import workcopy
-from wavestack.rag.corpus import load_rag_questions, split_text
-from wavestack.session.app_session import SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.models.engine import CancelToken
+from harness_lab.rag import graph as rag_graph
+from harness_lab.rag import index as rag_index
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag import workcopy
+from harness_lab.rag.corpus import load_rag_questions, split_text
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace.journal import get_journal
 
 QUESTIONS = {q.id: q.question_text for q in load_rag_questions("fr")}
 CRISIS = QUESTIONS["q_multi_crise"]

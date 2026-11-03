@@ -28,15 +28,15 @@ from test_rag_lab import (
     wait_idle,
 )
 
-from wavestack import config, greenops
-from wavestack.greenops import Impact, Measure, Probe, StageCost
-from wavestack.messages import render
-from wavestack.rag import lab as rag_lab
-from wavestack.rag import workcopy
-from wavestack.rag.corpus import chunk_corpus, load_rag_content
-from wavestack.session.app_session import SendRefused
-from wavestack.trace.catalog import PAYLOAD_MODELS
-from wavestack.trace.journal import get_journal
+from harness_lab import config, greenops
+from harness_lab.greenops import Impact, Measure, Probe, StageCost
+from harness_lab.messages import render
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag import workcopy
+from harness_lab.rag.corpus import chunk_corpus, load_rag_content
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace.catalog import PAYLOAD_MODELS
+from harness_lab.trace.journal import get_journal
 
 
 @pytest.fixture

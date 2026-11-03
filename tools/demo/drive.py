@@ -1,10 +1,10 @@
-"""Drive a running WaveStack for the README demo: screenshots and a manifest per sequence.
+"""Drive a running HarnessLab for the README demo: screenshots and a manifest per sequence.
 
 Six sequences, one folder each under `<frames>`: `main`, the « LLM nu » scenario then « Outils
 natifs » on the same prompt; `map`, the harness map of that conversation; `llm`, the Atelier LLM's
 three stages (INPUT, TRANSFORMATION, OUTPUT) on a sentence to complete; `rag`, the Atelier
 recherche documentaire's guided tour then its Fiches tab; `mcp`, the Atelier MCP's handshake with
-the local server; `security`, the Sécurité page. WaveStack must already run on 127.0.0.1:8420, in
+the local server; `security`, the Sécurité page. HarnessLab must already run on 127.0.0.1:8420, in
 French, with a local model loaded (see README.md next to this file). `--channel` picks the browser
 (`chrome` by default, `msedge` where Chrome is not installed).
 """
@@ -282,7 +282,7 @@ if __name__ == "__main__":
         "mcp": mcp_sequence,
         "security": security_sequence,
     }
-    parser = argparse.ArgumentParser(description="Capture WaveStack for the README demo.")
+    parser = argparse.ArgumentParser(description="Capture HarnessLab for the README demo.")
     parser.add_argument("frames", type=Path, help="dossier des captures")
     parser.add_argument(
         "sequence", nargs="*", choices=list(sequences), help="prises à refaire (toutes par défaut)"
@@ -291,9 +291,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     state = api_state()
     if (state.get("session_state") or {}).get("language") != "fr":
-        sys.exit("WaveStack doit tourner en français (les libellés cherchés sont en français).")
+        sys.exit("HarnessLab doit tourner en français (les libellés cherchés sont en français).")
     if session_state() != "idle":
-        sys.exit("WaveStack doit avoir un modèle chargé et attendre (état « idle »).")
+        sys.exit("HarnessLab doit avoir un modèle chargé et attendre (état « idle »).")
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(channel=args.channel)
         page = browser.new_page(viewport=VIEWPORT)

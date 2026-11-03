@@ -50,7 +50,7 @@
           "deterministic": true,
           "max_gap": 0.0
         },
-        "guard": "wavestack.net.guard",
+        "guard": "harness_lab.net.guard",
         "id": "anyjev",
         "peak_before_load_mb": 1934,
         "probabilistic": true,
@@ -320,7 +320,7 @@
           "deterministic": true,
           "max_gap": 0.0
         },
-        "guard": "wavestack.net.guard",
+        "guard": "harness_lab.net.guard",
         "id": "deberta_xsmall",
         "onnx_inputs": [
           "attention_mask",
@@ -1336,7 +1336,7 @@
           "deterministic": true,
           "max_gap": 0.0
         },
-        "guard": "wavestack.net.guard",
+        "guard": "harness_lab.net.guard",
         "id": "nli_mdeberta",
         "onnx_inputs": [
           "attention_mask",
@@ -2087,7 +2087,7 @@
           "deterministic": true,
           "max_gap": 0.0
         },
-        "guard": "wavestack.net.guard",
+        "guard": "harness_lab.net.guard",
         "id": "reranker_livre",
         "peak_before_load_mb": 1934,
         "probabilistic": false,
@@ -2207,7 +2207,7 @@
           "deterministic": true,
           "max_gap": 0.0
         },
-        "guard": "wavestack.net.guard",
+        "guard": "harness_lab.net.guard",
         "id": "slm_juge",
         "peak_before_load_mb": 1933,
         "probabilistic": true,
@@ -2451,7 +2451,7 @@
       "kind": "local",
       "label": "Strands Decider 2B hobson v19 (port ONNX q8)",
       "published": "",
-      "reason": "Fail('[ONNXRuntimeError] : 1 : FAIL : Load model from C:\\\\Users\\\\Utilisateur\\\\.cache\\\\wavestack-bench\\\\hf\\\\models--onnx-community--strands-decider-2B-hobson-v19-ONNX\\\\snapshots\\\\31a83e0244b26d939ae33f87189d6c8204003e53\\\\onnx\\\\model_quantized.onnx failed:Fatal error: com.microsoft:CausalConvWithState",
+      "reason": "Fail('[ONNXRuntimeError] : 1 : FAIL : Load model from C:\\\\Users\\\\Utilisateur\\\\.cache\\\\harness-lab-bench\\\\hf\\\\models--onnx-community--strands-decider-2B-hobson-v19-ONNX\\\\snapshots\\\\31a83e0244b26d939ae33f87189d6c8204003e53\\\\onnx\\\\model_quantized.onnx failed:Fatal error: com.microsoft:CausalConvWithState",
       "status": "discarded"
     },
     "typesafe/jev-1.14": {

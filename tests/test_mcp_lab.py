@@ -30,14 +30,14 @@ from test_mcp import (
 from test_tools import QWEN, call
 from test_turn import _run
 
-from wavestack import config
-from wavestack.mcp import lab as mcp_lab
-from wavestack.mcp.servers import load_local_tools
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.trace.scope import TraceScope
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.mcp import lab as mcp_lab
+from harness_lab.mcp.servers import load_local_tools
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.trace.scope import TraceScope
+from harness_lab.web.app import create_app
 
 # The fixtures of test_mcp.py: its loop (AD-24) and its in-process public servers.
 loop = test_mcp.loop
@@ -364,7 +364,7 @@ def test_the_content_needs_every_method_and_the_resource_template():
 def test_before_covers_every_server_including_github():
     """CAP-8: `BEFORE` (the "Avant MCP" schema's rows) is `servers.ALL_IDS`, github included;
     `content/mcp_lab.yaml`'s `before.integrations` validates against it (real file, real load)."""
-    from wavestack.mcp.servers import ALL_IDS
+    from harness_lab.mcp.servers import ALL_IDS
 
     assert mcp_lab.BEFORE == ALL_IDS
     assert "github" in mcp_lab.BEFORE
@@ -376,7 +376,7 @@ def test_before_covers_every_server_including_github():
 @pytest.mark.parametrize("lang", ["fr", "en", "de"])
 def test_every_server_has_its_source_texts_github_included(lang):
     """CAP-8: github's source line ("Avant", "Avec", Séquence) is never empty."""
-    from wavestack.mcp.servers import ALL_IDS
+    from harness_lab.mcp.servers import ALL_IDS
 
     servers = mcp_lab.load_lab_content(lang).servers
     assert set(servers) == set(ALL_IDS)
@@ -434,7 +434,7 @@ def test_local_handshake_lists_the_three_primitives_and_leaves_the_brick(loop):
     events = lab_events(mark)
     started = one(events, "mcp_lab_exchange_started")
     assert (started["exchange"], started["by"], started["transport"]) == ("connect", None, "stdio")
-    assert started["launch_text"] == "lance le serveur : python -m wavestack.mcp.local_server fr"
+    assert started["launch_text"] == "lance le serveur : python -m harness_lab.mcp.local_server fr"
     assert events[0].kind == "mcp_lab_exchange_started" and events[-1].kind.endswith("_ended")
     shape = [(e.payload["direction"], e.payload["method"]) for e in messages]
     assert shape == [
@@ -476,7 +476,7 @@ def test_local_handshake_lists_the_three_primitives_and_leaves_the_brick(loop):
     assert ended["status"] == "ok" and ended["error_kind"] is None
     assert ended["connection"] == "open" and ended["failed_seq"] is None
     assert ended["primitives"] == {"tools": True, "resources": True, "prompts": True}
-    assert ended["server_info"]["name"] == "wavestack-glossaire" and ended["list_errors"] == []
+    assert ended["server_info"]["name"] == "harness-lab-glossaire" and ended["list_errors"] == []
     (resource,) = ended["resources"]
     assert (resource["uri"], resource["mime_type"]) == ("glossary://terms", "text/plain")
     (prompt,) = ended["prompts"]
@@ -1022,7 +1022,7 @@ def test_german_page_texts_and_the_local_tools_in_german(loop):
     try:
         state = session.mcp_lab_state()
         assert state["content"]["title_text"].startswith("MCP-Werkstatt")
-        assert state["servers"][0]["label_text"] == "WaveStack-Glossar"
+        assert state["servers"][0]["label_text"] == "HarnessLab-Glossar"
         _, messages, ended = connect(session)
         assert ended["status"] == "ok"
         german = load_local_tools("de")

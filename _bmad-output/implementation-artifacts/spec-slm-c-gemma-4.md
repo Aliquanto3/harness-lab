@@ -14,7 +14,7 @@ context: []
 
 ## Intent
 
-**Problem:** Gemma 4 E2B et E4B chargent dans WaveStack, mais sans outils. Leur gabarit a son propre format d'appel, `<|tool_call>call:calculator{expression:<|"|>12*37<|"|>}<tool_call|>`. Leur raisonnement passe par un canal `<|channel>thought\n…<channel|>` que les balises `<think>` ne voient pas : la variable `enable_thinking` est détectée, mais la pensée s'afficherait comme réponse.
+**Problem:** Gemma 4 E2B et E4B chargent dans HarnessLab, mais sans outils. Leur gabarit a son propre format d'appel, `<|tool_call>call:calculator{expression:<|"|>12*37<|"|>}<tool_call|>`. Leur raisonnement passe par un canal `<|channel>thought\n…<channel|>` que les balises `<think>` ne voient pas : la variable `enable_thinking` est détectée, mais la pensée s'afficherait comme réponse.
 
 **Approach:** Une famille `gemma4`, reconnue au gabarit (`<|turn>` et `<|tool_call>call:`), avec un lecteur `gemma4` pour la syntaxe d'arguments du gabarit (macro `format_argument`). Les balises de raisonnement deviennent `("<|channel>thought", "<channel|>")`, et la fin de tour est `<turn|>`. Le modèle reste facultatif : au moins 3,1 Go en Q4_K_M, il est à réserver aux postes de 16 Go.
 
@@ -52,10 +52,10 @@ context: []
 
 ## Code Map
 
-- `src/wavestack/models/capabilities.py:47-103` -- branche `gemma4` (avant la branche générique) ; `_THINK_TAGS` n'est pas le bon couple pour cette famille.
-- `src/wavestack/tools/parser.py` -- lecteur `gemma4` sur le modèle de `_parse_minicpm5` (balises propres, bloc entier) ; `tool_call_tags` dans `capabilities.py` gagne `("<|tool_call>", "<tool_call|>")`.
-- `src/wavestack/context/render.py:127-159` -- `reasoning_wrap` : vérifier qu'il trouve le bloc de pensée de Gemma 4 (`<|channel>thought\n`, `\n<channel|>`), sinon ajuster la sonde.
-- `src/wavestack/session/app_session.py:~8503` -- `in_reasoning` est déduit de `rendered.prompt.rstrip().endswith(tags[0])` : vérifier avec la balise `<|channel>thought`.
+- `src/harness_lab/models/capabilities.py:47-103` -- branche `gemma4` (avant la branche générique) ; `_THINK_TAGS` n'est pas le bon couple pour cette famille.
+- `src/harness_lab/tools/parser.py` -- lecteur `gemma4` sur le modèle de `_parse_minicpm5` (balises propres, bloc entier) ; `tool_call_tags` dans `capabilities.py` gagne `("<|tool_call>", "<tool_call|>")`.
+- `src/harness_lab/context/render.py:127-159` -- `reasoning_wrap` : vérifier qu'il trouve le bloc de pensée de Gemma 4 (`<|channel>thought\n`, `\n<channel|>`), sinon ajuster la sonde.
+- `src/harness_lab/session/app_session.py:~8503` -- `in_reasoning` est déduit de `rendered.prompt.rstrip().endswith(tags[0])` : vérifier avec la balise `<|channel>thought`.
 - `content/messages.yaml`, `content/i18n/{en,de}/messages.yaml` (`tools.parser`) -- messages `gemma4_*`.
 - `content/models/publishers.yaml` -- `gemma` reconnaît l'architecture `gemma4` (à confirmer par un test dans `tests/test_model_catalog.py:455`).
 - `tests/test_tool_parser_minicpm5.py` -- modèle de structure des tests (lecteur, capacités, séparateur, rendu, cycle complet).
@@ -64,7 +64,7 @@ context: []
 
 **Execution:**
 - [ ] `tests/fixtures/gemma4_chat_template.jinja` -- gabarit vérifié contre l'en-tête.
-- [ ] `src/wavestack/models/capabilities.py`, `src/wavestack/tools/parser.py` -- famille, balises, lecteur.
+- [ ] `src/harness_lab/models/capabilities.py`, `src/harness_lab/tools/parser.py` -- famille, balises, lecteur.
 - [ ] `content/*messages.yaml` -- messages en trois langues.
 - [ ] `tests/test_tool_parser_gemma4.py` -- matrice, capacités, séparateur, rendu avec outil et appel passé, cycle complet calculatrice avec Raisonnement activé et désactivé.
 - [ ] `docs/modeles.md` -- ligne Gemma 4 dans la table des modèles locaux (spec B), avec l'avertissement sur la mémoire.

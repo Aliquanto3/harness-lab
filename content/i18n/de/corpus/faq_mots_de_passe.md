@@ -1,6 +1,6 @@
 # FAQ Passwörter (präpariertes Dokument, inaktiv)
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses pädagogische Dokument demonstriert einen PoisonedRAG-Angriff (CAP-13) und ist standardmäßig nie aktiv. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses pädagogische Dokument demonstriert einen PoisonedRAG-Angriff (CAP-13) und ist standardmäßig nie aktiv. -->
 
 Dieses pädagogische Dokument dient den Angriffsdemonstrationen am Korpus (Storys 17 und 18): Es wird nie indexiert, solange es inaktiv ist, und enthält zwei absichtliche Fallen, die sichtbar bleiben, um nach der Aktivierung des Dokuments untersucht zu werden.
 

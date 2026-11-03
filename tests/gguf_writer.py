@@ -1,7 +1,7 @@
 """Writes a GGUF header (no tensor) for the tests: `write_gguf(path, metadata)`.
 
 Integers are uint32 (a negative one int32), floats float32, booleans bool, strings UTF-8,
-lists arrays of uint32 (or of strings). Enough for `wavestack.models.gguf_meta`.
+lists arrays of uint32 (or of strings). Enough for `harness_lab.models.gguf_meta`.
 """
 
 from __future__ import annotations

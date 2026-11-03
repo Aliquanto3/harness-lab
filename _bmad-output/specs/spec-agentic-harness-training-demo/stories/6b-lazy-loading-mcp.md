@@ -58,12 +58,12 @@ baseline_commit: '202452b1e123edc9e266d6317ebeffaf9bde3c03'
 
 ## Code Map
 
-- `src/wavestack/context/segments.py` (L33) : `Part` est un NamedTuple `(kind, text, brick, component, group)`. Ajouter `Joined(parts: tuple[Part, ...], sep: str)`.
-- `src/wavestack/context/render.py` : dans `prepare` (L243-253), un `Joined` donne le texte `sep.join(textes)` au rendu envoyé et `sep.join(textes marqués)` au rendu d'attribution. Les séparateurs vont à `template`. Chaque ligne a son propre `group` (le nom exposé de l'outil), sinon `_merge_groups` (L188) les fusionne. `_locate_in_order` (L171) fonctionne déjà part par part. Le gabarit Qwen fait `tojson` : `\n` est échappé de la même façon dans les deux rendus.
-- `src/wavestack/session/effects.py` (nouveau) : `ToolDocLoaded(BaseModel){kind: Literal["tool_doc_loaded"], tool: str}` et `Effect = ToolDocLoaded`, union à un seul membre, extensible (AD-23).
-- `src/wavestack/tools/registry.py` (L31-52) : `ToolSpec` reçoit `brick: str | None = None`, que la brique prend en priorité sur `component.split(".")[0]`. `run` peut renvoyer `ToolReply(text, effects)` (NamedTuple dans `effects.py`). `add` (L92-113) écarte une spec sans `description` qui n'est pas dans `content/tools.yaml` : le méta-outil fournit la sienne. La description est construite à chaque tour (voir `_tool_definitions`).
-- `src/wavestack/tools/executor.py` : `check(call, enabled, loadable=())` (L45) renvoie le message « documentation non chargée » quand `call.name` est dans `loadable` mais pas dans `enabled`. `run(call, cancel, effects: list | None = None)` (L82) déballe un `ToolReply`, ajoute ses effets à `effects` et renvoie le texte comme avant.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/context/segments.py` (L33) : `Part` est un NamedTuple `(kind, text, brick, component, group)`. Ajouter `Joined(parts: tuple[Part, ...], sep: str)`.
+- `src/harness_lab/context/render.py` : dans `prepare` (L243-253), un `Joined` donne le texte `sep.join(textes)` au rendu envoyé et `sep.join(textes marqués)` au rendu d'attribution. Les séparateurs vont à `template`. Chaque ligne a son propre `group` (le nom exposé de l'outil), sinon `_merge_groups` (L188) les fusionne. `_locate_in_order` (L171) fonctionne déjà part par part. Le gabarit Qwen fait `tojson` : `\n` est échappé de la même façon dans les deux rendus.
+- `src/harness_lab/session/effects.py` (nouveau) : `ToolDocLoaded(BaseModel){kind: Literal["tool_doc_loaded"], tool: str}` et `Effect = ToolDocLoaded`, union à un seul membre, extensible (AD-23).
+- `src/harness_lab/tools/registry.py` (L31-52) : `ToolSpec` reçoit `brick: str | None = None`, que la brique prend en priorité sur `component.split(".")[0]`. `run` peut renvoyer `ToolReply(text, effects)` (NamedTuple dans `effects.py`). `add` (L92-113) écarte une spec sans `description` qui n'est pas dans `content/tools.yaml` : le méta-outil fournit la sienne. La description est construite à chaque tour (voir `_tool_definitions`).
+- `src/harness_lab/tools/executor.py` : `check(call, enabled, loadable=())` (L45) renvoie le message « documentation non chargée » quand `call.name` est dans `loadable` mais pas dans `enabled`. `run(call, cancel, effects: list | None = None)` (L82) déballe un `ToolReply`, ajoute ses effets à `effects` et renvoie le texte comme avant.
+- `src/harness_lab/session/app_session.py` :
   - État : `_mcp_lazy: bool = False` et `_loaded_docs: set[str]` (la conversation, AD-17). `set_mcp_mode(lazy)` est une intention de classe (a) : l'ajouter au tuple `_sent`/`_pending_ids` (L221-226, L330-343, L798-804), puis émettre `bricks_changed` et l'aperçu. `_emit_bricks` (L406) ajoute `mode: "full"|"lazy"` au payload de la brique `mcp`. `_tool_options` (L359) et `set_tool` (L831) écartent la source `harness`.
   - `TurnState` (L153) reçoit `loadable: tuple[str, ...]`, les outils MCP disponibles non chargés. `build_turn_state` (L601) : en documentation complète, rien ne change ; en lazy loading, `tools` reçoit les outils MCP disponibles déjà chargés, plus `load_tool_doc` si `loadable` n'est pas vide.
   - Le méta-outil est enregistré une fois au démarrage, à côté des outils natifs (L209) ; son `run` lit le registre et renvoie `ToolReply`.
@@ -73,17 +73,17 @@ baseline_commit: '202452b1e123edc9e266d6317ebeffaf9bde3c03'
   - `_step_messages` (L636) : `step.get("kind", TOOL_RESULT)` pendant le tour, `step["stub"]` s'il existe dans l'historique.
   - `clear_conversation` (L1029) vide aussi `_loaded_docs`. `_OVERFLOW_CAUSES_FR[TOOL_CATALOG]` (L96) : texte choisi selon `_mcp_lazy`, avec la piste du lazy loading en documentation complète.
 - `content/bricks/mcp.yaml` : `explanation_fr` complétée par les deux modes et l'écart de tokens. `content/mcp.yaml` : `lazy_label_fr`, et les textes de `load_tool_doc` (`label_fr` « Chargement de la documentation », phrase d'introduction, description du paramètre `tool`).
-- `src/wavestack/web/app.py` (L201-208, sur le modèle de `mcp_server`) : `POST /api/intentions/mcp_mode {lazy: bool}`.
-- `src/wavestack/web/static/app.js` : `brickOptions` (L412-446) ajoute l'interrupteur quand `brick.id === "mcp"`, et `setOption` (L448) l'envoie vers `/mcp_mode`. `toolCard` (L810) affiche le badge MCP quand la source commence par `mcp`, ou quand elle vaut `harness` pour la brique `mcp`.
+- `src/harness_lab/web/app.py` (L201-208, sur le modèle de `mcp_server`) : `POST /api/intentions/mcp_mode {lazy: bool}`.
+- `src/harness_lab/web/static/app.js` : `brickOptions` (L412-446) ajoute l'interrupteur quand `brick.id === "mcp"`, et `setOption` (L448) l'envoie vers `/mcp_mode`. `toolCard` (L810) affiche le badge MCP quand la source commence par `mcp`, ou quand elle vaut `harness` pour la brique `mcp`.
 - `tests/test_mcp_lazy.py` (nouveau) : réutilise `mcp_session`, `enable`, `wait_for`, `loop`, `web` de `tests/test_mcp.py` (L62-182), `call` et `_segments` de `tests/test_tools.py`, et `_run` de `tests/test_turn.py`. Serveur local réel et `McpWeb` pour data.gouv.fr ; `FakeEngine` avec des sorties scriptées.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/context/segments.py`, `context/render.py` -- `Joined` et son rendu avec sentinelles -- AD-4
-- [x] `src/wavestack/session/effects.py`, `tools/registry.py`, `tools/executor.py` -- `ToolDocLoaded`, `ToolReply`, `ToolSpec.brick`, `check(loadable)`, effets de `run` -- AD-23, AD-25
-- [x] `src/wavestack/session/app_session.py`, `content/bricks/mcp.yaml`, `content/mcp.yaml` -- mode, méta-outil, `loadable`/`loaded_in_turn`, talon, déchargement, cause de dépassement -- AD-4, AD-17, AD-25
-- [x] `src/wavestack/web/app.py`, `static/app.js` -- intention `mcp_mode`, interrupteur, badge -- AD-1, AD-18
+- [x] `src/harness_lab/context/segments.py`, `context/render.py` -- `Joined` et son rendu avec sentinelles -- AD-4
+- [x] `src/harness_lab/session/effects.py`, `tools/registry.py`, `tools/executor.py` -- `ToolDocLoaded`, `ToolReply`, `ToolSpec.brick`, `check(loadable)`, effets de `run` -- AD-23, AD-25
+- [x] `src/harness_lab/session/app_session.py`, `content/bricks/mcp.yaml`, `content/mcp.yaml` -- mode, méta-outil, `loadable`/`loaded_in_turn`, talon, déchargement, cause de dépassement -- AD-4, AD-17, AD-25
+- [x] `src/harness_lab/web/app.py`, `static/app.js` -- intention `mcp_mode`, interrupteur, badge -- AD-1, AD-18
 - [x] `tests/test_mcp_lazy.py` -- les 11 lignes de la matrice ; avec `Joined` sur le gabarit Qwen et `FakeEngine`, aucun `harness_error` d'attribution et une somme des tokens égale au total. Le test `model` de `tests/test_render_reference.py` prévoit déjà le cas « `load_tool_doc` avec deux serveurs » (AD-4) : y ajouter ce cas.
 
 **Acceptance Criteria:**
@@ -93,7 +93,7 @@ baseline_commit: '202452b1e123edc9e266d6317ebeffaf9bde3c03'
 
 ## Implementation Notes
 
-- Implémenté par un sous-agent (dispatch) ; j'ai relu le diff dans cette session. Vérifié : `ruff check` et `ruff format --check` propres, `node --check` propre. `pytest` : 205 passed, 2 deselected, 1 échec hors story (`test_tokens_css_matches_design_frontmatter`), dû aux tokens de la refonte « atelier de construction » ajoutés à `DESIGN.md`, modification non commitée qui ne touche pas la 6b. Test `model` sur Qwen3.5-9B (`WAVESTACK_TEST_GGUF`) avec `load_tool_doc` et deux serveurs : lancé par le sous-agent, qui rapporte qu'il passe ; non relancé dans cette session.
+- Implémenté par un sous-agent (dispatch) ; j'ai relu le diff dans cette session. Vérifié : `ruff check` et `ruff format --check` propres, `node --check` propre. `pytest` : 205 passed, 2 deselected, 1 échec hors story (`test_tokens_css_matches_design_frontmatter`), dû aux tokens de la refonte « atelier de construction » ajoutés à `DESIGN.md`, modification non commitée qui ne touche pas la 6b. Test `model` sur Qwen3.5-9B (`HARNESS_LAB_TEST_GGUF`) avec `load_tool_doc` et deux serveurs : lancé par le sous-agent, qui rapporte qu'il passe ; non relancé dans cette session.
 - Audit de la matrice : les 11 lignes sont couvertes par `tests/test_mcp_lazy.py`, tous les tests ont tourné. Le serveur local est un vrai processus enfant, data.gouv.fr est simulé par `McpWeb`.
 - Ajouts hors Code Map : `ToolSpec.label_fr` (libellé « Chargement de la documentation ») ; `BrickState.mode`/`lazy_label_fr` dans `trace/catalog.py` ; `McpContent.load_tool_doc`/`lazy_label_fr` dans `mcp/servers.py`. Pour un outil du harnais, `phase_label` porte le libellé seul.
 - Choix : `load_tool_doc` lit l'état courant des serveurs, pas le `TurnState` (relevé en revue, BH3, rejeté). Une documentation chargée l'est dès l'application de l'effet, même si le tour s'arrête ensuite (EC3, rejeté). La ligne coupée garde 120 caractères, suivis de « … ».
@@ -144,7 +144,7 @@ Joined((Part(TOOL_CATALOG, intro, "mcp", "core.harness", "load_tool_doc"),
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur
 - `uv run pytest` -- expected: tous les tests passent (tests `model` exclus)
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` : brique MCP, data.gouv.fr coché, envoyer un message (dépassement) ; cocher « Lazy loading » et comparer la jauge ; demander « Que veut dire MCP ? » et suivre le chargement puis l'appel ; vider la conversation.
+- `uv run harness-lab` : brique MCP, data.gouv.fr coché, envoyer un message (dépassement) ; cocher « Lazy loading » et comparer la jauge ; demander « Que veut dire MCP ? » et suivre le chargement puis l'appel ; vider la conversation.

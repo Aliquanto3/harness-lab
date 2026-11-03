@@ -15,10 +15,10 @@ from test_bricks import HEADERS  # noqa: F401  (the fixtures of the RAG tests)
 from test_rag import build
 from test_rag_lab import _client, ready
 
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import load_rag_questions
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import load_rag_questions
 
-STATIC = Path(__file__).resolve().parent.parent / "src" / "wavestack" / "web" / "static"
+STATIC = Path(__file__).resolve().parent.parent / "src" / "harness_lab" / "web" / "static"
 
 
 @pytest.fixture
@@ -63,7 +63,7 @@ def test_a_broken_questions_file_leaves_the_page_without_questions(index, tmp_pa
     # and the page waited for it forever (review of story 4).
     import shutil
 
-    from wavestack import config
+    from harness_lab import config
 
     content = tmp_path / "content"
     shutil.copytree(config.content_dir(), content)

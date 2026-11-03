@@ -9,9 +9,9 @@
 
 ## 1. Résumé du problème
 
-Anaël a demandé un audit : WaveStack est-il à l'état de l'art des harnais agentiques, sur le fond et sur la pédagogie ? La référence est le papier du Wavestone AI Lab (Barbaste et al., *Harness Engineering*, arXiv 2609.00006). Il étudie 11 harnais de code et définit le harnais par 7 sous-systèmes : boucle, intégration LLM, outils, mémoire et contexte, sécurité, orchestration, extensibilité. L'audit s'appuie aussi sur Böckeler (martinfowler.com), OCTO, walkinglabs et SFEIR.
+Anaël a demandé un audit : HarnessLab est-il à l'état de l'art des harnais agentiques, sur le fond et sur la pédagogie ? La référence est le papier du Wavestone AI Lab (Barbaste et al., *Harness Engineering*, arXiv 2609.00006). Il étudie 11 harnais de code et définit le harnais par 7 sous-systèmes : boucle, intégration LLM, outils, mémoire et contexte, sécurité, orchestration, extensibilité. L'audit s'appuie aussi sur Böckeler (martinfowler.com), OCTO, walkinglabs et SFEIR.
 
-Conclusion : WaveStack applique déjà l'essentiel des principes. On y trouve le contexte vu comme une ressource rare, le chargement progressif, l'hygiène du cache, des hooks déterministes, des bornes de boucle, un sous-agent isolé et des flux de données visibles. Cinq écarts restent :
+Conclusion : HarnessLab applique déjà l'essentiel des principes. On y trouve le contexte vu comme une ressource rare, le chargement progressif, l'hygiène du cache, des hooks déterministes, des bornes de boucle, un sous-agent isolé et des flux de données visibles. Cinq écarts restent :
 
 | # | Écart | Nature | Constat dans le dépôt |
 |---|---|---|---|
@@ -47,7 +47,7 @@ Type de changement : nouveau besoin, issu d'une veille. Ce n'est ni un échec ni
 
 ### Numérotation
 
-Les noms de lots ne suivent plus les versions publiées : le tag `v1.2.0` correspond à MiniCPM5-2B, et le lot V1.2 n'est pas livré. « V1.4 » est donc un nom de lot. Le dossier de spec est nommé par thème (`spec-wavestack-etat-de-l-art-harnais`), et le numéro SemVer sera attribué à la livraison.
+Les noms de lots ne suivent plus les versions publiées : le tag `v1.2.0` correspond à MiniCPM5-2B, et le lot V1.2 n'est pas livré. « V1.4 » est donc un nom de lot. Le dossier de spec est nommé par thème (`spec-harness-lab-etat-de-l-art-harnais`), et le numéro SemVer sera attribué à la livraison.
 
 ## 3. Approche recommandée
 
@@ -66,11 +66,11 @@ Options écartées : retour arrière (rien à défaire) ; revue du MVP (le MVP e
 
 ## 4. Propositions détaillées
 
-### 4.1 Nouvelle spec : `_bmad-output/specs/spec-wavestack-etat-de-l-art-harnais/`
+### 4.1 Nouvelle spec : `_bmad-output/specs/spec-harness-lab-etat-de-l-art-harnais/`
 
 Contenu attendu de SPEC.md, à rédiger avec `bmad-spec` :
 
-**Why.** L'audit du 2026-10-24 confirme que WaveStack applique l'essentiel des principes des harnais, et relève cinq écarts. Le lot les corrige, pour que WaveStack partage avec le papier du Wavestone AI Lab (arXiv 2609.00006) un vocabulaire et une carte communs.
+**Why.** L'audit du 2026-10-24 confirme que HarnessLab applique l'essentiel des principes des harnais, et relève cinq écarts. Le lot les corrige, pour que HarnessLab partage avec le papier du Wavestone AI Lab (arXiv 2609.00006) un vocabulaire et une carte communs.
 
 **Capabilities (proposées)**
 
@@ -88,7 +88,7 @@ Contenu attendu de SPEC.md, à rédiger avec `bmad-spec` :
     - le guide du harnais présente les guides et les capteurs (Böckeler), contrôles calculés ou déduits par un modèle ;
     - une consigne de scénario explique que les prompts nomment l'outil parce que le petit modèle en a besoin, et qu'un modèle plus fort se passe de cet échafaudage ;
     - la brique Skills et un scénario de sécurité traitent les skills tiers comme des paquets à vérifier avant installation ;
-    - un rappel d'une ligne liste ce que WaveStack ne montre pas : plateformes (ACP, places de marché), bacs à sable au niveau du système d'exploitation, modes de permission.
+    - un rappel d'une ligne liste ce que HarnessLab ne montre pas : plateformes (ACP, places de marché), bacs à sable au niveau du système d'exploitation, modes de permission.
 - **CAP-3 Carte du harnais** (écart 2)
   - intent : en fin de programme, le participant voit chaque brique placée dans les 7 sous-systèmes du papier, avec son rôle de guide ou de capteur.
   - success :
@@ -146,7 +146,7 @@ Points de contrôle de spec (`spec_checkpoint`) : stories 2 et 4, qui demandent 
 ### 4.3 Renvoi dans la V1.2
 
 ```
-Spec : spec-wavestack-v1-2-atelier-recherche-documentaire/SPEC.md
+Spec : spec-harness-lab-v1-2-atelier-recherche-documentaire/SPEC.md
 Section : Assumptions
 
 AJOUT :
@@ -164,7 +164,7 @@ Raison : éviter deux outils de recherche différents.
 ## 5. Passage de relais
 
 - **Portée** : modérée (nouveau lot, ordre des lots revu).
-- **Étape 1, spec (PM ou Architecte)** : `bmad-spec` crée `spec-wavestack-etat-de-l-art-harnais` à partir de la section 4. Il produit la maquette de la carte et du choix de stratégie, `brownfield.md` (compaction et historique de session, nouvel outil) et `stories.yaml`. Anaël valide la spec avant toute ligne de code.
+- **Étape 1, spec (PM ou Architecte)** : `bmad-spec` crée `spec-harness-lab-etat-de-l-art-harnais` à partir de la section 4. Il produit la maquette de la carte et du choix de stratégie, `brownfield.md` (compaction et historique de session, nouvel outil) et `stories.yaml`. Anaël valide la spec avant toute ligne de code.
 - **Étape 2, développement** : chaîne agent-cost-kit par story (`dev-story` → `second-avis` → `reviewer`), après la V1.3.
 - **Critères de réussite du lot** :
   - en formation, hors ligne, un participant compare RAG et recherche agentique sur une même question ;

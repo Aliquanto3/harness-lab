@@ -11,15 +11,15 @@ from fake_engine import FakeEngine, booted_session
 from test_bricks import HEADERS, _client
 from test_turn import _run
 
-from wavestack import config
-from wavestack.models.capabilities import TOOL_CALL_TAGS, ChannelSplitter
-from wavestack.net.factory import create_client
-from wavestack.session.app_session import AppSession
-from wavestack.tools import network
-from wavestack.tools.native import calculator, read_file
-from wavestack.tools.parser import ToolCall, parse_tool_calls
-from wavestack.tools.registry import ToolError, load_tools_content
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.models.capabilities import TOOL_CALL_TAGS, ChannelSplitter
+from harness_lab.net.factory import create_client
+from harness_lab.session.app_session import AppSession
+from harness_lab.tools import network
+from harness_lab.tools.native import calculator, read_file
+from harness_lab.tools.parser import ToolCall, parse_tool_calls
+from harness_lab.tools.registry import ToolError, load_tools_content
+from harness_lab.trace.journal import get_journal
 
 QWEN = (Path(__file__).parent / "fixtures" / "qwen3_5_chat_template.jinja").read_bytes()
 
@@ -382,7 +382,7 @@ def test_calculator_whitelist_and_bounds():
 
 
 def test_read_file_confined_to_demo_files(tmp_path):
-    assert "WaveStack" in read_file("notes_reunion.txt")
+    assert "HarnessLab" in read_file("notes_reunion.txt")
     assert "confidentiel/budget_projet.txt" in read_file(".")
     escapes = ["../../pyproject.toml", str(tmp_path), "/etc/passwd"]
     if os.name == "nt":  # a backslash separator and UNC paths exist on Windows only
@@ -786,7 +786,7 @@ def test_a_tool_turn_marks_what_the_second_call_read_already():
 def test_qwen35_0_8b_file_gets_the_qwen3_family_and_the_qwen3_coder_reader():
     # Qwen3.5-0.8B shares the architecture and the chat template of Qwen3.5-2B: no new
     # recognition code (the file name does not matter).
-    from wavestack.models.capabilities import capabilities_for
+    from harness_lab.models.capabilities import capabilities_for
 
     engine = FakeEngine(template=QWEN.decode("utf-8"), architecture="qwen35")
     caps = capabilities_for(engine.metadata())

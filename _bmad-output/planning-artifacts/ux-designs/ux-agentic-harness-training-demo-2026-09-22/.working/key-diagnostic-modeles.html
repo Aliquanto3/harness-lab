@@ -15,10 +15,10 @@
    Thème clair. Polices système à la place de Fredoka et Atkinson Hyperlegible (maquette hors ligne).
    Logos : PNG de la banque-visuels réduits, embarqués en data URI. */
 :root {
-  --primary: #451DC7; --primary-soft: #EDE7FE; --accent: #04F06A; --accent-soft: #CAFEE0;
+  --primary: #0B6B78; --primary-soft: #DCEFF1; --accent: #B4500F; --accent-soft: #FBE7D7;
   --ink: #0A0A14; --ink-soft: #4A4A5E; --muted: #8A8A9E; --line: #E6E6EC;
-  --surface: #F6F5FA; --raised: #FFFFFF; --danger: #FF2A49; --danger-soft: #FDE8EB;
-  --network: #FFCA4A; --network-soft: #FFF5D1; --relief: #D9D0F6; --dot: #D6CCF5;
+  --surface: #F7F8F6; --raised: #FFFFFF; --danger: #B42318; --danger-soft: #FDE8EB;
+  --network: #E8A317; --network-soft: #FFF5D1; --relief: #D9D0F6; --dot: #D6CCF5;
   --r-sm: 12px; --r-md: 18px; --r-full: 9999px;
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
   --title: "Fredoka", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
@@ -61,7 +61,7 @@ h2 small { font: 400 15px var(--body); color: var(--ink-soft); }
 .filters .count { margin-left: auto; align-self: center; color: var(--ink-soft); }
 .btn { font: 700 15px var(--body); border-radius: var(--r-full); padding: 8px 18px; min-height: 36px;
   border: 2px solid var(--ink); background: var(--raised); color: var(--ink); box-shadow: 0 3px 0 var(--relief); cursor: pointer; }
-.btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 3px 0 #250F6B; }
+.btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 3px 0 #084E58; }
 .btn-link { border: 0; box-shadow: none; background: none; color: var(--primary); text-decoration: underline; padding: 0; min-height: 0; }
 
 /* Groupe d'éditeur */
@@ -172,7 +172,7 @@ h2 small { font: 400 15px var(--body); color: var(--ink-soft); }
 <body>
 
 <nav class="site-nav" aria-label="Pages">
-  <span class="brand">WaveStack</span>
+  <span class="brand">HarnessLab</span>
   <a href="#">Harnais</a><a href="#">LLM</a><a href="#">RAG</a><a href="#">MCP</a>
   <a href="#" aria-current="page">🛠️ Diagnostic</a>
   <span class="spacer"></span><a href="#">Affichage ▾</a>
@@ -231,13 +231,13 @@ h2 small { font: 400 15px var(--body); color: var(--ink-soft); }
       <section class="sources">
         <h3>Sources</h3>
         <div class="source">
-          <div><b>Fichier GGUF · LM Studio</b> <span class="hint">· moteur interne de WaveStack, tokens candidats disponibles</span>
+          <div><b>Fichier GGUF · LM Studio</b> <span class="hint">· moteur interne de HarnessLab, tokens candidats disponibles</span>
             <div class="path">C:\Users\pascal\.lmstudio\models\lmstudio-community\gemma-3-4b-it-GGUF\gemma-3-4b-it-Q4_K_M.gguf</div></div>
           <span class="src-size">2,5 Go</span><span class="state">Disponible</span>
           <button class="btn btn-primary" type="button">Choisir cette source</button>
         </div>
         <div class="source">
-          <div><b>llama-server · 127.0.0.1:8080</b> <span class="hint">· même fichier, déjà en mémoire (processus distinct de WaveStack)</span>
+          <div><b>llama-server · 127.0.0.1:8080</b> <span class="hint">· même fichier, déjà en mémoire (processus distinct de HarnessLab)</span>
             <div class="path">http://127.0.0.1:8080 · fenêtre bornée à 8 192 par llama-server (-c)</div></div>
           <span class="src-size">≈ 3,1 Go</span><span class="state">Disponible</span>
           <button class="btn btn-primary" type="button">Choisir cette source</button>
@@ -251,7 +251,7 @@ h2 small { font: 400 15px var(--body); color: var(--ink-soft); }
         <section>
           <h3>Capacités</h3>
           <dl>
-            <dt>Fenêtre</dt><dd>8 192 tokens<span class="why">131 072 en natif, bornée par le budget mémoire de WaveStack (6 200 Mo).</span></dd>
+            <dt>Fenêtre</dt><dd>8 192 tokens<span class="why">131 072 en natif, bornée par le budget mémoire de HarnessLab (6 200 Mo).</span></dd>
             <dt>Appel d'outils</dt><dd>Oui<span class="why">Le gabarit déclare des outils.</span></dd>
             <dt>Raisonnement</dt><dd>Non<span class="why">Aucune balise de réflexion dans le gabarit.</span></dd>
             <dt>Prix</dt><dd>—<span class="why">Modèle local : aucun coût par token.</span></dd>

@@ -9,14 +9,14 @@ from fake_engine import FakeEngine, booted_session
 from starlette.testclient import TestClient
 from test_turn import _run
 
-from wavestack import config
-from wavestack.bricks.contract import BrickContent, BrickDeclaration, Component
-from wavestack.bricks.registry import BRICKS, check_panel_groups, check_unique_ids
-from wavestack.session import app_session as app_session_module
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.bricks.contract import BrickContent, BrickDeclaration, Component
+from harness_lab.bricks.registry import BRICKS, check_panel_groups, check_unique_ids
+from harness_lab.session import app_session as app_session_module
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 HEADERS = {"origin": "http://127.0.0.1:8421"}
 
@@ -554,7 +554,7 @@ def test_tools_and_mcp_cards_say_what_leaves_the_workstation_and_where_to_read_i
     assert tools.index("Jours fériés") < tools.index("Résumé Wikipédia")  # registry order
     mcp = cards["mcp"]["outbound_text"]
     assert "data.gouv.fr" in mcp and "Microsoft Learn" in mcp and "Données sortantes" in mcp
-    assert "Glossaire WaveStack" not in mcp  # the local server stays on the workstation
+    assert "Glossaire HarnessLab" not in mcp  # the local server stays on the workstation
     assert "{" not in tools + mcp
     assert cards["skills"]["outbound_text"] is None
     assert tools.startswith("Peuvent sortir du poste : ")  # disabled ones included

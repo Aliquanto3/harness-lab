@@ -2,7 +2,7 @@
 # lecture seule. Lu par `rag/exposed.py` (`load_texts`) à chaque démarrage, dans la langue de la
 # session ; surcouches `content/i18n/{en,de}/rag_mcp.yaml` : mêmes clés, mêmes variables.
 server:
-  instructions_text: "Serveur de démonstration de WaveStack : il cherche dans le corpus fictif Exemplia avec l'architecture RAG composée dans l'atelier, et renvoie des passages cités. Il ne rédige rien : c'est à vous d'écrire la réponse à partir des passages, en les citant."
+  instructions_text: "Serveur de démonstration de HarnessLab : il cherche dans le corpus fictif Exemplia avec l'architecture RAG composée dans l'atelier, et renvoie des passages cités. Il ne rédige rien : c'est à vous d'écrire la réponse à partir des passages, en les citant."
 tools:
   search_documents:
     description_text: "Cherche les passages du corpus fictif Exemplia (entreprise imaginaire) les plus proches d'une question, avec l'architecture RAG exposée. Renvoie au plus top_k passages classés, chacun avec son document, son titre, sa position, son score et une citation. Lecture seule ; les documents réservés aux RH ne sont jamais renvoyés."
@@ -20,7 +20,7 @@ describe:
   composed_label_text: "Chaîne composée"
   stage_text: "{stage} : {option}"
   header_text: "Architecture exposée : {architecture}."
-  corpus_text: "Corpus : les documents fictifs d'Exemplia livrés avec WaveStack, jamais la copie de travail de l'atelier."
+  corpus_text: "Corpus : les documents fictifs d'Exemplia livrés avec HarnessLab, jamais la copie de travail de l'atelier."
   hr_text: "Profil d'accès « tous » : les passages des documents réservés aux RH sont retirés avant la réponse, et leur nombre est dit."
   frozen_text: "La chaîne est figée au démarrage du serveur : une modification dans l'atelier ne compte qu'après un arrêt puis un démarrage."
   not_run_text: "Le serveur exécute le découpage, l'embedding, l'index et la recherche ; ni le Contexte ni la Génération ne sont exécutés pour vous."

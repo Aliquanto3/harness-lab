@@ -1,10 +1,10 @@
-"""Scripted local servers for WaveStack's end-to-end tests (story 18, no real model).
+"""Scripted local servers for HarnessLab's end-to-end tests (story 18, no real model).
 
 `--flavor llama_server` imitates llama-server: `/health`, `/props` (Qwen3.5's template),
 `/v1/models`, `/tokenize` (with pieces), `/detokenize` and `/completion` (SSE), with a
 byte-level tokenizer whose template markers are single tokens. `--flavor ollama` imitates
 an Ollama that serves one model whose GGUF is not on this disk (`/api/tags`, `/api/ps`,
-`/api/generate` for `keep_alive: 0`): WaveStack lists it « incompatible ».
+`/api/generate` for `keep_alive: 0`): HarnessLab lists it « incompatible ».
 
 The answer of `/completion` depends on the prompt the harness rendered: the result of a
 tool if the turn has one, a call to `get_datetime` for « heure » when the tool is offered,

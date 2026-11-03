@@ -333,7 +333,7 @@ scenarios:
       Stellen Sie schließlich den zweiten Prompt: Was Headroom abgeschnitten hat, ist für
       das Modell verloren. Die Kompression verkleinert, was hineingeht, Caveman, was
       herauskommt. Meldet die Karte, dass Headroom nicht installiert ist, führen Sie
-      `uv sync --extra compression` aus und starten Sie WaveStack neu.
+      `uv sync --extra compression` aus und starten Sie HarnessLab neu.
     bricks: [short_memory, system_prompt, global_memory, tools, mcp, skills, hooks, compression]
     tools: [read_file]
     mcp_lazy: true
@@ -502,10 +502,10 @@ scenarios:
     title_text: Eine Bilanz von agent-cost-kit lesen
     description_text: >-
       Die Bausteine des vorigen Szenarios bleiben aktiv. Die Token-Bilanz eines Coding-Agenten
-      hat dieselben Spalten wie WaveStack: „Cache-Lesen“, „Cache-Schreiben 5 Min.“ oder „1
+      hat dieselben Spalten wie HarnessLab: „Cache-Lesen“, „Cache-Schreiben 5 Min.“ oder „1
       Std.“, „Nicht im Cache“ und „Ausgabe“. Senden Sie die drei Prompts und öffnen Sie dann
       „Ausgaben“ in der oberen Leiste. Die Spalte „Diese Unterhaltung“ zählt seit dem letzten
-      „Unterhaltung leeren“, „Seit dem Start“ seit dem Start von WaveStack. Lesen Sie Feld
+      „Unterhaltung leeren“, „Seit dem Start“ seit dem Start von HarnessLab. Lesen Sie Feld
       für Feld: Das Lesen ist am größten, das ist normal, denn jeder Aufruf liest den ganzen
       schon gesehenen Kontext erneut, und bei Claude kostet ein Lesen ein Zehntel der Eingabe. Ein
       Schreiben, das das Lesen übersteigt, zeigt einen verlorenen Cache an, gebrochenes
@@ -603,7 +603,7 @@ scenarios:
       Sie einen Vergleich nach einer Änderung nicht lesen. Bei einem einzelnen Fall liefert
       „Starten“ mit „3 Versuchen“ „bestanden von 3“, [[g:pass_at_k|pass@3]] (mindestens ein
       Versuch bestanden) und [[g:pass_hat_k|pass^3]] (alle bestanden): Die Verlässlichkeit eines
-      Agenten ist pass^k, nicht sein bester Versuch. Die [[g:replay|Wiedergabe]] von WaveStack
+      Agenten ist pass^k, nicht sein bester Versuch. Die [[g:replay|Wiedergabe]] von HarnessLab
       führt die Tools erneut aus: Die gelesene Datei oder die erfragte Uhrzeit können von
       Versuch zu Versuch abweichen. Eingefrorene Tools (ihre Antworten aufgezeichnet) würden
       alles außer dem Modell [[g:determinism|deterministisch]] machen, also einen schärferen
@@ -648,7 +648,7 @@ scenarios:
     title_text: Wohin gehen meine Daten?
     description_text: >-
       Beim Start ist alles aktiv: die lokalen Tools und der Baustein MCP, mit Lazy Loading,
-      mit dem lokalen Server (WaveStack-Glossar) und dem öffentlichen Server data.gouv.fr.
+      mit dem lokalen Server (HarnessLab-Glossar) und dem öffentlichen Server data.gouv.fr.
       Lesen Sie zuerst das Schema: Die Tools und der lokale MCP-Server bleiben in der Zone
       Arbeitsplatz, data.gouv.fr ist in der Zone Netzwerk gezeichnet. Wählen Sie
       data.gouv.fr auf der Karte MCP ab und wieder an: Der Fluss, der die Grenze des

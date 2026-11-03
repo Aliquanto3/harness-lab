@@ -55,7 +55,7 @@ sortie ; retirer « Réinitialiser » ou son texte ; masquer la puce « · lié 
 
 ## Code Map
 
-- `src/wavestack/web/static/app.css` -- barre haute : `.top-bar` l. 172 (gap, padding
+- `src/harness_lab/web/static/app.css` -- barre haute : `.top-bar` l. 172 (gap, padding
   `spacing-4`), `.gauge` l. 549, `.gauge-stack` l. 636 (`width: 300px`), `.gauge-legend` l. 677,
   `.gauge-figures` l. 706 (cède, texte entier en `title`) ; lot K l. 4696-4835 : facteurs de
   repli, `.top-bar > .gauge` `min-width: calc(300px + spacing-3)` (l. 4712), palier 1 600, 1 400,
@@ -66,7 +66,7 @@ sortie ; retirer « Réinitialiser » ou son texte ; masquer la puce « · lié 
   « Projection » 81, LLM 33, thème 34, reset 103, gap 8, padding 16) ; projection, 962 (scénario
   40, gauge 312, window 61, Volets 86, indicateur 32, modèle 40, « Projection » 95, LLM 39, thème
   38, reset 123).
-- `src/wavestack/web/static/index.html` l. 13-66 -- barre haute ; bouton `#projection-toggle`
+- `src/harness_lab/web/static/index.html` l. 13-66 -- barre haute ; bouton `#projection-toggle`
   (`projection-toggle-long` / `-short`, `aria-label` « Mode projection »). `.window-panel` l. 3900
   (ancré à gauche de « Fenêtre », 30 rem).
 - `tools/e2e/run_e2e.py` -- `_fully_visible` l. 1150, `_top_bar_problems` l. 1599, contrôle
@@ -79,7 +79,7 @@ sortie ; retirer « Réinitialiser » ou son texte ; masquer la puce « · lié 
   les prompts IAM, SOC p2 « ne la contourne pas » et « transmettre ») ; test `fits` (prompts plus
   longs : à relancer).
 - `tests/test_e2e_fake_openai.py` l. 238-285 -- SOC, IAM et Souveraineté par le faux fournisseur.
-- `src/wavestack/web/app.py` l. 245-267 -- `/static` monté, routes des quatre pages ; tests web
+- `src/harness_lab/web/app.py` l. 245-267 -- `/static` monté, routes des quatre pages ; tests web
   existants (`tests/test_web_app.py`).
 
 ## Tasks & Acceptance
@@ -197,7 +197,7 @@ Windows 11, polices de Windows, dossier de données temporaire (tests et E2E). S
 `test_forced.py::test_a_documentation_no_longer_loadable_is_dropped[full]`, même attente),
 suite lente (19 min 38 contre 9 d'habitude, poste chargé) ; relancés seuls
 (`test_forced.py`, `test_mcp.py`, `test_mcp_lazy.py`) : 65 réussis. Aucun de ces tests ne lit
-les fichiers du lot. `fits` en décompte exact (`WAVESTACK_TEST_GGUF` = le 2B du poste) :
+les fichiers du lot. `fits` en décompte exact (`HARNESS_LAB_TEST_GGUF` = le 2B du poste) :
 réussi. E2E complet (`PYTHONUTF8=1`, sortie redirigée dans le dossier temporaire) :
 658 vérifications réussies, 0 en échec ; 5 `harness_error` voulus ; console : 2 `ERR_FAILED`
 et 1 `ERR_CONNECTION_RESET` (réseau coupé du parcours), aucune erreur `favicon.ico` ; captures

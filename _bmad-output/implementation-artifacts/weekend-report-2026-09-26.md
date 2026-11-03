@@ -46,7 +46,7 @@ Chaque décision donne le défaut appliqué, l'alternative et l'endroit où chan
 **D1. AD-4 et AD-22 : quand compresser** (story 20, H-1)
 - Par défaut : chaque texte passe une seule fois, avant le premier appel qui le lit. Les réponses d'outils arrivées en cours de tour sont donc compressées, et l'historique garde le texte compressé (H-2).
 - Alternative : lecture stricte, compression seulement avant le premier appel du tour. Seuls les extraits RAG et les actions forcées seraient compressés, et la brique perdrait son cas principal (UJ-7).
-- Où changer : spine AD-4 (ligne « à valider ») ; `AppSession._transform_context` dans `src/wavestack/session/app_session.py` ; `.memlog.md`.
+- Où changer : spine AD-4 (ligne « à valider ») ; `AppSession._transform_context` dans `src/harness_lab/session/app_session.py` ; `.memlog.md`.
 
 **D2. AD-21 : reranker absent** (story 16, hypothèse 1)
 - Par défaut : seule la sous-option « Reranking » devient indisponible. Le RAG simple continue, et l'étape « Recherche RAG » dit que le reranking n'est pas appliqué.
@@ -56,12 +56,12 @@ Chaque décision donne le défaut appliqué, l'alternative et l'endroit où chan
 **D3. Disparition de « prêt sans modèle »** (story 18, hypothèse 2)
 - Par défaut : quand seuls des serveurs (Ollama, llama-server) sont trouvés, le contrôle `model` bloque avec « Choisissez un modèle servi ». Un modèle servi n'est jamais choisi d'office ; un choix mémorisé est repris s'il est encore servi.
 - Alternative : revenir à « prêt sans modèle », ou choisir d'office quand un seul modèle est servi (Ollama chargerait alors un modèle sans ton accord).
-- Où changer : `src/wavestack/session/diagnostic.py` (`_check_model_locked`) ; `tests/test_cli_diagnostic.py`.
+- Où changer : `src/harness_lab/session/diagnostic.py` (`_check_model_locked`) ; `tests/test_cli_diagnostic.py`.
 
 **D4. Budget mémoire de 4 096 Mo** (story 17, repris par les stories 15, 16, 18 et 20)
 - Par défaut : `[memory] budget_mb = 4096` (en Mio, soit le plafond de NFR-2 et non la cible de 2 à 3 Go), marge `load_margin_mb = 256`. Le budget est contrôlé à chaque changement à chaud et à chaque chargement de composant, **pas au lancement** (C2) : le coût y est seulement enregistré.
 - Alternative : budget à 3 072 (la cible), ou refus chiffré au lancement avec renvoi au diagnostic.
-- Où changer : `wavestack.toml [memory]` ou `settings.json` ; chemin de démarrage dans `app_session.py` et `models/load_registry.py`.
+- Où changer : `harness-lab.toml [memory]` ou `settings.json` ; chemin de démarrage dans `app_session.py` et `models/load_registry.py`.
 
 **D5. Exceptions au cumul du programme** (story 21, H2 et H5)
 - Par défaut : le raisonnement n'est reconduit dans aucun module après le module 1 ; le RAG est éteint dans `mcp_full` et rallumé par `mcp_lazy`. Le premier scénario de chaque module restaure la mémoire globale de démonstration (`restore_memory`), alors qu'EXPERIENCE.md la supposait intouchée.
@@ -79,13 +79,13 @@ Chaque décision donne le défaut appliqué, l'alternative et l'endroit où chan
 |---|---|---|---|---|
 | D7 | Échec de la recherche RAG (story 15, hyp. 7) | Le tour continue sans extraits | Lettre d'AD-16 : le tour se termine en erreur | `app_session.py` (recherche RAG) |
 | D8 | Aperçu de la jauge avec RAG (story 15, hyp. 9 et 35) | Compte les 3 extraits les plus longs de l'index | Aperçu sans extraits (l'autre phrase d'AD-9) | `app_session.py` (aperçu) ; spine AD-9 |
-| D9 | Renvoi du raisonnement à Mistral (story 13, H6) | `resend = false`, ce qui s'écarte d'AD-20 (« vrai pour Mistral ») | `resend = true` si Mistral accepte les blocs `thinking` renvoyés ; sinon amender AD-20 | Préréglage `mistral` de `wavestack.toml`, ou `settings.json` |
+| D9 | Renvoi du raisonnement à Mistral (story 13, H6) | `resend = false`, ce qui s'écarte d'AD-20 (« vrai pour Mistral ») | `resend = true` si Mistral accepte les blocs `thinking` renvoyés ; sinon amender AD-20 | Préréglage `mistral` de `harness-lab.toml`, ou `settings.json` |
 | D10 | Brique voulue mais indisponible (story 13, H4) | Dessinée en style indisponible dans le schéma | « Absente du schéma », comme le dit EXPERIENCE.md | `renderSchema` dans `app.js` |
-| D11 | Taille de la mémoire globale (story 14, H3) | 20 entrées de 300 caractères, soit environ 1 550 tokens (≈ 60 % de l'espace utile avec le raisonnement) | Descendre `MAX_CHARS` à 200 | `src/wavestack/memory.py` (`MAX_CHARS`, `MAX_ENTRIES`) |
+| D11 | Taille de la mémoire globale (story 14, H3) | 20 entrées de 300 caractères, soit environ 1 550 tokens (≈ 60 % de l'espace utile avec le raisonnement) | Descendre `MAX_CHARS` à 200 | `src/harness_lab/memory.py` (`MAX_CHARS`, `MAX_ENTRIES`) |
 | D12 | Tiroir de la mémoire (story 14, H1 et H7) | Aucun ajout depuis le tiroir ; « Tout effacer » sans confirmation | Ajout direct depuis le tiroir ; confirmation avant d'effacer | `app.js` ; `POST /api/intentions/memory` |
-| D13 | Nombre de candidats reranqués (story 16, hyp. 3) | 8 candidats, 3 gardés | Moins de candidats si l'étape dépasse NFR-1 | `wavestack.toml [rag] rerank_candidates`, `top_k` |
-| D14 | Seuil et prose en compression (story 20, H-3 ; story 12, hyp. 7) | `min_chars = 300`, `cost_mb = 130`. La prose passe telle quelle (0 %), et la carte le dit | Compresseur maison minimal pour les `rag_excerpt` | `wavestack.toml [compression]` |
-| D15 | Outils et état du sous-agent (story 19, H-1, H-5, H-22) | `tools = ["read_file", "fetch_page"]`, limités aux outils actifs ; pas de préservation d'état ; pas de raisonnement dans le sous-agent | Autre liste d'outils ; `save_state` après mesure | `wavestack.toml [subagent]` ; `contributes_to` de la brique Raisonnement |
+| D13 | Nombre de candidats reranqués (story 16, hyp. 3) | 8 candidats, 3 gardés | Moins de candidats si l'étape dépasse NFR-1 | `harness-lab.toml [rag] rerank_candidates`, `top_k` |
+| D14 | Seuil et prose en compression (story 20, H-3 ; story 12, hyp. 7) | `min_chars = 300`, `cost_mb = 130`. La prose passe telle quelle (0 %), et la carte le dit | Compresseur maison minimal pour les `rag_excerpt` | `harness-lab.toml [compression]` |
+| D15 | Outils et état du sous-agent (story 19, H-1, H-5, H-22) | `tools = ["read_file", "fetch_page"]`, limités aux outils actifs ; pas de préservation d'état ; pas de raisonnement dans le sous-agent | Autre liste d'outils ; `save_state` après mesure | `harness-lab.toml [subagent]` ; `contributes_to` de la brique Raisonnement |
 | D16 | Seuils du banc (story 12, hyp. 1) | Headroom ≤ 300 Mo, embedding ≤ 600 Mo, reranker ≤ 800 Mo, recall@1 ≥ 0,75 | Des seuils plus serrés | `tools/bench/story12_bench.py` |
 | D17 | Place des scénarios métier (story 21, H1) | Dans `transverse`, groupe « Transverses et métier », hors cumul | Un champ `business` dédié | `content/scenarios.yaml` |
 | D18 | Budget exprimé en Go dans les refus (story 18, hyp. 10) | Un seul format pour tous les refus : « environ 5,0 Go ; budget de 4,0 Go » | Mo, comme le prévoyait la matrice de la story 18 | Message du `LoadRegistry` |
@@ -100,13 +100,13 @@ Prérequis : le réseau ouvert vers PyPI, `abetlen.github.io`, `huggingface.co`,
 - [ ] `uv run pytest -q` : tout doit être vert (les tests `model` sont sautés).
 - [ ] AppLocker et WDAC : vérifier que `headroom\_core*.pyd` et `ast-grep.exe` ne sont pas bloqués. Au lancement, la carte Compression doit être disponible.
 
-### B. Bancs et instantanés (avant de lancer WaveStack)
+### B. Bancs et instantanés (avant de lancer HarnessLab)
 - [ ] `uv run --with headroom-ai==0.38.0 python tools/bench/story12_bench.py headroom --json` : reporter la sortie dans la story 12, avec le RSS ajouté sous Windows (≈ 130 Mo attendus) et l'absence de tentative réseau.
 - [ ] `uv run --with huggingface-hub --with fastembed python tools/bench/story12_bench.py embed --download --json` (≈ 2,1 Go) : recall@1, MRR, RSS et `pooling_gguf` (2 = CLS) par candidat. Confirmer ou remplacer granite-107m et bge-reranker-v2-m3, et vérifier que les replis fastembed finissent « mesuré ».
 - [ ] `uv run python scripts/snapshot_mcp.py` : versionner `content/mcp_snapshots/`, puis `uv run pytest -s tests/test_program.py -k fits`.
 
-### C. Modèles RAG (dans WaveStack)
-- [ ] `uv run wavestack` avec Qwen3.5-2B. Sur la carte RAG, la raison affichée ne doit pas être « sqlite-vec ne se charge pas » : c'est le test de sqlite-vec sous Windows.
+### C. Modèles RAG (dans HarnessLab)
+- [ ] `uv run harness-lab` avec Qwen3.5-2B. Sur la carte RAG, la raison affichée ne doit pas être « sqlite-vec ne se charge pas » : c'est le test de sqlite-vec sous Windows.
 - [ ] « Télécharger le modèle d'embedding », puis relever le sha256 dans l'effet `model_download` du journal. Le reporter dans `[rag.embedding] files[].sha256`, et remplacer `resolve/main` par le commit du dépôt bartowski.
 - [ ] « Construire l'index » : noter la durée, la mémoire, et qu'aucun verrou de fichier ne gêne. Puis `uv run python -m pytest -m model tests/test_rag.py`.
 - [ ] Cocher « Reranking », puis « Télécharger le modèle de reranking » : reporter le sha256 et le commit dans `[rag.reranker]`. Mesurer le RSS ajouté (≤ 800 Mo) et le reporter dans `measured_rss_mb`. Puis `uv run python -m pytest -m model tests/test_rag_rerank.py`.
@@ -115,7 +115,7 @@ Prérequis : le réseau ouvert vers PyPI, `abetlen.github.io`, `huggingface.co`,
 - [ ] Sonder Qwen3.5-2B et 4B, puis relire `rss_bytes` et `kv_bytes_per_token` dans `settings.json` (`probed_models`). Tenter le passage de 2B à 4B : il ne doit pas être refusé à tort (surestimation du cache KV d'un modèle hybride).
 - [ ] Lancer `llama-server -m …\Qwen3.5-2B-Q4_K_M.gguf --port 8080 -np 1` : le choisir, faire un tour avec `get_datetime`, vérifier que les ids reçus correspondent au texte rendu et que le robot est dessiné hors du cadre Harnais.
 - [ ] Lancer `ollama serve` : choisir un modèle, faire un tour, puis noter toute alerte « transparence réduite » avec les deux comptes qu'elle cite. Essayer un blob `qwen35` : s'il est refusé, la raison doit renvoyer vers llama-server et le modèle précédent doit rester actif.
-- [ ] `ollama ps` doit être vide après un changement de modèle et après la fermeture de WaveStack. Un modèle déjà chargé par un autre programme doit rester chargé.
+- [ ] `ollama ps` doit être vide après un changement de modèle et après la fermeture de HarnessLab. Un modèle déjà chargé par un autre programme doit rester chargé.
 - [ ] « Arrêter » pendant qu'Ollama charge un gros modèle : la main doit revenir en moins d'une seconde.
 - [ ] Facultatif, pour D9 : déclarer `resend = true` pour `mistral`, puis jouer un tour avec outil et un second tour. Un code 400 signifie que Mistral refuse.
 
@@ -123,7 +123,7 @@ Prérequis : le réseau ouvert vers PyPI, `abetlen.github.io`, `huggingface.co`,
 Pour chaque scénario, relever trois mesures :
 - **jauge** : la jauge avant envoi, sur 3 584 tokens utiles (3 072 avec le raisonnement) ;
 - **NFR-1** : le premier token de chaque appel (< 10 s en LLM nu, < 30 s pour la configuration la plus chargée) ;
-- **NFR-2** : le RSS de WaveStack dans le Gestionnaire des tâches (≤ 4 Go, cible 2 à 3 Go).
+- **NFR-2** : le RSS de HarnessLab dans le Gestionnaire des tâches (≤ 4 Go, cible 2 à 3 Go).
 
 - [ ] **Module 1** : LLM nu (NFR-1 < 10 s) ; `reasoning` (repli dans la Vue humain, réserve de 1 536 tokens, longueur du raisonnement face à cette réserve) ; `short_memory` ; `system_prompt` ; `global_memory` (tiroir, « Écrire en mémoire », mémoire pleine face à la fenêtre, pour D11).
 - [ ] **Module 2** : `native_tools`, `network_tools`.
@@ -190,8 +190,8 @@ Le parcours E2E a besoin d'un Chromium de la révision de Playwright 1.56 (`PLAY
 - Reports : `_bmad-output/implementation-artifacts/deferred-work.md`
 - Architecture : `_bmad-output/planning-artifacts/architecture/architecture-agentic-harness-training-demo-2026-09-23/ARCHITECTURE-SPINE.md` (AD-4 et AD-21 « à valider »)
 - UX et spec : `_bmad-output/planning-artifacts/ux-designs/ux-agentic-harness-training-demo-2026-09-22/EXPERIENCE.md`, `_bmad-output/specs/spec-agentic-harness-training-demo/SPEC.md`, `.memlog.md`
-- Réglages : `wavestack.toml` (`[memory]`, `[rag]`, `[rag.embedding]`, `[rag.reranker]`, `[compression]`, `[subagent]`, `[model_servers]`, préréglage `mistral`)
+- Réglages : `harness-lab.toml` (`[memory]`, `[rag]`, `[rag.embedding]`, `[rag.reranker]`, `[compression]`, `[subagent]`, `[model_servers]`, préréglage `mistral`)
 - Programme : `content/scenarios.yaml`, `tests/test_program.py`, `scripts/snapshot_mcp.py`, `scripts/build_rag_index.py`
 - Outillage : `tools/bench/story12_bench.py` et `README.md`, `tools/e2e/run_e2e.py` et `README.md`
-- Code central : `src/wavestack/session/app_session.py`, `src/wavestack/session/diagnostic.py`, `src/wavestack/models/load_registry.py`, `src/wavestack/models/servers.py`, `src/wavestack/memory.py`
+- Code central : `src/harness_lab/session/app_session.py`, `src/harness_lab/session/diagnostic.py`, `src/harness_lab/models/load_registry.py`, `src/harness_lab/models/servers.py`, `src/harness_lab/memory.py`
 - Documentation utilisateur : `README.md` (programme, changer de modèle, serveurs locaux, RAG, reranking, compression)

@@ -28,19 +28,19 @@ from test_rag import build
 from test_rag_lab import _client, run, wait_idle
 from test_rag_lab_generation import cloud_session, ready
 
-from wavestack import config
-from wavestack.models import servers
-from wavestack.models.cloud_base import CallCost, record_spend
-from wavestack.models.engine import CancelToken, LlamaCppEngine
-from wavestack.rag import evaluation as ev
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import RagPassage, RagQuestion, load_rag_questions
-from wavestack.rag.diagnosis import Listed
-from wavestack.session.app_session import SendRefused
+from harness_lab import config
+from harness_lab.models import servers
+from harness_lab.models.cloud_base import CallCost, record_spend
+from harness_lab.models.engine import CancelToken, LlamaCppEngine
+from harness_lab.rag import evaluation as ev
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import RagPassage, RagQuestion, load_rag_questions
+from harness_lab.rag.diagnosis import Listed
+from harness_lab.session.app_session import SendRefused
 
 LANGS = ("fr", "en", "de")
 ROOT = Path(__file__).resolve().parent.parent
-STATIC = ROOT / "src" / "wavestack" / "web" / "static"
+STATIC = ROOT / "src" / "harness_lab" / "web" / "static"
 VERDICT_JSON = '{"verdict": "yes", "why": "La réponse suit le contexte."}'
 
 
@@ -258,7 +258,7 @@ def test_a_free_question_is_left_out_of_n_and_a_session_run_adds_its_row():
 
 
 def diag_stage(kind, items):
-    from wavestack.rag import diagnosis
+    from harness_lab.rag import diagnosis
 
     return diagnosis.LiveStage(
         kind=kind, items=[diagnosis.LiveItem(doc_id=d, text=t) for d, t in items]
@@ -723,7 +723,7 @@ def test_the_generator_of_a_finished_run_is_kept_and_bounded(index):
 
 
 def live_run(**changes):
-    from wavestack.web.app import RagLabJudgeIntention
+    from harness_lab.web.app import RagLabJudgeIntention
 
     return RagLabJudgeIntention.model_validate(judge_body(**changes)).run
 

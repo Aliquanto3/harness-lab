@@ -16,14 +16,14 @@ from starlette.testclient import TestClient
 from test_reasoning import NO_REASONING
 from test_tools import QWEN
 
-from wavestack import config
-from wavestack.messages import render
-from wavestack.models import discovery, probe
-from wavestack.models.load_registry import LoadRegistry, ModelChoice
-from wavestack.session.app_session import _LOAD_FAILED_FR, AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.messages import render
+from harness_lab.models import discovery, probe
+from harness_lab.models.load_registry import LoadRegistry, ModelChoice
+from harness_lab.session.app_session import _LOAD_FAILED_FR, AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 GIB = 1024**3
 ORIGIN = {"Origin": "http://127.0.0.1:8420"}
@@ -253,7 +253,7 @@ def test_budget_exceeded_refuses_before_any_release(tmp_path):
         session.switch_model(ModelChoice("file", paths["Qwen3.5-4B"]))
 
     assert refused.value.reason_text == (
-        "Changement refusé : Qwen3.5-4B demande environ 3,1 Go ; WaveStack occupe 1,9 Go sans "
+        "Changement refusé : Qwen3.5-4B demande environ 3,1 Go ; HarnessLab occupe 1,9 Go sans "
         "le modèle actif, pour un budget de 4,0 Go (= plafond [memory] budget_mb). Qwen3.5-2B "
         "reste actif. Choisissez un modèle plus petit."
     )
@@ -524,7 +524,7 @@ def test_web_switch_refused_during_a_turn(monkeypatch, tmp_path):
 
 def _probe_child(monkeypatch, session: DiagnosticSession, result: dict) -> list[str]:
     """The real `_probe_candidate`, its child process answering `result` (`ok`, `reason`...)."""
-    from wavestack.session import diagnostic as diagnostic_module
+    from harness_lab.session import diagnostic as diagnostic_module
 
     monkeypatch.setattr(
         session, "_probe_candidate", DiagnosticSession._probe_candidate.__get__(session)
@@ -619,7 +619,7 @@ def test_budget_subtracts_the_active_model():
 
     assert registry.check("B", round(2.5 * GIB)) is None  # 3 − 2 + 2,5 = 3,5 ≤ 4
     refusal = registry.check("B", round(3.1 * GIB))  # 3 − 2 + 3,1 = 4,1 > 4
-    assert "WaveStack occupe 1,0 Go sans le modèle actif" in refusal
+    assert "HarnessLab occupe 1,0 Go sans le modèle actif" in refusal
     assert refusal.endswith("A reste actif. Choisissez un modèle plus petit.")
 
 
@@ -721,7 +721,7 @@ def test_kv_cache_per_layer_and_value_length():
 
 @pytest.mark.parametrize("step", ["capabilities", "cloud_window"])
 def test_a_failure_after_the_factory_closes_the_new_engine(monkeypatch, tmp_path, step):
-    from wavestack.session import app_session as module
+    from harness_lab.session import app_session as module
 
     session, tracker, paths = _booted(tmp_path, {"A": FakeEngine(), "B": FakeEngine()})
 
@@ -844,32 +844,32 @@ def test_diagnostic_blocks_again_when_no_model_is_left(monkeypatch, tmp_path):
 MIB = 1024**2
 
 
-def test_refusal_gives_wavestack_memory_in_mo_under_one_go():
-    """E3: WaveStack's real memory without the active model, in Mo under 1 Go."""
+def test_refusal_gives_harness_lab_memory_in_mo_under_one_go():
+    """E3: HarnessLab's real memory without the active model, in Mo under 1 Go."""
     registry = LoadRegistry(4 * GIB, 0, rss_fn=lambda: 210 * MIB + 2 * GIB)
     registry.grant("A", 2 * GIB)
 
     refusal = registry.check("B", round(3.9 * GIB))
 
-    assert "WaveStack occupe 210 Mo sans le modèle actif, pour un budget de 4,0 Go." in refusal
+    assert "HarnessLab occupe 210 Mo sans le modèle actif, pour un budget de 4,0 Go." in refusal
     assert refusal.startswith("Changement refusé : B demande environ 3,9 Go ;")
 
 
 def test_a_served_model_is_never_subtracted_from_the_rss():
-    """E3: a served model's memory is in another process: WaveStack's RSS stays whole."""
+    """E3: a served model's memory is in another process: HarnessLab's RSS stays whole."""
     registry = LoadRegistry(4 * GIB, 0, rss_fn=lambda: 210 * MIB)
     registry.grant("qwen3.5:2b", 3 * GIB, in_process=False)
 
     refusal = registry.check("olmo-3:7b", round(4.4 * GIB))
 
-    assert "WaveStack occupe 210 Mo sans le modèle actif" in refusal  # never « 0,0 Go »
+    assert "HarnessLab occupe 210 Mo sans le modèle actif" in refusal  # never « 0,0 Go »
     assert registry.check("petit", 3 * GIB) is None  # 210 Mo + 3 Go ≤ 4 Go
 
 
 def test_4b_estimate_after_the_new_probe_exceeds_the_budget(tmp_path):
     """Acceptance (N5): the 4B, probed at the window after an evaluation (weights, the whole
     window's KV, compute buffers: ≈ 4,05 Go injected here, to measure on the PC), plus the
-    margin, is past the 4 096 Mo budget (≈ 4,3 Go); the refusal gives WaveStack's real
+    margin, is past the 4 096 Mo budget (≈ 4,3 Go); the refusal gives HarnessLab's real
     memory."""
     engines = {"Qwen3.5-2B": FakeEngine(), "Qwen3.5-4B": FakeEngine()}
     tracker = Tracker(engines)
@@ -892,7 +892,7 @@ def test_4b_estimate_after_the_new_probe_exceeds_the_budget(tmp_path):
 
     assert cost == round(4.05 * GIB) + 256 * MIB > 4096 * MIB  # no KV counted twice
     assert "Qwen3.5-4B demande environ 4,3 Go" in refused.value.reason_text
-    assert "WaveStack occupe 210 Mo sans le modèle actif" in refused.value.reason_text
+    assert "HarnessLab occupe 210 Mo sans le modèle actif" in refused.value.reason_text
     assert tracker.open == {"Qwen3.5-2B"}
 
 
@@ -955,7 +955,7 @@ def test_stop_during_the_probe_never_loads_the_new_model(tmp_path):
 
 def test_stop_without_a_previous_model_leaves_none_with_the_reason(tmp_path):
     """E4: the launch's load stopped: no model is active, and `idle` says why."""
-    from wavestack.session.app_session import _LOAD_STOPPED_FR
+    from harness_lab.session.app_session import _LOAD_STOPPED_FR
 
     tracker = Tracker({"A": FakeEngine()})
     paths = _files(tmp_path, "A")
@@ -1039,7 +1039,7 @@ def test_refusal_with_a_local_model_active_gives_the_real_remainder(tmp_path):
     with pytest.raises(SendRefused) as refused:
         session.switch_model(ModelChoice("file", paths["B"]))
 
-    assert "WaveStack occupe 210 Mo sans le modèle actif" in refused.value.reason_text
+    assert "HarnessLab occupe 210 Mo sans le modèle actif" in refused.value.reason_text
 
 
 def test_stop_whose_previous_model_fails_to_come_back_is_an_error(tmp_path):

@@ -27,7 +27,7 @@ Les langues fusionnées la veille imposent que tout texte nouveau naisse en `fr`
 
 - **CAP-1** Serveur identifiable (story 1)
   - **intent:** Le formateur sait quel dossier et quel commit servent la page ouverte, et le CLI qui réutilise une instance le dit.
-  - **success:** `GET /api/health` rend le dossier du projet et le commit ; lancer `wavestack` sur un port occupé par une instance saine affiche « déjà lancée depuis {dossier} ({commit}) », dans la langue de la session.
+  - **success:** `GET /api/health` rend le dossier du projet et le commit ; lancer `harness-lab` sur un port occupé par une instance saine affiche « déjà lancée depuis {dossier} ({commit}) », dans la langue de la session.
 - **CAP-2** Navigation commune (story 2)
   - **intent:** Chaque page a la même barre de navigation en tête ; l'atelier garde ses contrôles dans une barre basse.
   - **success:** Sur chaque page, la barre commune mène aux autres pages et marque la page courante ; en `de` à 1 280 et 1 600 px, normal et projection, ni la barre commune ni la barre basse n'ont de contrôle tronqué (`_bar_fits`), selon une tranche E2E.

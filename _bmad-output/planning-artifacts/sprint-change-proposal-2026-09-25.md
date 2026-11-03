@@ -11,9 +11,9 @@ status: approuvée (2026-09-25)
 
 ## 1. Résumé du problème
 
-Au test manuel de la story 8c (commit `15301a4`), deux défauts de lisibilité vont à l'encontre de l'objectif pédagogique de WaveStack :
+Au test manuel de la story 8c (commit `15301a4`), deux défauts de lisibilité vont à l'encontre de l'objectif pédagogique de HarnessLab :
 
-1. **Schéma d'architecture** : on ne distingue pas visuellement un hook d'un outil. Tous les nœuds hors du cadre Harnais sont des rectangles identiques (`renderSchema`, `src/wavestack/web/static/app.js:1477`), posés en grille de trois lignes dans l'ordre d'arrivée ; jusqu'à 20 nœuds (6 outils, 3 serveurs MCP, 6 skills, 4 hooks, fichier d'audit). Seuls le libellé et l'infobulle diffèrent.
+1. **Schéma d'architecture** : on ne distingue pas visuellement un hook d'un outil. Tous les nœuds hors du cadre Harnais sont des rectangles identiques (`renderSchema`, `src/harness_lab/web/static/app.js:1477`), posés en grille de trois lignes dans l'ordre d'arrivée ; jusqu'à 20 nœuds (6 outils, 3 serveurs MCP, 6 skills, 4 hooks, fichier d'audit). Seuls le libellé et l'infobulle diffèrent.
 2. **Orchestration** : dès le lancement, le volet est rempli de texte brut. `renderJournal()` (`app.js:1257`) affiche chaque enveloppe en `JSON.stringify(payload, null, 2)`, sans titre ni repli, sous les étapes : diagnostic, `bricks_changed`, aperçu du contexte, découverte MCP. Le déroulé d'un tour est difficile à suivre.
 
 **Nature** : spécification juste, implémentation partielle, dérive accumulée depuis la story 2.

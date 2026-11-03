@@ -9,10 +9,10 @@ par Claude Code ; aucun code source modifié.
 
 | Commande | Attendu (guide) | Obtenu | Statut |
 |---|---|---|---|
-| Copie `settings.json`, `api_keys.json`, `memory.json` dans `%LOCALAPPDATA%\WaveStack\sauvegarde-palier-2` | copie de l'état palier 2 | 3 fichiers copiés (7 704, 235, 481 octets) | OK |
+| Copie `settings.json`, `api_keys.json`, `memory.json` dans `%LOCALAPPDATA%\HarnessLab\sauvegarde-palier-2` | copie de l'état palier 2 | 3 fichiers copiés (7 704, 235, 481 octets) | OK |
 | `git status` | arbre propre, rien sous `tools/e2e/screenshots` | propre ; branche locale en retard de 2 commits | OK |
 | `git fetch origin` ; `git merge --ff-only origin/claude/dreamy-cerf-gdjtee` (équivaut à `git pull`) | HEAD = `2f43f8f docs: rapport des corrections du palier 2 (lots A à G et I)` ou plus récent | HEAD = `2f43f8f`, puis `cb3a20e`, `e2b399c`, `2abad49`, `515c858`, `12faad6`, `8afb1d5`, `dc193ca`, `0f54120`, `7b22faf`, `373d30a` | OK |
-| Modèles dans `%LOCALAPPDATA%\WaveStack\models` | 2B, 4B, embedding, reranker | `Qwen3.5-2B-Q4_K_M.gguf` (1 280 835 840), `Qwen3.5-4B-Q4_K_M.gguf` (2 740 937 888), `embedding\granite-embedding-107m-multilingual-Q8_0.gguf` (121 020 096), `reranker\bge-reranker-v2-m3-Q4_K_M.gguf` (438 376 864) | OK (tailles de 4.2 conformes) |
+| Modèles dans `%LOCALAPPDATA%\HarnessLab\models` | 2B, 4B, embedding, reranker | `Qwen3.5-2B-Q4_K_M.gguf` (1 280 835 840), `Qwen3.5-4B-Q4_K_M.gguf` (2 740 937 888), `embedding\granite-embedding-107m-multilingual-Q8_0.gguf` (121 020 096), `reranker\bge-reranker-v2-m3-Q4_K_M.gguf` (438 376 864) | OK (tailles de 4.2 conformes) |
 
 État de `probed_models` avant le premier lancement : 2B `rss_bytes` 1 146 068 992,
 `kv_bytes_per_token` 49 152, sans `probe_version` ; 4B `rss_bytes` 2 880 712 704,
@@ -27,11 +27,11 @@ tourne en arrière-plan (port 11434), sans modèle chargé (`ollama ps` vide).
 |---|---|---|---|
 | `$env:UV_SYSTEM_CERTS = "1"` ; `uv lock --check` | passe | « Resolved 91 packages in 5ms », code 0 | OK |
 | `uv sync --extra compression` | Headroom installé | « Checked 90 packages », code 0 (déjà en place) | OK |
-| Premier lancement : `uv run python <scratchpad>\launch_nobrowser.py` (appelle `wavestack.cli.main` avec `webbrowser.open` neutralisé, pour ne pas ouvrir Edge), puis arrêt du processus | le 2B est resondé une fois, quelques dizaines de secondes de plus | lanceur démarré à 20:59:31 ; entrée du 2B réécrite à 21:00:04,7 (`probed_at`) : **≈ 33 s** du démarrage à la fin de la sonde, imports compris (première observation de `probe_version` 2 à 25,4 s après le début de la surveillance). Pic de RSS d'un processus Python pendant la sonde : 1 990 Mo | OK |
+| Premier lancement : `uv run python <scratchpad>\launch_nobrowser.py` (appelle `harness_lab.cli.main` avec `webbrowser.open` neutralisé, pour ne pas ouvrir Edge), puis arrêt du processus | le 2B est resondé une fois, quelques dizaines de secondes de plus | lanceur démarré à 20:59:31 ; entrée du 2B réécrite à 21:00:04,7 (`probed_at`) : **≈ 33 s** du démarrage à la fin de la sonde, imports compris (première observation de `probe_version` 2 à 25,4 s après le début de la surveillance). Pic de RSS d'un processus Python pendant la sonde : 1 990 Mo | OK |
 | `probed_models` du 2B dans `settings.json` | `probe_version` 2, `rss_bytes`, `kv_bytes_per_token`, `probe_window` 4 096, `rss_eval_tokens` | `probe_version` 2, `rss_bytes` 2 025 000 960 (1 931 Mo ; 1 093 Mo avant le lot E), `kv_bytes_per_token` 49 152, `probe_window` 4 096, `rss_eval_tokens` 512 | OK |
 | `GET /api/diagnostic` (au lieu de la page) | prêt | `ready: true`, `blocking_checks` vide | OK |
 | `GET /api/state` : cartes Compression et RAG (au lieu de l'interface) | Compression disponible ; RAG sans « sqlite-vec ne se charge pas » | `compression` : `available: true`, `reason_fr: null` ; `rag` : `available: true`, `reason_fr: null` | OK |
-| Mémoire de WaveStack après le lancement, 2B chargé, aucun tour | — | processus 2472 : 1 183 Mo (pic 1 271 Mo, privé 2 390 Mo) ; RAM libre du poste 6 053 / 16 064 Mo | relevé |
+| Mémoire de HarnessLab après le lancement, 2B chargé, aucun tour | — | processus 2472 : 1 183 Mo (pic 1 271 Mo, privé 2 390 Mo) ; RAM libre du poste 6 053 / 16 064 Mo | relevé |
 
 Remarque : le 4B garde son entrée d'avant le lot E (sans `probe_version`) ; il sera resondé
 au moment du choix (comportement prévu).
@@ -42,15 +42,15 @@ au moment du choix (comportement prévu).
 |---|---|---|---|
 | `uv run ruff check .` | propre | « All checks passed! » | OK |
 | `uv run ruff format --check .` | propre | « 138 files already formatted » | OK |
-| `uv run pytest -q -rs` (sans `WAVESTACK_TEST_*`) | 934 réussis, 3 sautés, 6 désélectionnés | **934 passed, 3 skipped, 6 deselected in 706.02s (0:11:46)** | OK |
+| `uv run pytest -q -rs` (sans `HARNESS_LAB_TEST_*`) | 934 réussis, 3 sautés, 6 désélectionnés | **934 passed, 3 skipped, 6 deselected in 706.02s (0:11:46)** | OK |
 | Raisons des 3 sauts | 2 × « Windows refuse de remplacer… », 1 × « simulation sans /proc… » | `test_rag_rerank.py:579` et `test_rag_review.py:340` : « Windows refuse de remplacer un fichier qu'une connexion tient ouvert » ; `test_rag_review.py:503` : « simulation sans /proc : sous Windows, le système applique ses règles » | OK |
 | Contrôle ciblé (`-rA -k …`) | variantes `[connection-closed-first]`, test hors ligne de Headroom et tests Windows réussis | réussis : `test_an_index_replaced_with_the_reranker_loaded_closes_it[connection-closed-first]`, `test_an_index_replaced_during_the_session_is_read_again[connection-closed-first]`, `test_headroom_makes_no_network_attempt_at_import_nor_compression`, `test_guard_blocks_under_proactor_event_loop`, `test_guard_blocks_the_real_mcp_client_under_proactor_event_loop` | OK |
-| `WAVESTACK_TEST_GGUF` = 2B, `WAVESTACK_TEST_MODELS_DIR` = dossier des modèles ; `uv run pytest -q -m model -rA --durations=0` | 6 réussis | **6 passed, 937 deselected in 80.92s**. Durées : `test_real_gguf_reuses_its_cache_between_two_turns` 34,6 s ; `test_probe_real_gguf_loads_successfully` 22,1 s ; `test_real_gguf_state_restored_after_a_divergent_prompt` 6,8 s ; embedding 5,5 s ; reranker 4,6 s ; `test_real_gguf_passes_checks_4_and_6` 3,7 s | OK |
+| `HARNESS_LAB_TEST_GGUF` = 2B, `HARNESS_LAB_TEST_MODELS_DIR` = dossier des modèles ; `uv run pytest -q -m model -rA --durations=0` | 6 réussis | **6 passed, 937 deselected in 80.92s**. Durées : `test_real_gguf_reuses_its_cache_between_two_turns` 34,6 s ; `test_probe_real_gguf_loads_successfully` 22,1 s ; `test_real_gguf_state_restored_after_a_divergent_prompt` 6,8 s ; embedding 5,5 s ; reranker 4,6 s ; `test_real_gguf_passes_checks_4_and_6` 3,7 s | OK |
 | Preuves du lot A | second tour : moteur n'évalue que les nouveaux tokens (±1) ; état restauré sur le modèle hybride | les deux tests réussissent (les assertions sont `abs(evaluated_tokens − nouveaux) ≤ 1`, sans `prefix_not_reused`). Valeurs chiffrées relevées à l'étape 5 (le test ne les affiche pas) | OK |
 
 ### Test `fits` avec le vrai tokenizer (section 4.4)
 
-`uv run pytest -s -rA tests/test_program.py -k fits` (dans le même terminal, `WAVESTACK_TEST_GGUF`
+`uv run pytest -s -rA tests/test_program.py -k fits` (dans le même terminal, `HARNESS_LAB_TEST_GGUF`
 posée) :
 
 ```
@@ -111,7 +111,7 @@ encode character 'Ċ'` dans le rappel de journal de llama-cpp-python (console cp
 | `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` (Chromium déjà installé : `chromium-1194`, `chromium-1208`) | 0 échec sur ce poste connecté ; ≈ 356 avec l'extra | **356 vérifications réussies, 0 en échec, 0 anomalies connues**, en 291 s, code 0. `public_holidays` : « Service injoignable (ConnectError) : le poste n'a pas accès à calendrier.api.gouv.fr. » (réseau coupé par le lanceur, comme prévu). 5 `harness_error` voulus par le parcours (429, 500, flux cassé, 401, téléchargement d'embedding) ; console du navigateur : 4 `Failed to load resource` (ERR_FAILED, ERR_CONNECTION_RESET, 2 × ERR_CONNECTION_REFUSED), attendus avec le réseau coupé | OK |
 | `git restore tools/e2e/screenshots` | arbre propre | 25 captures réécrites, restaurées ; reste seulement ce fichier de résultats | OK |
 
-## Section 4.1 : bancs de la story 12 (WaveStack arrêté)
+## Section 4.1 : bancs de la story 12 (HarnessLab arrêté)
 
 Les JSON sont écrits dans le dossier temporaire de la session (et non à la racine du dépôt,
 pour garder l'arbre propre) : `bench-headroom.json`, `bench-embed.json`.
@@ -143,9 +143,9 @@ pour garder l'arbre propre) : `bench-headroom.json`, `bench-embed.json`.
 Script `<scratchpad>\measure_session.py`, hors dépôt : il pilote une `AppSession` dans le
 processus, avec le vrai `Qwen3.5-2B-Q4_K_M.gguf` sur le moteur intégré, abonne un relevé au
 journal (`model_call_ended`, `prefix_not_reused`, `reasoning_cut`…) et échantillonne la RSS
-(processus + enfants) et la charge CPU du poste. `WAVESTACK_DATA_DIR` pointe vers une copie
+(processus + enfants) et la charge CPU du poste. `HARNESS_LAB_DATA_DIR` pointe vers une copie
 jetable du dossier de données (`settings.json`, `memory.json`, et `models` en jonction vers le
-vrai dossier) : le dossier réel n'est pas modifié. WaveStack arrêté, llama-server jamais lancé.
+vrai dossier) : le dossier réel n'est pas modifié. HarnessLab arrêté, llama-server jamais lancé.
 Journaux d'événements complets : `<scratchpad>\events-*.jsonl`.
 
 Conditions : Outlook et Teams fermés. **Edge** : ouvert en arrière-plan depuis 20:58:59
@@ -312,12 +312,12 @@ de l'intention `select_model` de l'interface.
 - Entrée du 4B après : `probe_version` 2, `rss_bytes` **4 468 621 312 (4 262 Mo)**,
   `kv_bytes_per_token` 131 072, `probe_window` 4 096, `rss_eval_tokens` 512.
 - Message (`harness_error`) : « Le modèle dépasse le budget mémoire une fois mesuré. » ; cause :
-  « **Changement refusé : Qwen3.5-4B-Q4_K_M demande environ 4,4 Go ; WaveStack occupe 118 Mo
+  « **Changement refusé : Qwen3.5-4B-Q4_K_M demande environ 4,4 Go ; HarnessLab occupe 118 Mo
   sans le modèle actif, pour un budget de 4,0 Go.** Choisissez un modèle plus petit. » ; effet :
   « Retour au modèle précédent : Qwen3.5-2B-Q4_K_M. »
 - `model_load_ended` : `status` `restored`, « Qwen3.5-2B-Q4_K_M est de nouveau actif ».
 
-**OK** : 4B refusé par le budget de 4 096 Mo (N5), mémoire de WaveStack en Mo (118 Mo, pas
+**OK** : 4B refusé par le budget de 4 096 Mo (N5), mémoire de HarnessLab en Mo (118 Mo, pas
 « 0,0 Go »), 2B de nouveau actif. Écart mineur : la sonde du 4B prend ≈ 53 s, au-delà des
 15 à 30 s annoncés par le rapport (lot E).
 
@@ -349,7 +349,7 @@ tester « Arrêter » (E4). Aucun commit, aucun push. Mesures finies à 22:45 en
 | D | Wikipédia | `wikipedia_summary` `ok` en 165 ms, contenu de l'article | plus de 403 | OK |
 | D | E2E sur le poste connecté | 356 réussies, 0 échec | 0 échec | OK |
 | E | sonde du 2B au lancement | ≈ 33 s ; `probe_version` 2, RSS 1 931 Mo | entrée complète | OK |
-| E | 4B : sonde et refus | sonde ≈ 53 s ; RSS 4 262 Mo ; « demande environ 4,4 Go ; WaveStack occupe 118 Mo… budget de 4,0 Go » ; 2B restauré | refus par 4 096 Mo, Mo sous 1 Go | OK |
+| E | 4B : sonde et refus | sonde ≈ 53 s ; RSS 4 262 Mo ; « demande environ 4,4 Go ; HarnessLab occupe 118 Mo… budget de 4,0 Go » ; 2B restauré | refus par 4 096 Mo, Mo sous 1 Go | OK |
 | F | banc `headroom` | RETENU ; 84 Mo au pic ; aucune tentative réseau (`configured`) | ≤ 300 Mo, réseau `True` | OK |
 | F | banc `embed` | granite 428 Mo, reranker 736 Mo ; `e5small_q8` refusé code 2 | ≤ 600 / ≤ 800 | OK |
 | F | test hors ligne de Headroom | réussi | réussi | OK |
@@ -360,7 +360,7 @@ tester « Arrêter » (E4). Aucun commit, aucun push. Mesures finies à 22:45 en
 ### b) Tests manuels restants
 
 Ordre du guide (5, puis 6, puis 7), sans ce que le script a couvert. Avant : Outlook et Teams
-fermés, Edge quitté depuis la zone de notification (il se relance seul), `uv run wavestack`.
+fermés, Edge quitté depuis la zone de notification (il se relance seul), `uv run harness-lab`.
 
 1. **5.1 Mémoire globale figée (N1)** : scénario « Mémoire globale », prompt 1, 2e tour, puis
    « Vider la conversation » et prompt 2, puis modifier et effacer une entrée. Attendu : pas de
@@ -388,7 +388,7 @@ fermés, Edge quitté depuis la zone de notification (il se relance seul), `uv r
 8. **5.7 Script pendant une session** : un tour du scénario RAG, puis
    `uv run python scripts/build_rag_index.py` dans un 2e terminal. Attendu : « L'index est
    ouvert par un autre programme… », code 1. 3 min. Retour : sortie et `$LASTEXITCODE`.
-9. **5.5 E1 llama-server sans `-c`**, puis **`-c 4096` et N6** (WaveStack arrêté sur un modèle
+9. **5.5 E1 llama-server sans `-c`**, puis **`-c 4096` et N6** (HarnessLab arrêté sur un modèle
    cloud ou petit avant de lancer llama-server ; jamais le 2B chargé en même temps). Attendu :
    ≈ 5 Go et l'avertissement « relancez-le avec `-c 4096` », puis plus d'avertissement et une
    RSS de llama-server proche du diagnostic. Pour N6 : 2e tour de `native_tools` et quiz du
@@ -437,7 +437,7 @@ Total estimé : ≈ 4 h 30.
 
 ### d) Anomalies
 
-1. Test `fits` avec `WAVESTACK_TEST_GGUF` : échec du garde-fou `mcp_full` > 2 800 (2 572).
+1. Test `fits` avec `HARNESS_LAB_TEST_GGUF` : échec du garde-fou `mcp_full` > 2 800 (2 572).
    Cause : le test compte le rendu **chat** (session cloud) avec le tokenizer local ; la jauge
    locale réelle vaut 3 204 (mesurée). Le test sous-estime le mode local d'environ 20 %, donc
    son verdict est trop indulgent pour le 2B.

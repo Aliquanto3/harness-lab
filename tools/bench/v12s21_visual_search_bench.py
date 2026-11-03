@@ -1,8 +1,8 @@
 """V1.2 story 21 benchmark: does a visual document retriever (ColPali, ColQwen, ColSmol) fit the
-CPU budget of WaveStack (CAP-19)? Pages of the fictitious Exemplia corpus are drawn as images
+CPU budget of HarnessLab (CAP-19)? Pages of the fictitious Exemplia corpus are drawn as images
 (no OCR), indexed page by page, then searched with the prepared questions (MaxSim).
 
-Spec: `_bmad-output/specs/spec-wavestack-v1-2-atelier-recherche-documentaire/stories/
+Spec: `_bmad-output/specs/spec-harness-lab-v1-2-atelier-recherche-documentaire/stories/
 21-recherche-visuelle-sans-ocr.md`. Modelled on `v12s2_system_one_bench.py` and `v2s6`, whose
 helpers it reuses (network guard, peak working set, RAM watchdog). It adds no dependency to the
 project and no torch: the measurement packages come from `uv run --with fastembed==0.9.1`
@@ -43,11 +43,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 SCRIPT = "tools/bench/v12s21_visual_search_bench.py"
-SPEC_DIR = ROOT / "_bmad-output" / "specs" / "spec-wavestack-v1-2-atelier-recherche-documentaire"
+SPEC_DIR = ROOT / "_bmad-output" / "specs" / "spec-harness-lab-v1-2-atelier-recherche-documentaire"
 REPORT_PATH = SPEC_DIR / "rapport-recherche-visuelle.md"
 RESULTS_DIR = HERE / "results"
-DEFAULT_MODELS_DIR = Path.home() / ".cache" / "wavestack-bench"
-DEFAULT_WORK_DIR = Path.home() / ".cache" / "wavestack-bench" / "v12s21-pages"
+DEFAULT_MODELS_DIR = Path.home() / ".cache" / "harness-lab-bench"
+DEFAULT_WORK_DIR = Path.home() / ".cache" / "harness-lab-bench" / "v12s21-pages"
 FASTEMBED_PIN = "fastembed==0.9.1"
 DOWNLOAD_HOSTS = ["huggingface.co", "*.hf.co"]
 
@@ -261,7 +261,7 @@ def paginate(
 
 
 def build_pages(lang: str = LANG_DEFAULT) -> list[Page]:  # needs the project modules
-    from wavestack.rag.corpus import load_rag_content, read_documents
+    from harness_lab.rag.corpus import load_rag_content, read_documents
 
     pages: list[Page] = []
     for doc in read_documents(load_rag_content(lang), lang):
@@ -1173,7 +1173,7 @@ def deferred_block(agg: dict) -> list[str]:
         return L
     L += [
         "```yaml",
-        "- source_spec: `_bmad-output/specs/spec-wavestack-v1-2-atelier-recherche-documentaire/stories/21-recherche-visuelle-sans-ocr.md`",  # noqa: E501
+        "- source_spec: `_bmad-output/specs/spec-harness-lab-v1-2-atelier-recherche-documentaire/stories/21-recherche-visuelle-sans-ocr.md`",  # noqa: E501
         f"  summary: CAP-19, recherche visuelle sans OCR : {label}. {sentence}",
         "  evidence: rapport-recherche-visuelle.md ; décision d'intégration (ou non) à prendre par Anaël."  # noqa: E501
         + ("" if label == "tient" else " Pistes : " + " ; ".join(NEXT_LEADS) + "."),
@@ -1283,7 +1283,7 @@ def cmd_download(args) -> int:  # pragma: no cover - network
 def cmd_measure(args) -> int:  # pragma: no cover - real run
     if not args.confirm_idle:
         sys.exit("Lancement réel refusé : passez --confirm-idle quand aucun autre agent ne tourne.")
-    from wavestack.rag.corpus import load_rag_questions
+    from harness_lab.rag.corpus import load_rag_questions
 
     models_dir = Path(args.models_dir)
     cands = selected(args.only)

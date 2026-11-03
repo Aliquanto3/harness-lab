@@ -1,6 +1,6 @@
 # Überprüfung der Berechtigungen bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
 
 Eine Berechtigung ist ein Zugangsrecht zu einer Anwendung, einem gemeinsamen Ordner oder einer physischen Zone, wie in der Zugangsrichtlinie für Räumlichkeiten beschrieben. Dieses Dokument legt die Regeln für ihre regelmäßige Überprüfung fest.
 

@@ -52,17 +52,17 @@ context:
 
 ## Code Map
 
-- `src/wavestack/models/servers.py:800-866` -- `ServedModel`, `_served_by` : garder `details.quantization_level` d'Ollama (déjà dans `/api/tags`).
-- `src/wavestack/models/discovery.py:25-63,176-230` -- `ModelCandidate` : champ `quantization` (servi) ; `_server_candidates` le recopie.
-- `src/wavestack/models/gguf_meta.py`, `catalog.py:326-352` -- en-tête brut déjà en cache : `general.file_type` (entier, table des ftype de llama.cpp → « Q4_K_M »), `general.finetune`, `general.version`, `general.basename`, `general.size_label`.
+- `src/harness_lab/models/servers.py:800-866` -- `ServedModel`, `_served_by` : garder `details.quantization_level` d'Ollama (déjà dans `/api/tags`).
+- `src/harness_lab/models/discovery.py:25-63,176-230` -- `ModelCandidate` : champ `quantization` (servi) ; `_server_candidates` le recopie.
+- `src/harness_lab/models/gguf_meta.py`, `catalog.py:326-352` -- en-tête brut déjà en cache : `general.file_type` (entier, table des ftype de llama.cpp → « Q4_K_M »), `general.finetune`, `general.version`, `general.basename`, `general.size_label`.
 - `catalog.py:439-474,539-665,726-797` -- `ModelEntry` (+ `card_id`, `quantization_text`, `gguf_path`, `logo`), `local_entries`, `group_models`, `models_payload` : calculer les cartes (union-find sur règles 1→3), `groups[].cards[]` = `{id, name, size_bytes_min, size_text, source_values[]}` ; `logo` de l'éditeur ; compteur à sources.
 - `catalog.py:192-220` + `content/models/publishers.yaml` -- champ `logo` (nom de fichier sous `static/logos/`).
-- `src/wavestack/session/app_session.py:1916,2023-2032,8445` -- `model_load_ended` ; mémoriser en mémoire le dernier échec par `(kind, ref)`, exposé par `/api/diagnostic` (`load_errors`).
-- `src/wavestack/web/app.py:386-393,600-724` -- `/models` → `RedirectResponse("/diagnostic")` ; payload.
-- `src/wavestack/web/static/diagnostic.html` -- réécriture d'après la maquette ; réutiliser `patchList`, `chooseModel`, `post`, `setApiKey`, `testCloud`, `openWarning`, `openStream`, `renderSearch`, `renderCap`, `startSwitch`… (l.223-811) et la logique filtres/tri de `models.html:259-356`. Garder les ids `#checks`, `#cloud-cap`, `#cloud-warning*`, `#model-path`, `#submit-path`, `#select-model-status`, `#candidates-search`, `#candidates-progress*`, `#filter-*`, `#filters-reset`.
-- `src/wavestack/web/static/models.html` -- supprimé ; `pages.css:204-411` -- règles communes, ajouter les cartes (portée `body.annex-page`).
-- `src/wavestack/web/static/app.js:2860-2864` -- entrée « Tableau des modèles… » vers `/diagnostic`.
-- `src/wavestack/web/static/i18n.js:112` -- inchangé (pas d'entrée `/models`).
+- `src/harness_lab/session/app_session.py:1916,2023-2032,8445` -- `model_load_ended` ; mémoriser en mémoire le dernier échec par `(kind, ref)`, exposé par `/api/diagnostic` (`load_errors`).
+- `src/harness_lab/web/app.py:386-393,600-724` -- `/models` → `RedirectResponse("/diagnostic")` ; payload.
+- `src/harness_lab/web/static/diagnostic.html` -- réécriture d'après la maquette ; réutiliser `patchList`, `chooseModel`, `post`, `setApiKey`, `testCloud`, `openWarning`, `openStream`, `renderSearch`, `renderCap`, `startSwitch`… (l.223-811) et la logique filtres/tri de `models.html:259-356`. Garder les ids `#checks`, `#cloud-cap`, `#cloud-warning*`, `#model-path`, `#submit-path`, `#select-model-status`, `#candidates-search`, `#candidates-progress*`, `#filter-*`, `#filters-reset`.
+- `src/harness_lab/web/static/models.html` -- supprimé ; `pages.css:204-411` -- règles communes, ajouter les cartes (portée `body.annex-page`).
+- `src/harness_lab/web/static/app.js:2860-2864` -- entrée « Tableau des modèles… » vers `/diagnostic`.
+- `src/harness_lab/web/static/i18n.js:112` -- inchangé (pas d'entrée `/models`).
 - `content/ui.yaml:1032-1145`, `content/i18n/{en,de}/ui.yaml` -- nouvelles clés `diagnostic.states.*`, `diagnostic.sections.*`, `models.sort_by.*`, compteur à sources.
 - Banque : `~/.claude/skills/synced/…/banque-visuels/logos/*.png` + `manifeste.json`.
 - Tests : `tests/test_web_app.py:47-167,471,499` ; `tests/test_ui_texts.py:26-36,136-259` ; `tests/test_web_tokens.py:534,583-675` ; `tests/test_i18n.py:378` ; `tests/test_model_catalog.py`, `test_model_servers.py:202,940`, `gguf_writer.py`.

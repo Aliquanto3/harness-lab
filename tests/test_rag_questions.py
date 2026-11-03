@@ -9,8 +9,8 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from wavestack import config
-from wavestack.rag.corpus import (
+from harness_lab import config
+from harness_lab.rag.corpus import (
     RagQuestionSet,
     chunk_corpus,
     load_rag_content,

@@ -8,9 +8,9 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from wavestack.agent_eval.cases import AgentCase
-from wavestack.agent_eval.checks import verify
-from wavestack.trace.envelope import Envelope
+from harness_lab.agent_eval.cases import AgentCase
+from harness_lab.agent_eval.checks import verify
+from harness_lab.trace.envelope import Envelope
 
 TS = datetime(2026, 10, 25, tzinfo=UTC)
 

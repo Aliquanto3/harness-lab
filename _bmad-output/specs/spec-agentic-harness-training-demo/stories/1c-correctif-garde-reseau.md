@@ -39,21 +39,21 @@ baseline_commit: '1a6472453270e29e02e8dc4c6c83df10fae69a1f'
 | Proxy | Hôte du proxy résolu | Adresses du proxy acceptées | N/A |
 | Boucle locale | `connect(("127.0.0.1", 11434))` | Acceptée | N/A |
 | IPv6 | Résolution rendant `2001:db8::1` (tuple à 4 éléments) | Acceptée au `connect` | N/A |
-| Application réelle | `uv run wavestack` avec réseau | Diagnostic « Accès réseau disponible » ; `public_holidays` rend un résultat | N/A |
+| Application réelle | `uv run harness-lab` avec réseau | Diagnostic « Accès réseau disponible » ; `public_holidays` rend un résultat | N/A |
 
 </frozen-after-approval>
 
 ## Code Map
 
-- `src/wavestack/net/guard.py` -- `install(allowed_hosts)` (L56) : en plus de l'audit hook, envelopper `socket.getaddrinfo` (attribut du module, relu à l'appel par `socket.create_connection` et par `asyncio`) pour ajouter à un ensemble `_resolved` les adresses (`sockaddr[0]`) rendues pour un hôte accepté ; l'audit hook refuse toujours l'hôte non autorisé avant la résolution. Filtre `socket.connect` (L66) : accepter `host in _resolved` en plus de `is_host_allowed`. Garder `is_host_allowed`, `is_loopback`, `_matches`, `_proxy_hosts` tels quels.
-- `src/wavestack/cli.py` (L21-24), `src/wavestack/models/probe.py` (L116-119) -- appellent `install` ; aucun changement attendu.
+- `src/harness_lab/net/guard.py` -- `install(allowed_hosts)` (L56) : en plus de l'audit hook, envelopper `socket.getaddrinfo` (attribut du module, relu à l'appel par `socket.create_connection` et par `asyncio`) pour ajouter à un ensemble `_resolved` les adresses (`sockaddr[0]`) rendues pour un hôte accepté ; l'audit hook refuse toujours l'hôte non autorisé avant la résolution. Filtre `socket.connect` (L66) : accepter `host in _resolved` en plus de `is_host_allowed`. Garder `is_host_allowed`, `is_loopback`, `_matches`, `_proxy_hosts` tels quels.
+- `src/harness_lab/cli.py` (L21-24), `src/harness_lab/models/probe.py` (L116-119) -- appellent `install` ; aucun changement attendu.
 - `tests/test_net_guard.py` -- motifs existants (refus par `getaddrinfo`, Proactor). Ajouter les tests de la matrice dans un sous-processus `sys.executable -c …` : remplacer `socket.getaddrinfo` par un résolveur simulé **avant** `install([...])`, puis appeler `socket.getaddrinfo(...)` et `sys.audit("socket.connect", None, (ip, port))`.
 - `tests/conftest.py` -- garde de session limitée à la boucle locale ; ne pas modifier.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/net/guard.py` -- apprendre les adresses résolues des hôtes acceptés ; les accepter au `connect` ; commentaire `ponytail:` sur le plafond -- AD-15
+- [x] `src/harness_lab/net/guard.py` -- apprendre les adresses résolues des hôtes acceptés ; les accepter au `connect` ; commentaire `ponytail:` sur le plafond -- AD-15
 - [x] `tests/test_net_guard.py` -- les 8 lignes de la matrice sans réseau, en sous-processus ; test de non-régression du bogue (résolution d'un hôte autorisé vers une IP publique, puis `connect` accepté)
 
 **Acceptance Criteria:**
@@ -97,4 +97,4 @@ Groupes routés en `patch` : P1 à P6 ; `defer` : EC5 ; aucun `intent_gap` ni `b
 - Hors pytest, garde installée comme dans `cli` : `create_client(timeout=3.0).head("https://huggingface.co")` -- expected: statut HTTP, pas `NetworkBlocked`
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` : le diagnostic affiche « Accès réseau disponible » ; activer `public_holidays`, demander les jours fériés 2026 ; le bloc données sortantes et le nœud réseau « disponible » apparaissent.
+- `uv run harness-lab` : le diagnostic affiche « Accès réseau disponible » ; activer `public_holidays`, demander les jours fériés 2026 ; le bloc données sortantes et le nœud réseau « disponible » apparaissent.

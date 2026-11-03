@@ -5,7 +5,7 @@ Run lancé le 2026-10-24 à 23:10, terminé le 2026-10-25 à 18:55. Orchestratio
 ## Bilan
 
 - **32 stories fusionnées** sur 32 prévues : epic 13 (V1.3, cache visible) 6/6, epic 14 (V1.4, état de l'art des harnais) 4/4, epic 12 (V1.2, atelier recherche documentaire) 22/22 (dont 12.19b, découpée de 12.19).
-- **Trois versions** : 1.3.0 (#102), 1.4.0 (#106), 1.5.0 (#129 fusion de l'intégration dans main, #130 version, tag `v1.5.0` et [release](https://github.com/Aliquanto3/wavestack/releases/tag/v1.5.0)). Les stories V1.2 se sont intégrées sur `integration/v1-2-atelier` pour garder main à la 1.4.0 pendant la formation sur l'onglet harnais (décision d'Anaël du 2026-10-25).
+- **Trois versions** : 1.3.0 (#102), 1.4.0 (#106), 1.5.0 (#129 fusion de l'intégration dans main, #130 version, tag `v1.5.0` et [release](https://github.com/Aliquanto3/harness-lab/releases/tag/v1.5.0)). Les stories V1.2 se sont intégrées sur `integration/v1-2-atelier` pour garder main à la 1.4.0 pendant la formation sur l'onglet harnais (décision d'Anaël du 2026-10-25).
 - **Hors stories** : CI découpée en 4 groupes par système et équilibrée par durées (#98 ; Windows de 17-18 min à ~9 min) ; faux blobs creux pour les tests lents sous Windows (#100) ; onglet « Diagnostic » renommé « Modèles » (#124) ; correctif de la mise à jour du graphe GraphRAG (#127) ; README et démo refaits (#128).
 - **Arrêts** : limite d'usage de 02:12 à 05:45 ; panne du classifieur du mode auto vers 07:10 (agents de 14.4 et 12.5 arrêtés, puis repris) ; réseau du poste très lent vers Hugging Face pour le banc 12.2 (14 à 43 Ko/s), contourné par Anaël.
 - **Rien de bloqué en fin de run.** Aucun agent ni tâche de fond restants.

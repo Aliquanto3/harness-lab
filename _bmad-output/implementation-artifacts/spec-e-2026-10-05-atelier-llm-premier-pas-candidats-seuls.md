@@ -45,15 +45,15 @@ context:
 
 ## Code Map
 
-- `src/wavestack/models/engine.py` -- `LlamaCppEngine.next_candidates(prompt_ids, cancel)` près de `prefill` (l.~361) : cache ramené à son préfixe commun avec `ids[:-1]` au plus (`kv_cache_seq_rm` ou `reset`, comme `prefill`), puis `llm.eval` par lots de `PREFILL_BATCH` (au moins le dernier id évalué), `llama_get_logits_ith(ctx, -1)` comme `_candidates`, `top_from_logits` + `piece_text` → `{p, texts, tail}` (forme de `top`) ; `None` si annulé ; `_last_evaluated` mis à jour.
+- `src/harness_lab/models/engine.py` -- `LlamaCppEngine.next_candidates(prompt_ids, cancel)` près de `prefill` (l.~361) : cache ramené à son préfixe commun avec `ids[:-1]` au plus (`kv_cache_seq_rm` ou `reset`, comme `prefill`), puis `llm.eval` par lots de `PREFILL_BATCH` (au moins le dernier id évalué), `llama_get_logits_ith(ctx, -1)` comme `_candidates`, `top_from_logits` + `piece_text` → `{p, texts, tail}` (forme de `top`) ; `None` si annulé ; `_last_evaluated` mis à jour.
 - `tests/fake_engine.py` -- `FakeEngine.next_candidates` : appels notés (`peeks`), cache mis à jour, `logits_script[0]` lu par `top_from_logits` ; aucun ajout à `calls`/`samplings`.
-- `src/wavestack/trace/catalog.py` -- `LlmGenerationStartedPayload` (l.~1152) et `LlmGenerationEndedPayload` (l.~1209) : `candidates_only: bool = False`.
-- `src/wavestack/session/app_session.py` -- `llm_step` (l.~8779) : paramètre `candidates_only=False` ; si vrai, `self._executor.submit(self._run_peek, …)` ; nouveau `_run_peek` après `_step_context` : scope `_lab_scope(request_id, call=True)`, `_step_context` pour les ids, started avec phase `session.llm_lab.step.peek_reading`, `_save_main_state`, `engine.next_candidates`, `memory[0] = {"token_text": None} | top`, `_lab_restore(saved, "llm")`, ended (`message_text` `session.llm_lab.step.peek_done`), `_lab_release` ; erreurs comme `_run_lab`.
-- `src/wavestack/web/app.py` -- `LlmStepIntention.candidates_only: bool = False` (l.~216), passé par la route (l.~514).
+- `src/harness_lab/trace/catalog.py` -- `LlmGenerationStartedPayload` (l.~1152) et `LlmGenerationEndedPayload` (l.~1209) : `candidates_only: bool = False`.
+- `src/harness_lab/session/app_session.py` -- `llm_step` (l.~8779) : paramètre `candidates_only=False` ; si vrai, `self._executor.submit(self._run_peek, …)` ; nouveau `_run_peek` après `_step_context` : scope `_lab_scope(request_id, call=True)`, `_step_context` pour les ids, started avec phase `session.llm_lab.step.peek_reading`, `_save_main_state`, `engine.next_candidates`, `memory[0] = {"token_text": None} | top`, `_lab_restore(saved, "llm")`, ended (`message_text` `session.llm_lab.step.peek_done`), `_lab_release` ; erreurs comme `_run_lab`.
+- `src/harness_lab/web/app.py` -- `LlmStepIntention.candidates_only: bool = False` (l.~216), passé par la route (l.~514).
 - `content/messages.yaml`, `content/i18n/{en,de}/messages.yaml` -- `session.llm_lab.step.peek_reading`, `peek_done`.
-- `src/wavestack/web/static/llm.js` -- `drawStep` (l.~1500) envoie `candidates_only: store.auto === "step"` ; `stepEvent` (l.~1580) : `llm_token` sans cas automatique ; à `llm_generation_ended` `candidates_only` + `completed` + même texte → `dist.source = "step"`, `index 0`, `tokens 1`, `scheduleDistribution(0)` ; statut d'attente `stages.output.reading_text` pour la lecture.
+- `src/harness_lab/web/static/llm.js` -- `drawStep` (l.~1500) envoie `candidates_only: store.auto === "step"` ; `stepEvent` (l.~1580) : `llm_token` sans cas automatique ; à `llm_generation_ended` `candidates_only` + `completed` + même texte → `dist.source = "step"`, `index 0`, `tokens 1`, `scheduleDistribution(0)` ; statut d'attente `stages.output.reading_text` pour la lecture.
 - `content/llm_lab.yaml`, `content/i18n/{en,de}/llm_lab.yaml` -- `stages.output.reading_text`.
-- `src/wavestack/web/static/app.js` -- `logRow` (l.~6455) : nom de ligne `main.log.lab_peek_started` / `lab_peek_ended` pour un `llm_generation_*` à `candidates_only`.
+- `src/harness_lab/web/static/app.js` -- `logRow` (l.~6455) : nom de ligne `main.log.lab_peek_started` / `lab_peek_ended` pour un `llm_generation_*` à `candidates_only`.
 - `content/ui.yaml`, `content/i18n/{en,de}/ui.yaml` -- ces deux clés sous `main.log`.
 - `tests/test_llm_lab.py` -- tests après `test_step_route_answers_validates_and_refuses` (l.~1536).
 - `tools/e2e/run_e2e.py` -- `_LoopLab` (l.~12700) : `peeked(draw)` (started + ended `candidates_only`, aucun `llm_token`, `/distribution` à `token_text` nul) ; `_llm_loop_first_load` (l.~12862) : contrôle `candidates_only` du pas automatique et absence de tirage, puis clic sans `candidates_only`.
@@ -78,7 +78,7 @@ context:
 
 - Point d'arrêt 1 (approbation de la spec) : « Approve and continue » pris en autonomie, Anaël injoignable.
 - Step-03 : implémenté directement par l'agent qui a fait l'investigation, sans sous-agent d'implémentation (contexte déjà chargé, comme les corrections C et D) ; les patchs de revue appliqués de même.
-- Écarts au Code Map : `_run_peek` tourne sous `_lab_scope(request_id)` sans `call_id` (aucun appel au modèle) ; `src/wavestack/session/llm_lab.py` (`OutputStage.reading_text`) et `tests/test_engine_candidates.py` touchés en plus.
+- Écarts au Code Map : `_run_peek` tourne sous `_lab_scope(request_id)` sans `call_id` (aucun appel au modèle) ; `src/harness_lab/session/llm_lab.py` (`OutputStage.reading_text`) et `tests/test_engine_candidates.py` touchés en plus.
 - `LlamaCppEngine.next_candidates` vérifié sur le GGUF synthétique `tests/fixtures/tiny-llama.gguf` (suite par défaut, aucun modèle réel) : mêmes `top` que le premier token tiré au même endroit, cache vide, cache au-delà des ids, cache exactement sur les ids (1 id réévalué), lecture annulée, aucun id (`ValueError`).
 - Borne « prompt trop long » de la lecture alignée sur celle de « Tirer » (`window - output_reserve(False)`), après la revue ; `read_tps` mesuré sur la seule lecture du moteur.
 - Le `sampling` de `llm_generation_started` reste celui de l'écran (champ obligatoire) : il ne sert qu'aux barres redessinées par `/distribution`.

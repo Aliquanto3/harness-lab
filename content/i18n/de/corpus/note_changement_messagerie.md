@@ -1,6 +1,6 @@
 # Änderungsmitteilung zur Messaging-Umstellung bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Mitteilung beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Mitteilung beschreibt kein reales Unternehmen. -->
 
 Diese Mitteilung erklärt den Übergang von Version 1 zu Version 2 der E-Mail-Richtlinie, gültig seit dem 1. Januar 2026.
 

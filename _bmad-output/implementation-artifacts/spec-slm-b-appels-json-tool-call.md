@@ -13,7 +13,7 @@ context: []
 
 ## Intent
 
-**Problem:** Granite 4.0 Nano (IBM, Apache-2.0) écrit ses appels comme Hermes, `<tool_call>{"name": …, "arguments": …}</tool_call>`, format que lit déjà le lecteur `hermes`. WaveStack ne lui propose pourtant pas d'outils : `capabilities_for` n'accepte ce format que dans un gabarit ChatML avec le raisonnement de Qwen3, alors que celui de Granite est en `<|start_of_role|>…<|end_of_role|>`, sans raisonnement.
+**Problem:** Granite 4.0 Nano (IBM, Apache-2.0) écrit ses appels comme Hermes, `<tool_call>{"name": …, "arguments": …}</tool_call>`, format que lit déjà le lecteur `hermes`. HarnessLab ne lui propose pourtant pas d'outils : `capabilities_for` n'accepte ce format que dans un gabarit ChatML avec le raisonnement de Qwen3, alors que celui de Granite est en `<|start_of_role|>…<|end_of_role|>`, sans raisonnement.
 
 **Approach:** Reconnaître au gabarit, quelle que soit l'architecture, toute famille qui annonce `<tool_call>` sans `<function=` (donc hors `qwen3_coder` et `minicpm5`). Elle reçoit le lecteur `hermes`, une séquence d'arrêt lue dans les marqueurs de fin de tour du gabarit (`<|end_of_text|>` pour Granite, `<|im_end|>` pour un ChatML), et le raisonnement selon les règles existantes. L'installateur propose les variantes non-H, via la liste de la spec A.
 
@@ -55,8 +55,8 @@ context: []
 
 ## Code Map
 
-- `src/wavestack/models/capabilities.py:47-103` -- `capabilities_for` : ajouter la branche « `<tool_call>` sans `<function=` » après les branches `minicpm5` et `qwen3`, avec une table des marqueurs de fin de tour (`<|end_of_text|>`, `<|im_end|>`) cherchés dans le gabarit. `by_template` (l. 78) reste la règle de Qwen3. `reasoning_tags` et `reasoning_variable` suivent la branche générique actuelle (l. 94-103).
-- `src/wavestack/tools/parser.py` -- `_hermes` (l. ~88) réutilisé tel quel.
+- `src/harness_lab/models/capabilities.py:47-103` -- `capabilities_for` : ajouter la branche « `<tool_call>` sans `<function=` » après les branches `minicpm5` et `qwen3`, avec une table des marqueurs de fin de tour (`<|end_of_text|>`, `<|im_end|>`) cherchés dans le gabarit. `by_template` (l. 78) reste la règle de Qwen3. `reasoning_tags` et `reasoning_variable` suivent la branche générique actuelle (l. 94-103).
+- `src/harness_lab/tools/parser.py` -- `_hermes` (l. ~88) réutilisé tel quel.
 - `content/models/publishers.yaml:59` -- `granite` (ajouter l'architecture `granite` si elle n'y est pas, à vérifier) ; un cas `(["granite"], ["granite-4.0-1b"], "granite")` dans `tests/test_model_catalog.py:455`.
 - `install.ps1`, `install.sh` -- entrées `granite-4.0-350m` et `granite-4.0-1b` dans la liste de la spec A (ou, si A n'est pas encore fusionnée, attendre A).
 - `tests/test_tools.py` (`call`, `tool_session`), `tests/fake_engine.py`, `tests/test_tool_parser_minicpm5.py` -- modèles de tests (capacités, cycle complet).
@@ -66,7 +66,7 @@ context: []
 
 **Execution:**
 - [x] `tests/fixtures/granite4_chat_template.jinja` -- gabarit vérifié contre l'en-tête.
-- [x] `src/wavestack/models/capabilities.py` -- détection et séquences d'arrêt.
+- [x] `src/harness_lab/models/capabilities.py` -- détection et séquences d'arrêt.
 - [x] `content/models/publishers.yaml` (+ i18n si besoin) -- architecture `granite`.
 - [x] `install.ps1`, `install.sh`, `tests/test_installers.py` -- deux entrées dans la liste de la spec A.
 - [x] `tests/test_tool_parser_granite4.py` -- matrice ; capacités de la fixture (famille `granite`, `hermes`, arrêt, pas de raisonnement) ; rendu avec outil et appel passé ; cycle complet calculatrice avec `FakeEngine(template=GRANITE, architecture="granite")`.
@@ -78,7 +78,7 @@ context: []
 
 ## Implementation Notes
 
-- 2026-10-24, préparation par l'orchestrateur : les deux fichiers Q4_K_M sont déjà téléchargés et vérifiés (tailles et sha256 de la spec) dans `%TEMP%\wavestack-e2e-models\models`. Leurs gabarits réels sont identiques octet pour octet (6 418 caractères) : une seule fixture `tests/fixtures/granite4_chat_template.jinja`, à extraire de l'en-tête de l'un d'eux par `gguf_meta.read_metadata`. Architecture `granite`, `general.basename` `granite-4.0`, tailles `350M` et `1B`. La spec A est fusionnée (#86) : la table `$OptionalModels` (install.ps1) et `OPTIONAL_MODELS` (install.sh) reçoivent les entrées `granite-4.0-350m` et `granite-4.0-1b`.
+- 2026-10-24, préparation par l'orchestrateur : les deux fichiers Q4_K_M sont déjà téléchargés et vérifiés (tailles et sha256 de la spec) dans `%TEMP%\harness-lab-e2e-models\models`. Leurs gabarits réels sont identiques octet pour octet (6 418 caractères) : une seule fixture `tests/fixtures/granite4_chat_template.jinja`, à extraire de l'en-tête de l'un d'eux par `gguf_meta.read_metadata`. Architecture `granite`, `general.basename` `granite-4.0`, tailles `350M` et `1B`. La spec A est fusionnée (#86) : la table `$OptionalModels` (install.ps1) et `OPTIONAL_MODELS` (install.sh) reçoivent les entrées `granite-4.0-350m` et `granite-4.0-1b`.
 
 ## Spec Change Log
 

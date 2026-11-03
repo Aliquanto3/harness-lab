@@ -1,5 +1,5 @@
 # English translation of content/llm_lab.yaml (languages 4/5, AD-19): same keys, same
-# placeholders. Validated by wavestack.session.llm_lab.LabContent.
+# placeholders. Validated by harness_lab.session.llm_lab.LabContent.
 
 title_text: "LLM workshop: inside the model"
 intro_text: >-
@@ -31,7 +31,7 @@ sections:
       At each step, the model gives a probability to every token in the vocabulary.
       Sampling is the random draw of the next token from them; these settings decide how it
       is done. The order described here is
-      llama.cpp's (the engine of WaveStack, llama-server and Ollama): top-k (keep only the
+      llama.cpp's (the engine of HarnessLab, llama-server and Ollama): top-k (keep only the
       most probable tokens), then top-p (keep a group of tokens that adds up to a given
       probability), then min-p (drop tokens that are too unlikely), then temperature
       (flattens or sharpens the probabilities); a cloud provider may apply its own
@@ -125,7 +125,7 @@ stages:
       real tokens will replace these.
     example_cloud_text: >-
       An example of splitting, not this model's: its tokenizer is at its provider. For your
-      text, WaveStack only gives the estimate alongside.
+      text, HarnessLab only gives the estimate alongside.
   transfo:
     title_text: "TRANSFORMATION"
     subtitle_text: "the numbers go through the model's layers (its stages of computation)"
@@ -228,7 +228,7 @@ stages:
       stack_hybrid_text: "layer {n} of {couches} · solid: full attention, dashed: recurrent"
       stack_done_text: "{couches} layers crossed"
       stack_unknown_text: "number of layers unknown for this model"
-      unknown_text: "Dimensions unknown for this model: WaveStack cannot read them."
+      unknown_text: "Dimensions unknown for this model: HarnessLab cannot read them."
     note_text:
       one: >-
         The engine exposes neither the attention weights nor the hidden states: {n} token, 8
@@ -423,7 +423,7 @@ generation:
     token each, but not always. The exact token count is the server's, in the event log.
   more_text: "… and {reste} more, not shown (512 chips at most)."
   legend_text: >-
-    The colours (purple, green) alternate from one chip to the next without meaning anything:
+    The colours (blue, orange) alternate from one chip to the next without meaning anything:
     they only separate a token from its neighbour.
   sent_summary_text: "See the prompt sent to the model"
   status:
@@ -433,7 +433,7 @@ generation:
     error: "The generation failed."
 
 loading:
-  empty_text: "No load since WaveStack started."
+  empty_text: "No load since HarnessLab started."
   running_text: "Loading… {duree}"
   total_text: "{modele}: {statut} in {duree}"
   local_text: "Local: CPU RAM, no GPU. The model runs on this workstation's processor."
@@ -480,7 +480,7 @@ distribution:
   title_text: "What the settings do to the candidates"
   intro_text: >-
     The candidates of a token already produced, as the model saw them. Move a slider:
-    WaveStack works out again which ones stay in the running and each one's chance of being
+    HarnessLab works out again which ones stay in the running and each one's chance of being
     drawn, without a new generation. The model probability does not move.
   empty_text: >-
     Draw the next token, below. Generate an answer with “Show the candidate tokens” ticked
@@ -493,7 +493,7 @@ distribution:
   more_text: "… and {reste} other candidates read, further down, not shown."
   tail_text: "Rest of the vocabulary"
   tail_help_text: >-
-    WaveStack keeps the {lus} most probable candidates of each token; the rest of the
+    HarnessLab keeps the {lus} most probable candidates of each token; the rest of the
     vocabulary weighs {reste} of the probability. The chance of being drawn is shared among
     the candidates kept only: an approximation, faithful as long as this rest is small.
 

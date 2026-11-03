@@ -1,6 +1,6 @@
-"""Lot D: the end-to-end launcher cuts WaveStack's outbound network itself (no browser).
+"""Lot D: the end-to-end launcher cuts HarnessLab's outbound network itself (no browser).
 
-`tools/e2e/stack.py` gives WaveStack proxy variables that name a loopback port on which
+`tools/e2e/stack.py` gives HarnessLab proxy variables that name a loopback port on which
 nothing listens: a request to a public host passes the guard, is traced, then fails; the
 loopback (fake servers) bypasses the proxy, and so do the launcher's own requests.
 """
@@ -22,9 +22,9 @@ from pathlib import Path
 import httpx
 import pytest
 
-from wavestack.net import guard
-from wavestack.net.factory import create_client
-from wavestack.trace.journal import get_journal
+from harness_lab.net import guard
+from harness_lab.net.factory import create_client
+from harness_lab.trace.journal import get_journal
 
 _PATH = Path(__file__).resolve().parents[1] / "tools" / "e2e" / "stack.py"
 
@@ -83,7 +83,7 @@ def workstation_proxy(monkeypatch):
 
 @pytest.fixture
 def launched_env(stack, tmp_path, closed_port, workstation_proxy, monkeypatch):
-    """The environment WaveStack gets from the launcher, applied to this process."""
+    """The environment HarnessLab gets from the launcher, applied to this process."""
     env = stack._env(tmp_path, closed_port)
     _apply_proxies(env, monkeypatch)
     return env

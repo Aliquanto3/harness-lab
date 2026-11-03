@@ -44,7 +44,7 @@ deferred:
 
 ## Intent
 
-**Problem:** Aujourd'hui, le RAG n'existe que comme une brique de l'atelier. Sa chaîne est figée : sqlite-vec, embedding et reranker déclarés dans `wavestack.toml`, `top_k` fixe. Le formateur ne peut donc ni montrer de quoi est faite une architecture RAG, ni faire varier un composant pour en voir l'effet. Anaël a demandé le 2026-09-28 un écran à part pour cela, avec FAISS et LanceDB parmi les bases vectorielles.
+**Problem:** Aujourd'hui, le RAG n'existe que comme une brique de l'atelier. Sa chaîne est figée : sqlite-vec, embedding et reranker déclarés dans `harness-lab.toml`, `top_k` fixe. Le formateur ne peut donc ni montrer de quoi est faite une architecture RAG, ni faire varier un composant pour en voir l'effet. Anaël a demandé le 2026-09-28 un écran à part pour cela, avec FAISS et LanceDB parmi les bases vectorielles.
 
 **Approach:** Ajouter un nouvel écran, `/rag`, atteint depuis la barre haute. Il dessine la chaîne (découpage, embedding, base vectorielle, recherche, reranking, construction du contexte, génération) et l'exécute sur une question, étape par étape, sur le fil de travail de la session. Chaque étape est tracée par des événements `rag_lab_*` (AD-1, AD-2), avec ce qui entre, ce qui sort, les scores, les rangs, la durée et la mémoire. Le livrable se découpe en quatre incréments, chacun utilisable seul :
 1. la chaîne livrée, exécutée telle quelle ;
@@ -98,32 +98,32 @@ deferred:
 
 Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant celle-ci. On se repère aux symboles, jamais aux numéros de ligne.
 
-- `src/wavestack/rag/index.py`
+- `src/harness_lab/rag/index.py`
   - Fonctions à réutiliser : `connect`, `load_vec`, `vec_unavailable`, `read_meta`, `read_chunks`, `IndexMeta`, `corpus_digest`, `passage_text` (le titre puis le texte : c'est ce qui est embeddé), `write_index`, `build_index` (paramètres `on_progress` et `cancelled`), `BuildCancelled`, `IndexInUse` et `file_sha256`.
   - Le motif d'écriture est à reproduire pour les index du laboratoire : un fichier temporaire, puis `os.replace`.
-- `src/wavestack/rag/retriever.py`
+- `src/harness_lab/rag/retriever.py`
   - `Excerpt` (`position`, `chunk_id`, `doc_id`, `title_fr`, `text`, `score`) ;
   - `Retriever`, le port que les stratégies V2 doivent implémenter ;
   - `score_of`, qui calcule `1 − distance` borné à [0, 1] ;
   - `SqliteVecRetriever`, qui prend `search(query, k)`.
-- `src/wavestack/rag/corpus.py`
+- `src/harness_lab/rag/corpus.py`
   - `RagContent` : `excerpt()` et `placement_fr` ;
   - `Chunk` ;
   - `split_text` et `chunk_corpus(content, max_chars)`. Le corpus donne 77 extraits à 300 caractères, 29 à 700 et 16 à 1 200 ;
   - `load_rag_content`.
-- `src/wavestack/models/embedding.py`
+- `src/harness_lab/models/embedding.py`
   - `Embedder`, qui prend `embed_queries` et `embed_passages` et rend des vecteurs normalisés ;
   - `normalize`, `open_embedder` et `model_path`.
-- `src/wavestack/models/reranker.py` -- `Reranker.score(query, passages, cancelled, progress)`, `RerankScore`, `RerankCancelled` et `open_reranker`.
-- `src/wavestack/models/load_registry.py`
+- `src/harness_lab/models/reranker.py` -- `Reranker.score(query, passages, cancelled, progress)`, `RerankScore`, `RerankCancelled` et `open_reranker`.
+- `src/harness_lab/models/load_registry.py`
   - Constantes de créneau `EMBEDDING`, `RERANKER` et `COMPRESSOR`, à imiter.
   - `component_cost`, `check_component`, `grant`, `release` et `holder`.
   - `process_rss`, qui mesure le processus et ses enfants.
-- `src/wavestack/config.py`
+- `src/harness_lab/config.py`
   - Chemins : `data_dir`, `repo_root` et `models_dir`. Seul `config` résout les chemins (AD-20).
   - `Config.rag_embedding`, `rag_reranker`, `rag_top_k` (bornes 1 à 20), `rag_rerank_candidates`, `rag_chunk_max_chars` (≥ 50) et `rag_index_path()`.
   - Motifs à reprendre : `compression_cost_bytes` pour un `cost_mb`, et `_int`.
-- `src/wavestack/session/app_session.py`
+- `src/harness_lab/session/app_session.py`
   - `__init__` : `_embedder_factory` et `_reranker_factory` (les faux s'y branchent), `_executor` (un seul worker) et `_load_registry`.
   - État RAG : `_rag_model`, `_rerank_model`, `_rag_content`, `_embedder`, `_rag_retriever`, `_reranker`, `_rag_index_error` et `_rag_missing_fr`.
   - `_rag_static_reason`, `_rag_unavailable`, `_rerank_static_reason` et `_rerank_availability` donnent les raisons à réutiliser.
@@ -131,16 +131,16 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
   - État de la session : `_enter_rag_job`, `_set_state`, `_refusal_reason`, `stop` (ajouter `rag_lab`) et `hold`.
   - `_rag_rerank_step` : son tri stable (score, puis rang d'origine) est à reprendre.
   - Le fichier fait plus de 6 000 lignes. La logique du laboratoire va dans un module à part, et la session ne garde que des méthodes minces.
-- `src/wavestack/trace/catalog.py`
+- `src/harness_lab/trace/catalog.py`
   - `SessionState`, auquel ajouter `rag_lab` ;
   - `PAYLOAD_MODELS`, qui enregistre chaque `kind` ;
   - `RagSearchEndedPayload` et `RerankedExcerpt`, les modèles de forme.
-- `src/wavestack/trace/scope.py` -- `scoped(...)`, qui pose `step_id`, `brick`, `component`, `actor` et `trigger`.
-- `src/wavestack/web/app.py`
+- `src/harness_lab/trace/scope.py` -- `scoped(...)`, qui pose `step_id`, `brick`, `component`, `actor` et `trigger`.
+- `src/harness_lab/web/app.py`
   - `create_app`, et les routes de page `index_page`, `diagnostic_page` et `/models` (story 25).
   - Le motif d'intention de classe (b) de `build_rag_index`, où `SendRefused` donne un 409.
   - Le gestionnaire de `RequestValidationError`, `_revalidate_pages` et `_latest`.
-- `src/wavestack/web/static/`
+- `src/harness_lab/web/static/`
   - `index.html` : `header.top-bar`, où la story 29 a peut-être ajouté son lien d'écran.
   - `models.html` : `nav.page-tabs`, story 25.
   - `theme.js` et `[data-theme-picker]`, story 31.
@@ -151,13 +151,13 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
 - `tests/test_rag_rerank.py` -- `index`, `rerank_config`, `place_reranker`, `session_for` et `wait_idle`, à réutiliser.
 - `tests/test_web_app.py` et `tests/test_web_tokens.py` -- les pages servies et les règles des jetons et du thème (story 31).
 - `tools/e2e/stack.py` -- `rag_settings` : faux embedding `fake-embedding`, index dans le dossier de données, fichiers servis par le faux serveur.
-- `tools/e2e/wavestack_e2e.py` -- remplace `embedding.open_embedder` et le reranker par les faux.
+- `tools/e2e/harness_lab_e2e.py` -- remplace `embedding.open_embedder` et le reranker par les faux.
 - `tools/e2e/run_e2e.py` -- `s_rag` (télécharge et construit), `s_rag_rerank`, `SCENARIOS`, `Run.shot`, `Run.shot_element`, `_fully_visible`, et `_contrast_sweep` (story 31).
 - `pyproject.toml`
   - `[project.optional-dependencies]`, où se trouve déjà `compression` ;
   - `[tool.uv] no-build-package` ;
   - l'index explicite `abetlen-cpu`.
-- `wavestack.toml` -- `[rag]` ; y ajouter `[rag_lab]`.
+- `harness-lab.toml` -- `[rag]` ; y ajouter `[rag_lab]`.
 - `README.md` -- `## Compression du contexte (Headroom)` sert de modèle pour une section d'extra.
 
 ## Tasks & Acceptance
@@ -174,28 +174,28 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
 ### Incrément 1 — La chaîne livrée, dessinée et exécutée
 
 **Execution:**
-1. `content/rag_lab.yaml` (nouveau), et `RagLabContent` (pydantic, `extra="forbid"`) dans `src/wavestack/rag/lab.py`. Pour chaque type d'étape : `label_fr` et `explain_fr` (2 à 3 phrases). Pour chaque option : `label_fr`. À quoi s'ajoutent les textes de page : titre, aide, « génération non exécutée ici » et « emprunté à la brique RAG ». Un fichier invalide donne `content_error_fr` dans `GET /api/rag_lab`, et la page l'affiche. Raison : AD-19.
-2. `src/wavestack/rag/lab.py` (nouveau, sans dépendance à la session) :
+1. `content/rag_lab.yaml` (nouveau), et `RagLabContent` (pydantic, `extra="forbid"`) dans `src/harness_lab/rag/lab.py`. Pour chaque type d'étape : `label_fr` et `explain_fr` (2 à 3 phrases). Pour chaque option : `label_fr`. À quoi s'ajoutent les textes de page : titre, aide, « génération non exécutée ici » et « emprunté à la brique RAG ». Un fichier invalide donne `content_error_fr` dans `GET /api/rag_lab`, et la page l'affiche. Raison : AD-19.
+2. `src/harness_lab/rag/lab.py` (nouveau, sans dépendance à la session) :
    - `Stage{id, kind, option, params}` et `Pipeline{label_fr, stages}` ;
    - `default_pipeline(cfg)` : `chunking/paragraphs{chunk_max_chars}`, `embedding/declared`, `vector_store/sqlite_vec`, `vector_search/cosine{candidates}`, `rerank/declared`, `context/excerpts{top_k}`, `generation/not_run` ;
    - `validate_pipeline(p, catalog) → reason_fr | None` : à cet incrément, seule la chaîne livrée est acceptée ;
    - `LabRun`, qui exécute les étapes d'une voie avec des fonctions injectées (embedder, reranker, index, annulation, émission) et rend, pour chaque étape, `input_fr`, `output_fr`, `facts`, `items`, `duration_ms` et `rss_bytes`.
 
    Le découpage lit les extraits de l'index (`read_chunks`). La recherche passe par `SqliteVecRetriever`. Le reranking reprend le tri stable de `_rag_rerank_step`. Le contexte suit le format `RagContent.excerpt`. Raison : un moteur testable seul, sans alourdir `app_session.py`.
-3. `src/wavestack/trace/catalog.py` -- Ajouter `rag_lab` à `SessionState`, puis cinq `kind` et leurs payloads (note de conception) : `rag_lab_run_started`, `rag_lab_stage_started`, `rag_lab_stage_progress`, `rag_lab_stage_ended` et `rag_lab_run_ended`. Raison : AD-2.
-4. `src/wavestack/session/app_session.py` -- Ajouter les méthodes minces qui s'appuient sur `rag/lab.py` :
+3. `src/harness_lab/trace/catalog.py` -- Ajouter `rag_lab` à `SessionState`, puis cinq `kind` et leurs payloads (note de conception) : `rag_lab_run_started`, `rag_lab_stage_started`, `rag_lab_stage_progress`, `rag_lab_stage_ended` et `rag_lab_run_ended`. Raison : AD-2.
+4. `src/harness_lab/session/app_session.py` -- Ajouter les méthodes minces qui s'appuient sur `rag/lab.py` :
    - `rag_lab_state()`, qui donne le catalogue, la chaîne par défaut, le contenu et sa raison d'erreur, ainsi que les disponibilités, calculées par `_rag_unavailable` et `_rerank_availability` ;
    - `run_rag_lab(question, pipelines)`, de classe (b), qui passe en `rag_lab` puis `executor.submit`. L'embedder et le reranker sont empruntés ou chargés, puis fermés (AD-8), et la session revient en `idle` avec la raison qu'elle avait.
 
    Il faut aussi étendre `stop` à `rag_lab`. Pour la portée, poser `step_id=lab{n}.{lane}.s{i}`, `brick="rag"`, `component="rag_lab.{kind}"`, `actor="harness"` et `trigger="user"`. Raison : AD-3, AD-8 et AD-24.
-5. `src/wavestack/web/app.py`
+5. `src/harness_lab/web/app.py`
    - Ajouter les routes :
      - `GET /rag`, qui sert `rag.html` ;
      - `GET /api/rag_lab`, qui renvoie `{catalog, default_pipeline, content, content_error_fr, last_run, session_state, seq}`, où `last_run` est formé des enveloppes `rag_lab_*` du dernier run lues dans le journal ;
      - `POST /api/intentions/rag_lab_run`, de corps `RagLabRunIntention{question: str (1 à 500), pipelines: list[Pipeline] | None (max 1 ici)}`, qui répond `{run_id}` et renvoie 409 sur `SendRefused` ou sur une chaîne refusée.
    - Raison : AD-18.
 6. Fichiers statiques :
-   - `src/wavestack/web/static/rag.html` (nouveau) :
+   - `src/harness_lab/web/static/rag.html` (nouveau) :
      - en tête de `<head>`, `theme.js`, puis `fonts.css`, `tokens.css` et `rag.css` ;
      - `nav.page-tabs` : Atelier (`/`), les écrans de la story 29 s'ils existent, « Atelier RAG » (courant), Diagnostic et Modèles ;
      - le sélecteur de thème ;
@@ -241,8 +241,8 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
 ### Incrément 2 — Options, réglages et comparaison
 
 **Execution:**
-1. `src/wavestack/config.py` et `wavestack.toml` -- Ajouter `rag_lab_dir()` (`data_dir()/"rag_lab"`) et la section `[rag_lab]` : `fastembed` (optionnelle : `model_name`, `dims`, `label_fr`), puis `faiss_cost_mb` et `lancedb_cost_mb` (incrément 3). Raison : AD-20.
-2. `src/wavestack/rag/lab.py`
+1. `src/harness_lab/config.py` et `harness-lab.toml` -- Ajouter `rag_lab_dir()` (`data_dir()/"rag_lab"`) et la section `[rag_lab]` : `fastembed` (optionnelle : `model_name`, `dims`, `label_fr`), puis `faiss_cost_mb` et `lancedb_cost_mb` (incrément 3). Raison : AD-20.
+2. `src/harness_lab/rag/lab.py`
    - Réglages bornés dans le catalogue : `chunk_max_chars` de 200 à 1 500, `candidates` et `top_k` de 1 à 20, avec `candidates ≥ top_k`.
    - Option `vector_store/memory` : recherche exhaustive en Python pur (produit scalaire sur vecteurs normalisés).
    - Option `embedding/fastembed` : disponible seulement si `importlib.util.find_spec("fastembed")`, si `[rag_lab.fastembed]` est déclarée et si ses fichiers sont sous `models_dir()/fastembed`. Elle s'ouvre avec `local_files_only=True`. Sinon, elle est indisponible avec sa raison.
@@ -254,7 +254,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
    - Chaque carte reçoit une liste d'options (les indisponibles sont désactivées, raison en infobulle et en texte) et ses réglages en `input type=number` bornés.
    - Une case « Comparer avec une autre configuration » ouvre la chaîne B.
    - Les résultats s'affichent en deux colonnes, suivies de la synthèse de comparaison.
-   - Les chaînes en cours d'édition sont mémorisées dans `localStorage` (`wavestack.ragLab`, lecture protégée par `try/catch`), avec un bouton « Revenir à la chaîne livrée ».
+   - Les chaînes en cours d'édition sont mémorisées dans `localStorage` (`harness_lab.ragLab`, lecture protégée par `try/catch`), avec un bouton « Revenir à la chaîne livrée ».
 5. Tests et E2E
    - Tests :
      - bornes et refus, en 422 ou 409 ;
@@ -280,9 +280,9 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
    - Déclarer l'extra `rag-alt = ["faiss-cpu==1.15.1", "lancedb==0.39.0"]`.
    - Ajouter `faiss-cpu`, `lancedb` et `pyarrow` à `no-build-package` : roues seulement.
    - Mettre à jour `uv.lock`. Le conteneur ne joint pas l'index `abetlen` : voir la note de conception.
-2. `src/wavestack/rag/lab.py`
+2. `src/harness_lab/rag/lab.py`
    - Options `vector_store/faiss` (`IndexFlatIP`, `write_index`) et `vector_store/lancedb` (`lancedb.connect(dossier)`, table `chunks`, métrique `cosine`). Chacune est construite à la demande depuis le cache de vecteurs, dans `rag_lab_dir()/<clé>/faiss/` ou `lancedb/`, puis relue ensuite.
-   - Catalogue : `find_spec` sans import. En cas d'absence : « Indisponible : FAISS (ou LanceDB) n'est pas installé. Depuis le dossier de WaveStack : `uv sync --extra compression --extra rag-alt`, puis relancez WaveStack. » Et, pour Headroom, « sans `--extra compression`, Headroom serait retiré ».
+   - Catalogue : `find_spec` sans import. En cas d'absence : « Indisponible : FAISS (ou LanceDB) n'est pas installé. Depuis le dossier de HarnessLab : `uv sync --extra compression --extra rag-alt`, puis relancez HarnessLab. » Et, pour Headroom, « sans `--extra compression`, Headroom serait retiré ».
    - Premier import : `check_component` puis `grant` dans les créneaux `rag_lab.faiss` et `rag_lab.lancedb` (constantes dans `load_registry.py`), avec pour coût `[rag_lab] faiss_cost_mb = 60` et `lancedb_cost_mb = 180`. Ces créneaux ne sont jamais libérés, car un import ne se défait pas. L'étape le dit.
 3. Tests
    - `tests/test_rag_lab_alt.py` : les options indisponibles sans l'extra (`find_spec` → `None`), la commande dans la raison, le refus du budget à l'import, l'`ImportError` convertie en raison.
@@ -299,7 +299,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
 ### Incrément 4 — Ajouter, retirer et déplacer
 
 **Execution:**
-1. `src/wavestack/rag/lab.py`
+1. `src/harness_lab/rag/lab.py`
    - Étapes `lexical_search/bm25` (Python pur, k1 = 1,5 et b = 0,75, tokenisation par `\w+` en minuscules, mots de 3 lettres et plus ; réglage `candidates`) et `fusion/rrf` (fusion par rangs réciproques, k = 60).
    - `validate_pipeline` applique les règles :
      - le découpage, l'embedding, la base vectorielle, le contexte et la génération sont fixes et dans cet ordre ;
@@ -429,19 +429,19 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
 ## À vérifier sur PC
 
 - **Installation de l'extra sans droits d'administrateur**
-  - **Geste** : dans PowerShell, depuis le dossier de WaveStack, lancer `uv sync --extra compression --extra rag-alt`, puis `uv run wavestack`.
+  - **Geste** : dans PowerShell, depuis le dossier de HarnessLab, lancer `uv sync --extra compression --extra rag-alt`, puis `uv run harness-lab`.
   - **Attendu** : installation sans invite UAC ni pare-feu, et FAISS et LanceDB disponibles dans `/rag`.
   - **Critère** : code de sortie 0 ; durée et taille de `.venv` notées ; aucune boîte de dialogue.
   - **Moyen** : à la main, ou script PowerShell.
 - **DLL non signées (AppLocker ou WDAC)**
   - **Geste** : `/rag`, base vectorielle FAISS puis LanceDB, « Lancer la chaîne ».
   - **Attendu** : le run passe ; si un import est bloqué, l'étape en `error` dit pourquoi et le reste fonctionne.
-  - **Critère** : aucune `pageerror` ; WaveStack reste utilisable.
+  - **Critère** : aucune `pageerror` ; HarnessLab reste utilisable.
   - **Moyen** : Claude in Chrome ou Playwright.
 - **Chaîne livrée avec les vrais modèles**
   - **Geste** : `/rag`, question « Combien de jours de télétravail par semaine ? », « Lancer », avec granite-embedding et bge-reranker (Qwen3.5-2B actif).
   - **Attendu** : les sept étapes sont renseignées, et le reranking réordonne.
-  - **Critère** : run complet en moins de 15 s ; RSS de WaveStack sous le budget (4 Go) ; mémoire affichée par étape relevée.
+  - **Critère** : run complet en moins de 15 s ; RSS de HarnessLab sous le budget (4 Go) ; mémoire affichée par étape relevée.
   - **Moyen** : script AppSession, puis Playwright pour la capture.
 - **Coût mémoire réel des imports**
   - **Geste** : RSS avant et après la première exécution FAISS, puis LanceDB (Gestionnaire des tâches ou script `psutil`).
@@ -459,7 +459,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27, 31 et 29 modifient l'arbre avant cel
   - **Critère** : aucune erreur réseau ; aucune invite du pare-feu.
   - **Moyen** : à la main.
 - **Rien dans le dépôt**
-  - **Geste** : après les runs, lancer `git status` et regarder `%LOCALAPPDATA%\WaveStack\rag_lab`.
+  - **Geste** : après les runs, lancer `git status` et regarder `%LOCALAPPDATA%\HarnessLab\rag_lab`.
   - **Attendu** : les index sont dans le dossier de données seulement.
   - **Critère** : `git status` propre.
   - **Moyen** : PowerShell.
@@ -480,7 +480,7 @@ Statut : done (2026-09-29, orchestrateur de nuit ; étapes 1 à 4 menées par l'
 
 **Changement :** nouvel écran `/rag` « Atelier RAG » (lien de la barre haute, onglet des autres pages), bac à sable séparé de la brique RAG. (1) Chaîne livrée dessinée et exécutée (découpage, embedding, base vectorielle sqlite-vec, recherche, reranking, construction du contexte, génération dessinée avec son entrée) : pour une question, chaque étape montre ce qui entre et sort (extraits, scores, rangs, durée, mémoire). (2) Options et réglages (taille des extraits, candidats, top-k, recherche exhaustive en mémoire, fastembed s'il est installé et déclaré), cache de vecteurs dans le dossier de données, comparaison A/B côte à côte. (3) FAISS et LanceDB dans l'extra optionnel `rag-alt` (faiss-cpu 1.15.1, lancedb 0.39.0, roues seulement) : sans lui, option grisée avec la commande d'installation ; imports comptés au budget mémoire (AD-8). (4) Ajouter, retirer et déplacer les composants de récupération (BM25, fusion RRF, reranking) avec des règles vérifiées par la session. Moteur séparé (`rag/lab.py`), événements `rag_lab_*`, état `rag_lab`, prêt des modèles de la brique, rien écrit hors du dossier de données.
 
-**Fichiers :** `rag/lab.py` (nouveau), `rag/{retriever,embedding}.py`, `models/load_registry.py`, `config.py`, `trace/catalog.py`, `session/app_session.py`, `web/app.py`, `web/static/{rag.html,rag.js,rag.css (nouveaux),app.js,index.html,llm.html,diagnostic.html,models.html}`, `content/rag_lab.yaml` (nouveau), `pyproject.toml` et `uv.lock` (extra `rag-alt`), `wavestack.toml`, `tests/test_rag_lab{,_alt}.py` (nouveaux) et tests associés, `tools/e2e/{run_e2e.py,wavestack_e2e.py,README.md}`, README, EXPERIENCE.md, DESIGN.md, SPEC.md (CAP-45), ARCHITECTURE-SPINE.md, captures 55 à 58.
+**Fichiers :** `rag/lab.py` (nouveau), `rag/{retriever,embedding}.py`, `models/load_registry.py`, `config.py`, `trace/catalog.py`, `session/app_session.py`, `web/app.py`, `web/static/{rag.html,rag.js,rag.css (nouveaux),app.js,index.html,llm.html,diagnostic.html,models.html}`, `content/rag_lab.yaml` (nouveau), `pyproject.toml` et `uv.lock` (extra `rag-alt`), `harness-lab.toml`, `tests/test_rag_lab{,_alt}.py` (nouveaux) et tests associés, `tools/e2e/{run_e2e.py,harness_lab_e2e.py,README.md}`, README, EXPERIENCE.md, DESIGN.md, SPEC.md (CAP-45), ARCHITECTURE-SPINE.md, captures 55 à 58.
 
 **Revue :** 33 constats — 26 corrigés (8 medium, 18 low), 4 différés, 3 regroupés ; voir le triage. Décision prise à la correction : fastembed n'est ni livré ni ajouté à `rag-alt` (onnxruntime et son client de téléchargement non vérifiés hors ligne ni sous Windows) ; la manière de l'ajouter est documentée. Revue de suivi recommandée : false (aucun high).
 

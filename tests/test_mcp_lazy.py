@@ -12,9 +12,9 @@ from test_mcp import McpWeb, card, enable, loop, mcp_session, since, wait_for, w
 from test_tools import QWEN, _segments, call
 from test_turn import _run
 
-from wavestack.context.render import render_context
-from wavestack.context.segments import Joined, Part, SegmentKind
-from wavestack.trace.journal import get_journal
+from harness_lab.context.render import render_context
+from harness_lab.context.segments import Joined, Part, SegmentKind
+from harness_lab.trace.journal import get_journal
 
 LOCAL = (
     "local__list_terms",
@@ -407,8 +407,8 @@ def test_chat_mode_documented_tool_enters_tools_at_the_next_call(loop):  # noqa:
     from pydantic import SecretStr
     from test_cloud import SENTINEL, Provider, delta, sse
 
-    from wavestack import config
-    from wavestack.session.app_session import AppSession
+    from harness_lab import config
+    from harness_lab.session.app_session import AppSession
 
     def calling(name: str, arguments: str) -> bytes:
         tool_call = {"index": 0, "id": "p1", "function": {"name": name, "arguments": arguments}}
@@ -463,8 +463,8 @@ def test_chat_mode_everything_loaded_in_the_turn_drops_the_meta_tool(loop):  # n
     from pydantic import SecretStr
     from test_cloud import SENTINEL, Provider, delta, sse
 
-    from wavestack import config
-    from wavestack.session.app_session import AppSession
+    from harness_lab import config
+    from harness_lab.session.app_session import AppSession
 
     def loading(tool: str) -> bytes:
         arguments = json.dumps({"tool": tool})

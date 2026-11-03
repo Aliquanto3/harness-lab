@@ -1,5 +1,5 @@
 ---
-title: Revue adverse de la passe « Update » cloud (FR-43) du spine WaveStack
+title: Revue adverse de la passe « Update » cloud (FR-43) du spine HarnessLab
 target: ../ARCHITECTURE-SPINE.md
 scope: "Passe Update du 2026-09-24 (C1–C3, H4–H9, M10–M15, L16–L17) : AD-2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 15, 16, 19, 20, 21, 23, 24, 25 et conventions"
 lens: "Deux unités conformes à la lettre de chaque AD, qui se construisent pourtant de façon incompatible (forme de données, propriétaire, chemin de mutation, fuite de secret)"
@@ -8,7 +8,7 @@ previous: review-cloud-adversary.md (P1–P13)
 sources:
   - ../ARCHITECTURE-SPINE.md (état du 2026-09-24, 20:40)
   - ../.memlog.md (entrées C1 à L17)
-  - src/wavestack/trace/scope.py, net/factory.py, tools/network.py, session/diagnostic.py, session/effects.py, config.py (code livré, pour les points d'ancrage)
+  - src/harness_lab/trace/scope.py, net/factory.py, tools/network.py, session/diagnostic.py, session/effects.py, config.py (code livré, pour les points d'ancrage)
 ---
 
 # Revue adverse : passe « Update » des amendements cloud
@@ -33,7 +33,7 @@ Deux contradictions entre AD apparaissent aussi : AD-8 (« le sélectionner lib�
 | --- | --- | --- | --- |
 | P1 Port `Engine` / deux corps exacts | **Fermée** | Union `RenderedPrompt \| ChatBody`, corps complet construit par `context`, sérialisé une seule fois, égalité testée avec `outbound_request`. Titre et Prevents réécrits. | La brique raisonnement « ajoute au corps » des champs (AD-6) : un second écrivain du corps (N12). Représentation de `body: bytes` dans un événement JSON (N12). |
 | P2 `tool_call_id` | **Fermée en principe, rouverte** | Identifiant attribué par la session, format `[A-Za-z0-9]{9}`, historique `{id, name, arguments}`, une réponse par identifiant. | La dérivation depuis le `step_id` crée des collisions sur les appels parallèles (N2). La règle « une réponse par identifiant » contredit la voie « mal formé » du mode chat (N5). |
-| P3 Clé vers un autre hôte | **Fermée pour P3a et P3b sur la lettre** | `id` WaveStack unique, `api_keys.json = {id: {host, key}}`, `follow_redirects=False` pour `origin = model`, en-tête posé par requête. Le client httpx livré a `follow_redirects=False` par défaut, donc l'adaptateur est sûr s'il ne le force pas. | Le contrôle d'hôte n'a pas de propriétaire : AD-5 fait lire le fichier par l'adaptateur, et AD-20 rattache le contrôle à `key_set`. « Tester » peut donc envoyer une clé périmée (N7). |
+| P3 Clé vers un autre hôte | **Fermée pour P3a et P3b sur la lettre** | `id` HarnessLab unique, `api_keys.json = {id: {host, key}}`, `follow_redirects=False` pour `origin = model`, en-tête posé par requête. Le client httpx livré a `follow_redirects=False` par défaut, donc l'adaptateur est sûr s'il ne le force pas. | Le contrôle d'hôte n'a pas de propriétaire : AD-5 fait lire le fichier par l'adaptateur, et AD-20 rattache le contrôle à `key_set`. « Tester » peut donc envoyer une clé périmée (N7). |
 | P4 Clé dans la trace | **Fermée en grande partie** | `SecretStr`, `effect_applied{kind, id, key_set}`, filtre des chaînes du fournisseur, loggers au niveau WARNING, test sentinelle. | Une persistance générique par `model_dump(mode="json")` écrit `**********` dans `api_keys.json` (N8). L'erreur 422 de FastAPI renvoie l'entrée reçue (N13). |
 | P5 Classes d'intentions | **Fermée** | Classe (b) « hors `idle` et hors `diagnostic` pour les quatre » ; `set_api_key` en (b) ; `test_cloud_model` tient `model_load`. | `select_model` en diagnostic charge un GGUF sans état de verrou déclaré (Mineur, N11). |
 | P6 Avertissement et choix persistant | **Fermée sur la confirmation, rouverte sur l'application** | `acknowledged: true` exigé par la session ; `selected_model = {kind, ref}` ; règle de lancement sans réseau. | AD-8 contre AD-21 sur le moment où le choix s'applique (N6). `kind: file\|cloud` n'a pas de valeur pour un modèle servi, et l'ancien format chaîne n'a pas de migration (N11). |
@@ -72,7 +72,7 @@ Deux contradictions entre AD apparaissent aussi : AD-8 (« le sélectionner lib�
 **AD à resserrer :** AD-4 (Estimation), AD-9 (Dépassement), AD-21 (Test).
 
 **Règle proposée.**
-> - Le modèle d'écart est **affine** : `total = Σ estimations × ratio + overhead`. Le test mesure `overhead` avec son premier appel (invite minimale, sans outil) et `ratio` avec le second. Sinon, prendre `estimate_ratio` et `estimate_overhead` de `wavestack.toml`. Le ratio est borné à [0,8 ; 1,5].
+> - Le modèle d'écart est **affine** : `total = Σ estimations × ratio + overhead`. Le test mesure `overhead` avec son premier appel (invite minimale, sans outil) et `ratio` avec le second. Sinon, prendre `estimate_ratio` et `estimate_overhead` de `harness-lab.toml`. Le ratio est borné à [0,8 ; 1,5].
 > - La clé est `(id du modèle, contexte principal | sous-agent)`, et non `context_id` : tous les `sub{n}` partagent la même.
 > - En mode chat, un dépassement calculé sur une **estimation** n'est bloquant que si `Σ estimations` brute (ratio 1, sans overhead) dépasse déjà `usable`. Sinon, l'appel part avec un avertissement « estimation incertaine », et le 400 « contexte dépassé » du fournisseur (AD-16) fait foi. Un test : ratio de 4 venu du test, puis premier tour de 1 500 tokens estimés, et l'appel doit partir.
 
@@ -105,7 +105,7 @@ Deux contradictions entre AD apparaissent aussi : AD-8 (« le sélectionner lib�
 **Unité A : `session`.** Elle émet `context_reconciled{call_id, segments: [{id, tokens}], used, percent, usage_source}`, champ pour champ (AD-2, AD-4).
 
 **Unité B : jauge du front (AD-1, AD-9).**
-- La jauge empile par `SegmentKind`, et `context_rendered` lui donne « la ventilation par type de segment ». `near_limit` (seuil 0,8 défini dans `wavestack.toml`) et `overflow` viennent aussi de la session.
+- La jauge empile par `SegmentKind`, et `context_rendered` lui donne « la ventilation par type de segment ». `near_limit` (seuil 0,8 défini dans `harness-lab.toml`) et `overflow` viennent aussi de la session.
 - Après la réconciliation, B n'a que des tokens par `id`. Pour empiler, il doit **additionner par type**, ce qu'interdit AD-4 (« le front n'additionne ni ne répartit rien »). Pour la couleur de la jauge, il doit comparer `percent` au seuil, ce qui est un recalcul interdit par AD-1.
 - Ou bien il garde la ventilation de `context_rendered`, désormais périmée.
 
@@ -229,7 +229,7 @@ Deux contradictions entre AD apparaissent aussi : AD-8 (« le sélectionner lib�
 **AD à resserrer :** AD-20 (Fusion), conventions (Configuration).
 
 **Règle proposée.**
-> La fusion se fait **champ par champ, par `id`**, sur les dictionnaires bruts. La validation `CloudModel` s'applique au résultat fusionné. Une entrée de `settings.json` sans équivalent dans `wavestack.toml` doit être complète. Une entrée fusionnée invalide est écartée avec un `diagnostic_check` d'avertissement (raison en français, champ en cause), sans jamais bloquer le lancement.
+> La fusion se fait **champ par champ, par `id`**, sur les dictionnaires bruts. La validation `CloudModel` s'applique au résultat fusionné. Une entrée de `settings.json` sans équivalent dans `harness-lab.toml` doit être complète. Une entrée fusionnée invalide est écartée avec un `diagnostic_check` d'avertissement (raison en français, champ en cause), sans jamais bloquer le lancement.
 
 ---
 

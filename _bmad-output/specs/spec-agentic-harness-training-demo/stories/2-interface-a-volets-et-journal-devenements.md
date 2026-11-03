@@ -13,7 +13,7 @@ baseline_commit: '02016def1a57d1c74ebb61a545645a19e3ee5a56'
 
 ## Intent
 
-**Problem:** WaveStack n'a qu'une page de diagnostic minimale (story 1). Aucune des CAP-1 à CAP-4 (vue humain, contexte LLM, orchestration, schéma d'architecture, panneau des briques, synchronisation) n'existe, et le front n'a aucun magasin unique de projection du journal d'événements (AD-1).
+**Problem:** HarnessLab n'a qu'une page de diagnostic minimale (story 1). Aucune des CAP-1 à CAP-4 (vue humain, contexte LLM, orchestration, schéma d'architecture, panneau des briques, synchronisation) n'existe, et le front n'a aucun magasin unique de projection du journal d'événements (AD-1).
 
 **Approach:** Construire la grille à 5 volets masquables (AD-18, JS natif sans compilation) et le magasin client unique qui consomme tout le flux SSE existant pour projeter l'état — sans aucune brique active : LLM nu, historique vide, schéma limité aux deux nœuds fixes `core.harness`/`core.model`. Étendre `trace` du seul `kind` `architecture_changed` (AD-12) qu'il faut pour alimenter le schéma ; les autres volets restent à l'état vide, pédagogiquement explicite.
 
@@ -46,12 +46,12 @@ baseline_commit: '02016def1a57d1c74ebb61a545645a19e3ee5a56'
 
 ## Code Map
 
-- `src/wavestack/trace/catalog.py` -- ajouter `ArchitectureNode{id, kind, hosting, label_fr, wanted, available, reason_fr}`, `ArchitectureEdge{from_, to, crosses_boundary}`, `ArchitectureChangedPayload{nodes, edges}` ; enregistrer `"architecture_changed"` dans `PAYLOAD_MODELS`.
-- `src/wavestack/session/app_session.py` (nouveau) -- `AppSession` minimal : état fixe `idle` (AD-3), `emit_initial()` qui pousse `session_state{state:"idle"}` puis `architecture_changed` avec les deux nœuds fixes `core.harness`/`core.model` (locaux, `wanted=available=True`), aucune arête.
-- `src/wavestack/web/app.py` -- réutiliser `Journal`/`_format_sse` (déjà écrits story 1) : ajouter `GET /` (sert `static/index.html`), `GET /api/state` (dernier `session_state` + `architecture_changed` connus), `GET /api/stream` (SSE générique, même logique de reprise que `/api/diagnostic/stream`). Ne pas toucher aux routes `/diagnostic*` existantes.
-- `src/wavestack/web/static/index.html`, `static/app.js`, `static/app.css`, `static/tokens.css` (nouveaux) -- grille 5 volets (barre haute minimale, panneau des briques vide, vue humain avec composer désactivé, Contexte LLM vide, Orchestration = journal brut des événements, bande basse = schéma SVG des 2 nœuds fixes), magasin de projection unique, masquage/puce/menu/mode focus, sélection synchronisée par `data-component`.
-- `src/wavestack/web/static/diagnostic.html` -- une fois `ready`, afficher un lien « Ouvrir WaveStack » vers `/`.
-- `src/wavestack/cli.py` -- après diagnostic prêt, construire `AppSession` et appeler `emit_initial()`.
+- `src/harness_lab/trace/catalog.py` -- ajouter `ArchitectureNode{id, kind, hosting, label_fr, wanted, available, reason_fr}`, `ArchitectureEdge{from_, to, crosses_boundary}`, `ArchitectureChangedPayload{nodes, edges}` ; enregistrer `"architecture_changed"` dans `PAYLOAD_MODELS`.
+- `src/harness_lab/session/app_session.py` (nouveau) -- `AppSession` minimal : état fixe `idle` (AD-3), `emit_initial()` qui pousse `session_state{state:"idle"}` puis `architecture_changed` avec les deux nœuds fixes `core.harness`/`core.model` (locaux, `wanted=available=True`), aucune arête.
+- `src/harness_lab/web/app.py` -- réutiliser `Journal`/`_format_sse` (déjà écrits story 1) : ajouter `GET /` (sert `static/index.html`), `GET /api/state` (dernier `session_state` + `architecture_changed` connus), `GET /api/stream` (SSE générique, même logique de reprise que `/api/diagnostic/stream`). Ne pas toucher aux routes `/diagnostic*` existantes.
+- `src/harness_lab/web/static/index.html`, `static/app.js`, `static/app.css`, `static/tokens.css` (nouveaux) -- grille 5 volets (barre haute minimale, panneau des briques vide, vue humain avec composer désactivé, Contexte LLM vide, Orchestration = journal brut des événements, bande basse = schéma SVG des 2 nœuds fixes), magasin de projection unique, masquage/puce/menu/mode focus, sélection synchronisée par `data-component`.
+- `src/harness_lab/web/static/diagnostic.html` -- une fois `ready`, afficher un lien « Ouvrir HarnessLab » vers `/`.
+- `src/harness_lab/cli.py` -- après diagnostic prêt, construire `AppSession` et appeler `emit_initial()`.
 - `tests/test_trace_architecture.py` (nouveau) -- validation payload `architecture_changed`.
 - `tests/test_web_tokens.py` (nouveau) -- `static/tokens.css` reprend exactement les jetons `colors`/`typography`/`rounded`/`spacing` du frontmatter de `DESIGN.md`.
 - `tests/test_web_app.py` (nouveau ou étendu) -- `GET /`, `GET /api/state`, reprise `/api/stream` par `Last-Event-ID`.
@@ -96,7 +96,7 @@ Pass 1 (blind-hunter, edge-case-hunter, verification-gap ; 3 layers, 15 findings
 - [EC2] Aucun `try/except` autour de la cible du thread diagnostic (`cli.py`) — préexistant : `session.run()` tournait déjà seul, sans protection, dans ce même thread avant cette story ; cette story ajoute seulement un appel supplémentaire au même risque déjà présent. → `defer`.
 - [EC5] `ArchitectureEdge` ne valide pas que `from_`/`to` référencent des nœuds existants — cette story n'émet jamais d'arête (`edges: []`) ; à traiter avec la story qui introduira de vraies arêtes. → `defer`.
 - [VG2] Le branchement `cli.py` diagnostic → `AppSession` n'est exercé par aucun test de bout en bout (`main()` bloque sur `uvicorn.run`, chaque moitié est testée isolément) — disposition déposée par la couche verification-gap elle-même : `defer`, refactor (extraire `_run_diagnostic_then_boot` en fonction injectable) non nécessaire pour livrer cette story.
-- [EC1] « Pas de signal distinctif si le diagnostic ne devient jamais prêt » — `false`, réfuté : `/diagnostic` et `/api/diagnostic` portent déjà ce signal (`blocking_checks`), et l'UI ne route jamais vers `/` avant `ready` (le lien « Ouvrir WaveStack » n'apparaît que si `ready`).
+- [EC1] « Pas de signal distinctif si le diagnostic ne devient jamais prêt » — `false`, réfuté : `/diagnostic` et `/api/diagnostic` portent déjà ce signal (`blocking_checks`), et l'UI ne route jamais vers `/` avant `ready` (le lien « Ouvrir HarnessLab » n'apparaît que si `ready`).
 - [EC3] `parseSseEvent` ne validerait pas la présence de `seq`, risquant `Last-Event-ID: undefined` puis rejeu/doublons — `false`, réfuté : `Envelope.seq` est un champ pydantic requis (`envelope.py`), le serveur ne peut jamais sérialiser un événement sans lui.
 - [EC4] Croissance non bornée de `store.journal` (et du journal serveur) sur une session longue — `low`, rejeté : même raisonnement déjà tenu et accepté en story 1 (BH2 de son propre triage) pour le journal serveur, applicable ici au journal front ; session de démo pédagogique courte, correction (virtualisation de liste) non triviale pour un bénéfice marginal.
 
@@ -114,4 +114,4 @@ Pas de bibliothèque JS (décision AD-18 différée jusqu'à cette story) : le s
 - `uv run pytest` -- expected: tous les tests passent
 
 **Manual checks (if no CLI):**
-- `uv run wavestack`, attendre le diagnostic prêt, ouvrir `/` : les 5 volets sont visibles, masquer/réafficher chacun via « — » et via le menu « Volets ▾ », vérifier qu'au moins un volet reste toujours visible, cliquer un nœud du schéma et vérifier la surbrillance.
+- `uv run harness-lab`, attendre le diagnostic prêt, ouvrir `/` : les 5 volets sont visibles, masquer/réafficher chacun via « — » et via le menu « Volets ▾ », vérifier qu'au moins un volet reste toujours visible, cliquer un nœud du schéma et vérifier la surbrillance.

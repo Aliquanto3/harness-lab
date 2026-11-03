@@ -22,10 +22,10 @@ import argparse
 import sys
 from pathlib import Path
 
-from wavestack import config
-from wavestack.messages import msg
-from wavestack.rag import contexts
-from wavestack.rag.corpus import chunk_documents, load_rag_content, read_documents
+from harness_lab import config
+from harness_lab.messages import msg
+from harness_lab.rag import contexts
+from harness_lab.rag.corpus import chunk_documents, load_rag_content, read_documents
 
 LANGUAGES = ("fr", "en", "de")
 COMMENT = (

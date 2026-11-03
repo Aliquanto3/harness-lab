@@ -183,7 +183,7 @@
   "fr.sauvegardes.p1",
   "fr.mots_de_passe.p1"
  ],
- "guard": "wavestack.net.guard",
+ "guard": "harness_lab.net.guard",
  "load_s": 1.62,
  "memory": {
   "peak_pagefile_mb": 6109,

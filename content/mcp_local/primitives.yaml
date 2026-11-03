@@ -2,7 +2,7 @@
 # serveur au lancement, dans sa langue. `{…}` : une valeur que le serveur place.
 terms:
   title: Termes du glossaire
-  description: La liste des termes du glossaire du démonstrateur WaveStack, un par ligne.
+  description: La liste des termes du glossaire du démonstrateur HarnessLab, un par ligne.
 explain_term:
   title: Expliquer une notion
   description: >-
@@ -13,4 +13,4 @@ explain_term:
     à partir de cette définition : {definition}
   unknown_text: >-
     Explique la notion « {term} » à un consultant qui découvre les agents, en trois phrases.
-    Elle n'est pas dans le glossaire de WaveStack, dont voici les termes : {known}.
+    Elle n'est pas dans le glossaire de HarnessLab, dont voici les termes : {known}.

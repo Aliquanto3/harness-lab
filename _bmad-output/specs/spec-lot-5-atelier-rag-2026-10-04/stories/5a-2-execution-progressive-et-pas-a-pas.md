@@ -40,8 +40,8 @@ context:
 
 ## Code Map
 
-- `src/wavestack/web/static/rag.js` -- `applyEnvelope` : étapes atteintes → `stepper.push` ; `renderViews(frameIndex)` ; focus avec le `stage_ended` de l'étape.
-- `src/wavestack/web/static/rag.css` -- `is-hidden`, `is-new`, pastilles d'état.
+- `src/harness_lab/web/static/rag.js` -- `applyEnvelope` : étapes atteintes → `stepper.push` ; `renderViews(frameIndex)` ; focus avec le `stage_ended` de l'étape.
+- `src/harness_lab/web/static/rag.css` -- `is-hidden`, `is-new`, pastilles d'état.
 - `tools/e2e/run_e2e.py` -- `_rag_lab_views`.
 
 ## Tasks & Acceptance

@@ -36,7 +36,7 @@ d'historique (propre à Opus 5.5 et Fable 5.1), et les conversations n'ont pas c
 2. **Sonnet 5 réflexion éteinte** : appel d'outil natif (`tool_use`), pas écrit en texte. Parade
    (2) non nécessaire : `off` reste `{type: "disabled"}`.
 3. **`block_binding` avec `{type: "disabled"}`** : refusé (400) par les deux modèles. Parade (3)
-   appliquée : `block_binding` ne figure que dans `reasoning.on` (`wavestack.toml`).
+   appliquée : `block_binding` ne figure que dans `reasoning.on` (`harness-lab.toml`).
 4. **`display: "summarized"` sur Sonnet 5** : accepté, la réflexion résumée arrive au canal
    Raisonnement.
 

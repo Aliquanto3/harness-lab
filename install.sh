@@ -1,35 +1,45 @@
 #!/usr/bin/env bash
-# Installe uv, WaveStack et le modele Qwen par defaut sans droits administrateur, puis
+# Installe uv, HarnessLab et le modele Qwen par defaut sans droits administrateur, puis
 # lance l'application. Idempotent : relancer ce script ne retelecharge ni le projet ni
 # le modele s'ils sont deja presents.
 #
 # Surcharges (dossiers d'installation, utiles aussi pour les tests) :
-#   WAVESTACK_INSTALL_DIR, WAVESTACK_DATA_DIR, WAVESTACK_UV_INSTALL_DIR,
-#   WAVESTACK_NO_LAUNCH=1 (n'ouvre pas l'application), WAVESTACK_DRY_RUN=1 (mode a blanc),
-#   WAVESTACK_MODELS=id1,id2 (telecharge aussi ces modeles locaux facultatifs, verifies par
+#   HARNESS_LAB_INSTALL_DIR, HARNESS_LAB_DATA_DIR, HARNESS_LAB_UV_INSTALL_DIR,
+#   HARNESS_LAB_NO_LAUNCH=1 (n'ouvre pas l'application), HARNESS_LAB_DRY_RUN=1 (mode a blanc),
+#   HARNESS_LAB_MODELS=id1,id2 (telecharge aussi ces modeles locaux facultatifs, verifies par
 #   empreinte SHA-256 ; Qwen reste le modele par defaut ; `list` affiche la table et
-#   s'arrete), WAVESTACK_WITH_MINICPM=1 (alias de WAVESTACK_MODELS=minicpm5, publie en 1.2.0).
+#   s'arrete), HARNESS_LAB_WITH_MINICPM=1 (alias de HARNESS_LAB_MODELS=minicpm5, publie en 1.2.0).
 set -euo pipefail
 
 # Memes valeurs que README.md (une seule source de verite : voir tests/test_installers.py)
 QWEN_URL="https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf"
 QWEN_FILE="Qwen3.5-2B-Q4_K_M.gguf"
-# Modeles locaux facultatifs : une seule table, lue par WAVESTACK_MODELS. Une ligne par modele :
+# Modeles locaux facultatifs : une seule table, lue par HARNESS_LAB_MODELS. Une ligne par modele :
 # identifiant|fichier|taille|licence|sha256|url (revision epinglee).
 OPTIONAL_MODELS="qwen3.5-0.8b|Qwen3.5-0.8B-Q4_K_M.gguf|0,5 Go|Apache-2.0|bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517|https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/6ab461498e2023f6e3c1baea90a8f0fe38ab64d0/Qwen3.5-0.8B-Q4_K_M.gguf
 minicpm5|MiniCPM5-2B-Q4_K_M.gguf|1,5 Go|Apache-2.0|ec2d5801640099e97d8d7e8003ad4d81f336e757811f03a26173dddf386602fd|https://huggingface.co/openbmb/MiniCPM5-2B-GGUF/resolve/2079a22f3beaa4e306449978533478fe0522f4b3/MiniCPM5-2B-Q4_K_M.gguf
 granite-4.0-350m|granite-4.0-350m-Q4_K_M.gguf|0,2 Go|Apache-2.0|771c588a49607f274a2bba3185733607ebe6f74b996ab90e2d6bee0d98bcec52|https://huggingface.co/ibm-granite/granite-4.0-350m-GGUF/resolve/b8208a86a58427e1739265318028eb5895b74bf2/granite-4.0-350m-Q4_K_M.gguf
 granite-4.0-1b|granite-4.0-1b-Q4_K_M.gguf|1,0 Go|Apache-2.0|22ec0f9cc99a90185312de3c882c84e7bd6789bdd050389844380a01a831d7f1|https://huggingface.co/ibm-granite/granite-4.0-1b-GGUF/resolve/b27c2fe3f211b7f44e80fa620177aea371099aaa/granite-4.0-1b-Q4_K_M.gguf"
-REPO_URL="https://github.com/Aliquanto3/wavestack.git"
-TARBALL_URL="https://github.com/Aliquanto3/wavestack/archive/refs/heads/main.tar.gz"
+REPO_URL="https://github.com/Aliquanto3/harness-lab.git"
+TARBALL_URL="https://github.com/Aliquanto3/harness-lab/archive/refs/heads/main.tar.gz"
 
-INSTALL_DIR="${WAVESTACK_INSTALL_DIR:-}"
-DATA_DIR="${WAVESTACK_DATA_DIR:-}"
-UV_INSTALL_DIR_OVERRIDE="${WAVESTACK_UV_INSTALL_DIR:-}"
-NO_LAUNCH="${WAVESTACK_NO_LAUNCH:-}"
-DRY_RUN="${WAVESTACK_DRY_RUN:-}"
-WITH_MINICPM="${WAVESTACK_WITH_MINICPM:-}"
-MODELS_ARG="${WAVESTACK_MODELS:-}"
+# 2.0.0 : les anciennes variables WAVESTACK_* restent lues en repli, avec un avertissement.
+for _name in INSTALL_DIR DATA_DIR UV_INSTALL_DIR NO_LAUNCH DRY_RUN WITH_MINICPM MODELS; do
+    _new="HARNESS_LAB_$_name"
+    _old="WAVESTACK_$_name"
+    if [ -z "${!_new+x}" ] && [ -n "${!_old+x}" ]; then
+        echo "Attention : $_old est obsolete, utilisez $_new (lue en repli)." >&2
+        printf -v "$_new" '%s' "${!_old}"
+    fi
+done
+
+INSTALL_DIR="${HARNESS_LAB_INSTALL_DIR:-}"
+DATA_DIR="${HARNESS_LAB_DATA_DIR:-}"
+UV_INSTALL_DIR_OVERRIDE="${HARNESS_LAB_UV_INSTALL_DIR:-}"
+NO_LAUNCH="${HARNESS_LAB_NO_LAUNCH:-}"
+DRY_RUN="${HARNESS_LAB_DRY_RUN:-}"
+WITH_MINICPM="${HARNESS_LAB_WITH_MINICPM:-}"
+MODELS_ARG="${HARNESS_LAB_MODELS:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
@@ -87,13 +97,22 @@ if [ -z "$INSTALL_DIR" ]; then
     if [ -f "$SCRIPT_DIR/pyproject.toml" ]; then
         INSTALL_DIR="$SCRIPT_DIR"
     else
-        INSTALL_DIR="$HOME/Documents/WaveStack"
+        INSTALL_DIR="$HOME/Documents/HarnessLab"
     fi
 fi
 
 # -- Dossier de donnees : venv, caches et modeles, jamais sous Documents.
 if [ -z "$DATA_DIR" ]; then
-    DATA_DIR="$HOME/.local/share/wavestack"
+    DATA_DIR="$HOME/.local/share/harness-lab"
+    # 2.0.0 : l'ancien dossier par defaut est copie une fois (jamais supprime).
+    LEGACY_DATA_DIR="$HOME/.local/share/wavestack"
+    if [ -z "$DRY_RUN" ] && [ ! -e "$DATA_DIR" ] && [ -d "$LEGACY_DATA_DIR" ]; then
+        echo "Copie de l'ancien dossier de donnees $LEGACY_DATA_DIR vers $DATA_DIR (l'ancien reste en place)..."
+        rm -rf "$DATA_DIR.migration"
+        mkdir -p "$(dirname "$DATA_DIR")"
+        cp -a "$LEGACY_DATA_DIR" "$DATA_DIR.migration"
+        mv "$DATA_DIR.migration" "$DATA_DIR"
+    fi
 fi
 VENV_DIR="$DATA_DIR/venv"
 CACHE_DIR="$DATA_DIR/uv-cache"
@@ -126,7 +145,7 @@ fi
 
 # -- Projet : clone si absent ; inchange s'il est deja la (idempotent).
 if [ ! -f "$INSTALL_DIR/pyproject.toml" ]; then
-    echo "Recuperation de WaveStack dans $INSTALL_DIR..."
+    echo "Recuperation de HarnessLab dans $INSTALL_DIR..."
     mkdir -p "$(dirname "$INSTALL_DIR")"
     if command -v git >/dev/null 2>&1; then
         git clone "$REPO_URL" "$INSTALL_DIR"
@@ -136,7 +155,7 @@ if [ ! -f "$INSTALL_DIR/pyproject.toml" ]; then
         curl -fL "$TARBALL_URL" | tar -xz --strip-components=1 -C "$INSTALL_DIR"
     fi
 else
-    echo "WaveStack deja present dans $INSTALL_DIR, pas de nouveau clone."
+    echo "HarnessLab deja present dans $INSTALL_DIR, pas de nouveau clone."
 fi
 
 # -- Modele Qwen : telecharge si absent (idempotent).
@@ -150,7 +169,7 @@ else
     echo "Modele Qwen deja present, pas de nouveau telechargement."
 fi
 
-# -- Modeles facultatifs (WAVESTACK_MODELS) : telecharges si absents, verifies par empreinte.
+# -- Modeles facultatifs (HARNESS_LAB_MODELS) : telecharges si absents, verifies par empreinte.
 if [ -n "$SELECTED" ]; then
     while IFS='|' read -r id file size _ sha url; do
         path="$MODELS_DIR/$file"
@@ -167,14 +186,14 @@ fi
 
 # -- Venv et caches sous le dossier de donnees, jamais sous Documents ; l'appli lit ses
 #    modeles dans le meme dossier.
-export WAVESTACK_DATA_DIR="$DATA_DIR"
+export HARNESS_LAB_DATA_DIR="$DATA_DIR"
 export UV_PROJECT_ENVIRONMENT="$VENV_DIR"
 export UV_CACHE_DIR="$CACHE_DIR"
 
 if [ -z "$NO_LAUNCH" ]; then
-    echo "Lancement de WaveStack..."
-    (cd "$INSTALL_DIR" && uv run wavestack)
+    echo "Lancement de HarnessLab..."
+    (cd "$INSTALL_DIR" && uv run harness-lab)
 fi
 
 echo
-echo "Pour relancer WaveStack plus tard : reexecutez install.sh dans ce dossier."
+echo "Pour relancer HarnessLab plus tard : reexecutez install.sh dans ce dossier."

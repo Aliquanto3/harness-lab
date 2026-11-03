@@ -1,6 +1,6 @@
 # Krisenmanagementverfahren von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
 
 Dieses Verfahren übernimmt vom Meldeverfahren für Vorfälle, sobald ein Vorfall der Stufe 3 erklärt wird oder mehrere Standorte von Exemplia gleichzeitig betroffen sind.
 

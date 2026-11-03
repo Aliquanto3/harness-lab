@@ -1,6 +1,6 @@
 # Leitfaden zum Agent-Harness
 
-Demo-Dokument von WaveStack, absichtlich lang: Es dient dazu, die Delegation an einen
+Demo-Dokument von HarnessLab, absichtlich lang: Es dient dazu, die Delegation an einen
 Sub-Agenten zu zeigen. Originaltext, nicht vertraulich.
 
 ## 1. Das Modell und der Harness
@@ -133,7 +133,7 @@ Schutzmechanismen, Tests). Eine Kontrolle wird entweder vom Code berechnet,
 deterministisch und günstig, oder von einem Modell abgeleitet, flexibler, aber weniger
 verlässlich (Böckeler).
 
-WaveStack zeigt nicht: Plattformen (ACP, Marktplätze), Sandboxes auf Betriebssystemebene,
+HarnessLab zeigt nicht: Plattformen (ACP, Marktplätze), Sandboxes auf Betriebssystemebene,
 Berechtigungsmodi.
 
 ## 11. Merksätze

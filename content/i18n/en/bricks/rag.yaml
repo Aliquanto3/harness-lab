@@ -26,7 +26,7 @@ explanation_text:
       the excerpts go to the provider in your message.
   - >-
     The demonstration corpus describes Exemplia, an imaginary organisation: about twenty
-    fictitious texts written for WaveStack (passwords, remote work, expense claims…). The
+    fictitious texts written for HarnessLab (passwords, remote work, expense claims…). The
     excerpts do not stay in the history: each turn searches again.
   - >-
     A limit of simple RAG: the query is your message as it is. A follow-up question

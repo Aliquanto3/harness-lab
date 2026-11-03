@@ -83,32 +83,32 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/bricks/contract.py:12-30` -- `Category` et `BrickDeclaration` : y ajouter `group: Literal["reads", "acts"]`.
-- `src/wavestack/bricks/registry.py:33-228` -- `BRICKS`, dont l'ordre sert d'ordre d'affichage (story 22). L'ordre actuel est reasoning, short_memory, system_prompt, global_memory, tools, mcp, skills, hooks, subagent, rag, compression. Catégories : reasoning et system_prompt en prompt ; short_memory, global_memory, skills, rag et compression en context ; tools, mcp, hooks et subagent en harness.
-- `src/wavestack/session/app_session.py:1227-1290` -- `_emit_bricks` : ajouter `"group"`. Lignes 3123-3130 et 3176-3190 : les deux appels de `gauge()` (local et chat), qui doivent passer la table brique → catégorie tirée de `self._bricks`.
-- `src/wavestack/context/window.py:18-75` -- `gauge()`, fonction unique des charges de jauge (AD-9). Elle y ajoute `discipline` par segment et par groupe, et `by_brick`.
-- `src/wavestack/trace/catalog.py:157-196, 332-340` -- `SegmentPayload`, `BreakdownItem`, `ContextWindowPayload` et `BrickState`, où ajouter les champs.
-- `src/wavestack/web/static/tokens.css` et le frontmatter de DESIGN.md (`colors`, `spacing.top-bar-height`) -- les jetons.
-- `src/wavestack/web/static/app.js:101-115` -- `GROUP_COLORS`, couleur par type de segment, conservée pour la pastille de type.
+- `src/harness_lab/bricks/contract.py:12-30` -- `Category` et `BrickDeclaration` : y ajouter `group: Literal["reads", "acts"]`.
+- `src/harness_lab/bricks/registry.py:33-228` -- `BRICKS`, dont l'ordre sert d'ordre d'affichage (story 22). L'ordre actuel est reasoning, short_memory, system_prompt, global_memory, tools, mcp, skills, hooks, subagent, rag, compression. Catégories : reasoning et system_prompt en prompt ; short_memory, global_memory, skills, rag et compression en context ; tools, mcp, hooks et subagent en harness.
+- `src/harness_lab/session/app_session.py:1227-1290` -- `_emit_bricks` : ajouter `"group"`. Lignes 3123-3130 et 3176-3190 : les deux appels de `gauge()` (local et chat), qui doivent passer la table brique → catégorie tirée de `self._bricks`.
+- `src/harness_lab/context/window.py:18-75` -- `gauge()`, fonction unique des charges de jauge (AD-9). Elle y ajoute `discipline` par segment et par groupe, et `by_brick`.
+- `src/harness_lab/trace/catalog.py:157-196, 332-340` -- `SegmentPayload`, `BreakdownItem`, `ContextWindowPayload` et `BrickState`, où ajouter les champs.
+- `src/harness_lab/web/static/tokens.css` et le frontmatter de DESIGN.md (`colors`, `spacing.top-bar-height`) -- les jetons.
+- `src/harness_lab/web/static/app.js:101-115` -- `GROUP_COLORS`, couleur par type de segment, conservée pour la pastille de type.
 - `app.js:828-940` -- `renderBricks`. Il n'est reconstruit que sur `bricks` / `armed` / `forceForm` / `memory` / `sessionKey`. La ligne d'état dépend de `store.gauge` et `store.architecture` : il faut la mettre à jour sur place, sans reconstruire la carte, pour garder les popovers et le focus. `app.js:1110-1125` : les lignes d'option ont déjà `hosting-tag-network`.
 - `app.js:1575-1600` -- `memoryCardParts`, qui porte déjà le nombre d'entrées.
 - `app.js:1789-1830` -- `renderGauge` : segments, figures et infobulle. `index.html:15-20` pour la jauge.
 - `app.js:2143` -- bulle `bubble-user`. `app.js:2590-2620` -- `appendSegments` (filet `--segment-color` et `.swatch`). `app.js:2733-2745` -- `compareCell`.
 - `app.js:3389-3640` -- `turnRows` : chaque ligne porte `actor` et `net`, et l'étape `step.brick` quand elle l'a. `app.js:3808-3880` -- `stepNode`, où `.turn-step-tile` est la pastille.
 - `app.js:4791-4830` -- `robot()`. `app.js:4955-5040` -- `buildSchema` : puces `arch-chip`, `arch-cloud-model`, `arch-server-model`. `app.js:5091-5125` -- `schemaNode`, qui connaît `node.hosting`, avec la brique en `node.id.split(".")[0]`. `hookStrip` pour les hooks.
-- `src/wavestack/web/static/app.css` -- `.top-bar` (98), `.pane-header` (377), `.gauge*` (444-500), `.bubble-user` (528), `.ctx-segment` (636), `.turn-step-tile` (1129), `.brick-card` (1508, 1578-1591), `.brick-toggle:checked` (1630), `.robot` (2375), `.arch-node*` (2583-2700), `.arch-cloud-model` et `.arch-server-model` (2954-2970).
+- `src/harness_lab/web/static/app.css` -- `.top-bar` (98), `.pane-header` (377), `.gauge*` (444-500), `.bubble-user` (528), `.ctx-segment` (636), `.turn-step-tile` (1129), `.brick-card` (1508, 1578-1591), `.brick-toggle:checked` (1630), `.robot` (2375), `.arch-node*` (2583-2700), `.arch-cloud-model` et `.arch-server-model` (2954-2970).
 - `tools/e2e/run_e2e.py` -- `Run.shot` (120), `_CSS_COLOR_JS` (1555), `s_network_tools` (670), `s_model_switch` (2599), `SCENARIOS` (2986). `tools/e2e/stack.py:57-120` -- `_entry` et `settings()`, qui déclarent deux faux modèles cloud.
 - `tests/test_bricks.py:444-470` (ordre, story 22), `tests/test_turn.py:234-246` (`gauge()`), `tests/test_web_tokens.py`.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/bricks/contract.py`, `registry.py` -- Ajouter `group` et réordonner `BRICKS` : reasoning, system_prompt, short_memory, global_memory, rag (`reads`), puis tools, mcp, skills, hooks, subagent, compression (`acts`). Les catégories ne changent pas. La story demande ces deux groupes, et l'ordre de la liste reste l'ordre d'affichage.
-- `src/wavestack/trace/catalog.py`, `context/window.py`, `session/app_session.py` -- Ajouter `BrickState.group`. Ajouter `discipline` (`prompt|context|harness|neutral`, `"neutral"` par défaut) à `SegmentPayload` et `BreakdownItem`, et `by_brick: [{brick, tokens, estimated}]` à `ContextWindowPayload`. `gauge()` reçoit `categories: Mapping[str, str] = {}` ; la discipline d'un groupe est celle de son premier segment. `_emit_bricks` émet `group`. AD-1 : ces valeurs viennent de la session.
+- `src/harness_lab/bricks/contract.py`, `registry.py` -- Ajouter `group` et réordonner `BRICKS` : reasoning, system_prompt, short_memory, global_memory, rag (`reads`), puis tools, mcp, skills, hooks, subagent, compression (`acts`). Les catégories ne changent pas. La story demande ces deux groupes, et l'ordre de la liste reste l'ordre d'affichage.
+- `src/harness_lab/trace/catalog.py`, `context/window.py`, `session/app_session.py` -- Ajouter `BrickState.group`. Ajouter `discipline` (`prompt|context|harness|neutral`, `"neutral"` par défaut) à `SegmentPayload` et `BreakdownItem`, et `by_brick: [{brick, tokens, estimated}]` à `ContextWindowPayload`. `gauge()` reçoit `categories: Mapping[str, str] = {}` ; la discipline d'un groupe est celle de son premier segment. `_emit_bricks` émet `group`. AD-1 : ces valeurs viennent de la session.
 - `tests/test_bricks.py`, `tests/test_turn.py` -- Couvrir l'ordre exact et les groupes des cartes, ainsi que les cas de la matrice : discipline par segment et par groupe, brique inconnue, `by_brick` et son ordre, `estimated`.
-- `DESIGN.md` (frontmatter et prose) puis `src/wavestack/web/static/tokens.css` -- Ajouter les jetons de la note de conception et passer `top-bar-height` à 56px. Réécrire Colors (« violet = marque et prompt engineering », le lieu d'hébergement porté par les zones du schéma et le libellé RÉSEAU, jaune = sort du poste), le tableau des disciplines avec leurs contrastes, et les composants `top-bar`, `pane`, `brick-card`, `context-gauge`, `context-segment`, `turn-step`, `arch-node-*`, la bulle utilisateur et le nœud du modèle. Retirer la phrase « Thème clair uniquement… Pas de tokens sombres » au profit de « jetons prêts pour un second thème (story 31) ».
+- `DESIGN.md` (frontmatter et prose) puis `src/harness_lab/web/static/tokens.css` -- Ajouter les jetons de la note de conception et passer `top-bar-height` à 56px. Réécrire Colors (« violet = marque et prompt engineering », le lieu d'hébergement porté par les zones du schéma et le libellé RÉSEAU, jaune = sort du poste), le tableau des disciplines avec leurs contrastes, et les composants `top-bar`, `pane`, `brick-card`, `context-gauge`, `context-segment`, `turn-step`, `arch-node-*`, la bulle utilisateur et le nœud du modèle. Retirer la phrase « Thème clair uniquement… Pas de tokens sombres » au profit de « jetons prêts pour un second thème (story 31) ».
 - `tests/test_web_tokens.py` -- Ajouter un test des contrastes, avec un calcul WCAG en Python pur, sur les paires de la note de conception. Ajouter un test qui interdit `#hex`, `rgb(` et `hsl(` dans `app.css` et `app.js`, commentaires exclus. Ces deux tests verrouillent l'AA et la préparation de la story 31.
-- `src/wavestack/web/static/index.html`, `app.css`, `app.js` (barre haute et volets) -- Donner à la barre haute le fond `ink`, avec titre, figures et statut en `on-ink` et un anneau de focus `on-ink`. La jauge garde une piste claire (`surface-raised`) : segments colorés par `item.discipline`, séparés d'un filet de 1 px, avec en infobulle « {label_fr} : n tokens · {discipline} ». Sous la barre, une légende `#gauge-legend` : une pastille bordée `on-ink-soft` et le nom par discipline présente, dans l'ordre prompt, context, harness, puis « Message et gabarit » ; le total reste dans `#gauge-figures`. `.pane-header` prend le fond `surface` (bandeau), et `.bubble-user` le fond `ink` avec le texte `on-ink`.
+- `src/harness_lab/web/static/index.html`, `app.css`, `app.js` (barre haute et volets) -- Donner à la barre haute le fond `ink`, avec titre, figures et statut en `on-ink` et un anneau de focus `on-ink`. La jauge garde une piste claire (`surface-raised`) : segments colorés par `item.discipline`, séparés d'un filet de 1 px, avec en infobulle « {label_fr} : n tokens · {discipline} ». Sous la barre, une légende `#gauge-legend` : une pastille bordée `on-ink-soft` et le nom par discipline présente, dans l'ordre prompt, context, harness, puis « Message et gabarit » ; le total reste dans `#gauge-figures`. `.pane-header` prend le fond `surface` (bandeau), et `.bubble-user` le fond `ink` avec le texte `on-ink`.
 - `app.js`, `app.css` (panneau des briques) -- En tête du panneau, la légende des quatre disciplines (« Prompt engineering », « Context engineering », « Harness engineering », « Sort du poste de travail »). Deux sections selon `brick.group` : « Ce que le modèle lit » et « Ce que le harnais fait ». Chaque carte porte `data-discipline=category`. Carte active : trait gauche de 5 px et fond teinté de sa discipline, interrupteur coché de cette couleur. Carte éteinte : grisée, fond et trait neutres, texte `ink-soft`. Une puce « 🌐 RÉSEAU » s'affiche si une option activée a `network: true`. La ligne d'état `p.brick-status[data-brick]` est mise à jour sur place à chaque rendu (voir la note). Un modèle qui raisonne toujours affiche 🔒 à côté de l'interrupteur verrouillé.
 - `app.js`, `app.css` (Contexte LLM, Orchestration, schéma) --
   - `appendSegments` et `compareCell` : le filet et le fond du segment prennent sa discipline (`data-discipline`), la `.swatch` garde `GROUP_COLORS` pour que le type de segment reste lisible.
@@ -168,7 +168,7 @@ deferred:
 
 ## Design Notes
 
-Jetons à ajouter (clair) : `discipline-prompt #451DC7` / `-soft #EEE9FC`, `discipline-context #0F7B6C` / `#E2F3EF`, `discipline-harness #B8327A` / `#FBE7F1`, `discipline-network #D9A400` / `#FFF5D1`, `discipline-neutral #8A8A9E` / `#EFEFF4`, `on-ink #FFFFFF`, `on-ink-soft #CFCDE4`. Ce sont les valeurs de la maquette, sauf `ink` : l'encre de la charte (`#0A0A14`) reste en place.
+Jetons à ajouter (clair) : `discipline-prompt #0B6B78` / `-soft #EEE9FC`, `discipline-context #0F7B6C` / `#E2F3EF`, `discipline-harness #B8327A` / `#FBE7F1`, `discipline-network #D9A400` / `#FFF5D1`, `discipline-neutral #8A8A9E` / `#EFEFF4`, `on-ink #FFFFFF`, `on-ink-soft #CFCDE4`. Ce sont les valeurs de la maquette, sauf `ink` : l'encre de la charte (`#0A0A14`) reste en place.
 
 Contrastes calculés, à verrouiller dans le test :
 
@@ -229,7 +229,7 @@ Brique éteinte : « Éteinte ». Brique voulue mais indisponible : « Indisponi
 ## À vérifier sur PC
 
 - **Barre haute projetée**
-  - **Geste** : dans Chrome puis Edge, lancer `uv run wavestack`, choisir « Outils réseau » dans le sélecteur de scénario, envoyer « Résume l'article Wikipédia sur le Mont-Saint-Michel. », puis projeter ou se placer à 3 m de l'écran.
+  - **Geste** : dans Chrome puis Edge, lancer `uv run harness-lab`, choisir « Outils réseau » dans le sélecteur de scénario, envoyer « Résume l'article Wikipédia sur le Mont-Saint-Michel. », puis projeter ou se placer à 3 m de l'écran.
   - **Attendu** : barre haute foncée, légende de la jauge lisible, total en tokens et en pourcentage.
   - **Critère** : Anaël lit la légende et le total à 3 m, à 100 % puis à 150 % de taille de texte (« Aa »), sans texte coupé.
   - **Moyen** : à la main.
@@ -254,7 +254,7 @@ Brique éteinte : « Éteinte ». Brique voulue mais indisponible : « Indisponi
   - **Critère** : 0 élément signalé pour le contraste.
   - **Moyen** : à la main (Lighthouse), ou Claude in Chrome.
 - **Mode contrasté de Windows**
-  - **Geste** : Paramètres, puis Accessibilité, puis Thèmes de contraste, choisir « Désert », puis recharger WaveStack.
+  - **Geste** : Paramètres, puis Accessibilité, puis Thèmes de contraste, choisir « Désert », puis recharger HarnessLab.
   - **Attendu** : barre haute, bulles et tuiles restent lisibles ; les focus sont visibles.
   - **Critère** : tous les textes restent lisibles, et le focus clavier reste visible sur les interrupteurs et la barre haute.
   - **Moyen** : à la main.

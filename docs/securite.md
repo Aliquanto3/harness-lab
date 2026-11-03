@@ -2,7 +2,7 @@
 
 [← Retour au README](../README.md)
 
-Ce document décrit ce que WaveStack contrôle, refuse et journalise (V1.1, vague 2). Il
+Ce document décrit ce que HarnessLab contrôle, refuse et journalise (V1.1, vague 2). Il
 s'adresse à un RSSI ou à un testeur non développeur. Pour l'interface générale, voir le
 [guide d'utilisation](guide.md). Pour l'installation et le proxy, voir
 [l'installation détaillée](installation.md).
@@ -51,7 +51,7 @@ La page se met à jour en direct pendant la séance.
 
 Le bouton **Journal** est dans la barre de navigation des six pages. Son compteur rouge
 compte les refus et les blocages de la séance. Il ne revient à zéro qu'au redémarrage de
-WaveStack, comme le journal. Un clic ouvre les 5 derniers événements (outil ou garde-fou,
+HarnessLab, comme le journal. Un clic ouvre les 5 derniers événements (outil ou garde-fou,
 décision, raison). Le lien « Tout le journal » ouvre la page Sécurité.
 
 ## Autorisations des outils MCP
@@ -68,7 +68,7 @@ s'affichent sous l'outil choisi dans « Serveurs et outils ». Règles par défa
 | Lecture GitHub (alertes de secrets et Dependabot, fichiers, tickets) | moyen | Autoriser |
 | Écriture GitHub (fusion ou création de PR) et tout outil GitHub non listé | élevé | Refuser |
 
-Le **bac à sable** est un dossier réservé de WaveStack. Les outils locaux n'écrivent que
+Le **bac à sable** est un dossier réservé de HarnessLab. Les outils locaux n'écrivent que
 dedans. Un fichier créé y fait au plus 1 Mo. Seules les 20 dernières captures d'écran sont
 gardées.
 
@@ -96,9 +96,9 @@ Un appel d'outil GitHub peut être refusé à trois niveaux :
 
 | Niveau | Ce qui se passe | Ce que vous voyez |
 |---|---|---|
-| Lecture seule côté GitHub | En mode lecture seule, GitHub ne propose pas ses outils d'écriture. WaveStack ne demande pas ce mode, pour montrer son propre refus. Ce cas n'a pas été vérifié en réel. | L'outil n'apparaît pas |
-| Politique WaveStack | La règle de l'outil est « Refuser », le cas par défaut pour toute écriture. Rien n'est envoyé à GitHub. | « Refusé par la politique de sécurité… Envoyé à GitHub : non. » |
-| GitHub (403) | WaveStack a laissé passer l'appel, mais le compte connecté n'a pas ce droit : GitHub refuse. | « Refusé par GitHub (403)… Envoyé à GitHub : oui » |
+| Lecture seule côté GitHub | En mode lecture seule, GitHub ne propose pas ses outils d'écriture. HarnessLab ne demande pas ce mode, pour montrer son propre refus. Ce cas n'a pas été vérifié en réel. | L'outil n'apparaît pas |
+| Politique HarnessLab | La règle de l'outil est « Refuser », le cas par défaut pour toute écriture. Rien n'est envoyé à GitHub. | « Refusé par la politique de sécurité… Envoyé à GitHub : non. » |
+| GitHub (403) | HarnessLab a laissé passer l'appel, mais le compte connecté n'a pas ce droit : GitHub refuse. | « Refusé par GitHub (403)… Envoyé à GitHub : oui » |
 
 Un jeton expiré donne aussi « Envoyé à GitHub : non » : l'appel est arrêté avant l'envoi. Les
 refus de la politique, du jeton expiré et du 403 sont journalisés.
@@ -148,14 +148,14 @@ production. Résumé (ce texte est encore un brouillon, à valider) :
 - Sans Prompt Guard, l'injection indirecte (cachée dans un document ou un résultat d'outil)
   n'est pas détectée.
 - L'autorisation porte sur le nom d'un outil, pas sur ce qu'il fait vraiment côté serveur.
-- Le jeton GitHub donne tous les droits accordés à l'application GitHub de WaveStack
+- Le jeton GitHub donne tous les droits accordés à l'application GitHub de HarnessLab
   (une « OAuth App »), pendant 8 h.
 - Ce jeton est stocké en clair sur le poste, protégé par les seuls droits du compte Windows.
 - Le bac à sable est un contrôle de chemin dans l'application. Ce n'est ni un conteneur ni un
   compte système isolé.
-- La capture d'écran voit tout l'écran, pas seulement WaveStack.
+- La capture d'écran voit tout l'écran, pas seulement HarnessLab.
 - Le journal n'a pas de valeur d'audit : il est local, non signé, modifiable sur le poste.
-- WaveStack ne contrôle pas ce qu'un fournisseur cloud fait des messages qu'il reçoit.
+- HarnessLab ne contrôle pas ce qu'un fournisseur cloud fait des messages qu'il reçoit.
 - L'application n'a pas d'authentification. Elle n'écoute que sur ce poste (`127.0.0.1`), et
   toute personne qui utilise le poste y a accès.
 - Les coûts et l'empreinte sont des estimations, marquées « ≈ » quand le fournisseur ne

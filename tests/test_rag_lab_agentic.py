@@ -19,11 +19,11 @@ from test_rag_erasure import client_for
 from test_rag_lab import ended, run, stage, wait_idle
 from test_rag_lab_no_index import cloud, lab, preset, presets, summary, update
 
-from wavestack import config
-from wavestack.rag import lab as rag_lab
-from wavestack.rag import pageindex, workcopy
-from wavestack.session.app_session import SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag import pageindex, workcopy
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace.journal import get_journal
 
 QUESTION = "Combien de jours de télétravail par semaine ?"
 NOMINAL = ["ACTION: grep télétravail", "ACTION: read_file corpus/teletravail.md", "ACTION: ANSWER"]

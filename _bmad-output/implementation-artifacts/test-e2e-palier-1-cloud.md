@@ -19,11 +19,11 @@
    scriptées et déterministes : elles dépendent du dernier message utilisateur (le texte ajouté par
    H3 est ignoré), des outils proposés et des résultats d'outils déjà reçus dans le tour. Des
    déclencheurs (`[mal-formé]`, `[erreur429]`, `[lent]`…) provoquent les cas d'erreur.
-2. `tools/e2e/stack.py` crée un dossier de données temporaire (`WAVESTACK_DATA_DIR`) dont le
+2. `tools/e2e/stack.py` crée un dossier de données temporaire (`HARNESS_LAB_DATA_DIR`) dont le
    `settings.json` déclare une entrée `[[cloud.models]]` complète, `id = "fake"`,
    `base_url = "http://127.0.0.1:<port>/v1"` (le `http` est admis pour la boucle locale),
-   `stream_usage = true`, `tools = true`, `context = 32768`, `key_env = "WAVESTACK_FAKE_API_KEY"`.
-   `wavestack.toml` n'est pas modifié. WaveStack est lancé par `python -m wavestack.cli` avec
+   `stream_usage = true`, `tools = true`, `context = 32768`, `key_env = "HARNESS_LAB_FAKE_API_KEY"`.
+   `harness-lab.toml` n'est pas modifié. HarnessLab est lancé par `python -m harness_lab.cli` avec
    `BROWSER=true` (aucun navigateur ouvert) et `HF_HOME`/`OLLAMA_MODELS` dans le dossier
    temporaire (aucun GGUF trouvé).
 3. `tools/e2e/run_e2e.py` pilote l'interface avec Playwright : choix du modèle au diagnostic
@@ -35,14 +35,14 @@
 
 | Domaine | Vérifié |
 |---|---|
-| Diagnostic et modèle cloud (11, 11b) | Ligne « Clé fournie par la variable WAVESTACK_FAKE_API_KEY », valeur de la clé absente de la page ; « Tester » réussit (appel d'outil `get_datetime` reçu, réponse, débit) ; avertissement dans la page, nommant le fournisseur ; « actif » après confirmation ; indicateur « RÉSEAU · Faux fournisseur (e2e) » dans la barre haute. Relance : `settings.json` retient `{kind: cloud, ref: fake}`, le modèle est repris sans nouvel avertissement (« choisi lors d'un lancement précédent ») et un tour aboutit. |
+| Diagnostic et modèle cloud (11, 11b) | Ligne « Clé fournie par la variable HARNESS_LAB_FAKE_API_KEY », valeur de la clé absente de la page ; « Tester » réussit (appel d'outil `get_datetime` reçu, réponse, débit) ; avertissement dans la page, nommant le fournisseur ; « actif » après confirmation ; indicateur « RÉSEAU · Faux fournisseur (e2e) » dans la barre haute. Relance : `settings.json` retient `{kind: cloud, ref: fake}`, le modèle est repris sans nouvel avertissement (« choisi lors d'un lancement précédent ») et un tour aboutit. |
 | Scénarios (10) | Sélecteur par module, consigne et puces ; une puce remplit le champ sans rien envoyer ; chaque scénario applique ses briques et sous-options ; après rechargement, sélecteur, consigne et prompts réapparaissent ; hors `idle`, sélecteur et « Réinitialiser » désactivés, API en 409 ; scénario inconnu en 404. |
 | LLM nu (3) | Corps envoyé : un seul message `user`, aucun outil ; réponse affichée ; Contexte LLM en corps JSON avec bandeau cloud ; un champ `reasoning` du fournisseur s'affiche replié. |
 | Mémoire courte (4) | Le prénom revient au second prompt ; brique éteinte, le modèle ne voit plus l'historique. |
 | Prompt système, rejeu, Comparer (4, 9b) | Prompt système en tête ; modifié dans le tiroir puis « Rejouer le dernier prompt » : réponse changée, badge « Rejeu », l'historique du rejeu ne contient pas le tour d'origine (AD-17) ; « Comparer » et le badge ouvrent la comparaison. |
 | Outils natifs (5) | `get_datetime`, `calculator` (1234 × 5678 = 7006652), `read_file` : appel, exécution, réinjection, réponse finale ; Orchestration montre « Demande d'outil ». |
 | Appels mal formés (AD-10) | JSON invalide : `tool_call_malformed`, nouvel essai, tour abouti ; toujours invalide : borne « 3 appels refusés » expliquée dans la Vue humain ; outil inconnu refusé avec la liste des outils ; `tool_use_failed` (400 façon Groq) suit le même chemin. |
-| Refus du fournisseur (AD-16) | 429 (« quota dépassé par minute », « Attendez 7 s »), 500, 401 (« Clé refusée… »), erreur au milieu du flux, `finish_reason: length` : message français dans la Vue humain et Orchestration, WaveStack reste utilisable. |
+| Refus du fournisseur (AD-16) | 429 (« quota dépassé par minute », « Attendez 7 s »), 500, 401 (« Clé refusée… »), erreur au milieu du flux, `finish_reason: length` : message français dans la Vue humain et Orchestration, HarnessLab reste utilisable. |
 | Outils réseau (5b) | Requête sortante tracée (`outbound_request`, URL exacte) ; l'échec est expliqué : « Service injoignable (ProxyError) : le poste n'a pas accès à calendrier.api.gouv.fr. » (idem Wikipédia) ; le tour se termine. |
 | H5, validation humaine (8b, 8c) | Le tour s'arrête avant l'outil réseau ; la carte montre destination et requête exacte ; « Refuser » : rien ne sort ; « Autoriser » : la requête part et son échec est expliqué ; après rechargement la validation en attente réapparaît, active ; « Arrêter » pendant la validation annule (décision `cancelled`, rien ne sort) ; « Autoriser et ne plus demander » décoche H5 dans la carte. |
 | MCP (6, 6b) | Serveur local connecté (2 outils), `local__define_term` appelé ; data.gouv.fr : « Service injoignable (ProxyError) : le poste n'a pas accès à mcp.data.gouv.fr. » ; lazy loading : seul `load_tool_doc` est décrit, puis documentation chargée et outil appelé ; « Charger la documentation » forcé au tour suivant. |
@@ -51,7 +51,7 @@
 | Où vont mes données ? | MCP local puis data.gouv.fr activés à la main ; seule l'arête `mcp.datagouv` franchit la frontière, le serveur local reste sur le poste. |
 | Déclenchement forcé (9) | Outil sans paramètre armé en un clic, puce qui désarme ; calculatrice avec préréglage « Multiplication » exécutée avant l'appel au modèle, le modèle reçoit 444. |
 | Arrêt | « Arrêter » pendant un flux lent : tour `cancelled`, « Arrêté à votre demande ». |
-| Réinitialisation (10) | Message « WaveStack réinitialisé : LLM nu. », aucune brique, sélecteur vide, trois volets en « Aucun tour », journal affiché limité à la suite (5 événements), rien à rejouer ; état identique après rechargement. |
+| Réinitialisation (10) | Message « HarnessLab réinitialisé : LLM nu. », aucune brique, sélecteur vide, trois volets en « Aucun tour », journal affiché limité à la suite (5 événements), rien à rejouer ; état identique après rechargement. |
 
 ## Anomalies
 
@@ -59,10 +59,10 @@ Par gravité décroissante. Toutes sont corrigées (voir « Correction » sous c
 vérifications, d'abord marquées `KNOWN [Ax]` dans le script, sont devenues des vérifications
 normales.
 
-### A1 — Moyenne : un onglet resté ouvert pendant une relance de WaveStack se bloque
+### A1 — Moyenne : un onglet resté ouvert pendant une relance de HarnessLab se bloque
 
-**Reproduction.** Ouvrir `/`, envoyer quelques messages, arrêter puis relancer `uv run wavestack`
-(ce que demande « Choix enregistré : relancez WaveStack pour l'utiliser. ») sans recharger
+**Reproduction.** Ouvrir `/`, envoyer quelques messages, arrêter puis relancer `uv run harness-lab`
+(ce que demande « Choix enregistré : relancez HarnessLab pour l'utiliser. ») sans recharger
 l'onglet, puis envoyer un message depuis cet onglet. Le serveur traite le tour (`turn_ended`
 émis), mais la Vue humain affiche « Préparation du contexte… » avec un chronomètre qui ne s'arrête
 pas, Orchestration montre un tour « en cours », et la réponse n'apparaît jamais. Recharger la
@@ -74,12 +74,12 @@ page répare tout (capture `18-onglet-ouvert-apres-relance.jpg`).
 plus ancien, et les identifiants de tour déjà connus du store désignent d'anciens tours.
 `session_epoch` existe dans l'enveloppe mais le front ne s'en sert pas.
 
-**Fichiers suspects.** `src/wavestack/web/static/app.js` (`streamEvents`, reprise à `lastSeq` ;
-`applyEnvelope`, recherche du tour par `turn_id`), `src/wavestack/web/app.py` (`_sse_stream`),
-`src/wavestack/trace/journal.py`. Piste : un identifiant de lancement (dans `/api/health` ou dans
+**Fichiers suspects.** `src/harness_lab/web/static/app.js` (`streamEvents`, reprise à `lastSeq` ;
+`applyEnvelope`, recherche du tour par `turn_id`), `src/harness_lab/web/app.py` (`_sse_stream`),
+`src/harness_lab/trace/journal.py`. Piste : un identifiant de lancement (dans `/api/health` ou dans
 chaque enveloppe) ; s'il change, le front recharge la page.
 
-**Impact.** L'animateur qui relance WaveStack pour changer de modèle garde souvent l'ancien onglet :
+**Impact.** L'animateur qui relance HarnessLab pour changer de modèle garde souvent l'ancien onglet :
 la démo semble figée. La commande de relance ouvre un nouvel onglet, ce qui limite le risque.
 
 **Correction.** Le journal tire un identifiant d'instance à chaque lancement du processus
@@ -101,7 +101,7 @@ coupés de même. Il faut faire défiler le schéma horizontalement pour voir ce
 cherche justement à montrer (captures `15-ou-vont-mes-donnees-schema.jpg`,
 `09-h5-validation-humaine.jpg`).
 
-**Fichiers suspects.** `src/wavestack/web/static/app.css` (`.arch-zone-network { flex: 0 1 230px }`,
+**Fichiers suspects.** `src/harness_lab/web/static/app.css` (`.arch-zone-network { flex: 0 1 230px }`,
 trop étroite pour le modèle et une colonne de nœuds), rendu de la zone dans `app.js`
 (`renderSchema`).
 
@@ -119,20 +119,20 @@ Le chiffre est le total du fournisseur, pas la somme des segments, et les deux p
 suivent. Le tour y est nommé « t1 » alors qu'Orchestration, la comparaison et le rail disent
 « Tour 1 ».
 
-**Fichier suspect.** `src/wavestack/web/static/app.js`, `renderContext` (vers la ligne 1429 :
+**Fichier suspect.** `src/harness_lab/web/static/app.js`, `renderContext` (vers la ligne 1429 :
 `source` s'ajoute au lieu de remplacer « (somme des segments) » ; `turn.id` au lieu de `turnName`).
 
 **Correction.** Une seule précision : « (total renvoyé par le fournisseur) » quand `usage` vient du
 fournisseur, « (somme des segments) » sinon ; le tour est nommé par `turnName` (« Tour 1 »). Le
 faux modèle a un déclencheur `[sans-usage]` pour vérifier le second cas.
 
-### A4 — Faible : le message « WaveStack réinitialisé : LLM nu. » déforme la barre haute
+### A4 — Faible : le message « HarnessLab réinitialisé : LLM nu. » déforme la barre haute
 
 **Reproduction.** Cliquer « ⟲ Réinitialiser » à 1 600 px de large : le message s'insère dans la
 barre et comprime les voisins (jauge 220 → 124 px, « Volets ▾ » et « Réinitialiser » passent sur
 deux lignes), jusqu'au tour suivant (capture `17-reinitialisation.jpg`).
 
-**Fichiers suspects.** `src/wavestack/web/static/app.css` (`.top-status`, sans largeur bornée ni
+**Fichiers suspects.** `src/harness_lab/web/static/app.css` (`.top-status`, sans largeur bornée ni
 `white-space`), `app.js` (`renderScenarioControls`).
 
 **Correction.** La barre haute n'a qu'une quarantaine de pixels libres à 1 600 px : le message sort

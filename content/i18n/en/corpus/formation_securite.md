@@ -1,6 +1,6 @@
 # Exemplia security training
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this procedure describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this procedure describes no real company. -->
 
 Every Exemplia employee takes a 2-hour online information security training, then passes a quiz with at least 8 correct answers out of 10 to obtain it. A new hire takes it within their first month; it is renewed every year for everyone.
 

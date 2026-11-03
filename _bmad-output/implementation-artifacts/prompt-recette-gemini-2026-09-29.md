@@ -7,7 +7,7 @@ tout ce qui suit n'a été vérifié que contre un faux fournisseur.
 
 ---
 
-Tu vas vérifier sur ce poste l'endpoint Gemini (Google AI Studio) de WaveStack. Travaille en
+Tu vas vérifier sur ce poste l'endpoint Gemini (Google AI Studio) de HarnessLab. Travaille en
 français.
 
 ## Contexte
@@ -16,7 +16,7 @@ français.
 - Dépôt : branche `main` (lot Gemini fusionné) ; teste sa tête.
 - Attendus détaillés : `_bmad-output/implementation-artifacts/spec-endpoint-gemini-ai-studio.md`
   (matrice des cas, critères d'acceptation, « Design Notes »).
-- Entrée livrée (`wavestack.toml`, `[[cloud.models]]` `id = "gemini"`) : `gemini-3.5-flash-lite`,
+- Entrée livrée (`harness-lab.toml`, `[[cloud.models]]` `id = "gemini"`) : `gemini-3.5-flash-lite`,
   clé par `GEMINI_API_KEY`. Raisonnement `think_tags`, balises `<thought>` / `</thought>` ;
   allumé : `extra_body.google.thinking_config = {thinking_level: "medium", include_thoughts: true}` ;
   éteint : `reasoning_effort: "minimal"`. `tool_call_extra` : la signature de contournement
@@ -31,7 +31,7 @@ français.
   - appel d'outil en un fragment, sans `index`, `finish_reason: "stop"` ; rejoué sans
     signature : 400 au corps en tableau JSON ; avec `skip_thought_signature_validator` : 200 ;
   - `usage` sur chaque fragment ; `completion_tokens` sans les tokens de réflexion, que
-    `total_tokens` compte (WaveStack affiche `total − prompt` en tokens produits).
+    `total_tokens` compte (HarnessLab affiche `total − prompt` en tokens produits).
 
 ## Règles
 
@@ -39,21 +39,21 @@ français.
    posée par Anaël dans son propre terminal ne l'atteint jamais, et une clé tapée dans la
    conversation finit dans la transcription. Donc :
    - Anaël écrit la clé **une fois**, lui-même, hors de Claude Code, dans un fichier **hors du
-     dépôt** : `$env:USERPROFILE\.wavestack\gemini.key` (jamais versionné, jamais copié ailleurs) ;
+     dépôt** : `$env:USERPROFILE\.harness-lab\gemini.key` (jamais versionné, jamais copié ailleurs) ;
    - toute commande qui en a besoin la lit **dans le même appel PowerShell** :
-     `$env:GEMINI_API_KEY = (Get-Content -Raw "$env:USERPROFILE\.wavestack\gemini.key").Trim()` ;
+     `$env:GEMINI_API_KEY = (Get-Content -Raw "$env:USERPROFILE\.harness-lab\gemini.key").Trim()` ;
    - tu n'affiches, ne recopies ni ne cites jamais la clé ni un morceau ; ni `setx`, ni
      `api_keys.json`, ni saisie au diagnostic pendant cette recette. Si le fichier manque,
      arrête-toi et demande-le à Anaël, sans lui demander la clé.
-2. **Lancement.** Ne modifie rien du dépôt ni du dossier de données réel. WaveStack se lance
+2. **Lancement.** Ne modifie rien du dépôt ni du dossier de données réel. HarnessLab se lance
    avec l'outil PowerShell en `run_in_background`, dans un seul appel qui pose, dans l'ordre :
-   la clé (règle 1, sauf à l'étape 2), `$env:WAVESTACK_DATA_DIR = "$env:TEMP\wavestack-gemini"`
+   la clé (règle 1, sauf à l'étape 2), `$env:HARNESS_LAB_DATA_DIR = "$env:TEMP\harness-lab-gemini"`
    (dossier jetable), `$env:BROWSER = "cmd /c rem"` (aucun navigateur ne s'ouvre), puis
-   `uv run wavestack --port <port libre> *> "$env:TEMP\wavestack-gemini\wavestack.log"`. Prends
+   `uv run harness-lab --port <port libre> *> "$env:TEMP\harness-lab-gemini\harness_lab.log"`. Prends
    un port libre (par exemple 8431 si `Test-NetConnection 127.0.0.1 -Port 8431` échoue) et
    attends `GET /api/health` avant d'agir ; arrête le processus entre deux étapes.
 3. Les replis se font dans le `settings.json` de ce dossier jetable, jamais dans
-   `wavestack.toml` ni dans le code. `settings.json` fusionne avec `wavestack.toml` par `id`,
+   `harness-lab.toml` ni dans le code. `settings.json` fusionne avec `harness-lab.toml` par `id`,
    champ par champ ; `null` ne retire qu'une clé de premier niveau de `reasoning.on` ou
    `reasoning.off` (par exemple `"extra_body": null`), rien de plus profond.
 4. Consigne au fil de l'eau dans
@@ -63,8 +63,8 @@ français.
 
 ## Étapes
 
-0. **Garde-fou** : après le `git checkout` de l'étape 1, vérifie que `wavestack.toml` du commit
-   testé contient `id = "gemini"` (`Select-String -Path wavestack.toml -Pattern '^id = "gemini"'`).
+0. **Garde-fou** : après le `git checkout` de l'étape 1, vérifie que `harness-lab.toml` du commit
+   testé contient `id = "gemini"` (`Select-String -Path harness-lab.toml -Pattern '^id = "gemini"'`).
    Sinon, arrête tout : ce n'est pas le bon commit.
 1. **Tests automatiques** : `git fetch`, `git checkout --detach origin/main`,
    `uv sync --extra compression`, `uv run ruff check .`, `uv run ruff format --check .`,
@@ -72,12 +72,12 @@ français.
    python tools/e2e/run_e2e.py` : 0 FAIL, dont `[gemini_shape]` et `[model_catalog]` (groupe
    « Réseau · Gemini (Google) »). Puis `git restore tools/e2e/screenshots`. Ces tests n'appellent
    pas Google : ils valident le code contre un faux Gemini.
-2. **Sans clé** : lance WaveStack (règle 2) sans poser `GEMINI_API_KEY`
+2. **Sans clé** : lance HarnessLab (règle 2) sans poser `GEMINI_API_KEY`
    (`Remove-Item Env:GEMINI_API_KEY -ErrorAction SilentlyContinue` dans le même appel). Sur `/models` et dans le
    sélecteur de la barre haute : « RÉSEAU · Google AI Studio · gemini-3.5-flash-lite » dans le
    groupe « Réseau · Gemini (Google) », raisonnement « activable », indisponible, raison donnée
-   (clé API). Arrête WaveStack.
-3. **Avec la clé** : relance WaveStack (règle 2), la clé lue dans le fichier dans le même
+   (clé API). Arrête HarnessLab.
+3. **Avec la clé** : relance HarnessLab (règle 2), la clé lue dans le fichier dans le même
    appel.
    Au diagnostic, la ligne Gemini dit « Clé fournie par la variable GEMINI_API_KEY » et
    `generativelanguage.googleapis.com` fait partie des hôtes autorisés (ligne réseau du
@@ -109,10 +109,10 @@ français.
 5. **Tableau `/models`** relu avec la clé : ligne Gemini disponible (ou « actif »), éditeur
    « Gemini (Google) », raisonnement « activable », fenêtre, outils « oui ».
 6. **Fuite de clé** : cherche la clé dans le journal (`/api/stream` enregistré dans un fichier
-   du dossier jetable), dans `wavestack.log` et dans `audit.log` du dossier jetable, ainsi que
+   du dossier jetable), dans `harness_lab.log` et dans `audit.log` du dossier jetable, ainsi que
    ses **4 premiers** et ses **4 derniers** caractères : zéro occurrence de la clé entière
    attendue. Fais la recherche par un script PowerShell qui lit la clé dans le **même fichier**
-   (`$env:USERPROFILE\.wavestack\gemini.key`) et n'affiche que les nombres d'occurrences par
+   (`$env:USERPROFILE\.harness-lab\gemini.key`) et n'affiche que les nombres d'occurrences par
    fichier et par morceau, jamais la clé ni ses morceaux. Une occurrence d'un morceau de 4
    caractères n'est pas forcément une fuite :
    - les clés AI Studio commencent toutes par `AIza` ou `AQ.` : ce préfixe peut se trouver
@@ -123,7 +123,7 @@ français.
    Dans ces deux cas, rapporte l'occurrence par son contexte (l'événement, le champ, les
    caractères voisins, sans le morceau lui-même) : c'est une coïncidence, pas une fuite. Toute
    autre occurrence est une anomalie.
-7. **Replis si besoin** (dans `settings.json` du dossier jetable, WaveStack arrêté, puis relancé
+7. **Replis si besoin** (dans `settings.json` du dossier jetable, HarnessLab arrêté, puis relancé
    et l'étape 4 rejouée pour le cas concerné) :
    - pensée ailleurs qu'entre `<thought>` : autres balises
      `{"cloud": {"models": [{"id": "gemini", "reasoning": {"tags": ["<…>", "</…>"]}}]}}`, ou
@@ -137,4 +137,4 @@ français.
    non fait), la forme réelle du raisonnement et des signatures (extraits de `raw_output`, sans
    clé), les replis appliqués et leur `settings.json` exact, les coûts observés si la console
    les montre, les anomalies avec correctif proposé, et ce qui reste à la main pour Anaël
-   (par exemple reporter un repli dans `wavestack.toml`).
+   (par exemple reporter un repli dans `harness-lab.toml`).

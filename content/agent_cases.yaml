@@ -1,5 +1,5 @@
 # Cas d'évaluation fournis (V1.5, CAP-2) : un cas par brique du programme, joué par
-# « Évaluer l'agent ». Format et vérifications : _bmad-output/specs/spec-wavestack-evaluer-l-agent/
+# « Évaluer l'agent ». Format et vérifications : _bmad-output/specs/spec-harness-lab-evaluer-l-agent/
 # contrat-des-cas.md. Traductions : content/i18n/{en,de}/agent_cases.yaml, mêmes id, mêmes
 # paramètres de vérification (seuls les textes et les messages changent).
 # PLAFONDS PROVISOIRES : `max_model_calls` est estimé (appels du chemin nominal + 1), sauf

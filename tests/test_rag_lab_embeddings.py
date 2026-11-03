@@ -20,19 +20,19 @@ from test_rag import build, place_model
 from test_rag_lab import QUESTION, ended, run, run_status, stage
 from test_rag_rerank import place_reranker, rerank_config, session_for
 
-from wavestack import config
-from wavestack.messages import Message, render
-from wavestack.models import catalog as model_catalog
-from wavestack.models import discovery, gguf_meta
-from wavestack.models.capabilities import capabilities_for
-from wavestack.models.embedding import LlamaCppEmbedder
-from wavestack.models.load_registry import EMBEDDING
-from wavestack.rag import index as rag_index
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import chunk_corpus, load_rag_content
-from wavestack.session import diagnostic as diagnostic_module
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.messages import Message, render
+from harness_lab.models import catalog as model_catalog
+from harness_lab.models import discovery, gguf_meta
+from harness_lab.models.capabilities import capabilities_for
+from harness_lab.models.embedding import LlamaCppEmbedder
+from harness_lab.models.load_registry import EMBEDDING
+from harness_lab.rag import index as rag_index
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import chunk_corpus, load_rag_content
+from harness_lab.session import diagnostic as diagnostic_module
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.trace.journal import get_journal
 
 URL = "https://huggingface.co/demo/resolve/main/lab.gguf"
 E5 = "multilingual-e5-small"
@@ -148,8 +148,8 @@ def test_an_invalid_entry_is_left_out_with_its_reason_the_others_kept(index, ent
     models, errors = cfg.rag_lab_embeddings
     assert [m.id for m in models] == [E5, QWEN]
     assert len(errors) == 1 and said in errors[0], errors
-    assert "wavestack.toml" in render(errors[0], "en")
-    assert "wavestack.toml" in render(errors[0], "de")
+    assert "harness-lab.toml" in render(errors[0], "en")
+    assert "harness-lab.toml" in render(errors[0], "de")
 
 
 def test_a_path_without_parts_is_outside_embedding(index):

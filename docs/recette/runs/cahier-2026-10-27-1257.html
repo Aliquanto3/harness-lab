@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cahier de tests WaveStack</title>
+<title>Cahier de tests HarnessLab</title>
 <style>
   :root {
     --bg: #f6f7f9; --surface: #ffffff; --text: #1b1f24; --muted: #5b6470; --border: #d9dde3;
@@ -70,13 +70,13 @@
 </head>
 <body>
 <main>
-  <h1>Cahier de tests fonctionnels : WaveStack</h1>
+  <h1>Cahier de tests fonctionnels : HarnessLab</h1>
   <p class="lead">Recette de la v1.7.0 (tests manuels du rapport du run du 27/10) exécutée par Claude in Chrome. Chaque cas cible ce qu'un test
     unitaire, d'intégration ou E2E scripté vérifie mal : un jugement sur le sens, un recoupement entre
     sources, un avis visuel ou une exploration.</p>
 
   <section class="meta" aria-label="Contexte de la campagne">
-    <div><span>Application</span>WaveStack, http://127.0.0.1:8420</div>
+    <div><span>Application</span>HarnessLab, http://127.0.0.1:8420</div>
     <div><span>Version</span><span id="meta-version">main @ 3f643e78</span></div>
     <div><span>Campagne</span><span id="meta-run">2026-10-27-1257</span></div>
     <div><span>Environnement</span>Windows 11, Chrome, modèle local sur CPU</div>
@@ -184,7 +184,7 @@
 <script>
   const STATUSES = [["todo", "À exécuter"], ["ok", "OK"], ["ko", "KO"], ["blocked", "Bloqué"]];
   // One state per copy: each campaign file starts blank, whatever the other copies hold.
-  const KEY = "wavestack-cahier:" + location.pathname;
+  const KEY = "harness-lab-cahier:" + location.pathname;
   let state = null;
   try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
   if (!state) { try { state = JSON.parse(document.getElementById("seed").textContent) || {}; } catch (e) { state = {}; } }

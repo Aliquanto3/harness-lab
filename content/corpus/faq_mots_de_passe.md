@@ -1,6 +1,6 @@
 # FAQ mots de passe (document piégé, inactif)
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : ce document pédagogique sert à démontrer une attaque PoisonedRAG (CAP-13) et n'est jamais actif par défaut. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : ce document pédagogique sert à démontrer une attaque PoisonedRAG (CAP-13) et n'est jamais actif par défaut. -->
 
 Ce document pédagogique sert aux démonstrations d'attaque du corpus (stories 17 et 18) : il n'est jamais indexé tant qu'il reste inactif, et il contient deux pièges volontaires, laissés visibles pour être étudiés une fois le document activé.
 

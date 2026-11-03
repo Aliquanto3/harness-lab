@@ -68,9 +68,9 @@ Légende : **A** = atterri tel quel ou reformulé à l'identique ; **M** = modif
 ### U-01 — La garde réseau compare des adresses IP à une liste de noms d'hôtes — élevée — AD-15
 
 - **Constat.**
-  - L'événement d'audit `socket.connect` fournit `(ip, port)`, pas un nom d'hôte. La liste autorisée de `wavestack.toml` contient des noms : `www.data.gouv.fr`, `learn.microsoft.com`, `huggingface.co`. En l'état, la garde ne peut rien comparer. Il faudrait résoudre les noms à l'avance, ce qui est fragile, car les CDN changent d'adresse.
+  - L'événement d'audit `socket.connect` fournit `(ip, port)`, pas un nom d'hôte. La liste autorisée de `harness-lab.toml` contient des noms : `www.data.gouv.fr`, `learn.microsoft.com`, `huggingface.co`. En l'état, la garde ne peut rien comparer. Il faudrait résoudre les noms à l'avance, ce qui est fragile, car les CDN changent d'adresse.
   - Derrière un proxy, UJ-3, toutes les connexions visent l'adresse du proxy. La garde doit donc l'autoriser explicitement, faute de quoi elle bloque tout.
-  - Même avec Xet désactivé, le téléchargement Hugging Face est redirigé vers des hôtes CDN (`cdn-lfs*.hf.co` ou équivalent). Ces hôtes ne figurent nulle part dans la liste par défaut. Le README d'AD-21 cite `huggingface.co` pour le proxy, pas pour la liste de WaveStack.
+  - Même avec Xet désactivé, le téléchargement Hugging Face est redirigé vers des hôtes CDN (`cdn-lfs*.hf.co` ou équivalent). Ces hôtes ne figurent nulle part dans la liste par défaut. Le README d'AD-21 cite `huggingface.co` pour le proxy, pas pour la liste de HarnessLab.
   - Une bibliothèque qui se connecte à un hôte autorisé sans passer par `net` passe la garde sans émettre d'`outbound_request`. « Tout est tracé » ne tient alors plus (NFR-4).
   - Un audit hook ne voit que le module `socket` de Python. Le code réseau natif (Rust ou C, par exemple `hf_xet` ou un téléchargeur ONNX) y échappe. Ce plafond n'est pas écrit.
 - **Correction proposée.** Dans AD-15 :

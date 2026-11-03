@@ -24,7 +24,7 @@ deferred:
     evidence: |-
       Revue indépendante (blind hunter) ; EXPERIENCE.md ne le demande pas. Consigné dans deferred-work.md.
     location: >-
-      src/wavestack/web/static/app.js
+      src/harness_lab/web/static/app.js
     severity: low
   - summary: >-
       Pas d'ajout d'entrée depuis le tiroir (exclu par la spec, H1).
@@ -38,7 +38,7 @@ deferred:
       Mesure du test de fenêtre minimale ; la borne de 300 est dans le contrat d'intention.
       À vérifier au test manuel, consigné dans deferred-work.md.
     location: >-
-      src/wavestack/memory.py
+      src/harness_lab/memory.py
     severity: medium
 ---
 
@@ -88,12 +88,12 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/config.py:450` -- ajouter `memory_path()` à côté d'`audit_path()` ; écriture atomique sur le modèle de `write_api_key` (437-446).
-- `src/wavestack/memory.py` (nouveau) -- sur le modèle de `skills.py`/`scenarios.py` : `MemoryEntry`, `MemoryContent` (texte du nœud, introduction, textes de `remember`, entrées de démonstration), `load_memory_content()`, `read_memory(path)` (lève sur fichier invalide), `write_memory(path, entries)`, constantes 20 entrées / 300 caractères.
+- `src/harness_lab/config.py:450` -- ajouter `memory_path()` à côté d'`audit_path()` ; écriture atomique sur le modèle de `write_api_key` (437-446).
+- `src/harness_lab/memory.py` (nouveau) -- sur le modèle de `skills.py`/`scenarios.py` : `MemoryEntry`, `MemoryContent` (texte du nœud, introduction, textes de `remember`, entrées de démonstration), `load_memory_content()`, `read_memory(path)` (lève sur fichier invalide), `write_memory(path, entries)`, constantes 20 entrées / 300 caractères.
 - `content/memory/memory.yaml`, `content/bricks/global_memory.yaml` (nouveaux) -- textes en français ; modèle : `content/skills.yaml` (bloc `load_skill`), `content/bricks/system_prompt.yaml`.
-- `src/wavestack/bricks/registry.py:31` -- `BrickDeclaration(id="global_memory", category="context", ...)` juste après `system_prompt` (ordre du panneau = FR-38) ; `file.memory` est déjà réservé (9-19).
-- `src/wavestack/session/effects.py:66` -- `MemoryWrite` dans l'union `Effect`.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/bricks/registry.py:31` -- `BrickDeclaration(id="global_memory", category="context", ...)` juste après `system_prompt` (ordre du panneau = FR-38) ; `file.memory` est déjà réservé (9-19).
+- `src/harness_lab/session/effects.py:66` -- `MemoryWrite` dans l'union `Effect`.
+- `src/harness_lab/session/app_session.py` :
   - `TurnState` 252-268 : champ `memory` ; `build_turn_state` 1068-1106 : textes + `REMEMBER` dans `tools` (après `load_skill`) si brique effective et `self._caps.tool_call_parser`.
   - `_system_parts` 1183-1215 : `Joined` mémoire entre prompt système et catalogue de skills (modèle : le catalogue 1199-1210).
   - `_load_content` 943-1023 : contenu mémoire + lecture de `memory.json` → `_content_errors["global_memory"]` ; `__init__` 315-417 : état `_memory`, émission initiale de `memory_changed` (comme `_load_scenarios` 1912).
@@ -103,27 +103,27 @@ deferred:
   - `_turn` 2141-2143 : ajouter `global_memory` au repli `harness_brick`.
   - `_emit_architecture` 547-574 : entrée `file.memory` dans `files` ; `_emit_bricks` 732-782 : `note_fr` de la carte.
   - `reset` 1962-1964 / `_reconfigure` 1966-1992 : restauration après l'émission de `harness_reset`, `launch_scenario` inchangé ; nouvelles méthodes `edit_memory(op, entry_id, text)` (classe b, `SendRefused` / `KeyError` / `ValueError`).
-- `src/wavestack/trace/catalog.py` -- `MemoryEntryState`, `MemoryChangedPayload` ; `EffectAppliedPayload` 360-367 (`memory_write`, `op`, `entry_id`, `text`) ; `ArmedActionState.kind` 400 (`memory`) ; `BrickState.note_fr` 256-273 ; `PAYLOAD_MODELS` 446-481.
-- `src/wavestack/web/app.py` -- `ArmIntention.kind` 95 ; `MemoryIntention` + `POST /api/intentions/memory` sur le modèle de `clear_conversation` 414-421 et `scenario` 423-432 ; `/api/state` 186-223 : `memory_changed`.
-- `src/wavestack/web/static/index.html:46-59` -- second `aside.edit-drawer#memory-drawer` (liste, alerte, « Tout effacer », « Fermer », choix enregistrer/abandonner).
-- `src/wavestack/web/static/app.js` -- `applyEnvelope` 146 : `memory_changed` → `store.memory` ; `effect_applied` 320-324 : aiguiller sur `p.effect` (`memory_write` → dernière étape d'outil `remember` du tour) ; `renderBricks` 491-603 : « Modifier la mémoire » (modèle 590-598) et force « Écrire en mémoire » au niveau de la carte (formulaire à un champ, `FORCE_LABELS` 665, `armAction` 861) ; tiroir sur le modèle de `openDrawer`/`closeDrawer` 972-1015 (`Échap` 3571) ; `turnRows` 2016-2030 : icône 💾 pour `remember` ; `BRICK_ICONS` 3017 ; `schemaNode` 3358 : clic sur `file.memory` ; `KIND_LABELS` 2787 et `eventSummary` 2832 ; boot : `/api/state.memory_changed`.
-- `src/wavestack/web/static/app.css` -- styles des entrées du tiroir sur `.edit-drawer`, jetons de DESIGN.md (`segment-global-memory`, `GROUP_COLORS` 76-78 déjà prêt).
+- `src/harness_lab/trace/catalog.py` -- `MemoryEntryState`, `MemoryChangedPayload` ; `EffectAppliedPayload` 360-367 (`memory_write`, `op`, `entry_id`, `text`) ; `ArmedActionState.kind` 400 (`memory`) ; `BrickState.note_fr` 256-273 ; `PAYLOAD_MODELS` 446-481.
+- `src/harness_lab/web/app.py` -- `ArmIntention.kind` 95 ; `MemoryIntention` + `POST /api/intentions/memory` sur le modèle de `clear_conversation` 414-421 et `scenario` 423-432 ; `/api/state` 186-223 : `memory_changed`.
+- `src/harness_lab/web/static/index.html:46-59` -- second `aside.edit-drawer#memory-drawer` (liste, alerte, « Tout effacer », « Fermer », choix enregistrer/abandonner).
+- `src/harness_lab/web/static/app.js` -- `applyEnvelope` 146 : `memory_changed` → `store.memory` ; `effect_applied` 320-324 : aiguiller sur `p.effect` (`memory_write` → dernière étape d'outil `remember` du tour) ; `renderBricks` 491-603 : « Modifier la mémoire » (modèle 590-598) et force « Écrire en mémoire » au niveau de la carte (formulaire à un champ, `FORCE_LABELS` 665, `armAction` 861) ; tiroir sur le modèle de `openDrawer`/`closeDrawer` 972-1015 (`Échap` 3571) ; `turnRows` 2016-2030 : icône 💾 pour `remember` ; `BRICK_ICONS` 3017 ; `schemaNode` 3358 : clic sur `file.memory` ; `KIND_LABELS` 2787 et `eventSummary` 2832 ; boot : `/api/state.memory_changed`.
+- `src/harness_lab/web/static/app.css` -- styles des entrées du tiroir sur `.edit-drawer`, jetons de DESIGN.md (`segment-global-memory`, `GROUP_COLORS` 76-78 déjà prêt).
 - `content/scenarios.yaml:8-11` -- scénario `global_memory` dans le module 1 (60 min).
 - Tests : `tests/fake_engine.py` (`booted_session`), `tests/test_skills.py` (`skills_session`, `since`, `nodes`, `card`), `tests/test_tools.py` (`QWEN`, `call`, `_segments`), `tests/test_forced.py`, `tests/test_bricks.py` (`_client`, `HEADERS`), `tests/test_scenarios.py:35` (11 → 12 scénarios). `conftest.py` isole le dossier de données par test.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/config.py`, `src/wavestack/memory.py`, `content/memory/memory.yaml`, `content/bricks/global_memory.yaml` -- chemin, modèles, lecture/écriture atomique, contenus -- AD-19, AD-20.
-- [x] `src/wavestack/session/effects.py`, `src/wavestack/trace/catalog.py`, `src/wavestack/bricks/registry.py` -- contrat d'abord : effet, événements, brique -- AD-2, AD-12, AD-23.
-- [x] `src/wavestack/session/app_session.py` -- état et chargement, `TurnState`, rendu, `remember`, applicateur, forçage, tiroir, réinitialisation, schéma, carte -- AD-3, AD-4, AD-17, AD-25.
-- [x] `src/wavestack/web/app.py` -- route `memory`, `kind: memory`, `/api/state` -- AD-18.
-- [x] `src/wavestack/web/static/index.html`, `app.js`, `app.css` -- tiroir, carte, forçage, étape, schéma, journal -- EXPERIENCE.
+- [x] `src/harness_lab/config.py`, `src/harness_lab/memory.py`, `content/memory/memory.yaml`, `content/bricks/global_memory.yaml` -- chemin, modèles, lecture/écriture atomique, contenus -- AD-19, AD-20.
+- [x] `src/harness_lab/session/effects.py`, `src/harness_lab/trace/catalog.py`, `src/harness_lab/bricks/registry.py` -- contrat d'abord : effet, événements, brique -- AD-2, AD-12, AD-23.
+- [x] `src/harness_lab/session/app_session.py` -- état et chargement, `TurnState`, rendu, `remember`, applicateur, forçage, tiroir, réinitialisation, schéma, carte -- AD-3, AD-4, AD-17, AD-25.
+- [x] `src/harness_lab/web/app.py` -- route `memory`, `kind: memory`, `/api/state` -- AD-18.
+- [x] `src/harness_lab/web/static/index.html`, `app.js`, `app.css` -- tiroir, carte, forçage, étape, schéma, journal -- EXPERIENCE.
 - [x] `content/scenarios.yaml`, `tests/test_scenarios.py` -- scénario `global_memory`, décompte mis à jour -- FR-38.
 - [x] `tests/test_global_memory.py` (nouveau) -- une ligne de la matrice par test, avec `remember` et le forçage sur `QWEN` ; routes 200/404/409/422 ; rendu local et chat (`_system_parts` partagé) ; clé `source` et `effect_applied.component = file.memory`.
 
 **Acceptance Criteria:**
-- Given la brique active et une entrée écrite, when WaveStack est relancé (nouvelle `AppSession` sur le même dossier), then l'entrée est dans le tiroir et dans le message système du premier tour.
+- Given la brique active et une entrée écrite, when HarnessLab est relancé (nouvelle `AppSession` sur le même dossier), then l'entrée est dans le tiroir et dans le message système du premier tour.
 - Given une page rechargée, when la mémoire a changé, then le tiroir et la carte reflètent le dernier `memory_changed` (AD-1).
 - Given une écriture par le modèle ou forcée, when on ouvre son étape dans Orchestration, then elle porte « Déclenché par le modèle » ou « Forcé par l'utilisateur » et le texte écrit.
 - Given le tiroir ouvert avec une entrée modifiée non enregistrée, when on ferme par `Échap`, then « Modification non enregistrée. Enregistrer ou abandonner ? » s'affiche.
@@ -138,7 +138,7 @@ deferred:
 Passe unique faite par l'agent d'implémentation (pas d'outil de sous-agent dans cette exécution) ; une revue indépendante suivra.
 - verdicts: 5 findings — high 0, medium 0, low 3, false 1, maybe-false 1
 - findings:
-  - `[low]` `[patch]` Les messages de `check_text` tutoyaient le modèle (« écris… », « Résume-le… ») alors qu'ils reviennent aussi à l'utilisateur en 422 (tiroir, armement) — messages rendus neutres (`src/wavestack/memory.py`).
+  - `[low]` `[patch]` Les messages de `check_text` tutoyaient le modèle (« écris… », « Résume-le… ») alors qu'ils reviennent aussi à l'utilisateur en 422 (tiroir, armement) — messages rendus neutres (`src/harness_lab/memory.py`).
   - `[low]` `[patch]` Aucun test ne couvrait l'abandon d'une écriture forcée quand la brique est éteinte (ligne « Forcé » de la spec) — ajout de `test_forced_write_is_dropped_when_the_brick_is_off`.
   - `[low]` `[reject]` Deux intentions (b) concurrentes (réinitialisation et suppression depuis deux onglets) pourraient faire lever `KeyError` dans `apply_writes` et un 500 sur la réinitialisation — improbable en démonstration, la correction ajouterait une garde ; la suppression concurrente, elle, finit déjà en 404.
   - `[false]` Un `memory_changed` rejoué au chargement de la page pourrait écraser le tiroir ouvert — faux : `renderMemoryDrawer` ne fait rien tant que le tiroir est caché, et garde les brouillons (`store.memoryDrafts`) quand il est ouvert.
@@ -194,10 +194,10 @@ def _apply_memory(self, writes: list[MemoryWrite], source: str) -> str | None:
 **Commands:**
 - `uv run ruff check . && uv run ruff format --check .` -- expected: aucune erreur
 - `uv run python -m pytest` -- expected: tout passe
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` avec Qwen : lancer le scénario « Mémoire globale », faire écrire le modèle (sinon forcer), vider la conversation et vérifier que l'information revient par le message système ; modifier et effacer dans le tiroir ; réinitialiser et retrouver la démonstration ; cliquer le nœud `memory.json`.
+- `uv run harness-lab` avec Qwen : lancer le scénario « Mémoire globale », faire écrire le modèle (sinon forcer), vider la conversation et vérifier que l'information revient par le message système ; modifier et effacer dans le tiroir ; réinitialiser et retrouver la démonstration ; cliquer le nœud `memory.json`.
 
 ## Auto Run Result
 
@@ -206,15 +206,15 @@ Status: done
 **Résumé :** brique `global_memory` (catégorie context, composant `global_memory.memory`, nœud `file.memory`). `memory.json` (dossier de données, `config.memory_path()`) est lu au lancement : absent → mémoire de démonstration en mémoire vive, illisible → `harness_error` et brique indisponible jusqu'à « Réinitialiser ». Les textes sont figés dans `TurnState.memory` et rendus en segments `global_memory` entre le prompt système et le catalogue de skills (local et chat, `_system_parts` partagé). Méta-outil `remember` (offert si la brique est effective et le modèle a un parseur), refus réinjectés (vide, > 300, 20 entrées), doublon sans effet. Effet `MemoryWrite` appliqué par un applicateur unique (`_apply_memory`) : écriture atomique, un `effect_applied` par effet (`file.memory`), un `memory_changed`, échec → `harness_error` et réponse réinjectée remplacée. Action forcée `memory` (« Écrire en mémoire »), tiroir `POST /api/intentions/memory` (replace, delete, clear ; 409/404/422/500), restauration de la démonstration à la réinitialisation. Front : carte (compte, note sans parseur, forçage, « Modifier la mémoire »), tiroir d'édition au clavier, étape 💾 d'Orchestration avec badge et entrée écrite, clic sur le nœud du schéma, journal. Scénario `global_memory` dans un module « Mémoire globale » en fin de programme (H11).
 
 **Fichiers :**
-- `src/wavestack/memory.py` (nouveau) — format de `memory.json`, contenus, lecture, écriture atomique, validation, application pure des écritures.
+- `src/harness_lab/memory.py` (nouveau) — format de `memory.json`, contenus, lecture, écriture atomique, validation, application pure des écritures.
 - `content/memory/memory.yaml`, `content/bricks/global_memory.yaml` (nouveaux) — textes du harnais, de `remember`, démonstration fictive, carte.
-- `src/wavestack/config.py` — `memory_path()`.
-- `src/wavestack/session/effects.py` — `MemoryWrite` dans l'union `Effect`.
-- `src/wavestack/bricks/registry.py` — brique `global_memory` après `system_prompt`.
-- `src/wavestack/trace/catalog.py` — `memory_changed`, `effect_applied` `memory_write`, `kind: memory`, `note_fr`.
-- `src/wavestack/session/app_session.py` — chargement, disponibilité, `TurnState`, rendu, `remember`, applicateur, forçage, tiroir, réinitialisation, schéma, carte.
-- `src/wavestack/web/app.py` — route `memory`, `kind: memory`, `/api/state.memory_changed`.
-- `src/wavestack/web/static/index.html`, `app.js`, `app.css` — tiroir, carte, forçage, étape, schéma, journal.
+- `src/harness_lab/config.py` — `memory_path()`.
+- `src/harness_lab/session/effects.py` — `MemoryWrite` dans l'union `Effect`.
+- `src/harness_lab/bricks/registry.py` — brique `global_memory` après `system_prompt`.
+- `src/harness_lab/trace/catalog.py` — `memory_changed`, `effect_applied` `memory_write`, `kind: memory`, `note_fr`.
+- `src/harness_lab/session/app_session.py` — chargement, disponibilité, `TurnState`, rendu, `remember`, applicateur, forçage, tiroir, réinitialisation, schéma, carte.
+- `src/harness_lab/web/app.py` — route `memory`, `kind: memory`, `/api/state.memory_changed`.
+- `src/harness_lab/web/static/index.html`, `app.js`, `app.css` — tiroir, carte, forçage, étape, schéma, journal.
 - `content/scenarios.yaml` — module et scénario « Mémoire globale ».
 - `tests/test_global_memory.py` (nouveau, 19 tests), `tests/test_bricks.py`, `tests/test_scenarios.py` — matrice, acceptation, comptes.
 
@@ -224,7 +224,7 @@ Status: done
 
 **Suivi de revue recommandé :** false (aucun correctif `high`, moins de deux `medium`). Une revue indépendante est de toute façon prévue par l'orchestrateur, cette passe ayant été faite sans sous-agent.
 
-**Vérification :** `uv run ruff check .` (vert), `uv run ruff format --check .` (vert), `node --check src/wavestack/web/static/app.js` (vert), `uv run pytest -q` : 427 réussis, 3 sautés. Audit de la matrice : chaque ligne couverte par un test de `tests/test_global_memory.py` (injection, écriture par le modèle, forcée, trois refus, doublon, sans parseur, tiroir, échec d'écriture, fichier invalide, réinitialisation, rejeu), tous exécutés et verts.
+**Vérification :** `uv run ruff check .` (vert), `uv run ruff format --check .` (vert), `node --check src/harness_lab/web/static/app.js` (vert), `uv run pytest -q` : 427 réussis, 3 sautés. Audit de la matrice : chaque ligne couverte par un test de `tests/test_global_memory.py` (injection, écriture par le modèle, forcée, trois refus, doublon, sans parseur, tiroir, échec d'écriture, fichier invalide, réinitialisation, rejeu), tous exécutés et verts.
 
 **Risques résiduels :**
 - Front non testé automatiquement (pas de tests JS dans le projet) : tiroir, forçage depuis la carte, étape d'Orchestration et clic du nœud sont à vérifier à la main.

@@ -20,12 +20,12 @@ from test_rag import build
 from test_rag_lab import QUESTION, _client, run, run_status, wait_idle
 from test_rag_lab_generation import ANSWER, GENERATION, ready
 
-from wavestack import config
-from wavestack.rag import lab as rag_lab
-from wavestack.session.app_session import SendRefused
-from wavestack.trace import otel as trace_otel
-from wavestack.trace import tree as trace_tree
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.rag import lab as rag_lab
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace import otel as trace_otel
+from harness_lab.trace import tree as trace_tree
+from harness_lab.trace.journal import get_journal
 
 SECRET = "sk-or-v1-NE-DOIT-JAMAIS-SORTIR"
 AUTH = "Basic dGVzdDp0ZXN0"
@@ -158,7 +158,7 @@ def test_the_tree_is_rebuilt_from_the_journal_with_its_part():
     """B2's part runs before its stage (BM25's index at the end of BUILD): it ends under it."""
     from datetime import UTC, datetime
 
-    from wavestack.trace.envelope import Envelope
+    from harness_lab.trace.envelope import Envelope
 
     now = datetime.now(UTC)
     seq = iter(range(1, 100))
@@ -244,9 +244,9 @@ def test_the_collector_s_host_is_allowed_only_by_its_url():
 def test_the_export_sends_genai_spans_and_no_text(index, monkeypatch):
     otel_needed()
     monkeypatch.setenv("OPENROUTER_API_KEY", SECRET)
-    monkeypatch.setenv("WAVESTACK_TEST_OTEL_AUTH", AUTH)
+    monkeypatch.setenv("HARNESS_LAB_TEST_OTEL_AUTH", AUTH)
     with Collector() as collector:
-        otel = {"endpoint": collector.url, "auth_env": "WAVESTACK_TEST_OTEL_AUTH"}
+        otel = {"endpoint": collector.url, "auth_env": "HARNESS_LAB_TEST_OTEL_AUTH"}
         session = ready(index, otel=otel)
         events = run(session)
         assert session.rag_lab_otel()["ready"] is True
@@ -259,7 +259,7 @@ def test_the_export_sends_genai_spans_and_no_text(index, monkeypatch):
     assert sent["spans"] == len(spans)
     by_id = {s.span_id: s for s in spans}
     (root,) = [s for s in spans if not s.parent_span_id]
-    assert root.name == "invoke_workflow wavestack.rag_lab"
+    assert root.name == "invoke_workflow harness_lab.rag_lab"
     assert attrs(root)["gen_ai.operation.name"] == "invoke_workflow"
     assert len({s.trace_id for s in spans}) == 1
     (chat,) = [s for s in spans if attrs(s).get("gen_ai.operation.name") == "chat"]
@@ -268,7 +268,7 @@ def test_the_export_sends_genai_spans_and_no_text(index, monkeypatch):
     assert a["gen_ai.usage.input_tokens"] > 0 and a["gen_ai.response.finish_reasons"]
     assert chat.name == f"chat {a['gen_ai.request.model']}"
     stage = by_id[chat.parent_span_id]
-    assert attrs(stage)["wavestack.rag_lab.stage.kind"] == "generation"
+    assert attrs(stage)["harness_lab.rag_lab.stage.kind"] == "generation"
     assert by_id[stage.parent_span_id] is root
     assert chat.start_time_unix_nano <= chat.end_time_unix_nano
     searches = [s for s in spans if attrs(s).get("gen_ai.operation.name") == "retrieval"]
@@ -312,7 +312,7 @@ def test_the_routes_say_the_state_and_a_refusal(index):
 
 
 def test_the_page_panel_and_file_are_wired():
-    static = Path(__file__).resolve().parents[1] / "src" / "wavestack" / "web" / "static"
+    static = Path(__file__).resolve().parents[1] / "src" / "harness_lab" / "web" / "static"
     html = (static / "rag.html").read_text(encoding="utf-8")
     script = '<script type="module" src="/static/rag-tree.js"></script>'
     assert html.index(script) > html.index('src="/static/rag.js"')
@@ -342,11 +342,11 @@ def test_outside_the_loopback_the_export_is_journaled_masked(index, monkeypatch)
     """A collector outside the loopback range (the factory's predicate forced): one
     `outbound_request` of origin `otel`, its `Authorization` masked, its body by its size."""
     otel_needed()
-    from wavestack.net import factory
+    from harness_lab.net import factory
 
-    monkeypatch.setenv("WAVESTACK_TEST_OTEL_AUTH", AUTH)
+    monkeypatch.setenv("HARNESS_LAB_TEST_OTEL_AUTH", AUTH)
     with Collector() as collector:
-        otel = {"endpoint": collector.url, "auth_env": "WAVESTACK_TEST_OTEL_AUTH"}
+        otel = {"endpoint": collector.url, "auth_env": "HARNESS_LAB_TEST_OTEL_AUTH"}
         session = ready(index, otel=otel)
         run(session)
         mark = get_journal().last_seq()
@@ -371,4 +371,4 @@ def test_only_the_inference_spans_carry_the_usage(index):
     usage = [s for s in spans if "gen_ai.usage.output_tokens" in attrs(s)]
     assert [attrs(s)["gen_ai.operation.name"] for s in usage] == ["chat"]
     stage = next(s for s in spans if s.span_id == usage[0].parent_span_id)
-    assert attrs(stage)["wavestack.rag_lab.usage.output_tokens"] == 20
+    assert attrs(stage)["harness_lab.rag_lab.usage.output_tokens"] == 20

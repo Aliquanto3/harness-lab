@@ -27,15 +27,15 @@ from test_rag import Embedders, build, place_model, rag_config
 from test_tools import QWEN, call, web  # noqa: F401 - `web`: the network tools' fixture
 from test_turn import _run
 
-from wavestack import config
-from wavestack.compression import env as compression_env
-from wavestack.compression import headroom_adapter
-from wavestack.compression.port import Compressed, CompressionContent
-from wavestack.models.load_registry import COMPRESSOR, ModelChoice
-from wavestack.session import app_session as app_session_module
-from wavestack.session.app_session import AppSession
-from wavestack.tools.registry import ToolSpec
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.compression import env as compression_env
+from harness_lab.compression import headroom_adapter
+from harness_lab.compression.port import Compressed, CompressionContent
+from harness_lab.models.load_registry import COMPRESSOR, ModelChoice
+from harness_lab.session import app_session as app_session_module
+from harness_lab.session.app_session import AppSession
+from harness_lab.tools.registry import ToolSpec
+from harness_lab.trace.journal import get_journal
 
 LOG = (config.content_dir() / "demo_files" / "journal_serveur.log").read_text(encoding="utf-8")
 ERROR_LINE = next(line for line in LOG.splitlines() if " ERROR " in line)
@@ -709,7 +709,7 @@ def test_offline_variables_are_set_and_win_over_the_environment(monkeypatch):
     for name, value in compression_env.OFFLINE_ENV.items():
         assert os.environ[name] == value
     # Story 4: litellm rewrites TIKTOKEN_CACHE_DIR at its import, never CUSTOM_TIKTOKEN_CACHE_DIR.
-    shipped = config.repo_root() / "src" / "wavestack" / "compression" / "tiktoken"
+    shipped = config.repo_root() / "src" / "harness_lab" / "compression" / "tiktoken"
     assert compression_env.tiktoken_cache_dir() == shipped.resolve()
     for name in _TIKTOKEN_ENV:
         assert os.environ[name] == str(compression_env.tiktoken_cache_dir())
@@ -729,7 +729,7 @@ def test_shipped_cl100k_base_table_is_the_official_one():
     license_file = compression_env.tiktoken_cache_dir() / "LICENSE-tiktoken"
     assert "MIT License" in license_file.read_text(encoding="utf-8")
     attributes = (config.repo_root() / ".gitattributes").read_text(encoding="utf-8")
-    assert f"src/wavestack/compression/tiktoken/{compression_env.CL100K_BASE_FILE} -text" in (
+    assert f"src/harness_lab/compression/tiktoken/{compression_env.CL100K_BASE_FILE} -text" in (
         attributes
     )
 
@@ -768,7 +768,7 @@ def test_missing_or_altered_table_makes_the_brick_unavailable(state, tmp_path, m
 
 
 def test_cli_sets_the_offline_variables_before_third_party_imports():
-    source = (config.repo_root() / "src" / "wavestack" / "cli.py").read_text(encoding="utf-8")
+    source = (config.repo_root() / "src" / "harness_lab" / "cli.py").read_text(encoding="utf-8")
     assert source.index("_headroom_offline()") < source.index("import truststore")
 
 
@@ -845,15 +845,15 @@ import urllib.request
 for lookup in ("getproxies_registry", "getproxies_macosx_sysconf"):  # the system's proxy
     if hasattr(urllib.request, lookup):
         setattr(urllib.request, lookup, lambda: {})
-from wavestack.net.guard import install
+from harness_lab.net.guard import install
 
 install(allowed_hosts=[])
-from wavestack.compression import env
+from harness_lab.compression import env
 
 env.tiktoken_cache_dir = lambda: Path(sys.argv[2])
 env.apply_offline_env()
 phase[0] = "import"
-from wavestack.compression import headroom_adapter
+from harness_lab.compression import headroom_adapter
 
 if len(sys.argv) > 3:
     headroom_adapter.COUNTING_MODEL = sys.argv[3]
@@ -898,11 +898,11 @@ def _tiktoken_file(encoding: str) -> str:
 
 
 def _run_offline_child(tmp_path, model: str | None = None) -> dict:  # noqa: ANN001
-    """The child above, with a tiktoken cache reduced to what WaveStack ships (`cl100k_base`,
+    """The child above, with a tiktoken cache reduced to what HarnessLab ships (`cl100k_base`,
     story 4), copied: the negative control must not write in the shipped folder."""
     shipped = compression_env.tiktoken_cache_dir()
     table = _tiktoken_file("cl100k_base")
-    assert (shipped / table).is_file(), "WaveStack ne livre pas cl100k_base"
+    assert (shipped / table).is_file(), "HarnessLab ne livre pas cl100k_base"
     cache = tmp_path / "tiktoken"
     cache.mkdir(exist_ok=True)
     shutil.copy(shipped / table, cache / table)
@@ -945,7 +945,7 @@ def test_headroom_makes_no_network_attempt_at_import_nor_compression(tmp_path):
     assert public == [], f"tentatives réseau de Headroom : {public}"
     assert out["model"] == "gpt-4"
     assert ERROR_LINE in out["text"] and len(out["text"]) < out["before"]  # compressed
-    # Story 4 review: litellm left the folder WaveStack points at (CUSTOM_TIKTOKEN_CACHE_DIR),
+    # Story 4 review: litellm left the folder HarnessLab points at (CUSTOM_TIKTOKEN_CACHE_DIR),
     # and tiktoken kept the table there (a bad sha256 would have deleted it).
     assert out["tiktoken_cache_dir"] == str(tmp_path / "tiktoken")
     assert (tmp_path / "tiktoken" / _tiktoken_file("cl100k_base")).is_file()
@@ -962,7 +962,7 @@ def test_headroom_offline_check_sees_the_old_counting_model_reach_out(tmp_path):
 
 
 @pytest.mark.skipif(importlib.util.find_spec("tiktoken") is None, reason="tiktoken (extra) absent")
-def test_headroom_counts_with_the_table_wavestack_ships():
+def test_headroom_counts_with_the_table_harness_lab_ships():
     # `gpt-4o` (`o200k_base`) sent tiktoken to the network on the target PC (lot F).
     from tiktoken.model import encoding_name_for_model
 
@@ -973,7 +973,7 @@ def test_headroom_counts_with_the_table_wavestack_ships():
 
 def test_compression_cost_is_110_mb_by_default():
     mib = 1024 * 1024
-    assert config.load_config().compression_cost_bytes == 110 * mib  # wavestack.toml
+    assert config.load_config().compression_cost_bytes == 110 * mib  # harness-lab.toml
     assert config.Config(values={}).compression_cost_bytes == 110 * mib  # key absent
 
 

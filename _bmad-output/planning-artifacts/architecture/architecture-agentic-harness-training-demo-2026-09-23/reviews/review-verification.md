@@ -1,4 +1,4 @@
-# Revue « vérification » du spine WaveStack (2026-09-23)
+# Revue « vérification » du spine HarnessLab (2026-09-23)
 
 Angle de lecture : chaque décision engagée a-t-elle été confirmée par le web, par le projet existant ou par un test, et pas seulement tirée de la mémoire d'entraînement ? Les entrées `(version)` du memlog sont tenues pour acquises. On a vérifié ici ce qu'elles ne couvrent pas.
 
@@ -50,7 +50,7 @@ Réserve : le uv local est en 0.11.7, pas en 0.12.18. La syntaxe `pyproject` a �
   - `raise_exception` n'existe pas : il faut l'ajouter aux globales.
   - le filtre `tojson` **natif** de Jinja2 échappe pour le HTML et **trie les clés**. Pour une description d'outil « Donne l'année <n> », on obtient `"Donne l'année <n>"` avec les clés triées. Avec le `tojson` de transformers, on obtient `"Donne l'année <n>"` dans l'ordre d'origine.
 
-  Conséquence : sans surcharge, le prompt envoyé diffère de celui pour lequel le modèle a été entraîné. Les apostrophes et accents français sont précisément le cas courant de WaveStack. Le nombre de tokens change aussi.
+  Conséquence : sans surcharge, le prompt envoyé diffère de celui pour lequel le modèle a été entraîné. Les apostrophes et accents français sont précisément le cas courant de HarnessLab. Le nombre de tokens change aussi.
 - **Référence, transformers.** `ImmutableSandboxedEnvironment(trim_blocks=True, lstrip_blocks=True, extensions=[AssistantTracker, jinja2.ext.loopcontrols])`, avec :
   - le filtre `tojson` = `json.dumps(x, ensure_ascii=False, indent, separators, sort_keys=False)` ;
   - les globales `raise_exception` (qui lève `TemplateError`) et `strftime_now(fmt)`.
@@ -153,7 +153,7 @@ Réserve : le uv local est en 0.11.7, pas en 0.12.18. La syntaxe `pyproject` a �
   - psutil 7.2.2 s'installe par wheel, sans compilation.
   - `sqlite3.connect(...).enable_load_extension(True)` puis `sqlite_vec.load(db)` fonctionnent sur le CPython 3.13.13 de python-build-standalone : `vec_version()` renvoie `v0.1.9`, avec SQLite 3.50.4.
 - **Source.** Test local ; https://alexgarcia.xyz/sqlite-vec/python.html
-- **Modification suggérée du spine.** Aucune. Ajouter au Deferred : « l'interpréteur Python du Microsoft Store ou de python.org peut différer ; WaveStack impose le Python géré par uv ».
+- **Modification suggérée du spine.** Aucune. Ajouter au Deferred : « l'interpréteur Python du Microsoft Store ou de python.org peut différer ; HarnessLab impose le Python géré par uv ».
 
 ## V11 — Qwen3.5 : licence et gabarit — **confirmé**
 

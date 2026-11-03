@@ -1,5 +1,5 @@
 @echo off
-rem Installe et lance WaveStack en une commande (double-clic ou invite CMD).
+rem Installe et lance HarnessLab en une commande (double-clic ou invite CMD).
 rem Delegue a install.ps1, qui fait le vrai travail en PowerShell.
 setlocal
 set "SCRIPT_DIR=%~dp0"

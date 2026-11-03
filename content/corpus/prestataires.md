@@ -1,6 +1,6 @@
 # Politique de sécurité des prestataires chez Exemplia
 
-<!-- Texte fictif rédigé pour WaveStack. Exemplia est une organisation imaginaire : cette politique ne décrit aucune entreprise réelle. -->
+<!-- Texte fictif rédigé pour HarnessLab. Exemplia est une organisation imaginaire : cette politique ne décrit aucune entreprise réelle. -->
 
 Exemplia classe chaque prestataire qui traite des informations de l'entreprise dans l'un de deux niveaux : critique, quand il héberge des données ou accède au réseau interne, ou standard pour les autres. Le niveau est fixé par la cellule fournisseurs avant la signature du contrat, et révisé chaque année.
 

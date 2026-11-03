@@ -1,6 +1,6 @@
 """Builds the RAG index (story 15, AD-22): the corpus of `content/`, chunked and embedded
 offline with the model `[rag.embedding]` names, written into `[rag] index_path`. The RAG
-card of WaveStack does the same (« Construire l'index »). Languages (4/5): `--lang` (`fr` by
+card of HarnessLab does the same (« Construire l'index »). Languages (4/5): `--lang` (`fr` by
 default, never read from `settings.json`) picks the corpus and its titles
 (`content/i18n/{lang}/`) and the index (`rag_index.{lang}.sqlite` outside French).
 Languages (5/5): what it prints is always English (`content/messages.yaml`, section
@@ -20,22 +20,22 @@ import sys
 import time
 from pathlib import Path
 
-from wavestack import config as _config
-from wavestack.net.guard import install as _install_guard
+from harness_lab import config as _config
+from harness_lab.net.guard import install as _install_guard
 
 # AD-15: before any third-party import; the network only for `--download`.
 _install_guard(_config.load_config().allowed_hosts if "--download" in sys.argv[1:] else [])
 
 from pydantic import ValidationError  # noqa: E402
 
-from wavestack import config  # noqa: E402
-from wavestack.greenops import LocalMeter, Probe, StageCost  # noqa: E402
-from wavestack.messages import msg, render  # noqa: E402
-from wavestack.models import download  # noqa: E402
-from wavestack.models.embedding import LlamaCppEmbedder, model_path  # noqa: E402
-from wavestack.models.engine import CancelToken  # noqa: E402
-from wavestack.rag.corpus import chunk_corpus, load_rag_content  # noqa: E402
-from wavestack.rag.index import (  # noqa: E402
+from harness_lab import config  # noqa: E402
+from harness_lab.greenops import LocalMeter, Probe, StageCost  # noqa: E402
+from harness_lab.messages import msg, render  # noqa: E402
+from harness_lab.models import download  # noqa: E402
+from harness_lab.models.embedding import LlamaCppEmbedder, model_path  # noqa: E402
+from harness_lab.models.engine import CancelToken  # noqa: E402
+from harness_lab.rag.corpus import chunk_corpus, load_rag_content  # noqa: E402
+from harness_lab.rag.index import (  # noqa: E402
     IndexInUse,
     VecUnavailable,
     build_index,
@@ -43,7 +43,7 @@ from wavestack.rag.index import (  # noqa: E402
     file_sha256,
     passage_text,
 )
-from wavestack.rag.lab import brick_costs_path, write_build_cost  # noqa: E402
+from harness_lab.rag.lab import brick_costs_path, write_build_cost  # noqa: E402
 
 TERMINAL = "en"  # the terminal's language (languages 5/5), never `settings.json`'s
 

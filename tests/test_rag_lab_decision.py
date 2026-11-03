@@ -20,11 +20,11 @@ from test_rag_lab import QUESTION, ended, run, run_status, stage
 from test_rag_lab_generation import own_chain
 from test_rag_rerank import place_reranker, rerank_config, session_for
 
-from wavestack import config
-from wavestack.rag import decision as rag_decision
-from wavestack.rag import exposed, sheets
-from wavestack.rag import lab as rag_lab
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.rag import decision as rag_decision
+from harness_lab.rag import exposed, sheets
+from harness_lab.rag import lab as rag_lab
+from harness_lab.trace.journal import get_journal
 
 LANGS = ("fr", "en", "de")
 KEY = "sk-or-test-not-a-real-key"

@@ -18,13 +18,13 @@ from fake_engine import FakeEngine
 from test_tools import QWEN, _segments, call
 from test_turn import _run
 
-from wavestack import config
-from wavestack.mcp import connection
-from wavestack.mcp.servers import load_mcp_content, mcp_servers
-from wavestack.net.factory import create_async_client
-from wavestack.session.app_session import AppSession
-from wavestack.tools.parser import parse_tool_calls
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.mcp import connection
+from harness_lab.mcp.servers import load_mcp_content, mcp_servers
+from harness_lab.net.factory import create_async_client
+from harness_lab.session.app_session import AppSession
+from harness_lab.tools.parser import parse_tool_calls
+from harness_lab.trace.journal import get_journal
 
 MSLEARN_TOOLS = [
     {
@@ -195,7 +195,7 @@ def local_servers() -> list[psutil.Process]:
     found = []
     for child in children:
         try:
-            if "wavestack.mcp.local_server" in " ".join(child.cmdline()):
+            if "harness_lab.mcp.local_server" in " ".join(child.cmdline()):
                 found.append(child)
         except psutil.Error:
             pass
@@ -264,7 +264,7 @@ def test_local_server_lifecycle_call_and_shutdown(loop):
 
     enable(session)  # re-enabled: a new process
     assert local_servers()  # the venv launcher may add a second process
-    session.close()  # AD-21: nothing survives WaveStack
+    session.close()  # AD-21: nothing survives HarnessLab
     assert local_servers() == []
 
 
@@ -496,7 +496,7 @@ def test_optional_arguments_and_untyped_values_are_accepted(loop, web):
     spec = session._registry.get("mslearn__microsoft_code_sample_search")
     assert spec.params == {"query": "string", "language": ""} and spec.required == ("query",)
     executor = session._tool_executor
-    from wavestack.tools.parser import ToolCall
+    from harness_lab.tools.parser import ToolCall
 
     enabled = session.build_turn_state().tools
     name = "mslearn__microsoft_code_sample_search"
@@ -530,8 +530,8 @@ def test_app_lifespan_attaches_the_loop_and_stops_the_local_server():
     from fastapi.testclient import TestClient
     from test_bricks import HEADERS
 
-    from wavestack.session.diagnostic import DiagnosticSession
-    from wavestack.web.app import create_app
+    from harness_lab.session.diagnostic import DiagnosticSession
+    from harness_lab.web.app import create_app
 
     engine = FakeEngine(template=QWEN.decode("utf-8"), architecture="qwen35")
     session = AppSession(
@@ -675,7 +675,7 @@ def test_public_servers_say_what_they_receive_and_local_ones_do_not(server):
 
 
 def test_mcp_servers_has_the_four_expected_ids_in_order():
-    from wavestack.mcp.servers import ALL_IDS
+    from harness_lab.mcp.servers import ALL_IDS
 
     assert ALL_IDS == ("local", "datagouv", "mslearn", "github")
     assert list(mcp_servers(config.Config())) == list(ALL_IDS)
@@ -684,7 +684,7 @@ def test_mcp_servers_has_the_four_expected_ids_in_order():
 @pytest.mark.parametrize("server", list(mcp_servers(config.Config()).values()), ids=lambda s: s.id)
 def test_mcp_server_logo_is_its_own_svg_file_offline(server):
     """CAP-8: every known server has a logo of its own, a local SVG (never the network)."""
-    from wavestack.web.app import STATIC_DIR
+    from harness_lab.web.app import STATIC_DIR
 
     assert server.logo == f"mcp/{server.id}.svg"
     path = STATIC_DIR / "logos" / server.logo
@@ -695,7 +695,7 @@ def test_mcp_server_logo_is_its_own_svg_file_offline(server):
 def test_every_server_has_a_white_dark_theme_logo():
     """CAP-8: GitHub's own white file for the dark theme (never a CSS recolouring); story 17.3:
     the navy neutral pictograms get a white copy too (unreadable on the dark background)."""
-    from wavestack.web.app import STATIC_DIR
+    from harness_lab.web.app import STATIC_DIR
 
     darks = {s.id: s.logo_dark for s in mcp_servers(config.Config()).values()}
     assert darks == {
@@ -711,8 +711,8 @@ def test_every_server_has_a_white_dark_theme_logo():
 
 
 def test_mcp_server_logo_falls_back_to_the_neutral_default_for_an_unknown_id():
-    from wavestack.mcp.servers import McpServer
-    from wavestack.web.app import STATIC_DIR
+    from harness_lab.mcp.servers import McpServer
+    from harness_lab.web.app import STATIC_DIR
 
     unknown = McpServer("future_server", "https://example.invalid")
     assert unknown.logo == "mcp/_default.svg"

@@ -26,7 +26,7 @@ context:
 
 **Always:**
 - **Commit 1, renommage pur.**
-  - Il couvre les clés d'événements, les réponses d'API, les modèles pydantic, les clés YAML de `content/` et `content/i18n/`, `wavestack.toml`, le JS, les tests, l'E2E, les variables de gabarit (`{title_fr}`) et les variables qui portent ces champs. Il couvre aussi les mentions dans `ARCHITECTURE-SPINE.md`, `EXPERIENCE.md` et `README.md`.
+  - Il couvre les clés d'événements, les réponses d'API, les modèles pydantic, les clés YAML de `content/` et `content/i18n/`, `harness-lab.toml`, le JS, les tests, l'E2E, les variables de gabarit (`{title_fr}`) et les variables qui portent ces champs. Il couvre aussi les mentions dans `ARCHITECTURE-SPINE.md`, `EXPERIENCE.md` et `README.md`.
   - Aucune valeur ne change. `ruff`, `pytest` (deux moitiés) et l'E2E (tranches) passent avant et après.
 - **Les fonctions `*_fr` gardent leur nom.** Ces 55 `def …_fr(` fabriquent du texte français (`kv_fr`, `date_fr`, `price_fr`…) ; la story 5 les reprend.
   - Un nom à la fois fonction et clé (`kv_fr`, `warning_fr`, `price_fr`, `count_fr`…) : seule la clé change, pas la définition, l'import ni l'appel.
@@ -84,7 +84,7 @@ context:
   - `README.md` (379, 769-771) et `config.py:769` citent des clés de `settings.json`.
 - **SQL** : `rag/index.py:197,205,238,250` et `rag/retriever.py:64` gardent `title_fr` en colonne ; alias `AS title_text` dans les `SELECT`.
 - **Alias de `settings.json`** : `config.py:65-66` (`extra="forbid"`), 137, 188, 191, 329. Utiliser `validation_alias=AliasChoices("x_text", "x_fr")`. `rag.js:125-126` (`only(p, ["label_fr","stages"])`).
-- **Chargeur** : un nouveau `src/wavestack/ui_texts.py`, `load_ui_texts(lang=None)` sur le modèle de `tools/registry.py:104`, avec `config.content_file`, `@cache` ajouté à `clear_content_caches` (`config.py:1050`). Validation : arbre de `str`, à feuilles non vides.
+- **Chargeur** : un nouveau `src/harness_lab/ui_texts.py`, `load_ui_texts(lang=None)` sur le modèle de `tools/registry.py:104`, avec `config.content_file`, `@cache` ajouté à `clear_content_caches` (`config.py:1050`). Validation : arbre de `str`, à feuilles non vides.
 - **Session** : `_localized` (`app_session.py:1545`) ; un `ui_texts()` à côté de `language_state()` (≈ :5166), relu par `_reload_texts` (≈ :5221).
 - **Route** : `web/app.py`, à côté de `/api/llm_lab` (:304).
 - **Front** :
@@ -116,8 +116,8 @@ context:
 
 **Execution:**
 - [x] Commit 1, renommage : tout le dépôt, hors `_bmad-output/` sauf `ARCHITECTURE-SPINE.md` et `EXPERIENCE.md`. Il comprend l'alias de colonne SQL, les alias de `settings.json` et la relecture de `label_fr` dans `rag.js` — pour que le renommage n'efface rien de ce qui est déjà écrit.
-- [x] `content/ui.yaml`, `src/wavestack/ui_texts.py`, `config.py`, `app_session.py`, `web/app.py` -- catalogue `common` et `main`, chargeur, route -- commit 2.
-- [x] `src/wavestack/web/static/i18n.js` et les cinq HTML -- `t()`, `locale()`, formats, `data-i18n*`, `<html lang>` -- commit 2.
+- [x] `content/ui.yaml`, `src/harness_lab/ui_texts.py`, `config.py`, `app_session.py`, `web/app.py` -- catalogue `common` et `main`, chargeur, route -- commit 2.
+- [x] `src/harness_lab/web/static/i18n.js` et les cinq HTML -- `t()`, `locale()`, formats, `data-i18n*`, `<html lang>` -- commit 2.
 - [x] `index.html`, `app.js` -- tous les littéraux via `t()`, formats par `i18n.js`, pluriels, listes -- commit 2, rendu français identique.
 - [x] `content/i18n/{en,de}/ui.yaml` -- traductions -- commit 3.
 - [x] `index.html`, `app.css`, `app.js` -- menu « Affichage ▾ » (thème, langue, projection), avec les contrôles E2E qui les ouvrent (`_themes`, `_pick_language`, projection) -- commit 3.
@@ -139,7 +139,7 @@ context:
 
 ## Implementation Notes
 
-- **Commit 1 (`5dbcc86`), renommage.** Script jetable sur les 251 noms ; les 55 `def …_fr(` gardent leur nom (définitions, imports, appels, docstrings). Lecture de l'existant : `title_fr AS title_text` dans les `SELECT` ; alias `AliasChoices` et `_legacy_text_keys` pour les clés `*_fr` de `settings.json` (le renommage avant la fusion garde la priorité d'une ancienne clé sur `wavestack.toml`) ; `label_fr` d'une chaîne sauvée relu par `rag.js`. `tests/test_text_fields.py` couvre les trois cas.
+- **Commit 1 (`5dbcc86`), renommage.** Script jetable sur les 251 noms ; les 55 `def …_fr(` gardent leur nom (définitions, imports, appels, docstrings). Lecture de l'existant : `title_fr AS title_text` dans les `SELECT` ; alias `AliasChoices` et `_legacy_text_keys` pour les clés `*_fr` de `settings.json` (le renommage avant la fusion garde la priorité d'une ancienne clé sur `harness-lab.toml`) ; `label_fr` d'une chaîne sauvée relu par `rag.js`. `tests/test_text_fields.py` couvre les trois cas.
 - **Commit 2 (`390e486`), mécanisme.** `content/ui.yaml` (720 feuilles), `ui_texts.py`, `AppSession.ui_texts()`, `GET /api/ui_texts`, `i18n.js` (`t()`, `section()` pour les tables de libellés, `locale()`, formats `Intl`, `ListFormat`, `PluralRules`, `data-i18n*`). `app.js` n'a plus de littéral français ni de format `fr-FR`. `common.language` porte l'ancien `LANGUAGE_TEXTS`, avec ses valeurs `en` et `de` dès ce commit (sinon `s_language` régressait) ; la parité stricte n'est vérifiée qu'au commit 3.
 - **Commit 3 (`e20119a`), traductions et barre.** `en` et `de` écrits par deux sous-agents, contrôlés par la machine (clés, variables, vouvoiement), sans relecture humaine. Menu « Affichage ▾ » : face = symbole du thème et code de langue ; les faces compactes du thème et de la langue et le « Aa » de la projection disparaissent, d'où le remplacement de `_compact_picker` par `_display_menu_picker` et de `#theme-picker-box` par `#display-menu` dans `_bar_fits` (au-delà de « ouvrir le menu »). `main.outbound_summary.left` devient une paire `.one` / `.other`. Le contrôle « aucun texte français » ignore les textes (ou citations de textes) envoyés par la session, encore français jusqu'aux stories 3 et 5.
 - **Commit 4, reprises de la vérification.** Barre haute lisible en `fr`, `en` et `de` (CSS seul) : au-dessus de 1 000 px, le scénario, l'hébergement et le nom du modèle et le sélecteur de modèle gardent environ six caractères et « … » ; sous 1 700 px, le titre part, les liens disent « LLM » et « RAG », et la puce du modèle garde son hébergement (le fournisseur reste dans l'infobulle, `app.js` le met dans son propre `span`) ; sous 1 400 px, « Affichage ▾ » garde symbole et code. La tranche `ui_language` mesure ces quatre noms (les six premiers caractères et « … » dans leur propre police) en `fr`, `en` et `de`, à 1 280 et 1 600 px, normal et projection, et couvre les lignes « Route injoignable » et « Pluriel » de la matrice. `<html lang>` n'est plus posé par `app.js` mais par `i18n.js` seul (français quand la route échoue). Citations de l'utilisateur par `common.format.quote` (« … », “…”, „…“).

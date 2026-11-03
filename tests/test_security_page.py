@@ -11,10 +11,10 @@ from test_mcp import McpWeb, loop, mcp_session, web  # noqa: F401
 from test_mcp_github import GITHUB_TOOLS, connected
 from test_mcp_lab import _client, lab_call
 
-from wavestack.mcp.security_log import SecurityJournal
-from wavestack.tools.registry import ToolError
-from wavestack.trace.catalog import SecurityEventPayload
-from wavestack.trace.journal import get_journal
+from harness_lab.mcp.security_log import SecurityJournal
+from harness_lab.tools.registry import ToolError
+from harness_lab.trace.catalog import SecurityEventPayload
+from harness_lab.trace.journal import get_journal
 
 
 def test_security_state_computes_the_question_cards_from_policy_and_journal(loop):  # noqa: F811

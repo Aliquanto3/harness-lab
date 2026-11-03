@@ -1,7 +1,7 @@
 # Revue d'accessibilité : Atelier MCP en séquence (lot 4 du 2026-10-04)
 
 Date : 2026-10-05. Référentiel : WCAG 2.2 AA, plus le plancher de l'application (EXPERIENCE.md, « Accessibility Floor » : cibles de 32 px, traits de 2 px, jamais la couleur seule, annonces des blocages et échecs).
-Sources lues : EXPERIENCE.md (« Atelier MCP en séquence », « Accessibility Floor »), DESIGN.md (composant « Atelier MCP en séquence », `mcp-*` du frontmatter, jetons de couleur clairs et `-dark`), `.working/maquette-atelier-mcp-sequence.html`, `src/wavestack/web/static/diagram.js`, et les règles `diagram-*` de `pages.css`.
+Sources lues : EXPERIENCE.md (« Atelier MCP en séquence », « Accessibility Floor »), DESIGN.md (composant « Atelier MCP en séquence », `mcp-*` du frontmatter, jetons de couleur clairs et `-dark`), `.working/maquette-atelier-mcp-sequence.html`, `src/harness_lab/web/static/diagram.js`, et les règles `diagram-*` de `pages.css`.
 Les spines l'emportent sur la maquette. Un écart de la maquette n'est relevé que si les spines ne l'interdisent pas : le build pourrait le reproduire.
 
 **Bilan : 0 critique, 9 hautes, 12 moyennes, 5 basses.**
@@ -58,7 +58,7 @@ Les fonds composites sont calculés : ligne courante = `accent-soft` à 70 % sur
 ### A11Y-03 · haute · 4.1.3 (plancher : « blocage, échec, dépassement annoncés dès qu'ils surviennent ») : rien n'est annoncé quand les messages arrivent ou échouent
 - **Où** : EXPERIENCE.md, États (« Poignée de main en cours », « Serveur injoignable », `isError`, « Erreur JSON-RPC », « outil inconnu ») et Accessibilité ; `createStepper` met la position en `aria-live="off"` en direct.
 - **Problème** : un utilisateur de lecteur d'écran clique « Se connecter » et n'entend rien : ni la fin de la poignée de main, ni « serveur injoignable (ConnectError) » après 10 s, ni « isError ». Le plancher de l'application exige l'annonce immédiate des échecs.
-- **Correctif** : EXPERIENCE.md, « Accessibilité » : une région `role="status"` par page, masquée visuellement. À la fin de chaque phase, elle annonce la synthèse de l'en-tête de phase (« Poignée de main · Glossaire WaveStack : ouverte en 1 371 ms, 2 outils, 1 ressource, 1 prompt »). Les échecs (injoignable, délai dépassé, `isError`, erreur JSON-RPC, outil inconnu refusé par le harnais) passent dans un `role="alert"`, une seule fois. Pas d'annonce flèche par flèche, pas de chronomètre en région live ; la fin d'un appel « par le modèle » s'annonce une fois, avec sa durée.
+- **Correctif** : EXPERIENCE.md, « Accessibilité » : une région `role="status"` par page, masquée visuellement. À la fin de chaque phase, elle annonce la synthèse de l'en-tête de phase (« Poignée de main · Glossaire HarnessLab : ouverte en 1 371 ms, 2 outils, 1 ressource, 1 prompt »). Les échecs (injoignable, délai dépassé, `isError`, erreur JSON-RPC, outil inconnu refusé par le harnais) passent dans un `role="alert"`, une seule fois. Pas d'annonce flèche par flèche, pas de chronomètre en région live ; la fin d'un appel « par le modèle » s'annonce une fois, avec sa durée.
 
 ### A11Y-04 · haute · 2.4.3, 2.2.1 / 3.2 (plancher : pas de défilement qui reprend la main) : focus perdu et défilement imposé pendant le direct
 - **Où** : EXPERIENCE.md, « Phases » (« Quand une phase commence, les précédentes se replient ») et « Stepper » (« défile pour rester visible ») ; maquette, `renderSeq` (`list.replaceChildren()` à chaque rendu) et `onShow` (`scrollIntoView` à chaque arrivée en direct).
@@ -84,16 +84,16 @@ Les fonds composites sont calculés : ligne courante = `accent-soft` à 70 % sur
 - **Correctif** : DESIGN.md, composant MCP : « aucun texte sous `{typography.label}` (12 px) ; toutes les tailles passent par les jetons de typographie ». Supprimer « `label` réduit » ; si la place manque, les primitives passent sous le nom sur une seconde ligne, ou le nœud grandit.
 
 ### A11Y-08 · haute · 2.5.8 (AA 24 px), plancher `hit-target-min` 32 px : cibles trop petites
-- **Où** : DESIGN.md, sélecteurs segmentés « À la main | Par le modèle » et « Documentation complète | Lazy loading », onglets, `mcp-phase-header`, étiquette « Hôte · WaveStack », puces des volets masqués, « Voir le JSON envoyé au modèle » ; maquette : `.diagram-stepper button { min-height: 28px }`.
-- **Problème** (hauteurs estimées dans la maquette) : segments environ 23 px, sous le minimum AA puisque les segments se touchent ; puce de volet masqué environ 19 px ; étiquette « Hôte · WaveStack » et « Voir le JSON » environ 15 px ; onglets environ 26 px ; en-tête de phase environ 24 px ; en-têtes de colonnes 30 px ; stepper ramené à 28 px, alors que `pages.css` en donne 32.
+- **Où** : DESIGN.md, sélecteurs segmentés « À la main | Par le modèle » et « Documentation complète | Lazy loading », onglets, `mcp-phase-header`, étiquette « Hôte · HarnessLab », puces des volets masqués, « Voir le JSON envoyé au modèle » ; maquette : `.diagram-stepper button { min-height: 28px }`.
+- **Problème** (hauteurs estimées dans la maquette) : segments environ 23 px, sous le minimum AA puisque les segments se touchent ; puce de volet masqué environ 19 px ; étiquette « Hôte · HarnessLab » et « Voir le JSON » environ 15 px ; onglets environ 26 px ; en-tête de phase environ 24 px ; en-têtes de colonnes 30 px ; stepper ramené à 28 px, alors que `pages.css` en donne 32.
 - **Correctif** : DESIGN.md, composant MCP, une ligne explicite : « Toute commande, y compris segments, onglets, en-têtes de colonnes et de phase, « Pourquoi… ? », « Voir le JSON », étiquette de l'hôte et puces, a `min-height: {spacing.hit-target-min}` ; le stepper garde les règles du lot 2 ». L'étiquette de l'hôte devient un bouton de 32 px au-dessus du cadre, ou c'est le cadre entier qui porte l'explication.
 
 ### A11Y-09 · haute · 1.1.1, 1.3.1, 1.4.1 : dans l'Architecture, transport, échec et connexion ne sont que visuels
 - **Où** : EXPERIENCE.md, « Volet Architecture » (fils nommés par leur transport ; ✖ sur le fil ; « Les clients et serveurs non connectés sont en retrait ») ; `wireLayer` : SVG en `aria-hidden` ; maquette : `.node.dim` (opacité seule), zones en `span`.
 - **Problème** : « stdio » ou « HTTP », le ✖ rouge du fil HTTP (climax du Flow MCP-2) et l'état connecté ou non n'existent que dans le SVG masqué ou par l'opacité. Les zones « Poste de travail » et « RÉSEAU » (la question clé SM-3) ne sont pas des groupes nommés : au lecteur d'écran, un nœud ne dit pas où il tourne.
 - **Correctif** : EXPERIENCE.md, « Accessibilité », point Architecture :
-  - chaque zone est un `role="group"` nommé (« Poste de travail », « Réseau, hors du poste ») ; le cadre de l'hôte est un groupe nommé « Hôte WaveStack » ;
-  - chaque nœud de serveur porte dans son nom ou sa description son lieu, son transport, son état et ses primitives : « Serveur MCP Glossaire WaveStack, sur le poste, stdio, connecté, 2 outils, 1 ressource, 1 prompt » ; « data.gouv.fr, réseau, HTTP, injoignable (ConnectError) » ;
+  - chaque zone est un `role="group"` nommé (« Poste de travail », « Réseau, hors du poste ») ; le cadre de l'hôte est un groupe nommé « Hôte HarnessLab » ;
+  - chaque nœud de serveur porte dans son nom ou sa description son lieu, son transport, son état et ses primitives : « Serveur MCP Glossaire HarnessLab, sur le poste, stdio, connecté, 2 outils, 1 ressource, 1 prompt » ; « data.gouv.fr, réseau, HTTP, injoignable (ConnectError) » ;
   - chaque client porte « connecté » ou « non connecté » ;
   - visuellement, « non connecté » se dit autrement que par l'opacité (voir A11Y-10).
 

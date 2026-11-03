@@ -52,14 +52,14 @@ context:
 
 ## Code Map
 
-- `wavestack.toml` -- après `[[rag_lab.embeddings]]` : `[[rag_lab.rerankers]]` Qwen3-Reranker-0.6B : `https://huggingface.co/ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF/resolve/a02f48bb4f057028298c21fa033da2b30d7742d5/qwen3-reranker-0.6b-q8_0.gguf`, path `reranker/qwen3-reranker-0.6b-q8_0.gguf`, size 639153184, sha256 `22c9979ce4fbcdc5acdc310c6641c32797eff1aa980b8f7a2db8a8ea23429a48`, Apache-2.0, `max_tokens = 1024`, RSS 937 (PC de développement).
-- `src/wavestack/config.py` -- `Config.rag_lab_embeddings` / `rag_lab_embedding` / `RAG_LAB_RESERVED_IDS` (5c-1) : factoriser pour `rag_lab_rerankers` / `rag_lab_reranker` (réservés : `declared` + id de la brique, dossier `reranker/`) ; `load_config` ignore aussi `rag_lab.rerankers` de settings.json ; messages `config.rag_lab_rerankers.*`.
-- `src/wavestack/models/reranker.py` -- `pair_tokens` l. 67 (format paire, gardé pour BGE) ; `LlamaCppReranker.__init__` l. 118 (contrôle de pooling après chargement via `llm.metadata`) ; `_logit` (lecture `llama_get_embeddings_seq[0]`) ; `score` (sigmoïde) : ajouter le classement de l'en-tête (`segments` / `no_rerank_template` / format paire / format gabarit), la paire par gabarit (`{query}`, `{document}` ; lire le gabarit réel dans l'en-tête du GGUF, requête HTTP Range sur le dépôt si besoin, et traiter tout autre champ qu'il contient), coupe du document seul pour tenir dans `max_tokens`, score brut pour le gabarit, attribut disant comment le score est lu.
-- `src/wavestack/models/gguf_meta.py`, `models/catalog.py` -- `catalog.header_metadata` (en-tête complet en cache : `tokenizer.chat_template.rerank` est après les tableaux du vocabulaire, `stop_at` ne suffit pas).
-- `src/wavestack/models/load_registry.py` -- constante `RAG_LAB_RERANKER = "rag_lab.reranker"`.
-- `src/wavestack/models/discovery.py` -- `_rag_model_files` : inclure `[[rag_lab.rerankers]]`.
-- `src/wavestack/session/app_session.py` -- `_rag_lab_catalog` (options rerank déclarées : fichier puis en-tête), `_rag_lab_reranker` l. 9608 (sur le modèle de `_rag_lab_declared_lent` de 5c-1 : slot propre, `soft=True`), `_rag_lab_absent` à généraliser.
-- `src/wavestack/rag/lab.py` -- `_rerank` (l. ~1890-1977) : lit `item.truncated` pour l'avertissement, fait sur la lecture du score ; `OPTIONS["rerank"] = ("declared",)` inchangé.
+- `harness-lab.toml` -- après `[[rag_lab.embeddings]]` : `[[rag_lab.rerankers]]` Qwen3-Reranker-0.6B : `https://huggingface.co/ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF/resolve/a02f48bb4f057028298c21fa033da2b30d7742d5/qwen3-reranker-0.6b-q8_0.gguf`, path `reranker/qwen3-reranker-0.6b-q8_0.gguf`, size 639153184, sha256 `22c9979ce4fbcdc5acdc310c6641c32797eff1aa980b8f7a2db8a8ea23429a48`, Apache-2.0, `max_tokens = 1024`, RSS 937 (PC de développement).
+- `src/harness_lab/config.py` -- `Config.rag_lab_embeddings` / `rag_lab_embedding` / `RAG_LAB_RESERVED_IDS` (5c-1) : factoriser pour `rag_lab_rerankers` / `rag_lab_reranker` (réservés : `declared` + id de la brique, dossier `reranker/`) ; `load_config` ignore aussi `rag_lab.rerankers` de settings.json ; messages `config.rag_lab_rerankers.*`.
+- `src/harness_lab/models/reranker.py` -- `pair_tokens` l. 67 (format paire, gardé pour BGE) ; `LlamaCppReranker.__init__` l. 118 (contrôle de pooling après chargement via `llm.metadata`) ; `_logit` (lecture `llama_get_embeddings_seq[0]`) ; `score` (sigmoïde) : ajouter le classement de l'en-tête (`segments` / `no_rerank_template` / format paire / format gabarit), la paire par gabarit (`{query}`, `{document}` ; lire le gabarit réel dans l'en-tête du GGUF, requête HTTP Range sur le dépôt si besoin, et traiter tout autre champ qu'il contient), coupe du document seul pour tenir dans `max_tokens`, score brut pour le gabarit, attribut disant comment le score est lu.
+- `src/harness_lab/models/gguf_meta.py`, `models/catalog.py` -- `catalog.header_metadata` (en-tête complet en cache : `tokenizer.chat_template.rerank` est après les tableaux du vocabulaire, `stop_at` ne suffit pas).
+- `src/harness_lab/models/load_registry.py` -- constante `RAG_LAB_RERANKER = "rag_lab.reranker"`.
+- `src/harness_lab/models/discovery.py` -- `_rag_model_files` : inclure `[[rag_lab.rerankers]]`.
+- `src/harness_lab/session/app_session.py` -- `_rag_lab_catalog` (options rerank déclarées : fichier puis en-tête), `_rag_lab_reranker` l. 9608 (sur le modèle de `_rag_lab_declared_lent` de 5c-1 : slot propre, `soft=True`), `_rag_lab_absent` à généraliser.
+- `src/harness_lab/rag/lab.py` -- `_rerank` (l. ~1890-1977) : lit `item.truncated` pour l'avertissement, fait sur la lecture du score ; `OPTIONS["rerank"] = ("declared",)` inchangé.
 - `content/messages.yaml`, `content/rag_lab.yaml` et copies en/de -- refus `models.reranker.segments`, `models.reranker.no_rerank_template`, raison de fichier absent, `rag_lab.rerank.truncated` (one/other), faits de lecture du score, explication de l'étape Reranking.
 - `tests/fixtures/make_tiny_rerank_gguf.py` + `tiny-bert-rank.gguf` -- déclare aujourd'hui `token_type_count = 2` (l. 51) : régénérer à 1 (comme BGE) et produire la variante à 2 pour le test de refus ; seul `tests/test_rag_rerank.py:808` charge ce fichier en reranker, `test_model_servers.py:1365` le lit.
 - Tests -- `tests/test_rag_lab_embeddings.py` (modèle à suivre), `tests/test_rag_rerank.py`, `tests/test_rag_lab.py`, `tools/e2e/run_e2e.py` (`_rag_lab` : select du Reranking).
@@ -68,7 +68,7 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `wavestack.toml`, `config.py` -- déclarer et valider `[[rag_lab.rerankers]]` (validation commune avec 5c-1).
+- [x] `harness-lab.toml`, `config.py` -- déclarer et valider `[[rag_lab.rerankers]]` (validation commune avec 5c-1).
 - [x] `models/reranker.py`, fixtures -- classement de l'en-tête, format gabarit, score brut, refus dédiés, compte des paires coupées.
 - [x] `app_session.py`, `load_registry.py`, `discovery.py` -- options, disponibilité par fichier et en-tête, slot par modèle.
 - [x] `rag/lab.py`, contenus ×3 -- avertissement, fait de lecture du score, explication.

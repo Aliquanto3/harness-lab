@@ -22,11 +22,11 @@ from test_rag_lab_rerankers import MINILM_HEADER, QWEN, place_lab
 from test_rag_lab_rerankers import lab_entry as reranker_entry
 from test_rag_rerank import RERANK_SIZE, rerank_config, session_for
 
-from wavestack import config
-from wavestack.messages import render
-from wavestack.models import download as download_module
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.messages import render
+from harness_lab.models import download as download_module
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.trace.journal import get_journal
 
 E5_TARGET = f"rag_lab_embedding:{E5}"
 QWEN_TARGET = f"rag_lab_reranker:{QWEN}"
@@ -384,7 +384,7 @@ def test_a_file_copied_by_hand_meanwhile_has_nothing_to_download(index):
     assert options(session, "embedding")[E5]["download"] is not None
     path = model_file("embedding", E5)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(b"\0" * SIZE)  # copied by hand while WaveStack runs
+    path.write_bytes(b"\0" * SIZE)  # copied by hand while HarnessLab runs
     client = client_of(session)
 
     answer = client.post("/api/intentions/download_model", json={"target": E5_TARGET},

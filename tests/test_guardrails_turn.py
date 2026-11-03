@@ -7,9 +7,9 @@ import json
 
 from fake_engine import FakeEngine, booted_session
 
-from wavestack.guardrails.contract import Classification, Entity
-from wavestack.guardrails.manager import GuardrailsManager
-from wavestack.trace.journal import get_journal
+from harness_lab.guardrails.contract import Classification, Entity
+from harness_lab.guardrails.manager import GuardrailsManager
+from harness_lab.trace.journal import get_journal
 
 
 class FakeClassifier:
@@ -168,8 +168,8 @@ def test_partial_analysis_is_said_never_silent() -> None:
 def test_cloud_call_withholds_the_answer_too() -> None:
     """Review of story 5 (HIGH): the chat path (`run_call`) streams and traces no final
     answer under `withhold`; the caller keeps it (`ChatCall.text`) for the check."""
-    from wavestack.models.cloud_base import ChatBody, ChatEnd, run_call
-    from wavestack.models.engine import CancelToken
+    from harness_lab.models.cloud_base import ChatBody, ChatEnd, run_call
+    from harness_lab.models.engine import CancelToken
 
     class Engine:
         def complete(self, body, cancel):

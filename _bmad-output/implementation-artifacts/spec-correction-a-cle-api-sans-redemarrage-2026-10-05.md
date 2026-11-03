@@ -37,11 +37,11 @@ context: []
 
 ## Code Map
 
-- `src/wavestack/models/cloud_base.py` -- `CloudEngine.__init__` (~l.450) garde `self._key` ; `_headers` (~l.528) le lit à chaque requête ; `mask` (~l.464) masque via `mask_key`. Seul endroit du moteur qui touche la clé (sous-classes `openai_chat`, `openai_responses`, `anthropic_messages` n'y touchent pas).
-- `src/wavestack/session/app_session.py` -- `_install_cloud` (~l.2442) crée le moteur avec `config.cloud_key(entry)` ; `self._cloud` (entrée active), `self._engine`, `self._lock`. `switch_model` (~l.1908) : `same_as` → `already_active` (ne pas changer).
-- `src/wavestack/web/app.py` -- route `set_api_key` (~l.896) : `session.set_api_key(...)` puis réponse ; `app_session` y est disponible.
-- `src/wavestack/session/diagnostic.py` -- `set_api_key` (~l.1022) : écrit via `apply_setting(ApiKeySet)` qui émet `effect_applied {effect: "api_key_set", id, key_set}`. Ne pas changer.
-- `src/wavestack/web/static/app.js` -- `case "effect_applied"` (~l.614) ; `scheduleModelList()` (~l.2537) relit `/api/diagnostic` (débouncé 150 ms).
+- `src/harness_lab/models/cloud_base.py` -- `CloudEngine.__init__` (~l.450) garde `self._key` ; `_headers` (~l.528) le lit à chaque requête ; `mask` (~l.464) masque via `mask_key`. Seul endroit du moteur qui touche la clé (sous-classes `openai_chat`, `openai_responses`, `anthropic_messages` n'y touchent pas).
+- `src/harness_lab/session/app_session.py` -- `_install_cloud` (~l.2442) crée le moteur avec `config.cloud_key(entry)` ; `self._cloud` (entrée active), `self._engine`, `self._lock`. `switch_model` (~l.1908) : `same_as` → `already_active` (ne pas changer).
+- `src/harness_lab/web/app.py` -- route `set_api_key` (~l.896) : `session.set_api_key(...)` puis réponse ; `app_session` y est disponible.
+- `src/harness_lab/session/diagnostic.py` -- `set_api_key` (~l.1022) : écrit via `apply_setting(ApiKeySet)` qui émet `effect_applied {effect: "api_key_set", id, key_set}`. Ne pas changer.
+- `src/harness_lab/web/static/app.js` -- `case "effect_applied"` (~l.614) ; `scheduleModelList()` (~l.2537) relit `/api/diagnostic` (débouncé 150 ms).
 - `content/messages.yaml` (~l.1219), `content/i18n/en/messages.yaml` (~l.1210), `content/i18n/de/messages.yaml` (~l.1213) -- `cloud.key_saved`.
 - `docs/modeles.md` (~l.332-335) -- étape « Clé » ; aucune doc ne parle aujourd'hui de redémarrer après une clé.
 - `tests/test_cloud.py` -- `Provider` (faux fournisseur, `requests` enregistrées), `_app(monkeypatch, provider)`, `_cloud_session`, `_turn`, `SENTINEL`, `ORIGIN`, `GROQ_TEXT`.
@@ -49,10 +49,10 @@ context: []
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/models/cloud_base.py` -- ajouter `CloudEngine.use_key(key)` : la clé des requêtes suivantes ; garder les clés précédentes et les masquer aussi dans `mask` -- AD-15 même pour une réponse partie avec l'ancienne clé.
-- [x] `src/wavestack/session/app_session.py` -- ajouter `use_api_key(model_id) -> bool` : si l'entrée cloud active a cet `id`, relire `config.cloud_key(entry)` et la passer au moteur (`use_key`) sous `self._lock` ; `False` sinon -- point unique côté session, sans rechargement.
-- [x] `src/wavestack/web/app.py` -- route `set_api_key` : après le succès de `session.set_api_key`, appeler `app_session.use_api_key(intention.id)`.
-- [x] `src/wavestack/web/static/app.js` -- `effect_applied` avec `p.effect === "api_key_set"` : `scheduleModelList()` puis `break`.
+- [x] `src/harness_lab/models/cloud_base.py` -- ajouter `CloudEngine.use_key(key)` : la clé des requêtes suivantes ; garder les clés précédentes et les masquer aussi dans `mask` -- AD-15 même pour une réponse partie avec l'ancienne clé.
+- [x] `src/harness_lab/session/app_session.py` -- ajouter `use_api_key(model_id) -> bool` : si l'entrée cloud active a cet `id`, relire `config.cloud_key(entry)` et la passer au moteur (`use_key`) sous `self._lock` ; `False` sinon -- point unique côté session, sans rechargement.
+- [x] `src/harness_lab/web/app.py` -- route `set_api_key` : après le succès de `session.set_api_key`, appeler `app_session.use_api_key(intention.id)`.
+- [x] `src/harness_lab/web/static/app.js` -- `effect_applied` avec `p.effect === "api_key_set"` : `scheduleModelList()` puis `break`.
 - [x] `content/messages.yaml`, `content/i18n/en/messages.yaml`, `content/i18n/de/messages.yaml` -- `cloud.key_saved` : la clé est prise en compte tout de suite, sans relancer.
 - [x] `docs/modeles.md` -- étape « Clé » : une phrase, la clé s'applique tout de suite, y compris au modèle cloud déjà actif.
 - [x] `tests/test_cloud.py` -- tests de la matrice : clé changée → en-tête `Authorization` de la requête suivante = nouvelle clé ; même modèle re-choisi → `already_active` et nouvelle clé ; autre `id` → inchangé ; `use_key` masque l'ancienne et la nouvelle clé.
@@ -71,7 +71,7 @@ context: []
 **Commands:**
 - `uv run pytest tests/test_cloud.py -q` -- expected: tout vert.
 - `uv run ruff check` et `uv run ruff format --check` sur les fichiers Python touchés -- expected: aucun écart.
-- `node --check src/wavestack/web/static/app.js` -- expected: syntaxe valide.
+- `node --check src/harness_lab/web/static/app.js` -- expected: syntaxe valide.
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py --only diagnostic` -- expected: 15 vérifications réussies, dont « clé enregistrée au diagnostic : « sans relancer », l'atelier relit sa liste de modèles ».
 
 **Manual checks (if no CLI):**
@@ -82,7 +82,7 @@ context: []
 - Décisions prises à la place d'Anaël (travail en sous-agents parallèles, propriétaire injoignable) : aucune question ouverte ; au point d'arrêt 1, option recommandée « Approuver et continuer » ; implémentation faite directement par l'agent de build, sans sous-agent d'implémentation (machine partagée par trois agents, RAM limitée, tests ciblés seulement).
 - Pas d'E2E : aucun scénario existant ne saisit de clé au Diagnostic.
 - Après revue (correctifs `patch`) : `mask_key` prend les clés remplacées (`former`) et reste le seul chemin de masquage ; `use_key` garde chaque ancienne clé une fois ; test de masquage renforcé (préfixes distincts, une clé contenant un morceau de l'autre) ; E2E ajouté en fin de scénario `diagnostic` (`_key_applied_at_once` : POST `set_api_key` avec `e2e-fake-key`, la page Harnais relit `/api/diagnostic`) ; doc précisée (la variable d'environnement demande toujours une relance) ; libellé anglais reformulé.
-- Fichiers touchés : `src/wavestack/models/cloud_base.py`, `src/wavestack/session/app_session.py` (seulement `use_api_key`, à côté de `_install_cloud`), `src/wavestack/web/app.py`, `src/wavestack/web/static/app.js`, `content/messages.yaml`, `content/i18n/{en,de}/messages.yaml`, `docs/modeles.md`, `tests/test_cloud.py`, `tools/e2e/run_e2e.py`.
+- Fichiers touchés : `src/harness_lab/models/cloud_base.py`, `src/harness_lab/session/app_session.py` (seulement `use_api_key`, à côté de `_install_cloud`), `src/harness_lab/web/app.py`, `src/harness_lab/web/static/app.js`, `content/messages.yaml`, `content/i18n/{en,de}/messages.yaml`, `docs/modeles.md`, `tests/test_cloud.py`, `tools/e2e/run_e2e.py`.
 
 ## Spec Change Log
 

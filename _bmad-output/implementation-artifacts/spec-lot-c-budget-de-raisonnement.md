@@ -16,21 +16,21 @@ deferred:
     evidence: |-
       Course étroite entre le contrôle d'annulation du moteur et celui du harnais ; effet limité à la trace (`reasoning_cut` émis pour un tour arrêté).
     location: >-
-      src/wavestack/session/app_session.py:_call_model
+      src/harness_lab/session/app_session.py:_call_model
     severity: low
   - summary: >-
       Le rendu de l'étape « Raisonnement coupé » et de la ligne de budget n'est vérifié par aucun test automatique.
     evidence: |-
       Pas de banc de test JS dans le dépôt ; à voir au test sur le PC cible.
     location: >-
-      src/wavestack/web/static/app.js
+      src/harness_lab/web/static/app.js
     severity: low
   - summary: >-
       Le critère « réponse en moins de 120 s » peut être manqué par construction avec le budget par défaut.
     evidence: |-
       Non vérifié : ≈ 11 tokens/s sur le PC cible (1 536 tokens en 137 s), soit ≈ 90 s pour 1 024 tokens de réflexion. Se tranche au test du prompt du train ; levier : `[reasoning] budget_tokens`.
     location: >-
-      wavestack.toml:[reasoning]
+      harness-lab.toml:[reasoning]
     severity: medium (unverified)
 ---
 
@@ -65,17 +65,17 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/config.py:92-98` -- `OUTPUT_RESERVE = 512`, `MAX_RESERVE = 1536`, `output_reserve(reasoning)` ; patron `_int` pour une propriété `reasoning_budget_tokens`.
-- `wavestack.toml` -- nouvelle section `[reasoning]` commentée en français.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/config.py:92-98` -- `OUTPUT_RESERVE = 512`, `MAX_RESERVE = 1536`, `output_reserve(reasoning)` ; patron `_int` pour une propriété `reasoning_budget_tokens`.
+- `harness-lab.toml` -- nouvelle section `[reasoning]` commentée en français.
+- `src/harness_lab/session/app_session.py` :
   - `_reasoning_on(state)` (l.~2540), `_reserve_of` : la réserve choisie par appel.
   - `_call_model` (l.~5812) : un seul `self._engine.complete(rendered.ids, stop, reserve, cancel)` ; `ChannelSplitter(in_reasoning=…)` ; `raw`, `channels`, `take`, `flush`, `end` (`model_call_ended`) ; sortie coupée → `output_truncated{channel}` puis `_ModelOutput("limit")` hors appel d'outil. C'est ici que s'insèrent l'arrêt au budget et la relance.
   - `_engine_cached_ids` (lot A) : ids en cache du moteur, pour construire la relance sans retokeniser la réflexion quand ils prolongent le prompt.
   - `_emit_bricks` (l.~1233 : `always_fr` de la carte Raisonnement), `_always_fr` (l.~2544).
-- `src/wavestack/context/render.py` -- `reasoning_wrap(template)` (lot A) : `(avant, milieu)` ; le milieu est la fermeture à injecter.
-- `src/wavestack/models/capabilities.py` -- `reasoning_tags`, `ChannelSplitter` (le texte injecté passe par `feed` pour basculer en `text`).
-- `src/wavestack/trace/catalog.py` -- `OutputTruncatedPayload` (l.~215), registre (l.~764) : ajouter `ReasoningCutPayload`.
-- `src/wavestack/web/static/app.js` -- `output_truncated` (l.505, 688, 2010, 4279, 4420) : modèle pour une étape « Raisonnement coupé » et son résumé ; carte des briques (l.~862-886).
+- `src/harness_lab/context/render.py` -- `reasoning_wrap(template)` (lot A) : `(avant, milieu)` ; le milieu est la fermeture à injecter.
+- `src/harness_lab/models/capabilities.py` -- `reasoning_tags`, `ChannelSplitter` (le texte injecté passe par `feed` pour basculer en `text`).
+- `src/harness_lab/trace/catalog.py` -- `OutputTruncatedPayload` (l.~215), registre (l.~764) : ajouter `ReasoningCutPayload`.
+- `src/harness_lab/web/static/app.js` -- `output_truncated` (l.505, 688, 2010, 4279, 4420) : modèle pour une étape « Raisonnement coupé » et son résumé ; carte des briques (l.~862-886).
 - `content/bricks/reasoning.yaml` -- puce « Coût » (réserve 512 → 1 536).
 - `tests/fake_engine.py` -- `outputs` : une sortie par appel ; la sortie compte un token par caractère et s'arrête à `max_tokens` (`length`).
 - `tests/test_reasoning.py` -- `RecordingEngine`, `_qwen`, `LONG_REASONING` (l.~385), `test_local_output_cut_in_the_reasoning_is_cut_at_the_reasoning_reserve` (l.388, à remplacer : c'est le défaut corrigé), `test_local_tool_call_cut_names_the_reasoning_reserve` (l.402).
@@ -84,10 +84,10 @@ deferred:
 ## Tasks & Acceptance
 
 **Execution:**
-- `wavestack.toml`, `src/wavestack/config.py` -- `[reasoning] budget_tokens = 1024` commenté ; propriété bornée (128 à `MAX_RESERVE − 128`, défaut sur valeur invalide).
-- `src/wavestack/session/app_session.py` -- dans `_call_model`, en mode local, quand l'appel commence en réflexion (ou y entre) et que la réserve dépasse le budget : dès que la réflexion atteint le budget sans s'être fermée, fermer le générateur du moteur, émettre `reasoning_cut`, ajouter la fermeture à la sortie brute et la passer au découpeur, puis relancer `complete` sur les ids de la relance (ids en cache du moteur s'ils prolongent le prompt et correspondent aux octets déjà générés, suivis de la tokenisation de ce qui manque et de la fermeture ; sinon ids du prompt + tokenisation de la sortie brute) avec `reserve − tokens déjà générés` ; compteurs, `first_at`, deltas et `model_call_ended` couvrent les deux générations ; `evaluated_tokens` en est la somme quand le moteur les donne ; la suite (appels d'outils, `output_truncated` sur `text`, annulation) inchangée. Carte Raisonnement : ligne dynamique « Budget de réflexion : N tokens ; au-delà, le harnais ferme la réflexion et garde M tokens pour la réponse. »
-- `src/wavestack/trace/catalog.py` -- `ReasoningCutPayload{budget, reasoning_tokens, answer_reserve, message_fr}` enregistré sous `reasoning_cut`.
-- `src/wavestack/web/static/app.js` -- étape « Raisonnement coupé » (message) dans Orchestration et résumé du journal ; ligne de budget sur la carte.
+- `harness-lab.toml`, `src/harness_lab/config.py` -- `[reasoning] budget_tokens = 1024` commenté ; propriété bornée (128 à `MAX_RESERVE − 128`, défaut sur valeur invalide).
+- `src/harness_lab/session/app_session.py` -- dans `_call_model`, en mode local, quand l'appel commence en réflexion (ou y entre) et que la réserve dépasse le budget : dès que la réflexion atteint le budget sans s'être fermée, fermer le générateur du moteur, émettre `reasoning_cut`, ajouter la fermeture à la sortie brute et la passer au découpeur, puis relancer `complete` sur les ids de la relance (ids en cache du moteur s'ils prolongent le prompt et correspondent aux octets déjà générés, suivis de la tokenisation de ce qui manque et de la fermeture ; sinon ids du prompt + tokenisation de la sortie brute) avec `reserve − tokens déjà générés` ; compteurs, `first_at`, deltas et `model_call_ended` couvrent les deux générations ; `evaluated_tokens` en est la somme quand le moteur les donne ; la suite (appels d'outils, `output_truncated` sur `text`, annulation) inchangée. Carte Raisonnement : ligne dynamique « Budget de réflexion : N tokens ; au-delà, le harnais ferme la réflexion et garde M tokens pour la réponse. »
+- `src/harness_lab/trace/catalog.py` -- `ReasoningCutPayload{budget, reasoning_tokens, answer_reserve, message_fr}` enregistré sous `reasoning_cut`.
+- `src/harness_lab/web/static/app.js` -- étape « Raisonnement coupé » (message) dans Orchestration et résumé du journal ; ligne de budget sur la carte.
 - `content/bricks/reasoning.yaml` -- puce « Coût » : la réserve de 1 536 se partage entre la réflexion (au plus le budget) et la réponse.
 - `tests/test_reasoning_budget.py` (nouveau) -- une ligne par cas de la matrice avec le faux moteur (réflexion `LONG_REASONING` au premier appel, réponse courte au second) : coupe au budget, ids de la relance terminés par la fermeture, `max_tokens` de la relance = 512, réponse dans le texte, tour `completed`, deltas `text`, pas de coupe quand la réflexion se ferme seule, réponse coupée, arrêt, brique éteinte, mode chat inchangé, tour suivant sans `prefix_not_reused`, réglage invalide.
 - `tests/test_reasoning.py` -- remplacer le test qui attend une bulle vide ; adapter les tests de réserve s'il le faut (la réserve reste 1 536).
@@ -138,7 +138,7 @@ deferred:
 - `uv run ruff check .` -- expected: aucun problème
 - `uv run ruff format --check .` -- expected: aucun fichier à reformater
 - `uv run pytest -q` -- expected: tout vert
-- `node --check src/wavestack/web/static/app.js` -- expected: pas d'erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: pas d'erreur
 
 ## Auto Run Result
 
@@ -146,7 +146,7 @@ Status: done
 
 **Résumé.** En mode local, quand l'appel raisonne, un budget de réflexion (`[reasoning] budget_tokens`, 1 024 par défaut, borné pour laisser au moins 128 tokens à la réponse) : dès que la réflexion l'atteint sans se fermer (jamais au milieu d'une balise, ni sur un fragment retenu par le moteur, ni juste après un blanc, sauf si la place de la réponse est en jeu), le harnais arrête la génération, émet `reasoning_cut`, ajoute la fermeture exacte du gabarit (`reasoning_wrap`, sinon `</think>` + ligne vide) et relance le modèle sur les ids en cache du moteur (sinon prompt + sortie retokenisée) avec la place restante de la réserve de 1 536. Un seul `model_call_ended` couvre les deux générations. Orchestration montre « Raisonnement coupé par le harnais à N tokens » ; la carte Raisonnement donne le budget et la réserve de la réponse. Mode chat inchangé.
 
-**Fichiers.** `wavestack.toml`, `src/wavestack/config.py` (budget), `src/wavestack/session/app_session.py` (`_call_model`, `_reasoning_closure`, `_relaunch_ids`, carte), `src/wavestack/models/capabilities.py` (`ChannelSplitter.holding`), `src/wavestack/trace/catalog.py` (`reasoning_cut`), `src/wavestack/web/static/app.js`, `content/bricks/reasoning.yaml`, `tests/fake_engine.py` (`cache_lags`), `tests/test_reasoning_budget.py` (nouveau), `tests/test_reasoning.py`, `deferred-work.md` (entrée fermée).
+**Fichiers.** `harness-lab.toml`, `src/harness_lab/config.py` (budget), `src/harness_lab/session/app_session.py` (`_call_model`, `_reasoning_closure`, `_relaunch_ids`, carte), `src/harness_lab/models/capabilities.py` (`ChannelSplitter.holding`), `src/harness_lab/trace/catalog.py` (`reasoning_cut`), `src/harness_lab/web/static/app.js`, `content/bricks/reasoning.yaml`, `tests/fake_engine.py` (`cache_lags`), `tests/test_reasoning_budget.py` (nouveau), `tests/test_reasoning.py`, `deferred-work.md` (entrée fermée).
 
 **Revue.** 14 patchs (5 medium, 9 low), 3 différés (arrêt au moment de la coupe, rendu JS, critère des 120 s : medium si vrai), 5 rejetés. `followup_review_recommended: false` : aucun high ; les medium sont des calculs de réserve et des chemins de relance, désormais testés.
 

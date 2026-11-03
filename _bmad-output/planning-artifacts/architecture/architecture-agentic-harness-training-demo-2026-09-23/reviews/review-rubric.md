@@ -1,10 +1,10 @@
 ---
-reviewed: ARCHITECTURE-SPINE.md (WaveStack, draft du 2026-09-23)
+reviewed: ARCHITECTURE-SPINE.md (HarnessLab, draft du 2026-09-23)
 lens: grille « bon spine » (contrat de cohérence)
 date: 2026-09-23
 ---
 
-# Revue du spine d'architecture WaveStack
+# Revue du spine d'architecture HarnessLab
 
 ## Verdict
 
@@ -115,7 +115,7 @@ Le spine est solide sur le cœur métier (journal d'événements, texte brut, ex
 - **Problème :** écouter sur la boucle locale ne protège pas du navigateur lui-même.
   - Une page web ouverte dans un autre onglet peut viser `127.0.0.1:port` : `POST` en `text/plain` ou formulaire (CSRF), ou rebinding DNS pour lire le flux SSE (qui contient le contexte et la mémoire).
   - Si les intentions peuvent modifier `settings.json`, et donc la liste d'adresses autorisées, une page tierce peut ouvrir la sortie de données.
-  - Enfin, l'outil « page web » peut viser la boucle locale (API WaveStack, Ollama), car AD-15 exempte la boucle locale de toute règle (SSRF). Les redirections HTTP ne sont pas revérifiées contre la liste autorisée.
+  - Enfin, l'outil « page web » peut viser la boucle locale (API HarnessLab, Ollama), car AD-15 exempte la boucle locale de toute règle (SSRF). Les redirections HTTP ne sont pas revérifiées contre la liste autorisée.
 - **Correction :** dans AD-18 :
   - `TrustedHostMiddleware` limité à `127.0.0.1` et `localhost:<port>` ;
   - refus de tout `POST` dont l'`Origin` n'est pas l'origine de l'application ;
@@ -123,7 +123,7 @@ Le spine est solide sur le cœur métier (journal d'événements, texte brut, ex
   - aucun en-tête CORS.
 
   Dans AD-15 :
-  - la liste d'adresses autorisées vient **uniquement** de `wavestack.toml` ou de `settings.json` édité à la main, **jamais d'une intention** ;
+  - la liste d'adresses autorisées vient **uniquement** de `harness-lab.toml` ou de `settings.json` édité à la main, **jamais d'une intention** ;
   - l'exemption de boucle locale est réservée aux adaptateurs de modèle et à la découverte (AD-5, AD-7) ; les outils ne visent jamais la boucle locale ;
   - chaque redirection est revérifiée contre la liste (`follow_redirects=False` et suivi manuel borné).
 
@@ -176,7 +176,7 @@ Le spine est solide sur le cœur métier (journal d'événements, texte brut, ex
   - `requires-python = "==3.13.*"` ;
   - `[[tool.uv.index]] name = "llama-cpu", url = …, explicit = true` + `[tool.uv.sources] llama-cpp-python = { index = "llama-cpu" }` + `[tool.uv] no-build-package = ["llama-cpp-python"]` ;
   - README : `UV_SYSTEM_CERTS=1` en premier recours derrière un proxy, et `UV_PYTHON_INSTALL_MIRROR` si GitHub est bloqué ;
-  - le diagnostic affiche la version de WaveStack (métadonnées du paquet) et le commit si disponible.
+  - le diagnostic affiche la version de HarnessLab (métadonnées du paquet) et le commit si disponible.
 
 ### 11. Registre des capacités incomplet ; BOS — Moyenne
 
@@ -229,7 +229,7 @@ Le spine est solide sur le cœur métier (journal d'événements, texte brut, ex
   - vérifier si FastAPI 0.141 fournit désormais une réponse SSE native, ce qui rendrait `sse-starlette` inutile (une dépendance de moins).
 - **Python 3.13 :** cohérent (roue `py3-none`), mais figer `requires-python` (constat 10).
 - **Rationale résiduelle :** l'estimation « 60 à 110 tokens/s » dans Deferred, et « le contexte principal est relu ensuite » dans AD-11, relèvent du memlog. Les garder seulement si elles servent de critère.
-- **Mermaid :** les trois diagrammes sont syntaxiquement valides. Dans le diagramme de processus, `\\` dans le libellé `%LOCALAPPDATA%\\WaveStack` s'affichera en double barre oblique inverse : écrire `\` simple ou `/`.
+- **Mermaid :** les trois diagrammes sont syntaxiquement valides. Dans le diagramme de processus, `\\` dans le libellé `%LOCALAPPDATA%\\HarnessLab` s'affichera en double barre oblique inverse : écrire `\` simple ou `/`.
 - **Gabarits :** aucun élément générique non rempli. `companions: []` est cohérent avec l'absence de compagnon.
 
 ---

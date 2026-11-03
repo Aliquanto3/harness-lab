@@ -10,7 +10,7 @@ import re
 
 import pytest
 
-from wavestack import config
+from harness_lab import config
 
 ARTIFACTS = config.repo_root() / "_bmad-output"
 CAHIER = ARTIFACTS / "implementation-artifacts" / "cahier-recette-nuit-2026-09-28.html"

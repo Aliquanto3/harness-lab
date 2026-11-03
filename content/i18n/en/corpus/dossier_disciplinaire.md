@@ -1,6 +1,6 @@
 # Exemplia disciplinary procedure
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this procedure describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this procedure describes no real company. -->
 
 This document describes the steps of a disciplinary procedure at Exemplia; it is classed confidential and its access is reserved to human resources, management and, for a file concerning them, the employee themselves.
 

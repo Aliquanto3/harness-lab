@@ -19,15 +19,15 @@ context:
 
 **Problem:** Les stories 3 et 4 ont été testées sur faux serveur et par quelques appels isolés ; le Success signal de SPEC.md (un scénario Outils et un scénario Raisonnement par modèle, réflexion visible, coût fidèle, proxy du poste traversé) n'a jamais été joué dans l'application réelle, sur le PC cible.
 
-**Approach:** Recette réelle dans WaveStack lancé sur le PC cible (port 8420), pilotée par l'API locale (`/api/intentions/*`) et le flux SSE (`/api/stream`) par un script jetable hors du dépôt, comme la recette des restes du 2026-10-02 : « Tester », puis un tour par brique (Raisonnement, Outils, MCP, Sous-agent) pour `claude_haiku`, `claude_sonnet` et `openai_luna`, plafond 5 $, et un tableau de résultats `resultats-fournisseurs-natifs-pc-2026-10.md` sur le modèle de `resultats-restes-pc-2026-10.md`.
+**Approach:** Recette réelle dans HarnessLab lancé sur le PC cible (port 8420), pilotée par l'API locale (`/api/intentions/*`) et le flux SSE (`/api/stream`) par un script jetable hors du dépôt, comme la recette des restes du 2026-10-02 : « Tester », puis un tour par brique (Raisonnement, Outils, MCP, Sous-agent) pour `claude_haiku`, `claude_sonnet` et `openai_luna`, plafond 5 $, et un tableau de résultats `resultats-fournisseurs-natifs-pc-2026-10.md` sur le modèle de `resultats-restes-pc-2026-10.md`.
 
 ## Boundaries & Constraints
 
 **Always:**
-- Avant de lancer le serveur : vérifier qu'aucun processus n'écoute sur 8420 (`Get-NetTCPConnection -LocalPort 8420`) ; sauvegarder `settings.json` et `memory.json` de `%LOCALAPPDATA%\WaveStack`, les restaurer après ; arrêter le serveur à la fin (Ctrl+Break dans sa console, voir la mémoire du projet : `CREATE_NEW_CONSOLE`, `GenerateConsoleCtrlEvent`).
+- Avant de lancer le serveur : vérifier qu'aucun processus n'écoute sur 8420 (`Get-NetTCPConnection -LocalPort 8420`) ; sauvegarder `settings.json` et `memory.json` de `%LOCALAPPDATA%\HarnessLab`, les restaurer après ; arrêter le serveur à la fin (Ctrl+Break dans sa console, voir la mémoire du projet : `CREATE_NEW_CONSOLE`, `GenerateConsoleCtrlEvent`).
 - Clés : `ANTHROPIC_API_KEY` et `OPENAI_API_KEY` lues dans l'environnement UTILISATEUR de Windows (registre) et passées au seul processus serveur, jamais affichées, journalisées, écrites ni commitées ; `api_keys.json` n'est pas modifié.
 - Par modèle, chaque ligne du tableau dit le geste, l'attendu, l'observé tiré du journal (`model_call_ended`, `outbound_request`, `consumption_updated`, `turn_ended`…) et le verdict : « Tester » ; un tour avec la brique Raisonnement (réflexion visible au canal Raisonnement) ; un tour Outils (`native_tools`) ; un tour MCP (`mcp_lazy`) ; un tour Sous-agent (`subagent`) ; le coût affiché (total de la séance) et l'empreinte EcoLogits (`impact_method`, fourchettes) ; le passage du proxy du poste (`api.anthropic.com`, `api.openai.com`).
-- Coût : relever le coût par appel et le total de WaveStack ; la comparaison avec la console du fournisseur (SPEC.md : écart ≤ 10 %) demande la session d'Anaël sur les consoles : la consigner comme geste à faire par Anaël, avec les chiffres de WaveStack à comparer et l'heure des appels.
+- Coût : relever le coût par appel et le total de HarnessLab ; la comparaison avec la console du fournisseur (SPEC.md : écart ≤ 10 %) demande la session d'Anaël sur les consoles : la consigner comme geste à faire par Anaël, avec les chiffres de HarnessLab à comparer et l'heure des appels.
 - Un modèle bloqué par son compte (crédit OpenAI épuisé le 2026-10-03) est noté « non joué » avec la réponse exacte du fournisseur ; essayer d'abord un « Tester » pour savoir si le blocage dure.
 - Toute anomalie de code trouvée : corrigée dans cette story si elle relève des stories 1 à 4 (test à l'appui), sinon notée dans `deferred-work.md`.
 - Plafond de séance 5 $ ; budget visé : moins de 2 $ pour toute la recette.
@@ -42,7 +42,7 @@ context:
 |----------|--------------|---------------------------|----------------|
 | Raisonnement | `claude_haiku`, brique Raisonnement, une question qui fait réfléchir | `model_delta` au canal `reasoning`, réponse, coût | N/A |
 | Outils | `native_tools`, prompt 1, chaque modèle | appel d'outil natif, résultat, réponse | N/A |
-| Compte bloqué | `openai_luna` sans crédit | « non joué », message de WaveStack relevé | consigné |
+| Compte bloqué | `openai_luna` sans crédit | « non joué », message de HarnessLab relevé | consigné |
 | Proxy | premier appel à chaque hôte | 200 ou refus du proxy relevé (`outbound_response`) | consigné |
 
 </frozen-after-approval>
@@ -50,9 +50,9 @@ context:
 ## Code Map
 
 - `_bmad-output/implementation-artifacts/resultats-restes-pc-2026-10.md` -- modèle du rapport (en-tête poste/date/code/modèles/méthode, tableau, correctifs).
-- `src/wavestack/web/app.py` -- routes `/api/intentions/*` (en-tête `Origin: http://127.0.0.1:8420` exigé) et `/api/stream`.
-- `src/wavestack/scenarios.py`, `content/scenarios/` -- scénarios `native_tools`, `mcp_lazy`, `subagent` et leurs prompts.
-- `src/wavestack/cli.py` -- lancement (`uv run wavestack`), `BROWSER` (barres obliques) pour ne pas ouvrir de navigateur, délai de grâce de fermeture.
+- `src/harness_lab/web/app.py` -- routes `/api/intentions/*` (en-tête `Origin: http://127.0.0.1:8420` exigé) et `/api/stream`.
+- `src/harness_lab/scenarios.py`, `content/scenarios/` -- scénarios `native_tools`, `mcp_lazy`, `subagent` et leurs prompts.
+- `src/harness_lab/cli.py` -- lancement (`uv run harness-lab`), `BROWSER` (barres obliques) pour ne pas ouvrir de navigateur, délai de grâce de fermeture.
 
 ## Tasks & Acceptance
 
@@ -63,7 +63,7 @@ context:
 - [x] Correctifs éventuels avec leurs tests ; sinon entrées dans `deferred-work.md`.
 
 **Acceptance Criteria:**
-- Given WaveStack lancé sur le PC cible avec les clés, when la recette est jouée, then chaque ligne du tableau a un verdict (OK, constat, non joué avec sa raison, ou défaut corrigé) et le coût total de la recette est relevé.
+- Given HarnessLab lancé sur le PC cible avec les clés, when la recette est jouée, then chaque ligne du tableau a un verdict (OK, constat, non joué avec sa raison, ou défaut corrigé) et le coût total de la recette est relevé.
 - Given la fin de la recette, then `settings.json` et `memory.json` sont restaurés, aucun serveur n'écoute sur 8420 et aucune clé n'apparaît dans le dépôt.
 
 ## Implementation Notes

@@ -6,9 +6,9 @@ from __future__ import annotations
 import pytest
 from test_agent_eval_checks import TS, J, case
 
-from wavestack.agent_eval import runs
-from wavestack.agent_eval.runs import CaseResult, Run, SystemPrompt, TrialOutcome
-from wavestack.trace.envelope import Envelope
+from harness_lab.agent_eval import runs
+from harness_lab.agent_eval.runs import CaseResult, Run, SystemPrompt, TrialOutcome
+from harness_lab.trace.envelope import Envelope
 
 GD = {"kind": "tool_called", "tool": "get_datetime"}
 

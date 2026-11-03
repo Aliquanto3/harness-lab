@@ -10,7 +10,7 @@
     Petite story. Entrées E008, E013, E022, E025, E027, E056, E066 de triage.md. Chaque
     test doit échouer sur la mutation que nomme son entrée : le vérifier en appliquant la
     mutation à la main avant de la défaire. Le test de LlamaCppEngine.complete est marqué
-    model et sauté sans WAVESTACK_TEST_GGUF ; ne pas le lancer avec un vrai GGUF sans l'accord
+    model et sauté sans HARNESS_LAB_TEST_GGUF ; ne pas le lancer avec un vrai GGUF sans l'accord
     d'Anaël. pytest en quarts, l'un après l'autre.
 - id: "2"
   title: "Robustesse : flux, serveurs locaux, appels cloud parallèles, instantanés MCP"

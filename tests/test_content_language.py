@@ -17,21 +17,21 @@ from test_cloud import SENTINEL, Provider
 from test_tools import QWEN, call
 from test_turn import _run
 
-from wavestack import config
-from wavestack.bricks.contract import load_brick_content
-from wavestack.cloud import active_model, load_cloud_content
-from wavestack.cloud import fill as cloud_fill
-from wavestack.compression.port import load_compression_content
-from wavestack.context.segments import SegmentKind, load_labels
-from wavestack.hooks import DEMO_HOOKS
-from wavestack.messages import msg
-from wavestack.models import catalog
-from wavestack.models.discovery import ModelCandidate
-from wavestack.scenarios import load_scenarios
-from wavestack.session.app_session import AppSession
-from wavestack.tools.native import read_file
-from wavestack.tools.registry import ToolError
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.bricks.contract import load_brick_content
+from harness_lab.cloud import active_model, load_cloud_content
+from harness_lab.cloud import fill as cloud_fill
+from harness_lab.compression.port import load_compression_content
+from harness_lab.context.segments import SegmentKind, load_labels
+from harness_lab.hooks import DEMO_HOOKS
+from harness_lab.messages import msg
+from harness_lab.models import catalog
+from harness_lab.models.discovery import ModelCandidate
+from harness_lab.scenarios import load_scenarios
+from harness_lab.session.app_session import AppSession
+from harness_lab.tools.native import read_file
+from harness_lab.tools.registry import ToolError
+from harness_lab.trace.journal import get_journal
 
 CONTENT = config.content_dir()
 LANGS = config.LANGUAGES
@@ -467,7 +467,7 @@ _NESTED_MARKS = str.maketrans("„“", "‚‘")
 
 
 def _catalogue_values(lang: str) -> list[str]:
-    from wavestack.skills import load_skills_content
+    from harness_lab.skills import load_skills_content
 
     values = [v for rel in CATALOGUES for v in _leaves(_load(config.content_file(rel, lang)))]
     values += [load_brick_content(b, lang).label_text for b in BRICK_NAMES["en"]]
@@ -538,7 +538,7 @@ def test_the_fallbacks_cite_the_labels_of_their_language(lang):
     cites the replay of its language, never a forced action."""
     from test_program import FALLBACK_SCENARIOS
 
-    from wavestack.ui_texts import load_ui_texts
+    from harness_lab.ui_texts import load_ui_texts
 
     ui = load_ui_texts(lang)["main"]
     replay, clear = ui["chat"]["replay_last"], ui["chat"]["clear"]

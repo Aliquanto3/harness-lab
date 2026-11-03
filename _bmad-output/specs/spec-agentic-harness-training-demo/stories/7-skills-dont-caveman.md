@@ -58,11 +58,11 @@ baseline_commit: 'c0d240632012b49c52fe8507eb8a7b5fedf0b95d'
 ## Code Map
 
 - `content/skills/{id}/SKILL.md` (nouveaux, un par skill décidé), `content/skills/caveman/NOTICE.md` (attribution et texte MIT du dépôt JuliusBrussee/caveman, récupéré verbatim si le réseau le permet). `content/skills.yaml` (nouveau, sur le modèle de `content/mcp.yaml`) : `catalog_intro`, et `load_skill: {label_fr: "Chargement du skill", description, skill}`. `content/bricks/skills.yaml` : carte (`category_fr: context engineering`), explication : skill face à outil, MCP et prompt système, chargement progressif, comparaison des tokens de sortie avec et sans Caveman.
-- `src/wavestack/skills.py` (nouveau, sur le modèle de `mcp/servers.py` L41-80) : `SkillText{name, label_fr, description, body}`, `SkillsContent`, `load_skills_content(ids)` qui lit `skills.yaml` et le `SKILL.md` de chaque id (en-tête entre `---`, `yaml.safe_load`). Lève sur un fichier absent ou invalide.
-- `src/wavestack/bricks/registry.py` : brique `skills` (category `context`, `capabilities=["tool_call_parser"]`), un `Component(id="skills.{id}", kind="skill", hosting="local_file", edges_to=["core.harness"])` par skill.
-- `src/wavestack/session/effects.py` : `SkillLoaded{kind: "skill_loaded", skill_id}` ; `Effect = ToolDocLoaded | SkillLoaded` (discriminé par `kind`).
-- `src/wavestack/trace/catalog.py` : `ArchitectureNode.kind` reçoit `"skill"`, plus `loaded: bool | None` et `detail_fr: str | None`. `tests/test_trace_architecture.py` L70 prend `"skill"` comme type inconnu : prendre un autre type.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/skills.py` (nouveau, sur le modèle de `mcp/servers.py` L41-80) : `SkillText{name, label_fr, description, body}`, `SkillsContent`, `load_skills_content(ids)` qui lit `skills.yaml` et le `SKILL.md` de chaque id (en-tête entre `---`, `yaml.safe_load`). Lève sur un fichier absent ou invalide.
+- `src/harness_lab/bricks/registry.py` : brique `skills` (category `context`, `capabilities=["tool_call_parser"]`), un `Component(id="skills.{id}", kind="skill", hosting="local_file", edges_to=["core.harness"])` par skill.
+- `src/harness_lab/session/effects.py` : `SkillLoaded{kind: "skill_loaded", skill_id}` ; `Effect = ToolDocLoaded | SkillLoaded` (discriminé par `kind`).
+- `src/harness_lab/trace/catalog.py` : `ArchitectureNode.kind` reçoit `"skill"`, plus `loaded: bool | None` et `detail_fr: str | None`. `tests/test_trace_architecture.py` L70 prend `"skill"` comme type inconnu : prendre un autre type.
+- `src/harness_lab/session/app_session.py` :
   - `_load_content` (L550) : charge `SkillsContent` quand `skills` est déclarée ; échec → `_content_errors["skills"]`.
   - État : `_skills_enabled: set[str]` (tous au départ), `_loaded_skills: set[str]` (conversation, AD-17). `_sent` (L250, L875) reçoit les skills activés ; `_pending_ids` (L360) marque `skills` quand ils changent. `_emit_bricks` (L417) : options de `skills` sur le modèle de `_mcp_options`. `_drawn_components` (L270) : seulement les skills activés. `_emit_architecture` : un nœud `skill` reçoit `loaded` et `detail_fr`.
   - `TurnState` (L169) : `skills: tuple[str, ...]` (chargés et activés, dans l'ordre du registre) et `skill_catalog: tuple[str, ...]` (activés non chargés). `build_turn_state` (L643) les remplit si `skills` est effective, et ajoute `load_skill` à `tools` si `skill_catalog` n'est pas vide.
@@ -70,17 +70,17 @@ baseline_commit: 'c0d240632012b49c52fe8507eb8a7b5fedf0b95d'
   - `_harness_tools` (L937) : ajoute `load_skill` (`brick="skills"`, `label_fr`), sur le modèle de `load_tool_doc` ; `_load_skill(skill)` sur le modèle de `_load_tool_doc` (L961) renvoie `ToolReply(body, (SkillLoaded(skill_id=skill),))`.
   - `_turn` (L1314) : dispatch des effets par type ; `_apply_skill_loaded` sur le modèle de `_apply_doc_loaded` (L1327) : `kind: SKILL_BODY`, `brick: "skills"`, `component: "skills.{id}"`, `stub`, puis `_emit_architecture`. `harness_brick` (L1249) : première brique effective parmi `tools`, `mcp`, `skills`.
   - `set_skill(skill_id, enabled)` sur le modèle de `set_tool` (L908). `clear_conversation` (L1157) vide `_loaded_skills` et réémet le schéma.
-- `src/wavestack/web/app.py` (L196-218) : `POST /api/intentions/skill {skill, enabled}`, 404 si inconnu.
-- `src/wavestack/web/static/app.js` : `brickOptions` (L418) : nom « Skills » ; `setOption` (L468) : `/api/intentions/skill`. `BRICK_ICONS` (L1051) : `skills`. `toolCard` (L829) : badge « Skill » quand `step.brick === "skills"`, badge « Déclenché par le modèle » pour toute source `harness`. `renderSchema` (L1234) : infobulle et état d'un nœud `skill` (`detail_fr`, « chargé »).
+- `src/harness_lab/web/app.py` (L196-218) : `POST /api/intentions/skill {skill, enabled}`, 404 si inconnu.
+- `src/harness_lab/web/static/app.js` : `brickOptions` (L418) : nom « Skills » ; `setOption` (L468) : `/api/intentions/skill`. `BRICK_ICONS` (L1051) : `skills`. `toolCard` (L829) : badge « Skill » quand `step.brick === "skills"`, badge « Déclenché par le modèle » pour toute source `harness`. `renderSchema` (L1234) : infobulle et état d'un nœud `skill` (`detail_fr`, « chargé »).
 - `tests/test_skills.py` (nouveau) : `FakeEngine` à sorties scriptées, `QWEN`, `call`, `_segments` de `tests/test_tools.py`, `_run` de `tests/test_turn.py`, et les aides `preview`/`exact` de `tests/test_mcp_lazy.py` (L36-43).
 
 ## Tasks & Acceptance
 
 **Execution:**
 - [x] `content/skills/**`, `content/skills.yaml`, `content/bricks/skills.yaml` -- les skills décidés, textes du méta-outil, carte -- AD-19, FR-23, FR-25
-- [x] `src/wavestack/skills.py`, `bricks/registry.py`, `session/effects.py`, `trace/catalog.py` -- chargeur, brique, `SkillLoaded`, nœud `skill` -- AD-12, AD-23
-- [x] `src/wavestack/session/app_session.py` -- état, `TurnState`, message système, `load_skill`, effet, sous-options, déchargement -- AD-4, AD-17, AD-25
-- [x] `src/wavestack/web/app.py`, `static/app.js` -- intention `skill`, carte, badges, nœud -- AD-1, AD-18
+- [x] `src/harness_lab/skills.py`, `bricks/registry.py`, `session/effects.py`, `trace/catalog.py` -- chargeur, brique, `SkillLoaded`, nœud `skill` -- AD-12, AD-23
+- [x] `src/harness_lab/session/app_session.py` -- état, `TurnState`, message système, `load_skill`, effet, sous-options, déchargement -- AD-4, AD-17, AD-25
+- [x] `src/harness_lab/web/app.py`, `static/app.js` -- intention `skill`, carte, badges, nœud -- AD-1, AD-18
 - [x] `tests/test_skills.py` -- les 10 lignes de la matrice, avec pour chaque rendu une somme des tokens égale au total et aucun `harness_error` d'attribution
 
 **Acceptance Criteria:**
@@ -107,7 +107,7 @@ Passe 1 (blind-hunter, edge-case-hunter, verification-gap ; 3 couches, 29 consta
 - [BH1] `test_skill_intention_http` : la dernière assertion ne peut pas échouer (les options ne portent que des ids de skill). `low`, confirmé. -> P2 `patch`.
 - [BH2] Les deux `ValueError` de `skills.py` (en-tête absent, `name` différent de l'id) n'ont aucun test. `low`, confirmé. -> P3 `patch`.
 - [BH3] Les corps chargés se suivent sans nom dans le message système : ni le modèle ni la salle ne savent quel texte vient de quel skill. `low`, confirmé (`_system_parts`, un `Part` nu par corps). -> P4 `patch`.
-- [BH4] `budget_review` dépasse la borne de 6 appels : `load_skill`, `read_file`, total, trois pourcentages, réponse = 7. `medium`, confirmé (`tools.max_calls = 6`, `wavestack.toml` L34) : le tour finit en `limit` avant le tableau. -> P5 `patch`.
+- [BH4] `budget_review` dépasse la borne de 6 appels : `load_skill`, `read_file`, total, trois pourcentages, réponse = 7. `medium`, confirmé (`tools.max_calls = 6`, `harness-lab.toml` L34) : le tour finit en `limit` avant le tableau. -> P5 `patch`.
 - [BH5a] `working_days` n'appelle `public_holidays` que pour une année : une période à cheval sur deux années perd des fériés. `low`, confirmé ; correction de contenu. -> P6 `patch`.
 - [BH5b] `working_days` fait compter les jours de semaine par le modèle. `low`, rejeté : aucun outil ne compte les jours d'un calendrier, et la qualité des réponses passe après la pédagogie (CLAUDE.md).
 - [BH6] `meeting_minutes` se contredit (« exactement trois rubriques », puis « Présents » ; « Commence par » en étape 3). `low`, confirmé. -> P7 `patch`.
@@ -137,7 +137,7 @@ Le préfixe (contrôle d'ajout seul, AD-4) impose le même partage qu'en 6b : le
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur
 - `uv run pytest` -- expected: tous les tests passent (tests `model` exclus)
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` : activer « Outils » et « Skills » ; poser une question, noter les tokens de sortie ; vider, demander « Réponds en mode caveman : … » ; suivre le chargement dans Orchestration, comparer les tokens de sortie ; vérifier le nœud « chargé » dans le schéma.
+- `uv run harness-lab` : activer « Outils » et « Skills » ; poser une question, noter les tokens de sortie ; vider, demander « Réponds en mode caveman : … » ; suivre le chargement dans Orchestration, comparer les tokens de sortie ; vérifier le nœud « chargé » dans le schéma.

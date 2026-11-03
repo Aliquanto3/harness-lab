@@ -47,7 +47,7 @@ context:
 
 ## Code Map
 
-- `src/wavestack/web/static/app.js:6774-6780` -- `SVG_NS`, `svgEl` : à déplacer.
+- `src/harness_lab/web/static/app.js:6774-6780` -- `SVG_NS`, `svgEl` : à déplacer.
 - `app.js:6889-6900` -- `schemaButton` : garde `setLinks`/`select`, crée sa base via le module (`diagram-block`).
 - `app.js:6990-7054` -- `renderSchema` : halo `is-active` (l.7044-7050) via le helper d'allumage du module.
 - `app.js:7186-7188` -- couche SVG `arch-wires` → couche du module.
@@ -62,9 +62,9 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/web/static/diagram.js` -- créer : `svgEl`, fil, marqueur, mesure relative, couche de fils (rAF + `ResizeObserver` + `fonts.ready`, `schedule()` public), allumage, bloc cliquable, `explain(block, text)`, `createStepper(host, { onShow })` avec `push`/`show`/`follow` -- primitives des lots 4 à 6.
-- [x] `src/wavestack/web/static/pages.css` -- règles `diagram-*` (couche, fils, chemin, flux animé, blocage, marqueurs, halo, pas à pas, popover, mouvement réduit) -- partagées.
-- [x] `src/wavestack/web/static/app.js` + `app.css` -- rebrancher le harnais, retirer les règles déplacées -- aucune double définition.
+- [x] `src/harness_lab/web/static/diagram.js` -- créer : `svgEl`, fil, marqueur, mesure relative, couche de fils (rAF + `ResizeObserver` + `fonts.ready`, `schedule()` public), allumage, bloc cliquable, `explain(block, text)`, `createStepper(host, { onShow })` avec `push`/`show`/`follow` -- primitives des lots 4 à 6.
+- [x] `src/harness_lab/web/static/pages.css` -- règles `diagram-*` (couche, fils, chemin, flux animé, blocage, marqueurs, halo, pas à pas, popover, mouvement réduit) -- partagées.
+- [x] `src/harness_lab/web/static/app.js` + `app.css` -- rebrancher le harnais, retirer les règles déplacées -- aucune double définition.
 - [x] `content/ui.yaml`, `content/i18n/{en,de}/ui.yaml` -- `common.diagram.{prev,next,live,position}`.
 - [x] `tools/e2e/run_e2e.py` -- renommer les sélecteurs ; ajouter dans un scénario existant une vérification du module dans la page (`import('/static/diagram.js')`, pas à pas et explication sur un conteneur de test) couvrant la matrice.
 
@@ -119,7 +119,7 @@ Le harnais emploie les classes `diagram-*` sur ses fils ; spécificité à surve
 
 **Commands:**
 - `uv run ruff check . ; uv run ruff format --check .` -- expected: propre
-- `node --check src/wavestack/web/static/diagram.js src/wavestack/web/static/app.js` -- expected: sans erreur
+- `node --check src/harness_lab/web/static/diagram.js src/harness_lab/web/static/app.js` -- expected: sans erreur
 - `uv run pytest -q tests/test_web_tokens.py tests/test_ui_texts.py tests/test_i18n.py tests/test_web_app.py` -- expected: tout passe
 - `$env:PYTHONUTF8=1; uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py --channel msedge --only native_tools h5 hooks disciplines linked_view panes network_tools subagent data_flows themes rag rag_rerank compression local_server` -- expected: 0 FAIL, avant et après
 - Comparaison des captures (`uv run --with pillow`) entre le passage de base et le passage final -- expected: écarts limités au contenu horodaté

@@ -1,6 +1,6 @@
 # Exemplia backup policy
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this policy describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this policy describes no real company. -->
 
 Exemplia's data follows the 3-2-1 rule: at least 3 copies of each piece of data, on 2 different media, with 1 copy kept away from the main site. This rule applies to file servers, application databases and email.
 

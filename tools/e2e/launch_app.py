@@ -1,15 +1,15 @@
-"""WaveStack for the end-to-end run: `wavestack.cli`, the second fake model slowed down.
+"""HarnessLab for the end-to-end run: `harness_lab.cli`, the second fake model slowed down.
 
 Loading a cloud model takes no time (no request, AD-21): the run could never see the
 « Chargement du modèle… » stopwatch. Here, preparing the model `fake_b` waits
-`WAVESTACK_E2E_LOAD_DELAY_S` seconds (2 by default); every other load is untouched.
+`HARNESS_LAB_E2E_LOAD_DELAY_S` seconds (2 by default); every other load is untouched.
 
 Story 24: the probe of a file named `sonde-lente-e2e.gguf` is a child that only sleeps
 (120 s), its path kept last to find it again: a slow probe without a real model, for
 « Arrêter » to kill.
 
 Restes différés, story 6: `read_file` of `confidentiel/outil-lent-e2e` waits
-`WAVESTACK_E2E_TOOL_DELAY_S` seconds (1.5 by default), a slow tool to see the schema at work.
+`HARNESS_LAB_E2E_TOOL_DELAY_S` seconds (1.5 by default), a slow tool to see the schema at work.
 """
 
 from __future__ import annotations
@@ -19,10 +19,10 @@ import sys
 import time
 from pathlib import Path
 
-from wavestack.session import app_session, diagnostic
+from harness_lab.session import app_session, diagnostic
 
 SLOW_REF = "fake_b"
-DELAY_S = float(os.environ.get("WAVESTACK_E2E_LOAD_DELAY_S", "2"))
+DELAY_S = float(os.environ.get("HARNESS_LAB_E2E_LOAD_DELAY_S", "2"))
 _install = app_session.AppSession._install
 
 
@@ -50,7 +50,7 @@ diagnostic._probe_argv = _slow_probe_argv
 # file does not exist: the tool then fails, explained), long enough for the page to show the
 # robot « utilise un outil », the tool's halo and the path to its node.
 SLOW_TOOL_PATH = "confidentiel/outil-lent-e2e"
-SLOW_TOOL_DELAY_S = float(os.environ.get("WAVESTACK_E2E_TOOL_DELAY_S", "1.5"))
+SLOW_TOOL_DELAY_S = float(os.environ.get("HARNESS_LAB_E2E_TOOL_DELAY_S", "1.5"))
 _read_file = app_session.AppSession._read_file
 
 
@@ -63,6 +63,6 @@ def _slow_read_file(self: app_session.AppSession, path: str) -> str:
 app_session.AppSession._read_file = _slow_read_file
 
 if __name__ == "__main__":
-    from wavestack import cli
+    from harness_lab import cli
 
     raise SystemExit(cli.main())

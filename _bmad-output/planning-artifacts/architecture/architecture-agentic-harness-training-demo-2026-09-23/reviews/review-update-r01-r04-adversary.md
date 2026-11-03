@@ -1,5 +1,5 @@
 ---
-title: Revue adverse de la mise à jour R-01 à R-04 du spine WaveStack
+title: Revue adverse de la mise à jour R-01 à R-04 du spine HarnessLab
 target: ../ARCHITECTURE-SPINE.md
 scope: "AD-2, AD-4, AD-9, AD-10, AD-15, AD-21, AD-25 (modifications du 2026-09-23, entrées R-01 à R-04 du .memlog)"
 lens: "Deux unités conformes à la lettre de chaque AD, qui se construisent pourtant de façon incompatible ; faisabilité technique des nouvelles règles"
@@ -32,7 +32,7 @@ Essai : `sys.addaudithook` qui note `socket.connect` et `socket.getaddrinfo`, pu
 | `asyncio.open_connection("localhost", p)` sous Proactor | `getaddrinfo('localhost', p)` seul | **non** |
 
 Sous Proactor, asyncio se connecte par `_overlapped.ConnectEx`, qui n'émet pas l'événement d'audit `socket.connect`. Or :
-- `uvicorn/loops/asyncio.py` (branche master) renvoie `asyncio.ProactorEventLoop` sous Windows dès qu'il n'y a ni `--reload` ni `--workers` : c'est le cas de `uv run wavestack` ;
+- `uvicorn/loops/asyncio.py` (branche master) renvoie `asyncio.ProactorEventLoop` sous Windows dès qu'il n'y a ni `--reload` ni `--workers` : c'est le cas de `uv run harness-lab` ;
 - le transport stdio du serveur MCP local (AD-21) exige Proactor sous Windows (Selector ne gère pas les sous-processus) ;
 - anyio (`_backends/_asyncio.py`) se connecte par `loop.create_connection`, donc par `ConnectEx` sous Proactor.
 

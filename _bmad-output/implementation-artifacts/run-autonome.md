@@ -1,6 +1,6 @@
 # Run autonome LFM3 (2026-10-28)
 
-Spec : `_bmad-output/specs/spec-wavestack-lfm3/`. Enchaînement par story : dev-story → second-avis → reviewer → PR → CI verte → fusion.
+Spec : `_bmad-output/specs/spec-harness-lab-lfm3/`. Enchaînement par story : dev-story → second-avis → reviewer → PR → CI verte → fusion.
 
 ## Périmètre
 
@@ -20,7 +20,7 @@ Au plus 1 stories en développement à la fois
 ## Règles et décisions
 
 - 2026-10-28 : vérification préalable de la story 3 : `psutil.net_connections` trouve sans droits admin (session non élevée) le PID d'un processus enfant à l'écoute, en 5 ms, et `memory_info().rss` est lisible.
-- 2026-10-28 : llama-cpp-python 0.3.35 crée le contexte avec `swa_full = True` par défaut et WaveStack ne le passe jamais : le chemin direct garde le calcul KV complet (story 2).
+- 2026-10-28 : llama-cpp-python 0.3.35 crée le contexte avec `swa_full = True` par défaut et HarnessLab ne le passe jamais : le chemin direct garde le calcul KV complet (story 2).
 - Story 2 part de la branche de la story 1 (même fichier `probe.py`) ; sa PR est reciblée sur `main` après fusion de #166.
 
 ## Journal

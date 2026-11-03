@@ -10,10 +10,10 @@ spec: ../../../implementation-artifacts/spec-lot-6-atelier-llm-boucle-du-modele.
 
 ## Fichiers propres à l'Atelier LLM (sans risque de conflit attendu)
 
-- `src/wavestack/web/static/llm.html`, `llm.js`, `llm.css` : sections 1 et 2 remplacées par les
+- `src/harness_lab/web/static/llm.html`, `llm.js`, `llm.css` : sections 1 et 2 remplacées par les
   trois étapes (`#stage-input`, `#stage-transfo`, `#stage-output`), sections suivantes
   renumérotées 4 à 7.
-- `src/wavestack/session/llm_lab.py` : textes `stages`, `classify_header`,
+- `src/harness_lab/session/llm_lab.py` : textes `stages`, `classify_header`,
   `architecture_from_header`, `read_architecture` (cache chemin + mtime), `STEP_LIMIT`,
   paramètre `architecture=` de `dimensions_payload`, `figures_text.max_id`.
 - `content/llm_lab.yaml` et `content/i18n/{en,de}/llm_lab.yaml` : bloc `stages`, renvois de
@@ -24,13 +24,13 @@ spec: ../../../implementation-artifacts/spec-lot-6-atelier-llm-boucle-du-modele.
 
 | Fichier | Nature | Contenu |
 | --- | --- | --- |
-| `src/wavestack/session/app_session.py` | ajouts, deux retouches | `llm_step`, `_engine_vocab` (ajoutés avant `_lab_release`) ; `_run_lab` gagne `continuation` et `max_tokens` (défauts neutres) ; `_lab_dimensions` passe `architecture=` ; `llm_distribution` renvoie `dropped_by` ; imports `Sequence`, `dropped_by`. Suite de la revue (pas sans gabarit) : `_run_lab` gagne `raw: bool = False` (la branche locale appelle `_step_context` au lieu de `render_context`, sans raisonnement ; `continuation` n'est plus lu qu'avec `raw`, le bloc `replace(rendered, …)` a disparu) ; `llm_step` passe `raw=True` ; `_step_context` ajouté avant `_lab_release` ; `_step_bos`, `_step_bos_text` ajoutés après `_lab_tokenized`, qui renvoie `bos_token`. |
-| `src/wavestack/web/app.py` | ajouts, une ligne retouchée | `LlmStepIntention`, `POST /api/intentions/llm_step` (après `llm_compare`) ; la ligne `from typing import Any, Literal` devient `from typing import Annotated, Any, Literal` (conflit d'une ligne si un autre lot touche cet import). |
-| `src/wavestack/trace/catalog.py` | ajouts | `LlmArchitecture`, champ `LlmDimensions.architecture` (défaut `None`) ; suite de la revue : champ `LlmTokenizedPayload.bos_token` (défaut `None`). |
-| `src/wavestack/models/engine.py` | ajouts (suite de la revue) | `VocabTokenizer.adds_bos()` (id du BOS si `llama_vocab_get_add_bos`, sinon `None`) après `is_eog` ; `LlamaCppEngine.adds_bos()` qui délègue, après `tokenize`. |
-| `src/wavestack/models/candidates.py` | refactorisation locale | `_cuts` extrait de `distribution` (même règle), `dropped_by` ajouté. Comportement de `distribution` inchangé (tests oracle verts). |
+| `src/harness_lab/session/app_session.py` | ajouts, deux retouches | `llm_step`, `_engine_vocab` (ajoutés avant `_lab_release`) ; `_run_lab` gagne `continuation` et `max_tokens` (défauts neutres) ; `_lab_dimensions` passe `architecture=` ; `llm_distribution` renvoie `dropped_by` ; imports `Sequence`, `dropped_by`. Suite de la revue (pas sans gabarit) : `_run_lab` gagne `raw: bool = False` (la branche locale appelle `_step_context` au lieu de `render_context`, sans raisonnement ; `continuation` n'est plus lu qu'avec `raw`, le bloc `replace(rendered, …)` a disparu) ; `llm_step` passe `raw=True` ; `_step_context` ajouté avant `_lab_release` ; `_step_bos`, `_step_bos_text` ajoutés après `_lab_tokenized`, qui renvoie `bos_token`. |
+| `src/harness_lab/web/app.py` | ajouts, une ligne retouchée | `LlmStepIntention`, `POST /api/intentions/llm_step` (après `llm_compare`) ; la ligne `from typing import Any, Literal` devient `from typing import Annotated, Any, Literal` (conflit d'une ligne si un autre lot touche cet import). |
+| `src/harness_lab/trace/catalog.py` | ajouts | `LlmArchitecture`, champ `LlmDimensions.architecture` (défaut `None`) ; suite de la revue : champ `LlmTokenizedPayload.bos_token` (défaut `None`). |
+| `src/harness_lab/models/engine.py` | ajouts (suite de la revue) | `VocabTokenizer.adds_bos()` (id du BOS si `llama_vocab_get_add_bos`, sinon `None`) après `is_eog` ; `LlamaCppEngine.adds_bos()` qui délègue, après `tokenize`. |
+| `src/harness_lab/models/candidates.py` | refactorisation locale | `_cuts` extrait de `distribution` (même règle), `dropped_by` ajouté. Comportement de `distribution` inchangé (tests oracle verts). |
 | `content/messages.yaml` + en + de | ajouts | `session.llm_lab.step.too_many`, `session.llm_lab.step.out_of_vocabulary`. |
-| `src/wavestack/web/static/diagram.js` | ajout d'option | `createStepper(host, { onShow, liveText })` : deux lignes touchées (la signature et le texte du bouton de droite, `liveText \|\| t("common.diagram.live")`). Rétrocompatible. |
+| `src/harness_lab/web/static/diagram.js` | ajout d'option | `createStepper(host, { onShow, liveText })` : deux lignes touchées (la signature et le texte du bouton de droite, `liveText \|\| t("common.diagram.live")`). Rétrocompatible. |
 | `tools/e2e/run_e2e.py` | ajouts seuls | `s_llm_loop`, `_LoopLab`, fonctions `_llm_loop_*` (dont `_llm_loop_cloud`, la ligne « Cloud » de la matrice), imports `llm_lab` et `dropped_by`, entrée `("llm_loop", s_llm_loop)` après `llm_live`. `s_llm_screen` et `s_llm_live` inchangés. |
 | `tests/test_web_tokens.py` | retouche | Le glob `*/DESIGN.md` trouvait aussi le DESIGN.md delta du lot 6 ; il ne garde plus que le DESIGN.md qui déclare `colors:`. |
 
@@ -111,9 +111,9 @@ l'OUTPUT `stages.output.example` tiré par la session pour les réglages affich�
 
 | Fichier | Nature | Contenu |
 | --- | --- | --- |
-| `src/wavestack/session/app_session.py` | ajouts (partie Atelier LLM) | `llm_example_distribution` après `llm_distribution`, qui gagne `"example": False`. |
-| `src/wavestack/web/app.py` | ajouts | `LlmExampleDistributionRequest`, `POST /api/llm_lab/example_distribution` après `/api/llm_lab/distribution`. |
-| `src/wavestack/session/llm_lab.py` | ajouts | `ExampleCandidate`, `OutputExample`, `TransfoStage.example_ids` (+ validateur), trois textes d'exemple d'`InputStage`, `OutputStage.example`. |
+| `src/harness_lab/session/app_session.py` | ajouts (partie Atelier LLM) | `llm_example_distribution` après `llm_distribution`, qui gagne `"example": False`. |
+| `src/harness_lab/web/app.py` | ajouts | `LlmExampleDistributionRequest`, `POST /api/llm_lab/example_distribution` après `/api/llm_lab/distribution`. |
+| `src/harness_lab/session/llm_lab.py` | ajouts | `ExampleCandidate`, `OutputExample`, `TransfoStage.example_ids` (+ validateur), trois textes d'exemple d'`InputStage`, `OutputStage.example`. |
 | `content/llm_lab.yaml` + en + de | ajouts | les clés ci-dessus. |
 | `llm.html`, `llm.js`, `llm.css` | retouches | badges `#input-tag` / `#output-tag` (plus de `data-text`), notes `#token-example` (INPUT) et `#distribution-note` (sous le graphique du Tirage : note de l'exemple + raison, qui n'est plus répétée dans `#llm-step-status`), `autoStart`, `fetchExample` ; raisons des réglages de l'OUTPUT en taille « label » pour que l'étape tienne à 1366 × 768 en cloud. |
 | `tools/e2e/run_e2e.py` | ajouts, vérifications mises à jour | `_llm_loop_first_load`, `_llm_loop_example`, `_example_rows` ; `_LoopLab(exact=…)` ; l'ancien état vide (graphiques masqués, top-k grisé en cloud, aucune colonne en cloud) n'est plus attendu par `_llm_screen`, `_distribution_unavailable`, `_llm_live`, `_llm_loop_input`, `_llm_loop_output`. Captures `75-llm-boucle-premier-chargement`, `76-llm-boucle-exemple-cloud` ajoutées ; captures LLM `52`-`54`, `64`, `65`, `70`-`74` régénérées (celles des autres scénarios laissées à leur version). |

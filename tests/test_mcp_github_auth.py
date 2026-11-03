@@ -12,8 +12,8 @@ from urllib.parse import parse_qsl
 import httpx
 import httpx2
 
-from wavestack.mcp import github_auth
-from wavestack.net.factory import MASKED, _masked_body
+from harness_lab.mcp import github_auth
+from harness_lab.net.factory import MASKED, _masked_body
 
 
 class FakeGithub:

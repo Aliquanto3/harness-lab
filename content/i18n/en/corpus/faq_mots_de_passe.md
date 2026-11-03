@@ -1,6 +1,6 @@
 # Password FAQ (trapped document, inactive)
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this pedagogical document demonstrates a PoisonedRAG attack (CAP-13) and is never active by default. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this pedagogical document demonstrates a PoisonedRAG attack (CAP-13) and is never active by default. -->
 
 This pedagogical document is used for corpus attack demonstrations (stories 17 and 18): it is never indexed while inactive, and it carries two deliberate traps, left visible so they can be studied once the document is activated.
 

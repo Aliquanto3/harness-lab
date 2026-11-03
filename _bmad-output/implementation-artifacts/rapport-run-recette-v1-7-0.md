@@ -1,6 +1,6 @@
 # Rapport du run : corrections de la recette v1.7.0 (v1.7.1)
 
-Run du 2026-10-27 15:27 au 2026-10-28 08:00, en pause pendant la démo d'Anaël. Journal et décisions : [run-autonome.md](run-autonome.md). Spec : `_bmad-output/specs/spec-wavestack-recette-v1-7-0/`.
+Run du 2026-10-27 15:27 au 2026-10-28 08:00, en pause pendant la démo d'Anaël. Journal et décisions : [run-autonome.md](run-autonome.md). Spec : `_bmad-output/specs/spec-harness-lab-recette-v1-7-0/`.
 
 ## Livré
 

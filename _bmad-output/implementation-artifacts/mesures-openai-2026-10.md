@@ -22,7 +22,7 @@ total : 0 $.**
 ## Mesures du 2026-10-03 au soir (crédit rechargé)
 
 Anaël a rechargé le crédit le 2026-10-03 au soir. Mêmes règles (clé lue dans l'environnement
-utilisateur, passée au seul processus de mesure ; aucun serveur WaveStack sur 8420). **39
+utilisateur, passée au seul processus de mesure ; aucun serveur HarnessLab sur 8420). **39
 requêtes, toutes 200 puis `response.completed`, 0,0024 $ en tout** (0,0011 $ pour les 22
 appels écrits à la main, 0,0013 $ pour les 3 recettes par `AppSession` ; coûts calculés sur
 l'`usage` de chaque réponse aux prix déclarés), sous le plafond de 0,50 $.

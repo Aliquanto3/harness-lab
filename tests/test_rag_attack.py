@@ -18,16 +18,16 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from test_bricks import HEADERS
 
-from wavestack import config
-from wavestack.guardrails import injection
-from wavestack.guardrails.contract import Classification, Entity, NotInstalled
-from wavestack.guardrails.manager import GuardrailsManager
-from wavestack.rag import attack, workcopy
-from wavestack.rag import index as rag_index
-from wavestack.rag.corpus import chunk_corpus, load_rag_content, load_rag_questions
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.guardrails import injection
+from harness_lab.guardrails.contract import Classification, Entity, NotInstalled
+from harness_lab.guardrails.manager import GuardrailsManager
+from harness_lab.rag import attack, workcopy
+from harness_lab.rag import index as rag_index
+from harness_lab.rag.corpus import chunk_corpus, load_rag_content, load_rag_questions
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.web.app import create_app
 
 LANGS = ("fr", "en", "de")
 CONTENT = config.repo_root() / "content"
@@ -562,13 +562,13 @@ def test_the_card_works_without_a_model_an_index_or_a_key():
 
 
 def test_the_tab_script_has_no_colour_and_no_inner_html():
-    code = (config.repo_root() / "src/wavestack/web/static/rag-attack.js").read_text("utf-8")
+    code = (config.repo_root() / "src/harness_lab/web/static/rag-attack.js").read_text("utf-8")
     assert "innerHTML" not in code and "insertAdjacentHTML" not in code
     assert not re.search(r"#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(", code)
-    css = (config.repo_root() / "src/wavestack/web/static/rag.css").read_text("utf-8")
+    css = (config.repo_root() / "src/harness_lab/web/static/rag.css").read_text("utf-8")
     block = css.split("V1.2 story 17")[1]
     assert not re.search(r"#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(", block)
-    html = (config.repo_root() / "src/wavestack/web/static/rag.html").read_text("utf-8")
+    html = (config.repo_root() / "src/harness_lab/web/static/rag.html").read_text("utf-8")
     panel = html.split('id="rag-panel-attack"')[1].split('id="rag-panel-sheets"')[0]
     assert "rag-soon" in panel and "Démonstration" not in panel  # the text comes from the file
 

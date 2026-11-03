@@ -42,7 +42,7 @@ Retour d'Anaël du 2026-10-04 : l'Atelier RAG montre une seule chaîne linéaire
 - Le backend garde une seule étape `embedding` (passages puis question) et ses événements : les étapes `embed_passages` et `embed_query` de la séquence en sont deux lectures.
 - Backend du run inchangé (pipelines ≤ 2, `compare()`) : la page n'envoie qu'une chaîne ; le nettoyage de la voie B attend 5c (après la fusion du lot 3, `app_session.py`).
 - `static/diagram.js` (partagé avec les lots 4 et 6) : ajouts seulement, nouvelles fonctions ou options à valeur par défaut ; ni signature ni comportement du schéma du harnais changés ; chaque ajout listé dans les Notes de fusion.
-- Fichiers carrefour (`content/ui.yaml`, `content/messages.yaml` et leurs copies en/de, `pages.css`, `tokens.css`, `app.js`, `tools/e2e/run_e2e.py`, `tests/test_ui_texts.py`, `tests/test_web_app.py`, `src/wavestack/web/app.py`) : ajouts seulement, groupés en section RAG (`rag_lab.*`, `s_rag_*`/`_rag_*`) ; lignes hors RAG intouchées. Les clés `rag.*` de `ui.yaml` devenues inutiles (comparaison, chaîne B) restent, signalées pour un nettoyage après fusion.
+- Fichiers carrefour (`content/ui.yaml`, `content/messages.yaml` et leurs copies en/de, `pages.css`, `tokens.css`, `app.js`, `tools/e2e/run_e2e.py`, `tests/test_ui_texts.py`, `tests/test_web_app.py`, `src/harness_lab/web/app.py`) : ajouts seulement, groupés en section RAG (`rag_lab.*`, `s_rag_*`/`_rag_*`) ; lignes hors RAG intouchées. Les clés `rag.*` de `ui.yaml` devenues inutiles (comparaison, chaîne B) restent, signalées pour un nettoyage après fusion.
 - Fichiers interdits : `diagnostic.html`, `static/logos/`, `models/catalog.py`, `models/discovery.py`, `models/servers.py`, `content/models/`, `mcp.*`, `mcp/lab.py`, `content/mcp_lab.yaml`, `llm.*`, `llm_lab.py`, `content/llm_lab.yaml`, DESIGN.md, EXPERIENCE.md et `.memlog.md` des UX partagés. `app_session.py` : seulement si indispensable pour relayer `rag_lab_stage_*`, minimal et signalé.
 - Textes nouveaux dans `content/rag_lab.yaml` et ses copies `content/i18n/{en,de}/`, validés par `RagLabContent` (mêmes clés dans les trois langues).
 - Sélecteurs E2E de l'éditeur gardés : `li.rag-chain-card[data-kind][data-stage-id]`, `select.rag-option`, `input[data-param]`, `.rag-move-button[data-action]`, `.rag-chain-refusal`, `#rag-palette-a`, `#rag-reset-chain`, `#rag-run`, `#rag-question`, `.rag-stage-card` (dans `#rag-details`).
@@ -96,7 +96,7 @@ Branche `feat/lot-5-atelier-rag-2026-10-04`, base `370bb36` (lot 2), commits « 
 | `_bmad-output/implementation-artifacts/deferred-work.md` | 4 entrées ajoutées en fin de fichier | fin de fichier |
 | `docs/guide.md` | section « Atelier RAG » réécrite (puces) | l. 268-322, titres inchangés |
 
-Non touchés : `content/ui.yaml`, `content/messages.yaml` et leurs copies en/de, `pages.css`, `tokens.css`, `app.js`, `tests/test_ui_texts.py`, `tests/test_web_app.py`, `src/wavestack/web/app.py`, `diagram.js`, `app_session.py`, et tous les fichiers des lots 3, 4 et 6.
+Non touchés : `content/ui.yaml`, `content/messages.yaml` et leurs copies en/de, `pages.css`, `tokens.css`, `app.js`, `tests/test_ui_texts.py`, `tests/test_web_app.py`, `src/harness_lab/web/app.py`, `diagram.js`, `app_session.py`, et tous les fichiers des lots 3, 4 et 6.
 
 Fichiers propres au RAG modifiés : `rag.html`, `rag.js`, `rag.css`, `rag/lab.py`, `content/rag_lab.yaml` et `content/i18n/{en,de}/rag_lab.yaml`, `tests/test_rag_lab.py`, `tests/test_rag_lab_alt.py`, captures `55` à `59-atelier-rag-*.jpg` (`57-atelier-rag-comparaison.jpg` supprimée, remplacée par `57-atelier-rag-composer.jpg`), `annex-language-de-rag-{1280,1600}.jpg`.
 
@@ -121,10 +121,10 @@ Branche `feat/lot-5c-modele-par-composant-2026-10-05`, base `f37aa72` (après la
 | --- | --- | --- |
 | `content/messages.yaml` et copies en/de | ajouts et retraits RAG | `session.rag_lab.*`, `rag_lab.*`, `config.rag_lab_*`, `models.reranker.*`, `session.download.disk_full` (5c-4), `session.prefix.causes.rag_lab` |
 | `content/ui.yaml` et copies en/de | ajout | `main.orch.prefix_causes.rag_lab` (5c-3) ; voie B retirée |
-| `src/wavestack/web/static/app.js` | voie B retirée du journal | `ragLabStage`, `eventSummary` (`rag_lab_*`) |
-| `src/wavestack/web/app.py` | `pipelines` de longueur 1 ; docstring de `DownloadModelIntention` (5c-4) | intentions RAG |
+| `src/harness_lab/web/static/app.js` | voie B retirée du journal | `ragLabStage`, `eventSummary` (`rag_lab_*`) |
+| `src/harness_lab/web/app.py` | `pipelines` de longueur 1 ; docstring de `DownloadModelIntention` (5c-4) | intentions RAG |
 | `tools/e2e/run_e2e.py` | zone RAG | `_rag_lab`, `_rag_lab_views`, `_rag_lab_download` (5c-4) |
-| `wavestack.toml` | ajouts | `[[rag_lab.embeddings]]`, `[[rag_lab.rerankers]]` et leurs commentaires |
+| `harness-lab.toml` | ajouts | `[[rag_lab.embeddings]]`, `[[rag_lab.rerankers]]` et leurs commentaires |
 | `docs/guide.md`, `docs/installation.md` | section « Atelier RAG », « Modèles du RAG » | puces Embedding, Reranking, Generation, Télécharger un modèle absent |
 | `_bmad-output/implementation-artifacts/deferred-work.md` | entrées en fin de fichier | fin de fichier |
 

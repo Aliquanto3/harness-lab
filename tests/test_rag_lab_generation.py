@@ -20,13 +20,13 @@ from test_rag import Embedders, build, place_model
 from test_rag_lab import QUESTION, ended, run, run_status, stage, wait_idle
 from test_rag_rerank import Rerankers, place_reranker, rerank_config, session_for
 
-from wavestack import config
-from wavestack.greenops import Impact
-from wavestack.models.engine import CancelToken
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import load_rag_content
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.greenops import Impact
+from harness_lab.models.engine import CancelToken
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import load_rag_content
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 GENERATION = "lab1.s7"  # the shipped chain's seventh stage, in the first run
 ANSWER = "Quatorze caractères."

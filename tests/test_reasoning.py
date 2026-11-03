@@ -15,9 +15,9 @@ from test_cloud import SENTINEL, Provider, delta, sse
 from test_tools import QWEN, call
 from test_turn import _run
 
-from wavestack import config
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 NO_REASONING = "Indisponible : le modèle actif ne sait pas raisonner."
 

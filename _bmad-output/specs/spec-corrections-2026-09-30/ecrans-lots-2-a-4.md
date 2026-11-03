@@ -4,7 +4,7 @@ Détail des CAP-2, CAP-3 et CAP-5 de `SPEC.md`, repris de `plan-corrections-2026
 
 ## Barre de navigation commune (CAP-2, story 2)
 
-- Une barre identique en tête de chaque page servie : logo WaveStack, Atelier (`/`), LLM nu (`/llm`), Atelier RAG (`/rag`), Diagnostic (`/diagnostic`), Modèles (`/models`), puis le thème et la langue. La page courante est marquée (`aria-current="page"`).
+- Une barre identique en tête de chaque page servie : logo HarnessLab, Atelier (`/`), LLM nu (`/llm`), Atelier RAG (`/rag`), Diagnostic (`/diagnostic`), Modèles (`/models`), puis le thème et la langue. La page courante est marquée (`aria-current="page"`).
 - La story 6 insère « Atelier MCP » (`/mcp`) entre « Atelier RAG » et « Diagnostic ».
 - Elle remplace `.page-tabs` des pages annexes et absorbe `#llm-link`, `#rag-link` et le titre de la barre de l'atelier.
 - Un seul balisage, partagé par les pages (fichier JS ou gabarit commun, au choix de l'implémentation), libellés par `t()` dans une section `common.nav` de `ui.yaml`.

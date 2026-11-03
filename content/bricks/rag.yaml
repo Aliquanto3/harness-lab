@@ -26,7 +26,7 @@ explanation_text:
       les extraits partent chez le fournisseur dans votre message.
   - >-
     Le corpus de démonstration décrit Exemplia, une organisation imaginaire : une vingtaine de
-    textes fictifs rédigés pour WaveStack (mots de passe, télétravail, notes de frais…). Les
+    textes fictifs rédigés pour HarnessLab (mots de passe, télétravail, notes de frais…). Les
     extraits ne restent pas dans l'historique : chaque tour cherche à nouveau.
   - >-
     Limite du RAG simple : la requête est votre message tel quel. Une question de relance

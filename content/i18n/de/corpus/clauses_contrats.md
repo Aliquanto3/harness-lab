@@ -1,6 +1,6 @@
 # Sicherheitsklauseln für Dienstleistungsverträge bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Klauselmuster beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Klauselmuster beschreibt kein reales Unternehmen. -->
 
 Dieses Muster ergänzt die Sicherheitsrichtlinie für Dienstleister: Es listet die Klauseln, die die Dienstleister-Einheit je nach Stufe des Dienstleisters in jeden Vertrag einfügt.
 

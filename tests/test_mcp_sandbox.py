@@ -10,7 +10,7 @@ import sys
 
 import pytest
 
-from wavestack.mcp import sandbox
+from harness_lab.mcp import sandbox
 
 
 def test_a_relative_path_resolves_inside_the_sandbox():
@@ -69,7 +69,7 @@ def _text(result) -> str:
 
 
 def test_create_path_writes_a_file_and_a_folder_inside_the_sandbox():
-    from wavestack.mcp import local_server
+    from harness_lab.mcp import local_server
 
     assert not local_server.create_path("notes", kind="folder").is_error
     result = local_server.create_path("notes/a.txt", content="bonjour")
@@ -80,7 +80,7 @@ def test_create_path_writes_a_file_and_a_folder_inside_the_sandbox():
 
 @pytest.mark.parametrize("name", ["../evil.txt", "CON", "a.txt:stream", " "])
 def test_create_path_answers_an_mcp_error_and_writes_nothing(name):
-    from wavestack.mcp import local_server
+    from harness_lab.mcp import local_server
 
     result = local_server.create_path(name, content="x")
 
@@ -89,7 +89,7 @@ def test_create_path_answers_an_mcp_error_and_writes_nothing(name):
 
 
 def test_create_path_refuses_overwriting_a_directory_or_a_file_and_too_much_content():
-    from wavestack.mcp import local_server
+    from harness_lab.mcp import local_server
 
     assert local_server.create_path(".", content="x").is_error  # the sandbox itself
     assert not local_server.create_path("a.txt", content="1").is_error
@@ -118,7 +118,7 @@ class _FakeShot:
 
 
 def test_take_screenshot_saves_a_png_and_answers_only_its_path_and_size(monkeypatch):
-    from wavestack.mcp import local_server
+    from harness_lab.mcp import local_server
 
     monkeypatch.setattr(local_server.mss, "mss", _FakeShot)
     monkeypatch.setattr(local_server, "MAX_SCREENSHOTS", 2)

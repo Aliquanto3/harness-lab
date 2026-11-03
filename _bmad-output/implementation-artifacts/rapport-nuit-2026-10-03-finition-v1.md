@@ -54,7 +54,7 @@ Numéros du plan : les 11 entrées déjà tranchées n'en ont pas (lettre D ou s
 | #22 | Premier lancement de 10 min | Limite connue [A], phrase au README | README |
 | #23 | Sous-agent : résumé du 2B coupé à 512 | Corrigée (consigne bornée) | `test_program.py` ; recette du 04/10 (111 tokens, `stop`) |
 | #24 | `_stream` : annulation pendant la connexion | Limite connue [A] | — |
-| #25 | Préréglage Mistral : plan à activer | Corrigée | README, `wavestack.toml` |
+| #25 | Préréglage Mistral : plan à activer | Corrigée | README, `harness-lab.toml` |
 | #26 | Decision 2.0 | **Ouverte, hors V1** | — |
 | #27 | Plafond de séance visible | Corrigée | `test_web_app.py`, E2E `gemini_shape` (`_gemini_costs`) |
 | #28 | `reasoning_dropped` sans E2E | Corrigée | E2E `reasoning_dropped` |
@@ -101,20 +101,20 @@ Chaque groupe : tests d'abord, ruff, tests ciblés, commit. Chaînes d'interface
 - **#19** : `_header_kv` faisait 82 % de `discovery.discover()` sous profileur (8,4 s sur 10,2 s, 41 candidats dont 19 modèles Ollama). Il passe par `catalog.header_metadata`. Découverte plus en-têtes du catalogue, sans profileur : 6,5 s avant, 3,5 à 4,2 s après.
 - **#34** : trois appels réels à Sonnet 5 (réflexion adaptative résumée, outil `calculator`, consignes qui demandent une phrase avant l'appel puis entre deux appels).
   - Ordre reçu : `thinking, text, tool_use`, puis `thinking, text, tool_use, tool_use` ; jamais de réflexion après un texte.
-  - Le renvoi dans l'ordre de WaveStack est accepté, sans `input_transformations`.
+  - Le renvoi dans l'ordre de HarnessLab est accepté, sans `input_transformations`.
   - Ordre de rendu inchangé. ≈ 0,05 $.
 - **#22** : phrase au README. En relisant, l'entrée « Diagnostic » du menu « Volets ▾ » (disparu) devient le lien de la barre de navigation.
 
 ## Phase 2 — vérifications sur le PC
 
-- **#7** : le test `fits` de `test_program.py` (`test_every_scenario_fits_the_default_window_with_every_prompt`), mode exact (`WAVESTACK_TEST_GGUF` = Qwen3.5-2B), passe en 256 s.
+- **#7** : le test `fits` de `test_program.py` (`test_every_scenario_fits_the_default_window_with_every_prompt`), mode exact (`HARNESS_LAB_TEST_GGUF` = Qwen3.5-2B), passe en 256 s.
 - **#4, #5, #6, non faites.** Le script, désormais dans le dépôt (`tools/recette_scenarios_2b.py`), devait jouer les sept scénarios par l'API, sur le port 8420 et avec les données d'Anaël, préalablement sauvegardées.
   - Premier essai : refusé en 403, il manquait l'en-tête `Origin` ; aucun prompt envoyé.
   - Second essai : arrêté par Claude Code pendant le chargement du 2B, le poste manquant de mémoire (3,6 Go libres, Edge ouvert pour la recette).
   - Consigne de Claude Code : ne pas le relancer sans votre accord. Ces trois entrées restent donc ouvertes.
   - Serveur arrêté ; `settings.json` et `memory.json` d'Anaël restaurés et vérifiés à l'octet (le lancement avait changé la langue, le modèle et la mémoire de démonstration).
 - **Installation à blanc (SM-5), vérification partielle.**
-  - Procédure : `git archive` de HEAD en zip (20,6 Mo), décompression (36 s), `uv run wavestack --port 8421` avec un `WAVESTACK_DATA_DIR` vide, les dossiers de modèles d'Ollama et le cache HF isolés de la recherche de fichiers GGUF, sans droits admin.
+  - Procédure : `git archive` de HEAD en zip (20,6 Mo), décompression (36 s), `uv run harness-lab --port 8421` avec un `HARNESS_LAB_DATA_DIR` vide, les dossiers de modèles d'Ollama et le cache HF isolés de la recherche de fichiers GGUF, sans droits admin.
   - Santé à 19 s ; diagnostic fini à 22 s : 7 modèles cloud, 19 modèles servis par Ollama (listés par son serveur, qui tournait), contrôle `model` bloquant tant qu'aucun choix n'est fait. Le test de chaque fichier GGUF trouvé, qui prend une dizaine de minutes au premier lancement sur ce poste (#22), a donc été évité.
   - La cible de 20 min n'est donc pas vérifiée : cache uv chaud (un poste neuf télécharge aussi Python et les roues), premier test des GGUF évité, choix et chargement d'un modèle non joués (pour la mémoire). Suivi : entrée « Vérifications restantes de la finition V1 » de `deferred-work.md`.
   - Écart au README relevé : l'entrée « Diagnostic » du menu « Volets ▾ », disparu (corrigé avec #22) ; aucun autre.
@@ -133,7 +133,7 @@ Une suite à la fois, aucun modèle local chargé pendant pytest, dossier `pytes
 | pytest, quart 2 (17 fichiers) | 697 passés, 6 désélectionnés |
 | pytest, quart 3 (17 fichiers) | 414 passés, 3 sautés, 6 désélectionnés |
 | pytest, quart 4 (14 fichiers) | 567 passés |
-| `-m model` (2B, `WAVESTACK_TEST_GGUF` et `WAVESTACK_TEST_MODELS_DIR`) | 12 passés |
+| `-m model` (2B, `HARNESS_LAB_TEST_GGUF` et `HARNESS_LAB_TEST_MODELS_DIR`) | 12 passés |
 | E2E, onze tranches (T9 avec `reasoning_dropped`) | **1 091 vérifications réussies, 0 échec** (T1 91, T2 69, T3 157, T4 59, T5 103, T6 142, T7 95, T8 86, T9 66, T10 137, T11 86) |
 | Recette navigateur (Edge, Claude in Chrome, pile E2E à faux fournisseur) | OK, détail ci-dessous |
 
@@ -172,18 +172,18 @@ Une suite à la fois, aucun modèle local chargé pendant pytest, dossier `pytes
 
 1. **Relire la PR [#21](https://github.com/Aliquanto3/agentic-harness-training-demo/pull/21)**, puis la fusionner si elle vous convient.
 2. **Rejouer #4 à #6 avec le 2B**, la mémoire libre (Edge, Teams et Outlook fermés, ≈ 4 Go libres) :
-   - vérifier qu'aucun WaveStack n'écoute déjà sur le port 8420 ;
-   - lancer `uv run python tools/recette_scenarios_2b.py` (sept scénarios, ≈ 30 min, résultats dans `recette-scenarios-2b.json`, ignoré par git). Le script copie d'abord `%LOCALAPPDATA%\WaveStack\settings.json` et `memory.json` en `*.avant-recette-<date>`, et s'arrête si le 2B n'est pas chargé ;
-   - à la fin, arrêter WaveStack (le script laisse le serveur tourner, son PID affiché), puis remettre les deux copies à leur place.
+   - vérifier qu'aucun HarnessLab n'écoute déjà sur le port 8420 ;
+   - lancer `uv run python tools/recette_scenarios_2b.py` (sept scénarios, ≈ 30 min, résultats dans `recette-scenarios-2b.json`, ignoré par git). Le script copie d'abord `%LOCALAPPDATA%\HarnessLab\settings.json` et `memory.json` en `*.avant-recette-<date>`, et s'arrête si le 2B n'est pas chargé ;
+   - à la fin, arrêter HarnessLab (le script laisse le serveur tourner, son PID affiché), puis remettre les deux copies à leur place.
    - Critères de #4 : `skills` appelle `load_skill` (pas `load_tool_doc`) pour `meeting_minutes`, `compression` lit `journal_serveur.log`, aucun extrait RAG hors sujet dans `mcp_lazy`, `skills`, `subagent` et `compression`.
    - Critères de #5 et #6 : appels de `local__define_term`, `mslearn__microsoft_docs_search` et `datagouv__search_datasets` ; escalade SOC ; délégation au premier prompt de `subagent`, puis quiz sans redélégation ; `prompt_ms` du premier appel de chaque quiz < 15 s, aucun `prefix_not_reused` de cause `history`.
    - Critère de #23 : le premier prompt de `subagent` ne finit plus sur `length` (`main_calls`, dernier champ).
-3. **Fermer la fenêtre de console** d'un WaveStack qui a un modèle Ollama chargé, puis vérifier que le modèle est déchargé ; refaire le double Ctrl+C avec un modèle Ollama chargé (#21, gestes manuels).
+3. **Fermer la fenêtre de console** d'un HarnessLab qui a un modèle Ollama chargé, puis vérifier que le modèle est déchargé ; refaire le double Ctrl+C avec un modèle Ollama chargé (#21, gestes manuels).
 4. Si vous voulez la mesure : rejouer le scénario `subagent` avec Sonnet 5 pour confirmer #29 (≈ 0,02 $).
 
 **Fait le 2026-10-04 après la revue** (avec votre accord ; détail dans les lignes `progress:` de `deferred-work.md`) :
 - n° 2 rejoué : sept scénarios avec le 2B, tous terminés sans erreur, données restaurées à l'octet. #23 bon (réponse de 111 tokens, `stop`). #5 : délégation puis quiz sans redélégation, quiz 2 et 3 en 2,7 s, mais quiz 1 en 53,5 s (relecture de cause `system`, nouvelle). #4 et #6 : `skills`, `compression`, `iam` et la recherche data.gouv de `mcp_lazy` bons ; `local__define_term` jamais appelé, souveraineté sans recherche, SOC sans escalade (limites du 2B) : fermées comme limites connues (votre décision). #5 reste ouverte (quiz 1 relu, cause `system` à trouver).
-- n° 3 en partie, par script : double Ctrl+C avec `gemma3:1b` chargé, sortie en 2,5 s, modèle déchargé ; fenêtre fermée (`WM_CLOSE` à une console `conhost`) : WaveStack s'arrêtait en laissant le modèle chargé jusqu'à l'expiration d'Ollama (5 min) ; corrigé sur votre décision (CTRL_CLOSE_EVENT capté, session fermée), remesuré : modèle déchargé aussitôt.
+- n° 3 en partie, par script : double Ctrl+C avec `gemma3:1b` chargé, sortie en 2,5 s, modèle déchargé ; fenêtre fermée (`WM_CLOSE` à une console `conhost`) : HarnessLab s'arrêtait en laissant le modèle chargé jusqu'à l'expiration d'Ollama (5 min) ; corrigé sur votre décision (CTRL_CLOSE_EVENT capté, session fermée), remesuré : modèle déchargé aussitôt.
 - n° 4 fait : Sonnet 5, sous-agent en 228 tokens, `stop`, 0,022 $.
 - Après la fusion : ✕ de Windows Terminal bon (modèle déchargé en moins d'une seconde) ; installation à blanc complète (SM-5) en 9 min 24 s jusqu'à l'atelier prêt avec le 2B (Python et dépendances téléchargés, cache vide, 20 GGUF testés) ; #5 diagnostiquée : un premier prompt envoyé avant la fin des connexions MCP du scénario fige un catalogue d'outils sans MCP, et le tour suivant relit tout. Corrigé sur votre décision : `send` attend la fin des connexions MCP en cours (bornée par leur délai) ; remesuré avec le 2B, plus de relecture.
 - Ensuite : le choix enregistré est vidé quand le retour d'E119 échoue (le lancement suivant demande un modèle) ; la spine d'architecture est à jour (AD-15, arrêt, MCP, téléchargement arrêté, modèle de décision). Le contrôle E2E de la ligne d'arrêt du Reranking est ajouté (mutation détectée). Seul #36 reste à vérifier, faute d'un compte Anthropic à zéro.
@@ -196,7 +196,7 @@ Ces points, plus la forme réelle du refus d'Anthropic (#36), l'installation à 
 
 | Groupe | Commit | Correctifs | Différés | Rejetés |
 |---|---|---|---|---|
-| 1. `src/`, `content/`, README, `wavestack.toml` | `6dadb6a` | 6 | 2 | 14 |
+| 1. `src/`, `content/`, README, `harness-lab.toml` | `6dadb6a` | 6 | 2 | 14 |
 | 2. `tests/`, `tools/` | `2f4cb05` | 7 | 0 | 22 |
 | 3. `_bmad-output` | celui qui ajoute cette section | 14 | 1 | 9 |
 

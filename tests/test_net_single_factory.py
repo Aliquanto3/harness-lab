@@ -13,7 +13,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-SRC = Path(__file__).resolve().parents[1] / "src" / "wavestack"
+SRC = Path(__file__).resolve().parents[1] / "src" / "harness_lab"
 NET = SRC / "net"
 FACTORY = NET / "factory.py"
 
@@ -46,9 +46,9 @@ FORBIDDEN = {
 NEEDS_HTTP_CLIENT = "mcp.client.streamable_http.streamable_http_client"
 
 # The guard's copy of the proxy: for `net/` only (AD-15).
-PROXY_COPY = {"wavestack.net.guard.office_proxies", "wavestack.net.guard._proxies"}
+PROXY_COPY = {"harness_lab.net.guard.office_proxies", "harness_lab.net.guard._proxies"}
 
-# (file relative to src/wavestack, enclosing function, qualified name) -> why it may stay.
+# (file relative to src/harness_lab, enclosing function, qualified name) -> why it may stay.
 EXEMPTIONS = {
     ("cli.py", "_existing_instance_health", "urllib.request.urlopen"): (
         "loopback only (127.0.0.1), urllib before any client is built; no proxy to find "
@@ -150,14 +150,14 @@ def test_only_the_factory_creates_http_clients():
             if (relative, function, name) in EXEMPTIONS:
                 used.add((relative, function, name))
             else:
-                offences.append(f"src/wavestack/{relative}:{line}: {name}")
+                offences.append(f"src/harness_lab/{relative}:{line}: {name}")
     assert not offences, "HTTP client outside net/factory.py (story 1e):\n" + "\n".join(offences)
     assert used == set(EXEMPTIONS), f"stale exemptions: {set(EXEMPTIONS) - used}"
 
 
 def test_only_net_reads_the_guard_copy_of_the_proxy():
     offences = [
-        f"src/wavestack/{path.relative_to(SRC).as_posix()}:{line}: {name}"
+        f"src/harness_lab/{path.relative_to(SRC).as_posix()}:{line}: {name}"
         for path in sorted(SRC.rglob("*.py"))
         if NET not in path.parents
         for line, name in _find(path.read_text("utf-8")).proxy_reads
@@ -174,8 +174,8 @@ import requests
 from http.client import HTTPSConnection
 from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
-from wavestack.net import guard
-from wavestack.net.guard import office_proxies
+from harness_lab.net import guard
+from harness_lab.net.guard import office_proxies
 
 def f():
     httpx.Client(trust_env=True)
@@ -203,7 +203,7 @@ def f():
         (22, "mcp.Client", "f"),
     ]
     assert finder.proxy_reads == [
-        (10, "wavestack.net.guard.office_proxies"),
-        (23, "wavestack.net.guard._proxies"),
-        (23, "wavestack.net.guard.office_proxies"),
+        (10, "harness_lab.net.guard.office_proxies"),
+        (23, "harness_lab.net.guard._proxies"),
+        (23, "harness_lab.net.guard.office_proxies"),
     ]

@@ -17,7 +17,7 @@ deferred:
     evidence: |-
       Non vérifié : 107 Mo au pic sous Linux, 57 Mo sur le PC cible avec l'ancien comptage. Se tranche au banc `headroom` sur le PC, puis ajuster `[compression] cost_mb` (130 aujourd'hui).
     location: >-
-      wavestack.toml:[compression]
+      harness-lab.toml:[compression]
     severity: medium (unverified)
   - summary: >-
       Les pics réels du banc embed sur le PC (granite ≈ +428 Mo, reranker ≈ +736 Mo) et les verdicts qui en découlent restent à relever.
@@ -57,9 +57,9 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/compression/headroom_adapter.py:33-36` -- `HEADROOM_VERSION`, commentaire (« `o200k_base`, shipped by litellm ») et `COUNTING_MODEL = "gpt-4o"`, utilisé l.~121.
-- `src/wavestack/compression/env.py` -- `OFFLINE_ENV` (l.15-21), `tiktoken_cache_dir` (commentaire « `cl100k_base`, `o200k_base` »), `apply_offline_env`.
-- `wavestack.toml:113-120` -- `[compression] min_chars`, `cost_mb = 130` et son commentaire ; `src/wavestack/config.py:~426` -- `compression_cost_bytes` (défaut 130).
+- `src/harness_lab/compression/headroom_adapter.py:33-36` -- `HEADROOM_VERSION`, commentaire (« `o200k_base`, shipped by litellm ») et `COUNTING_MODEL = "gpt-4o"`, utilisé l.~121.
+- `src/harness_lab/compression/env.py` -- `OFFLINE_ENV` (l.15-21), `tiktoken_cache_dir` (commentaire « `cl100k_base`, `o200k_base` »), `apply_offline_env`.
+- `harness-lab.toml:113-120` -- `[compression] min_chars`, `cost_mb = 130` et son commentaire ; `src/harness_lab/config.py:~426` -- `compression_cost_bytes` (défaut 130).
 - `tools/bench/story12_bench.py` -- `HEADROOM_OFFLINE_ENV` (l.44-55), candidats embedding (l.~230-241 `e5small_q8`), `_passes` (l.465-475), `_record_and_guard` (l.526-562 : garde qui enregistre les tentatives, modèle pour le test), `_peak_rss_mb` (l.571-586), variante Headroom (l.701 `kompress_model`, l.718 et 736 `model="gpt-4o"`, l.743-744 RSS), mesure embedding/reranker (l.~1000, 1078 : RSS après `llm.close()` ; l.1135-1138 `rss_added_mb = rss_after_run − rss_before_load`), sortie (l.1265).
 - `tools/bench/README.md` -- description du banc et des candidats.
 - `tests/test_story12_bench.py:280,292` -- `e5small_q8` comme candidat qui échoue.
@@ -69,8 +69,8 @@ deferred:
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/compression/headroom_adapter.py`, `src/wavestack/compression/env.py` -- `COUNTING_MODEL = "gpt-4"` (table `cl100k_base`, livrée par litellm et présente sur le PC cible) ; commentaires justes.
-- `wavestack.toml`, `src/wavestack/config.py` -- `cost_mb = 80`, commentaire : 57 Mo mesurés sur le PC cible le 2026-09-27, marge comprise.
+- `src/harness_lab/compression/headroom_adapter.py`, `src/harness_lab/compression/env.py` -- `COUNTING_MODEL = "gpt-4"` (table `cl100k_base`, livrée par litellm et présente sur le PC cible) ; commentaires justes.
+- `harness-lab.toml`, `src/harness_lab/config.py` -- `cost_mb = 80`, commentaire : 57 Mo mesurés sur le PC cible le 2026-09-27, marge comprise.
 - `tools/bench/story12_bench.py` -- même modèle de comptage que l'adaptateur (importé ou constante partagée) dans les deux variantes ; `rss_added_mb` = pic − RSS avant chargement, mesurés modèle chargé (le pic lu avant `close()`), pour l'embedding et le reranker ; `e5small_q8` retiré.
 - `tools/bench/README.md` -- RSS ajoutée au pic ; `e5small_q8` retiré (échec de chargement avec llama-cpp-python 0.3.35) ; modèle de comptage `gpt-4`.
 - `tests/test_story12_bench.py` -- le test du candidat qui échoue utilise un candidat factice ; test : `rss_added_mb` vient du pic.
@@ -83,7 +83,7 @@ deferred:
 
 ## Spec Change Log
 
-- 2026-09-27 — Constat de l'implémentation (banc réel, conteneur Linux) : avec le comptage `gpt-4` de F1, Headroom ajoute 99 Mo, au-dessus des 80 Mo retenus pour F2. Le plan liait F2 à F1 (« garder 130 par prudence ou passer à 80, à trancher avec F1 ») : F2 est tranché à 130 (valeur gardée) ; les 57 Mo du PC cible avaient été mesurés avec `gpt-4o` et une table absente. Modifié : `wavestack.toml`, `config.compression_cost_bytes`, README, test du défaut. État évité : un coût sous-estimé qui laisserait passer un chargement au-delà du budget (AD-8). KEEP : F1, F3, F4 et le test hors ligne tels quels. Le tableau de l'`intent-contract` (« 80 Mo par défaut ») est dépassé par cette entrée.
+- 2026-09-27 — Constat de l'implémentation (banc réel, conteneur Linux) : avec le comptage `gpt-4` de F1, Headroom ajoute 99 Mo, au-dessus des 80 Mo retenus pour F2. Le plan liait F2 à F1 (« garder 130 par prudence ou passer à 80, à trancher avec F1 ») : F2 est tranché à 130 (valeur gardée) ; les 57 Mo du PC cible avaient été mesurés avec `gpt-4o` et une table absente. Modifié : `harness-lab.toml`, `config.compression_cost_bytes`, README, test du défaut. État évité : un coût sous-estimé qui laisserait passer un chargement au-delà du budget (AD-8). KEEP : F1, F3, F4 et le test hors ligne tels quels. Le tableau de l'`intent-contract` (« 80 Mo par défaut ») est dépassé par cette entrée.
 
 ## Review Triage Log
 
@@ -126,7 +126,7 @@ Status: done
 
 **Résumé.** (F1) Headroom compte avec `gpt-4` (`cl100k_base`, présente dans le cache de litellm du PC cible) au lieu de `gpt-4o` (`o200k_base`, absente sur le PC, d'où la tentative vers `openaipublic.blob.core.windows.net`) ; le banc utilise le même modèle ; un test en sous-processus, avec les variables hors ligne, un cache réduit à `cl100k_base` et une garde qui enregistre, vérifie qu'aucune tentative réseau n'a lieu à l'import ni à la compression, avec un contrôle négatif (`gpt-4o` tente le réseau). (F2, décision prise par défaut) `cost_mb` gardé à 130 : avec `gpt-4`, Headroom ajoute 107 Mo au pic sous Linux, au-dessus des 80 envisagés. (F3) Le banc mesure la RSS ajoutée au pic (`VmHWM` sous Linux, `peak_wset` sous Windows) moins la base, pour l'embedding, le reranker, fastembed et Headroom ; les rapports portent `rss_added_method: "pic"` ; le README prévient que les verdicts d'embedding changeront sur le PC. (F4) `e5small_q8` retiré, avec sa raison ; `--only` d'un identifiant inconnu ou retiré le dit.
 
-**Fichiers.** `src/wavestack/compression/headroom_adapter.py`, `env.py`, `wavestack.toml`, `src/wavestack/config.py`, `README.md`, `tools/bench/story12_bench.py`, `tools/bench/README.md`, `tests/test_compression.py`, `tests/test_story12_bench.py`, `deferred-work.md` (quatre entrées fermées).
+**Fichiers.** `src/harness_lab/compression/headroom_adapter.py`, `env.py`, `harness-lab.toml`, `src/harness_lab/config.py`, `README.md`, `tools/bench/story12_bench.py`, `tools/bench/README.md`, `tests/test_compression.py`, `tests/test_story12_bench.py`, `deferred-work.md` (quatre entrées fermées).
 
 **Revue.** 10 patchs (4 medium, 6 low), 2 différés (mesures sur PC), 5 rejetés. `followup_review_recommended: false`. Écart à la spec consigné dans son journal des changements (F2 : 130 au lieu de 80).
 

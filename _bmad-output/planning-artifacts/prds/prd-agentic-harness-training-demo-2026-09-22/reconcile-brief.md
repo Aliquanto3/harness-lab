@@ -1,4 +1,4 @@
-# Rapprochement brief → PRD : WaveStack
+# Rapprochement brief → PRD : HarnessLab
 
 Entrées : `briefs/brief-agentic-harness-training-demo-2026-09-22/brief.md` et `addendum.md`.
 Cibles : `prd.md` et `addendum.md` (dossier PRD).
@@ -13,7 +13,7 @@ Règle appliquée : ce que le PRD tranche explicitement (11 briques avec sous-ag
 
 ### E2. Participant actif devenu spectateur (moyenne)
 - **Source** (brief, Executive Summary) : « Chaque brique s'active ou se désactive en direct, et l'utilisateur voit simultanément… » ; les utilisateurs primaires sont les collègues formés.
-- **PRD** : §2.3 : « le formateur est seul aux commandes, WaveStack est projeté » ; le participant « regarde WaveStack projeté » (Glossaire). La manipulation directe est réservée aux profils techniques qui installent l'outil.
+- **PRD** : §2.3 : « le formateur est seul aux commandes, HarnessLab est projeté » ; le participant « regarde HarnessLab projeté » (Glossaire). La manipulation directe est réservée aux profils techniques qui installent l'outil.
 - **Correction** : dire en §2.3 si ce choix est voulu et prévoir un moment où les participants manipulent (prompts proposés par la salle, exercice en binôme sur un poste installé), sans quoi l'appropriation visée par le brief repose uniquement sur l'observation.
 
 ### E3. Priorité de l'effort sur MCP, skills et hooks diluée (moyenne)
@@ -43,7 +43,7 @@ Règle appliquée : ce que le PRD tranche explicitement (11 briques avec sous-ag
 
 ### E8. Question « solution tierce » non outillée (basse)
 - **Source** (brief, Success Criteria) : « Se poser la bonne question sur une solution agentique tierce : où est hébergé le harnais, où sont hébergées les données, où est hébergé le LLM. »
-- **PRD** : SM-3 mesure ce réflexe « face à une solution tierce décrite en exercice », mais aucune exigence ne fournit cet exercice. FR-38 (« Où vont mes données ? ») porte sur WaveStack lui-même.
+- **PRD** : SM-3 mesure ce réflexe « face à une solution tierce décrite en exercice », mais aucune exigence ne fournit cet exercice. FR-38 (« Où vont mes données ? ») porte sur HarnessLab lui-même.
 - **Correction** : ajouter à FR-38 un exercice de transposition : une solution agentique tierce fictive à analyser selon les trois lieux d'hébergement.
 
 ### E9. Skills « amusants » : ton ludique perdu et second skill non défini (basse)
@@ -54,7 +54,7 @@ Règle appliquée : ce que le PRD tranche explicitement (11 briques avec sous-ag
 ### E10. Filiation wavelocalai et ADN « IA locale responsable » (basse)
 - **Source** (brief, Vision) : « cohérent avec l'ADN "IA locale responsable" déjà porté par des initiatives internes comme wavelocalai ».
 - **PRD** : mentionné seulement dans l'addendum, comme repo technique. La Vision du PRD parle de numérique responsable sans cette filiation, qui sert pourtant d'argument interne et client.
-- **Correction** : ajouter en §1 (Trajectoire) une phrase qui situe WaveStack dans la lignée de wavelocalai.
+- **Correction** : ajouter en §1 (Trajectoire) une phrase qui situe HarnessLab dans la lignée de wavelocalai.
 
 ### E11. Risque « conception entièrement nouvelle » absent (basse)
 - **Source** (addendum du brief) : « Aucun MCP, skill ou hook dans le repo : ces briques n'ont pas de précédent réutilisable, conception entièrement nouvelle. »

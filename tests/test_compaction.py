@@ -14,11 +14,11 @@ from fake_engine import FakeEngine, booted_session
 from test_cloud import GEMINI_TEXT, GeminiProvider, _cloud_session
 from test_cloud_cap import _settings, _spent_already
 
-from wavestack import config
-from wavestack.session import compaction
-from wavestack.session.app_session import Exchange, Message, SendRefused
-from wavestack.trace.catalog import PAYLOAD_MODELS
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.session import compaction
+from harness_lab.session.app_session import Exchange, Message, SendRefused
+from harness_lab.trace.catalog import PAYLOAD_MODELS
+from harness_lab.trace.journal import get_journal
 
 # Window 2048, reserve 512: 1536 usable; three exchanges of ~450 bytes, then a message of
 # 700 overflows; one exchange kept still holds, two do not.

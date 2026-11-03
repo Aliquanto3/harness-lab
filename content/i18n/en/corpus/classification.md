@@ -1,6 +1,6 @@
 # Information classification at Exemplia
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this policy describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this policy describes no real company. -->
 
 All information produced or received by Exemplia carries one of the following 4 classification levels: Public, Internal, Confidential and Secret. By default, an unmarked document is treated as Internal.
 

@@ -1,7 +1,7 @@
 """The one-command installers (install.bat, install.ps1, install.sh) stay in sync with
 README.md's Qwen URL, and install.ps1's dry run / idempotent paths behave as documented.
 
-No installer here ever touches the real `uv`, Documents or %LOCALAPPDATA%\\WaveStack: every
+No installer here ever touches the real `uv`, Documents or %LOCALAPPDATA%\\HarnessLab: every
 PowerShell run below passes -InstallDir/-DataDir pointing at pytest's own tmp_path, and the
 network calls (uv install, git clone, model download) are never reached because the tests
 only exercise -DryRun or the already-installed, idempotent branch.
@@ -18,7 +18,7 @@ import sys
 
 import pytest
 
-from wavestack import config
+from harness_lab import config
 
 ROOT = config.repo_root()
 README_TEXT = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -129,9 +129,9 @@ def test_install_sh_dry_run_creates_nothing(tmp_path) -> None:
         pytest.skip("bash indisponible sur ce poste")
     env = {
         **os.environ,
-        "WAVESTACK_INSTALL_DIR": (tmp_path / "project").as_posix(),
-        "WAVESTACK_DATA_DIR": (tmp_path / "data").as_posix(),
-        "WAVESTACK_DRY_RUN": "1",
+        "HARNESS_LAB_INSTALL_DIR": (tmp_path / "project").as_posix(),
+        "HARNESS_LAB_DATA_DIR": (tmp_path / "data").as_posix(),
+        "HARNESS_LAB_DRY_RUN": "1",
     }
     result = subprocess.run(
         [shutil.which("bash"), (ROOT / "install.sh").as_posix()],
@@ -232,16 +232,21 @@ def test_default_model_file_matches_the_installers() -> None:
 
 
 def _clean_env() -> dict[str, str]:
-    """os.environ without the WAVESTACK_* variables a developer may have set on the machine."""
-    return {k: v for k, v in os.environ.items() if not k.upper().startswith("WAVESTACK_")}
+    """os.environ without the HARNESS_LAB_* variables a developer may have set on the machine,
+    nor their former WAVESTACK_* names (2.0.0: read as a fallback)."""
+    return {
+        k: v
+        for k, v in os.environ.items()
+        if not k.upper().startswith(("HARNESS_LAB_", "WAVESTACK_"))
+    }
 
 
 def _sh(tmp_path, *, dry_run: bool = True, **extra: str) -> subprocess.CompletedProcess:
     env = {
         **_clean_env(),
-        "WAVESTACK_INSTALL_DIR": (tmp_path / "project").as_posix(),
-        "WAVESTACK_DATA_DIR": (tmp_path / "data").as_posix(),
-        **({"WAVESTACK_DRY_RUN": "1"} if dry_run else {}),
+        "HARNESS_LAB_INSTALL_DIR": (tmp_path / "project").as_posix(),
+        "HARNESS_LAB_DATA_DIR": (tmp_path / "data").as_posix(),
+        **({"HARNESS_LAB_DRY_RUN": "1"} if dry_run else {}),
         **extra,
     }
     return subprocess.run(
@@ -283,7 +288,7 @@ needs_windows = pytest.mark.skipif(sys.platform != "win32", reason="install.ps1 
 def test_install_sh_models_only_on_request(tmp_path) -> None:
     assert "MiniCPM5" not in _sh(tmp_path).stdout
     assert "Qwen3.5-0.8B" not in _sh(tmp_path).stdout
-    both = _sh(tmp_path, WAVESTACK_MODELS="qwen3.5-0.8b,minicpm5")
+    both = _sh(tmp_path, HARNESS_LAB_MODELS="qwen3.5-0.8b,minicpm5")
     assert both.returncode == 0
     assert "Qwen3.5-0.8B-Q4_K_M.gguf" in both.stdout
     assert "MiniCPM5-2B-Q4_K_M.gguf" in both.stdout
@@ -292,17 +297,17 @@ def test_install_sh_models_only_on_request(tmp_path) -> None:
 
 @needs_bash
 def test_install_sh_minicpm_alias(tmp_path) -> None:
-    out = _sh(tmp_path, WAVESTACK_WITH_MINICPM="1").stdout
+    out = _sh(tmp_path, HARNESS_LAB_WITH_MINICPM="1").stdout
     assert "MiniCPM5-2B-Q4_K_M.gguf" in out
     assert "Qwen3.5-0.8B" not in out
-    both = _sh(tmp_path, WAVESTACK_WITH_MINICPM="1", WAVESTACK_MODELS="minicpm5").stdout
+    both = _sh(tmp_path, HARNESS_LAB_WITH_MINICPM="1", HARNESS_LAB_MODELS="minicpm5").stdout
     assert both.count("MiniCPM5-2B-Q4_K_M.gguf") == 1
 
 
 @needs_bash
 @pytest.mark.parametrize("dry_run", [True, False])
 def test_install_sh_unknown_model_stops_before_anything(tmp_path, dry_run) -> None:
-    result = _sh(tmp_path, dry_run=dry_run, WAVESTACK_MODELS="qwen3.5-0.8b,inconnu")
+    result = _sh(tmp_path, dry_run=dry_run, HARNESS_LAB_MODELS="qwen3.5-0.8b,inconnu")
     assert result.returncode != 0
     assert "inconnu" in result.stderr
     assert VALID_IDS in result.stderr
@@ -312,14 +317,14 @@ def test_install_sh_unknown_model_stops_before_anything(tmp_path, dry_run) -> No
 
 @needs_bash
 def test_install_sh_model_id_is_not_a_pattern(tmp_path) -> None:
-    result = _sh(tmp_path, WAVESTACK_MODELS="qwen3[.]5-0.8b")
+    result = _sh(tmp_path, HARNESS_LAB_MODELS="qwen3[.]5-0.8b")
     assert result.returncode != 0
     assert "inconnu" in result.stderr
 
 
 @needs_bash
 def test_install_sh_models_list_prints_the_table_and_stops(tmp_path) -> None:
-    result = _sh(tmp_path, dry_run=False, WAVESTACK_MODELS="list")
+    result = _sh(tmp_path, dry_run=False, HARNESS_LAB_MODELS="list")
     assert result.returncode == 0
     for model_id, (_url, file, _sha) in OPTIONAL_MODELS.items():
         assert model_id in result.stdout
@@ -362,7 +367,7 @@ def test_install_ps1_models_as_a_powershell_array(tmp_path) -> None:
 
 @needs_windows
 def test_install_ps1_models_from_environment(tmp_path) -> None:
-    result = _ps(tmp_path, "-DryRun", WAVESTACK_MODELS="qwen3.5-0.8b")
+    result = _ps(tmp_path, "-DryRun", HARNESS_LAB_MODELS="qwen3.5-0.8b")
     assert result.returncode == 0, result.stderr
     assert "Qwen3.5-0.8B-Q4_K_M.gguf" in result.stdout
     assert "MiniCPM5" not in result.stdout
@@ -464,3 +469,33 @@ def test_install_ps1_verify_hash(tmp_path, good) -> None:
         assert result.returncode != 0
         assert "non conforme" in result.stdout + result.stderr
         assert not model.exists()
+
+
+# ---------- 2.0.0: the former WAVESTACK_* variables, read as a fallback ----------
+
+
+@needs_bash
+def test_install_sh_reads_the_former_variable_with_a_warning(tmp_path) -> None:
+    result = _sh(tmp_path, WAVESTACK_MODELS="minicpm5")
+    assert result.returncode == 0, result.stderr
+    assert "MiniCPM5-2B-Q4_K_M.gguf" in result.stdout
+    assert "WAVESTACK_MODELS est obsolete, utilisez HARNESS_LAB_MODELS" in result.stderr
+
+
+@needs_bash
+def test_install_sh_new_variable_wins_over_the_former(tmp_path) -> None:
+    result = _sh(tmp_path, HARNESS_LAB_MODELS="qwen3.5-0.8b", WAVESTACK_MODELS="minicpm5")
+    assert result.returncode == 0, result.stderr
+    assert "Qwen3.5-0.8B-Q4_K_M.gguf" in result.stdout
+    assert "MiniCPM5" not in result.stdout
+    assert "obsolete" not in result.stderr
+
+
+@needs_windows
+def test_install_ps1_reads_the_former_variable_with_a_warning(tmp_path) -> None:
+    result = _ps(tmp_path, "-DryRun", WAVESTACK_MODELS="qwen3.5-0.8b")
+    assert result.returncode == 0, result.stderr
+    assert "Qwen3.5-0.8B-Q4_K_M.gguf" in result.stdout
+    assert "WAVESTACK_MODELS est obsolete, utilisez HARNESS_LAB_MODELS" in (
+        result.stdout + result.stderr
+    )

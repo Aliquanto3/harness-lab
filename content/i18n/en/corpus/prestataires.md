@@ -1,6 +1,6 @@
 # Exemplia supplier security policy
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this policy describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this policy describes no real company. -->
 
 Exemplia places every supplier who handles company information into one of two tiers: critical, when it hosts data or connects to the internal network, or standard for the others. The tier is set by the supplier unit before the contract is signed, and reviewed every year.
 

@@ -7,7 +7,7 @@ from typing import get_args
 import pytest
 import yaml
 
-from wavestack.trace.catalog import PrefixCause
+from harness_lab.trace.catalog import PrefixCause
 
 ROOT = Path(__file__).resolve().parents[1]
 FILES = {

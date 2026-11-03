@@ -86,7 +86,7 @@ Chaque décision ferme une entrée C (`triage.md`). « Fermer » = noter la déc
 | D16 | E121 | Lazy loading : placer la documentation chargée en résultat d'outil (historique) plutôt que dans `tools` ? | **Oui** (S4) : évite ≈ 40 s de relecture par documentation chargée sur Qwen3.5 ; Contexte LLM et la jauge le montrent comme un résultat d'outil, ce qui reste juste pédagogiquement. Validation par Anaël car cela change AD-25 et ce que le modèle voit. |
 | D17 | E124 | Raisonnement qui va jusqu'au budget même sur « Bonjour » ? | **Consigne** (S3) : la consigne du scénario Raisonnement l'annonce (un petit modèle réfléchit même pour rien) ; pas de budget adaptatif. |
 | D18 | E126 | Test `fits` : `subagent` p4 déborde de 9 tokens avec des réponses « au pire ». | **Réponses mesurées** (S3) : le test simule des réponses de la taille relevée au lot K (≈ 500 tokens au plus), quiz inchangés. |
-| D19 | E139 | `hosting_text` et `notes_text` de `[[cloud.models]]` restent en français en `en`/`de`. | **Accepter et documenter** (S3) : texte saisi par l'opérateur dans `wavestack.toml`, affiché tel quel ; commentaire dans `wavestack.toml` et README. |
+| D19 | E139 | `hosting_text` et `notes_text` de `[[cloud.models]]` restent en français en `en`/`de`. | **Accepter et documenter** (S3) : texte saisi par l'opérateur dans `harness-lab.toml`, affiché tel quel ; commentaire dans `harness-lab.toml` et README. |
 
 ## Assumptions
 

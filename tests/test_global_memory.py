@@ -16,9 +16,9 @@ from test_mcp_lazy import exact
 from test_skills import since
 from test_tools import QWEN, _segments, call
 
-from wavestack import config
-from wavestack import memory as memory_file
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab import memory as memory_file
+from harness_lab.trace.journal import get_journal
 
 DEMO = [
     "L'utilisateur s'appelle Pascal.",

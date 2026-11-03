@@ -12,10 +12,10 @@ from fake_engine import FakeEngine, booted_session
 from test_bricks import HEADERS, _client
 from test_turn import _run
 
-from wavestack import config
-from wavestack import scenarios as scenarios_module
-from wavestack.session.app_session import SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab import scenarios as scenarios_module
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace.journal import get_journal
 
 
 def _since(mark: int) -> list:
@@ -307,7 +307,7 @@ def test_scenario_with_a_model_without_tool_calls_says_which_bricks_are_unavaila
 def test_scenario_with_a_capable_model_warns_nothing_and_a_switch_says_it_again(tmp_path):
     """E5: nothing to say with Qwen3's tool calls; a model change with the scenario active
     says it again (`scenario_changed` before `model_load_ended`)."""
-    from wavestack.models.load_registry import ModelChoice
+    from harness_lab.models.load_registry import ModelChoice
 
     engines = {"qwen": FakeEngine(architecture="qwen3"), "llama": FakeEngine(architecture="llama")}
     session = booted_session(engines["qwen"])
@@ -336,7 +336,7 @@ def test_scenario_with_a_capable_model_warns_nothing_and_a_switch_says_it_again(
 
 def test_a_failing_scenario_refresh_never_blocks_the_load_end(tmp_path, monkeypatch):
     """E5: the refresh after a load is guarded: `model_load_ended` and `idle` still come."""
-    from wavestack.models.load_registry import ModelChoice
+    from harness_lab.models.load_registry import ModelChoice
 
     session = booted_session(FakeEngine())
     session.launch_scenario("native_tools")

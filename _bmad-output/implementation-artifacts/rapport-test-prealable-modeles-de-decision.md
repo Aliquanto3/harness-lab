@@ -4,8 +4,8 @@
 >
 > **Story 7, même jour (07 h 55 à 07 h 57, joué par l'agent, après les corrections de la revue) :** mDeBERTa et MiniLM multilingues mesurés, tous deux « retenu » ; Decision 2.0 Kai non mesuré : son code, relu au commit épinglé, refuse de charger le modèle sous Windows (contrôle d'identité, voir « Relecture du code de Decision 2.0 ») : **écarté sur le PC cible au commit relu** (décision d'Anaël du 2026-10-03), à réessayer si le code est corrigé. Verdicts de mDeBERTa et MiniLM validés par Anaël ; `decision-model-candidates.md` mis à jour par bmad-spec le même jour.
 
-- Stories : [6-test-prealable-des-modeles-de-decision.md](../specs/spec-wavestack-v2/stories/6-test-prealable-des-modeles-de-decision.md), [7-banc-des-nouveaux-candidats-de-decision.md](../specs/spec-wavestack-v2/stories/7-banc-des-nouveaux-candidats-de-decision.md)
-- Candidats et critères : [decision-model-candidates.md](../specs/spec-wavestack-v2/decision-model-candidates.md). Ce fichier se met à jour par un nouveau passage de bmad-spec, à partir de ce rapport, jamais à la main.
+- Stories : [6-test-prealable-des-modeles-de-decision.md](../specs/spec-harness-lab-v2/stories/6-test-prealable-des-modeles-de-decision.md), [7-banc-des-nouveaux-candidats-de-decision.md](../specs/spec-harness-lab-v2/stories/7-banc-des-nouveaux-candidats-de-decision.md)
+- Candidats et critères : [decision-model-candidates.md](../specs/spec-harness-lab-v2/decision-model-candidates.md). Ce fichier se met à jour par un nouveau passage de bmad-spec, à partir de ce rapport, jamais à la main.
 - Banc : `tools/bench/v2s6_decision_bench.py`, testé par `tests/test_v2s6_decision_bench.py`.
 
 ## Relevé
@@ -14,7 +14,7 @@
 |---|---|
 | Poste | HP EliteBook x360 1030 G8, Intel Core i5-1145G7 (8 fils), 16 064 Mo de RAM |
 | Système | Windows 11 Entreprise (10.0.26200), session sans droits admin (lu par le banc : `admin: false`), proxy Zscaler |
-| SLM par défaut chargé pendant la mesure | `Qwen3.5-2B-Q4_K_M.gguf` (`%LOCALAPPDATA%\WaveStack\models`), fenêtre de 4 096, llama-cpp-python 0.3.35 ; RSS avec le SLM : ≈ 1 938 Mo |
+| SLM par défaut chargé pendant la mesure | `Qwen3.5-2B-Q4_K_M.gguf` (`%LOCALAPPDATA%\HarnessLab\models`), fenêtre de 4 096, llama-cpp-python 0.3.35 ; RSS avec le SLM : ≈ 1 938 Mo |
 | Date du relevé | 2026-10-03, de 00 h 44 à 00 h 57 (Decision 1.0 : 2026-10-02) ; story 7 : 2026-10-03, de 07 h 55 à 07 h 57, une mesure à la fois (premier passage de 07 h 05 à 07 h 12, refait après les corrections de la revue : mêmes RAM et accords) |
 | Version du banc | commit `7315647` ; empreinte du banc dans chaque JSON (`bench_sha256`) ; résultats dans `tools/bench/results/2026-10-02-pc-cible-v2s6/` |
 | Version du banc (story 7) | banc étendu, commité après le relevé (`repo_commit` b53b054 dans les JSON, arbre modifié) : `bench_sha256` `e7f987490657412977922db3a82c35085ab9b527735a48a50a7362aa7a4e6758`, identique dans les trois JSON et égal à l'empreinte du banc du commit `82e41fb` tel qu'extrait sous Windows (fins de ligne CRLF, `core.autocrlf=true` ; le blob git, en LF, a une autre empreinte) ; garde-fou de mémoire `active` dans les trois (`ram_watchdog`) ; résultats dans `tools/bench/results/2026-10-03-pc-cible-v2s7/` ; même SLM, RSS avec le SLM ≈ 1 938 Mo |
@@ -22,7 +22,7 @@
 
 ## Ce que mesure le banc
 
-Chaque mesure tourne dans un processus enfant neuf. Il installe la garde réseau du projet (AD-15) avant tout import tiers, retire les variables de proxy et consigne chaque tentative réseau. Il charge ensuite le SLM par défaut avec les réglages du moteur de WaveStack (fenêtre `[context] window` de `wavestack.toml`, threads par défaut), et lui fait produire un token pour que ses poids soient en mémoire comme pendant un tour. Il lit alors la RSS de base, charge le candidat, fait une décision d'échauffement non chronométrée par tâche, puis chronomètre 40 décisions. Le JSON consigne aussi le commit du dépôt, l'empreinte du banc, la version de llama-cpp-python, la version de Windows et la présence de droits admin.
+Chaque mesure tourne dans un processus enfant neuf. Il installe la garde réseau du projet (AD-15) avant tout import tiers, retire les variables de proxy et consigne chaque tentative réseau. Il charge ensuite le SLM par défaut avec les réglages du moteur de HarnessLab (fenêtre `[context] window` de `harness-lab.toml`, threads par défaut), et lui fait produire un token pour que ses poids soient en mémoire comme pendant un tour. Il lit alors la RSS de base, charge le candidat, fait une décision d'échauffement non chronométrée par tâche, puis chronomètre 40 décisions. Le JSON consigne aussi le commit du dépôt, l'empreinte du banc, la version de llama-cpp-python, la version de Windows et la présence de droits admin.
 
 **Entrées.** Vingt prompts fixes, tirés des prompts suggérés des scénarios V1 (`content/scenarios.yaml`), chacun dans deux tâches :
 
@@ -62,11 +62,11 @@ Une seule fois, avant les mesures :
 ```powershell
 uv sync --all-extras
 uv run python tools/bench/v2s6_decision_bench.py list
-$SLM = "<chemin du GGUF du SLM par défaut, celui que WaveStack charge>"
+$SLM = "<chemin du GGUF du SLM par défaut, celui que HarnessLab charge>"
 $OUT = "tools\bench\results\<AAAA-MM-JJ>-pc-cible-v2s6"
 ```
 
-Sans `--slm`, le banc prend le seul GGUF de SLM du dossier des modèles de WaveStack (`%LOCALAPPDATA%\WaveStack\models`), hors embedding et reranking. S'il en trouve plusieurs, il les liste et s'arrête.
+Sans `--slm`, le banc prend le seul GGUF de SLM du dossier des modèles de HarnessLab (`%LOCALAPPDATA%\HarnessLab\models`), hors embedding et reranking. S'il en trouve plusieurs, il les liste et s'arrête.
 
 **1. Decision 1.0 : revérification, sans mesure.** Relever d'abord, avec la date et la source :
 
@@ -118,10 +118,10 @@ uv run --with torch --with transformers --with safetensors --with huggingface-hu
 Pour Decision 2.0, `measure --download` exécute le code du dépôt juste après le téléchargement. Le 03/10, le dépôt a donc d'abord été téléchargé seul, au commit épinglé, sans rien exécuter, avec la fonction de téléchargement du banc. Son code a ensuite été relu, puis la commande ci-dessus a été lancée :
 
 ```powershell
-uv run --with huggingface-hub python -c "import sys, json; sys.path.insert(0, 'tools/bench'); import v2s6_decision_bench as b; from pathlib import Path; print(json.dumps(b.download_candidate(b.candidate('decision20'), Path.home() / '.cache' / 'wavestack-bench'), ensure_ascii=False))"
+uv run --with huggingface-hub python -c "import sys, json; sys.path.insert(0, 'tools/bench'); import v2s6_decision_bench as b; from pathlib import Path; print(json.dumps(b.download_candidate(b.candidate('decision20'), Path.home() / '.cache' / 'harness-lab-bench'), ensure_ascii=False))"
 ```
 
-`--download` télécharge seulement les fichiers nécessaires (tout le dépôt pour Decision 2.0), dans `~/.cache/wavestack-bench/hf`, par le proxy du poste et le magasin de certificats du système. La mesure se fait ensuite hors ligne, sur le commit téléchargé, qui est consigné. Relancer sans `--download` pour remesurer. Si `uv` ne résout pas un `--with`, par exemple si `fast-gliner` n'est pas publié sur PyPI, noter l'erreur dans la colonne « Raison » : le candidat reste « à surveiller ».
+`--download` télécharge seulement les fichiers nécessaires (tout le dépôt pour Decision 2.0), dans `~/.cache/harness-lab-bench/hf`, par le proxy du poste et le magasin de certificats du système. La mesure se fait ensuite hors ligne, sur le commit téléchargé, qui est consigné. Relancer sans `--download` pour remesurer. Si `uv` ne résout pas un `--with`, par exemple si `fast-gliner` n'est pas publié sur PyPI, noter l'erreur dans la colonne « Raison » : le candidat reste « à surveiller ».
 
 Les fichiers JSON de `$OUT` se versionnent, comme ceux de la story 12 (`tools/bench/results/`).
 
@@ -157,7 +157,7 @@ Les fichiers JSON de `$OUT` se versionnent, comme ceux de la story 12 (`tools/be
 
 ## Relecture du code de Decision 2.0 (story 7)
 
-Relue par l'agent le 2026-10-03, sur les fichiers locaux de `~/.cache/wavestack-bench/hf/models--vllm-sr--Decision-2.0-Kai-0.6B/snapshots/881bee413681d80ebeac86afcda8b4138dae516e/`, téléchargés au commit épinglé sans rien exécuter.
+Relue par l'agent le 2026-10-03, sur les fichiers locaux de `~/.cache/harness-lab-bench/hf/models--vllm-sr--Decision-2.0-Kai-0.6B/snapshots/881bee413681d80ebeac86afcda8b4138dae516e/`, téléchargés au commit épinglé sans rien exécuter.
 
 - **Commit** : le dossier de l'instantané est bien `881bee413681d80ebeac86afcda8b4138dae516e`, le sha consigné dans le banc (`DECISION20_REVISION`) ; 36 fichiers.
 - **Lus en entier (voie CPU)** : `modeling_decision2.py`, `configuration_decision2.py`, `pipeline_decision2.py`, `decision2/__init__.py`, `decision2/api.py`, `decision2/qwen.py`, et `decision2/_vendor/dev2model/` (`data.py`, `decision_model.py`, `infer.py`, `calibration.py`, `lora.py`, `score_bias.py`, `source.py`). Le sous-dossier `_vendor/` n'était pas nommé par le relevé du sous-agent ; il appartient bien à `decision2/` et à la voie CPU.
@@ -168,7 +168,7 @@ Relue par l'agent le 2026-10-03, sur les fichiers locaux de `~/.cache/wavestack-
   - profil `qwen-full`, `Qwen3Model` de 28 couches, 597 103 104 paramètres chargés, en FP32 sur CPU (`model.float()`) ;
   - contexte de 8 192, sans troncature (`max_length_exceeded`) ; `dtype` limité à `None` ou `"auto"` ;
   - `verify_bundle` exige tous les fichiers du manifeste, README et PNG compris (seul `.gitattributes` est toléré) ;
-  - le runtime `decision2/` est copié dans le dossier des modules dynamiques de Transformers (ici `~/.cache/wavestack-bench/hf_modules/`, par `HF_MODULES_CACHE`) ;
+  - le runtime `decision2/` est copié dans le dossier des modules dynamiques de Transformers (ici `~/.cache/harness-lab-bench/hf_modules/`, par `HF_MODULES_CACHE`) ;
   - appel `system_one(state=…, questions={qid: {"type": "choice", …}})`, réponse `["answers"][qid]["choice"]` ; une erreur arrive **par question**, `answers[qid] = {"type": …, "error": <code>}` ;
   - ni `subprocess`, ni `eval`/`exec`, ni pickle ou `torch.load` ; poids lus en safetensors.
 - **Réseau** : `snapshot_download` n'est appelé que pour un nom de dépôt (pas pour un dossier local) ou pour un adaptateur `qwen-adapter` (`base` vaut `null` ici). Mesure : aucune tentative réseau sous la garde.
@@ -194,13 +194,13 @@ Validée par Anaël le 2026-10-03, au passage de bmad-spec (`decision-model-cand
 
 Les quatre étapes prévues sont faites le 2026-10-03 : tableaux remplis, `decision-model-candidates.md` mis à jour par bmad-spec, « Deferred » d'`ARCHITECTURE-SPINE.md` remplacé par le verdict, story 6 passée à `done`.
 
-Story 7 ([7-banc-des-nouveaux-candidats-de-decision.md](../specs/spec-wavestack-v2/stories/7-banc-des-nouveaux-candidats-de-decision.md)) : banc étendu (trois candidats, épinglage de Decision 2.0, garde-fou de mémoire), relevé fait le 2026-10-03 sur le PC cible, lignes ajoutées ci-dessus. Restent :
+Story 7 ([7-banc-des-nouveaux-candidats-de-decision.md](../specs/spec-harness-lab-v2/stories/7-banc-des-nouveaux-candidats-de-decision.md)) : banc étendu (trois candidats, épinglage de Decision 2.0, garde-fou de mémoire), relevé fait le 2026-10-03 sur le PC cible, lignes ajoutées ci-dessus. Restent :
 
 1. **Verdicts de mDeBERTa et MiniLM validés par Anaël le 2026-10-03** :
    - `mdeberta` **retenu**, dans le budget avec le RAG V1 (3 889 Mo), mais avec un accord indicatif plus faible que `deberta_xsmall` (4/20 et 6/20 contre 12/20 et 7/20). La variante multilingue n'améliore donc pas l'accord sur ces vingt prompts et ces critères. Ne remplace pas `deberta_xsmall` comme défaut.
    - `minilm_multi` **retenu, RAG éteint seulement** (4 175 Mo avec le RAG V1). Le plus rapide (49 ms de médiane), mais sa décision de coût est dégénérée (toujours « complexe »).
    - `decision20` : **écarté sur le PC cible au commit relu**, décidé par Anaël le 2026-10-03 (critère 1 : le code du dépôt ne charge pas sous Windows). Le nouvel essai est noté dans `deferred-work.md` : un commit qui corrige `checkpoint_fingerprint` demanderait une nouvelle relecture, puis une nouvelle mesure. Le garde-fou de mémoire servira alors : 597 M de paramètres en FP32 (≈ 2,4 Go) avec le SLM (≈ 1,9 Go) dépasseraient probablement 4 096 Mo, à mesurer.
 2. **bmad-spec fait le 2026-10-03** : `decision-model-candidates.md` et `SPEC.md` à jour ; story 8 ajoutée à `stories.yaml`.
-3. **Story 8 de la V2, faite le 2026-10-03** ([8-banc-d-un-modele-de-decision-servi-par-ollama.md](../specs/spec-wavestack-v2/stories/8-banc-d-un-modele-de-decision-servi-par-ollama.md)) : tev1 0.8B, servi par Ollama 0.35.1, relevé sur le PC cible (`tools/bench/results/2026-10-03-pc-cible-v2s8/tev1.json`). Verdict du banc : **écarté**, par sa latence seule (2 655 ms de médiane, 2,6 fois le seuil). La RAM dépasse aussi, de 75 Mo (4 171 Mo, Ollama compris), mais ce chiffre dépend du nombre de requêtes : le processus du modèle grossit d'environ 28 Mo par requête, cause non vérifiée. L'accord (13/20 et 15/20) est douteux : toutes les réponses de coût sont « complexe » à partir du 7ᵉ prompt. Détail et réserves dans `decision-model-candidates.md` ; conditions d'un nouvel essai dans `deferred-work.md`.
-4. **Story 9 de la V2, faite le 2026-10-03** ([9-banc-des-modeles-de-decision-servis-par-llama-cpp.md](../specs/spec-wavestack-v2/stories/9-banc-des-modeles-de-decision-servis-par-llama-cpp.md)) : Julia-1 et Laya, servis par un llama-server portable (`b11378`) que le banc lance et arrête, relevés sur le PC cible (`tools/bench/results/2026-10-03-pc-cible-v2s9/`). Julia-1 : **retenu par le banc** (2 330 Mo, 3 500 avec le RAG V1 ; 170 ms de médiane), critère 1 accepté par Anaël le 2026-10-03 (binaire portable admis comme Ollama) ; mais son accord sur le coût, 9/20, est sous le taux de base (10/20 pour une réponse constante), et 8/20 sur la spécialité, avec des erreurs confiantes : un verdict du test préalable, pas un modèle utile en l'état. Laya : **écarté**, par sa latence (1 478 ms de médiane). Kev-4B, lev 4B et OpenJev 27B écartés sans mesure. Détail dans `decision-model-candidates.md`.
+3. **Story 8 de la V2, faite le 2026-10-03** ([8-banc-d-un-modele-de-decision-servi-par-ollama.md](../specs/spec-harness-lab-v2/stories/8-banc-d-un-modele-de-decision-servi-par-ollama.md)) : tev1 0.8B, servi par Ollama 0.35.1, relevé sur le PC cible (`tools/bench/results/2026-10-03-pc-cible-v2s8/tev1.json`). Verdict du banc : **écarté**, par sa latence seule (2 655 ms de médiane, 2,6 fois le seuil). La RAM dépasse aussi, de 75 Mo (4 171 Mo, Ollama compris), mais ce chiffre dépend du nombre de requêtes : le processus du modèle grossit d'environ 28 Mo par requête, cause non vérifiée. L'accord (13/20 et 15/20) est douteux : toutes les réponses de coût sont « complexe » à partir du 7ᵉ prompt. Détail et réserves dans `decision-model-candidates.md` ; conditions d'un nouvel essai dans `deferred-work.md`.
+4. **Story 9 de la V2, faite le 2026-10-03** ([9-banc-des-modeles-de-decision-servis-par-llama-cpp.md](../specs/spec-harness-lab-v2/stories/9-banc-des-modeles-de-decision-servis-par-llama-cpp.md)) : Julia-1 et Laya, servis par un llama-server portable (`b11378`) que le banc lance et arrête, relevés sur le PC cible (`tools/bench/results/2026-10-03-pc-cible-v2s9/`). Julia-1 : **retenu par le banc** (2 330 Mo, 3 500 avec le RAG V1 ; 170 ms de médiane), critère 1 accepté par Anaël le 2026-10-03 (binaire portable admis comme Ollama) ; mais son accord sur le coût, 9/20, est sous le taux de base (10/20 pour une réponse constante), et 8/20 sur la spécialité, avec des erreurs confiantes : un verdict du test préalable, pas un modèle utile en l'état. Laya : **écarté**, par sa latence (1 478 ms de médiane). Kev-4B, lev 4B et OpenJev 27B écartés sans mesure. Détail dans `decision-model-candidates.md`.
 5. Optionnel : signaler le défaut Windows en amont (dépôt vLLM Semantic Router), avec la ligne fautive et le correctif évident (`relative_to(path).as_posix()`).

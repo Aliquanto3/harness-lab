@@ -21,7 +21,7 @@ context:
 ## Boundaries & Constraints
 
 **Always:**
-- D2 : barre courte `Harnais · LLM · RAG · MCP · 🛠️ Diagnostic` (en `Harness · LLM · RAG · MCP · 🛠️ Diagnostics`, de `Harness · LLM · RAG · MCP · 🛠️ Diagnose`). Titres complets dans `<title>` (« WaveStack — … ») et `h1` : « Atelier Harnais », « Atelier LLM », « Atelier RAG », « Atelier MCP », « Diagnostic et modèles » (en « Harness workshop », « LLM workshop », « RAG workshop », « MCP workshop », « Diagnostics and models » ; de « Harness-Werkstatt », « LLM-Werkstatt », « RAG-Werkstatt », « MCP-Werkstatt », « Diagnose und Modelle »).
+- D2 : barre courte `Harnais · LLM · RAG · MCP · 🛠️ Diagnostic` (en `Harness · LLM · RAG · MCP · 🛠️ Diagnostics`, de `Harness · LLM · RAG · MCP · 🛠️ Diagnose`). Titres complets dans `<title>` (« HarnessLab — … ») et `h1` : « Atelier Harnais », « Atelier LLM », « Atelier RAG », « Atelier MCP », « Diagnostic et modèles » (en « Harness workshop », « LLM workshop », « RAG workshop », « MCP workshop », « Diagnostics and models » ; de « Harness-Werkstatt », « LLM-Werkstatt », « RAG-Werkstatt », « MCP-Werkstatt », « Diagnose und Modelle »).
 - Décision : le `h1` des ateliers garde son sous-titre après le titre complet (« Atelier LLM : l'intérieur du modèle », « Atelier RAG : l'architecture RAG à manipuler », « Atelier MCP : le protocole à manipuler »).
 - Décision : « Modèles » quitte la barre (cinq onglets, comme D2) ; la page `/models` reste servie, son onglet courant est « 🛠️ Diagnostic », et la page Diagnostic gagne un lien vers `/models` jusqu'à la fusion du lot 3.
 - Décision : l'index n'a pas de `h1` ; on en ajoute un « Atelier Harnais » masqué visuellement (`.sr-only`), pour ne pas prendre de hauteur à l'écran principal ni en projection.
@@ -47,7 +47,7 @@ context:
 
 ## Code Map
 
-Front : `src/wavestack/web/static/` (abrégé `static/`).
+Front : `src/harness_lab/web/static/` (abrégé `static/`).
 
 - `static/{index,llm,rag,mcp,diagnostic,models}.html` -- barre `nav.site-nav[data-i18n-links]` (l.20-26 ; diagnostic 142-148 ; models 79-85), `aria-current` sur l'onglet de la page ; `<title data-i18n=…>` l.8 (index sans data-i18n) ; `h1` llm:55, rag:55, mcp:59, diagnostic:175, models:112 ; `h2` diagnostic:184 (`candidates_title`), :204 (`cloud_title`).
 - `static/i18n.js:111-121` -- `LINK_NAMES` et réécriture du texte des liens depuis `common.links.<name>` ; retirer `/models` de la barre mais garder la page fonctionnelle.
@@ -59,8 +59,8 @@ Front : `src/wavestack/web/static/` (abrégé `static/`).
 - `static/app.js:2406-2453` `renderConsumption` (label / `#consumption-money` / `#consumption-footprint`, séparateur « · » à retirer) ; `fitFootprint` 2459-2478, `topBarFits` 2480-2491, `footprintOptional`, `footprintFitKey` et leurs appels 1102, 2618, 7468, 7508-7511 : à retirer. `static/index.html:235` `#consumption` ; `static/app.css:4836-4858`.
 - `static/app.js:1628-1659` `forcedToggle` ; modèle d'aide `app.js:1291-1319` (`button.brick-help[popovertarget]`, `div.brick-explanation[popover]`, ancrage CSS, `store.openBrickHelp`/`reopenPopovers` pour survivre au rendu) ; CSS `app.css:2317-2372` (`.brick-help` est `absolute` dans `.brick-card` : prévoir une variante en ligne dans le titre) ; `force-section` CSS 2650-2710.
 - `static/app.js:98-103` (`store.jsonClosed`), 3589-3591 (`clearCtxFolds`), 4203-4227 (`jsonTree`/`jsonNode`, chemin racine `json:${key}`, enfants `/…`).
-- `static/app.js:5473-5484` (ligne préfixe), 5983-5989 et 6055 (ligne courante dépliée en direct : `row.sticky || (o.live ? isCurrent : …)`) ; `src/wavestack/session/app_session.py:7528` et `:7605` (charges utiles `prefix_not_reused`) ; `ui.yaml:581-582` (`main.orch.rows.prefix`, `common_tokens`), 688 (`main.log.hook_decisions.prefix_not_reused`).
-- `docs/installation.md` -- sommaire 9-16, nouvelle section après « ## Le modèle local » (142-154) ; données : `wavestack.toml` `[rag.embedding]` 86-105, `[rag.reranker]` 107-124, `[rag_lab]` 126-141 ; `scripts/build_rag_index.py` (`--download` ne prend que l'embedding, `--lang`, `--model`) ; `pyproject.toml` extra `rag-alt` ; fastembed hors pyproject (`docs/guide.md:349-355`).
+- `static/app.js:5473-5484` (ligne préfixe), 5983-5989 et 6055 (ligne courante dépliée en direct : `row.sticky || (o.live ? isCurrent : …)`) ; `src/harness_lab/session/app_session.py:7528` et `:7605` (charges utiles `prefix_not_reused`) ; `ui.yaml:581-582` (`main.orch.rows.prefix`, `common_tokens`), 688 (`main.log.hook_decisions.prefix_not_reused`).
+- `docs/installation.md` -- sommaire 9-16, nouvelle section après « ## Le modèle local » (142-154) ; données : `harness-lab.toml` `[rag.embedding]` 86-105, `[rag.reranker]` 107-124, `[rag_lab]` 126-141 ; `scripts/build_rag_index.py` (`--download` ne prend que l'embedding, `--lang`, `--model`) ; `pyproject.toml` extra `rag-alt` ; fastembed hors pyproject (`docs/guide.md:349-355`).
 - Docs à renommer : `README.md:20-21,69` (+ l.25 lien vers la section), `docs/installation.md:163,176`, `docs/guide.md:13-15,28-33,213-215,263-265,358-360,410-411,462,528`, `docs/modeles.md:41,425,448,514,517`. Garder README 3, 9, 11, 70 et guide 68 (concept).
 
 ## Tasks & Acceptance
@@ -72,13 +72,13 @@ Front : `src/wavestack/web/static/` (abrégé `static/`).
 - [x] `content/messages.yaml` et surcouches -- écran « Atelier LLM » ; renvoi `docs/installation.md` (section « Modèles du RAG ») dans `embedding_absent` et `reranker_absent` -- D2, point 8.
 - [x] Fichiers Camille listés au Code Map -- Pascal, accord masculin -- point 2.
 - [x] `static/app.js`, `static/index.html`, `static/app.css` -- dépense sur 3 lignes (`💰`, `🍃`), retrait de `fitFootprint`/`topBarFits` ; « ? » d'aide à côté du titre « Actions forcées » sur le modèle `.brick-help` + popover, rouvert après rendu ; JSON replié sauf racine (ensemble des chemins inversés par l'utilisateur, remis à zéro par `clearCtxFolds`) ; ligne préfixe : titre et figure `cause · N tokens relus`, jamais dépliée automatiquement comme ligne courante -- points 3 à 6.
-- [x] `src/wavestack/session/app_session.py` -- ajouter `again_tokens` (tokens relus) aux deux charges utiles `prefix_not_reused` (`len(ids) - common` en tour, `again` sinon) -- point 6.
+- [x] `src/harness_lab/session/app_session.py` -- ajouter `again_tokens` (tokens relus) aux deux charges utiles `prefix_not_reused` (`len(ids) - common` en tour, `again` sinon) -- point 6.
 - [x] `docs/installation.md` (+ sommaire), `README.md`, `docs/guide.md`, `docs/modeles.md` -- section « Modèles du RAG » (embedding Granite 121 Mo, reranker BGE 438 Mo, dossiers `models/embedding|reranker/`, téléchargement depuis la carte RAG ou copie hors ligne, index livrés et `scripts/build_rag_index.py --download --lang`, `uv sync --extra rag-alt`, fastembed facultatif) ; renommages -- points 1, 8.
 - [x] `tests/test_ui_texts.py:206-235`, `tests/test_llm_lab.py:100,284,416,818-825`, `tests/test_turn_cache.py` (si charge utile assertée), tests Camille, `tools/e2e/run_e2e.py` (ordre de barre 2341, 6318-6336, 9309-9392, 9510, 10450-10476, 11331-11364, 829-840 JSON, 10005-10203 dépense, 7253 si texte changé) -- adapter ; ajouter une vérif E2E de l'aide « Actions forcées » et du repli JSON des sous-nœuds ; un test pytest de `again_tokens`.
 
 **Acceptance Criteria:**
 - Given n'importe quelle page en fr, en ou de, when elle s'affiche, then la barre montre exactement les cinq onglets D2 dans l'ordre et l'onglet de la page porte `aria-current`.
-- Given `/llm`, `/rag`, `/mcp`, `/diagnostic`, `/`, when la page est chargée, then `document.title` est « WaveStack — <titre complet> » et le `h1` commence par ce titre.
+- Given `/llm`, `/rag`, `/mcp`, `/diagnostic`, `/`, when la page est chargée, then `document.title` est « HarnessLab — <titre complet> » et le `h1` commence par ce titre.
 - Given l'atelier, when on clique sur le « ? » d'« Actions forcées », then une bulle affiche le texte d'aide, ancrée au bouton, et reste ouverte après un nouveau rendu.
 - Given le scénario mémoire, when il tourne, then l'assistant connaît « Pascal », consultant en cybersécurité, et aucun « Camille » ne reste hors de `_bmad-output/`.
 - Given `docs/installation.md`, when on suit la section « Modèles du RAG », then on sait où poser les deux GGUF, comment les télécharger et reconstruire un index.
@@ -131,7 +131,7 @@ Ligne préfixe : le rapport d'enquête montre qu'en direct la dernière ligne du
 
 **Commands:**
 - `uv run ruff check src tests tools ; uv run ruff format --check src tests tools` -- expected: aucun écart
-- `node --check src/wavestack/web/static/app.js src/wavestack/web/static/i18n.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js src/harness_lab/web/static/i18n.js` -- expected: aucune erreur
 - `uv run pytest -q tests/test_ui_texts.py tests/test_llm_lab.py tests/test_turn_cache.py tests/test_i18n.py tests/test_global_memory.py tests/test_subagent.py tests/test_e2e_fake_openai.py tests/test_web_app.py` -- expected: tout passe
 - pytest en quatre quarts des `tests/test_*.py` triés, un à la fois -- expected: tout passe
 - `$env:PYTHONUTF8=1; uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py --only <scénarios touchés>` (diagnostic, bare_llm, short_memory, global_memory, llm_screen, langues, FinOps/GreenOps, MCP/RAG lab pages, contexte JSON) -- expected: 0 FAIL

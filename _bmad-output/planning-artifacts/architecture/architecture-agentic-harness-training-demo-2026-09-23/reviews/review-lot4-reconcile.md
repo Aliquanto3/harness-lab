@@ -114,7 +114,7 @@ Méthode : chaque fait que la page doit recevoir de la session (AD-1 : la page m
 | # | Besoin | Source EXPERIENCE | Couvert par | Statut |
 |---|---|---|---|---|
 | 75 | « Service injoignable (ConnectError) : le poste n'a pas accès à {hôte}. » | « Serveur injoignable » | `error_text` (existant : `tools.network.unreachable{kind, host}`) | couvert |
-| 76 | « Le serveur n'a pas répondu dans le délai ({délai} s). », délai de connexion ou d'appel de `wavestack.toml` | « Délai dépassé » | `error_text` (existant : `mcp.error.timeout{timeout}`, `mcp_connect_timeout_s` / `mcp_call_timeout_s`). AD-27 ne l'écrit pas | couvert |
+| 76 | « Le serveur n'a pas répondu dans le délai ({délai} s). », délai de connexion ou d'appel de `harness-lab.toml` | « Délai dépassé » | `error_text` (existant : `mcp.error.timeout{timeout}`, `mcp_connect_timeout_s` / `mcp_call_timeout_s`). AD-27 ne l'écrit pas | couvert |
 | 77 | `isError` : le protocole a fonctionné, l'outil non | « isError » | `call_ended.is_error` | couvert |
 | 78 | Méthode capturée sans explication (`ping`, `list_changed`, `logging/*`) | idem | `mcp_lab_message.method` absent de `methods.*` | couvert |
 | 79 | Modèle sans appel d'outils | idem | `ask.tools = false`, `reason_text` | couvert |

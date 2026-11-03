@@ -16,13 +16,13 @@ from test_rag_lab import QUESTION, ended, run, run_status, stage, wait_idle
 from test_rag_lab_generation import own_chain
 from test_rag_rerank import Rerankers, place_reranker, rerank_config, session_for
 
-from wavestack import config
-from wavestack.rag import contexts
-from wavestack.rag import index as rag_index
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import chunk_documents, load_rag_content, read_documents
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.rag import contexts
+from harness_lab.rag import index as rag_index
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import chunk_documents, load_rag_content, read_documents
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 
 @pytest.fixture

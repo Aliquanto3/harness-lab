@@ -13,12 +13,12 @@ import yaml
 from test_bricks import _client
 from test_i18n import _session
 
-from wavestack import config
-from wavestack.trace.journal import get_journal
-from wavestack.ui_texts import UiTextsError, load_ui_texts
+from harness_lab import config
+from harness_lab.trace.journal import get_journal
+from harness_lab.ui_texts import UiTextsError, load_ui_texts
 
 CONTENT = config.content_dir()
-STATIC = config.repo_root() / "src" / "wavestack" / "web" / "static"
+STATIC = config.repo_root() / "src" / "harness_lab" / "web" / "static"
 TRANSLATED = ("en", "de")
 _VARIABLE = re.compile(r"\{(\w+)\}")
 _KEY = r"[a-z0-9_.]+"
@@ -219,7 +219,7 @@ def test_each_page_awaits_the_texts_and_shares_the_navigation(name):
     assert 'data-i18n-aria-label="common.theme.name"' in nav
     assert 'data-i18n="common.display.menu"' in nav and 'data-i18n="common.display.theme"' in nav
     links = re.findall(r'<a href="/(\w*)"( class="site-nav-brand")?[^>]*>([^<]+)</a>', nav)
-    assert [(href, text) for href, brand, text in links if brand] == [("", "WaveStack")], name
+    assert [(href, text) for href, brand, text in links if brand] == [("", "HarnessLab")], name
     named = [(href or "home", text) for href, brand, text in links if not brand]
     # Lot 1 of 2026-10-04 (D2): five tabs, « Modèles » out of the bar; story 10: a sixth tab.
     expected = ["home", "llm", "rag", "mcp", "security", "diagnostic"]

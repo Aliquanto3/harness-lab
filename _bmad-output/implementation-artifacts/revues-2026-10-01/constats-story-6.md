@@ -30,7 +30,7 @@ Les quatre relecteurs ont rendu (Intent Alignment, Verification Gap, Blind Hunte
 - BH8. Libellé de durée selon la direction, pas selon le type de message (notification serveur étiquetée « aller-retour ») ; le payload n'a pas de champ requête/réponse/notification/erreur.
 - BH9. Ordre des requêtes sortantes deviné alors que `envelope.seq` est disponible (mal placé pour les GET SSE / DELETE du Streamable HTTP).
 - BH10. JSON-RPC brut non borné et dupliqué (`mcp_lab_message.jsonrpc` puis `mcp_lab_call_ended.raw`) dans le journal, le flux SSE et chaque instantané ; ni plafond ni indicateur de troncature.
-- BH11. `launch_command` affiche `python -m wavestack.mcp.local_server {lang}` en dur alors que le lancement réel utilise `sys.executable` ; dériver de `StdioServerParameters`.
+- BH11. `launch_command` affiche `python -m harness_lab.mcp.local_server {lang}` en dur alors que le lancement réel utilise `sys.executable` ; dériver de `StdioServerParameters`.
 - BH12. Clés réutilisées absentes en en/de : `session.mcp.no_loop`, `session.llm_lab.back_to_idle` (ce dernier hors de l'espace de noms) ; créer `session.mcp_lab.back_to_idle` en trois langues.
 - BH13. Libellé « Atelier MCP : connexion terminée » trompeur (fin de la tentative, connexion souvent ouverte) ; préférer « poignée de main terminée ».
 - BH14. `intro_text` : « la brique MCP de l'atelier » confond atelier MCP et écran principal (fr, en, de) ; dire « l'écran principal ».

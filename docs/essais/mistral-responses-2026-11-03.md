@@ -1,7 +1,7 @@
 # Essai : l'API Responses de Mistral avec l'adaptateur `openai_responses` (2026-11-03)
 
 > **Suite** : correctif appliqué dans la PR #172 (version 1.7.4). L'adaptateur affiche et
-> renvoie le raisonnement en clair, et `wavestack.toml` porte l'exemple commenté
+> renvoie le raisonnement en clair, et `harness-lab.toml` porte l'exemple commenté
 > `mistral_responses`. Les constats ci-dessous décrivent l'adaptateur avant ce correctif.
 
 Test rapide, pas une story. Script jetable, resté sur la branche `test/mistral-responses` :
@@ -48,7 +48,7 @@ Aucune erreur 422 dans tout l'essai.
 
 ## Changement minimal proposé (appliqué dans la PR #172, avec l'attribution du texte en clair à la brique Raisonnement)
 
-Adaptateur `src/wavestack/models/openai_responses.py`, deux retouches :
+Adaptateur `src/harness_lab/models/openai_responses.py`, deux retouches :
 
 - lire `response.reasoning_text.delta` comme `response.reasoning_summary_text.delta` (canal
   `reasoning`, masqué, parties séparées par `\n\n` selon `(item_id, content_index)`) ;
@@ -59,7 +59,7 @@ Tests : deux cas dans `tests/test_openai_responses.py` sur le faux serveur SSE (
 `reasoning_text.delta` affiché ; item en clair renvoyé au tour suivant).
 
 Préréglage (exemple à recopier dans `settings.json`, ou entrée `mistral_responses` désactivée
-par défaut dans `wavestack.toml`) :
+par défaut dans `harness-lab.toml`) :
 
 ```toml
 [[cloud.models]]
@@ -90,5 +90,5 @@ une fois au diagnostic (ou `MISTRAL_API_KEY`), sur le même hôte.
 ## Ligne pour `veille-agents-code/tests-pratiques/PLAN.md`
 
 ```
-| Mistral Responses dans wavestack | fait le 2026-11-03 (`wavestack`, `docs/essais/mistral-responses-2026-11-03.md`, PR #172, v1.7.4) | OK après correctif : aucun 422 avec `mistral-large-4` (`store` et `include` acceptés et ignorés), streaming, appels d'outil, `usage` et `cached_tokens` OK ; le raisonnement en clair de Mistral (`response.reasoning_text.delta`, items `content` sans `encrypted_content`) est maintenant affiché et renvoyé par l'adaptateur ; `effort: "none"` refusé (400), d'où un exemple de préréglage `mistral_responses` avec `always = true`. Essai ~0,02 $. |
+| Mistral Responses dans harness-lab | fait le 2026-11-03 (`harness-lab`, `docs/essais/mistral-responses-2026-11-03.md`, PR #172, v1.7.4) | OK après correctif : aucun 422 avec `mistral-large-4` (`store` et `include` acceptés et ignorés), streaming, appels d'outil, `usage` et `cached_tokens` OK ; le raisonnement en clair de Mistral (`response.reasoning_text.delta`, items `content` sans `encrypted_content`) est maintenant affiché et renvoyé par l'adaptateur ; `effort: "none"` refusé (400), d'où un exemple de préréglage `mistral_responses` avec `always = true`. Essai ~0,02 $. |
 ```

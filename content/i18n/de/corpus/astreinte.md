@@ -1,6 +1,6 @@
 # Anlage der Bereitschaftskontakte von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Anlage beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Anlage beschreibt kein reales Unternehmen. -->
 
 Diese Anlage zum Krisenmanagementverfahren listet die Kontakte, die außerhalb der Geschäftszeiten, Tag und Nacht, je nach betroffenem Bereich zu erreichen sind.
 

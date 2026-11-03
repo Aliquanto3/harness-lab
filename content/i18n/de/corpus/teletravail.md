@@ -1,6 +1,6 @@
 # Vereinbarung zur Telearbeit bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Vereinbarung beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Vereinbarung beschreibt kein reales Unternehmen. -->
 
 Alle Mitarbeitenden mit unbefristetem Vertrag können nach einer Einarbeitungszeit von 2 Monaten bis zu 3 Tage pro Woche in Telearbeit arbeiten. Praktikanten und Auszubildende sind auf 1 Tag pro Woche begrenzt, damit sie den Kontakt zu ihrem Betreuer halten.
 

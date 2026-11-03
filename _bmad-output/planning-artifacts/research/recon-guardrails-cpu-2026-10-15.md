@@ -1,8 +1,8 @@
 ---
-title: 'technical research: guardrails utilisables sur CPU pour WaveStack'
+title: 'technical research: guardrails utilisables sur CPU pour HarnessLab'
 type: 'technical'
 topic: 'guardrails utilisables sur CPU'
-decision: 'Choisir un ou plusieurs guardrails pour la démo WaveStack, exécutables sur CPU/RAM (PC pro 16 Go, sans GPU), pédagogiques avant tout'
+decision: 'Choisir un ou plusieurs guardrails pour la démo HarnessLab, exécutables sur CPU/RAM (PC pro 16 Go, sans GPU), pédagogiques avant tout'
 source: 'run (recherche web, ici)'
 status: draft
 preset: 'standard'
@@ -13,7 +13,7 @@ updated: '2026-10-15'
 
 # Guardrails utilisables sur CPU — recherche technique
 
-**Décision servie :** choisir, pour la démo WaveStack (SLM locaux, CPU/RAM, PC pro 16 Go, aucun GPU), un ou des guardrails illustrant la brique « sécurité / garde-fous » du harnais, sans dégrader l'expérience pédagogique par une latence ou une consommation RAM excessives.
+**Décision servie :** choisir, pour la démo HarnessLab (SLM locaux, CPU/RAM, PC pro 16 Go, aucun GPU), un ou des guardrails illustrant la brique « sécurité / garde-fous » du harnais, sans dégrader l'expérience pédagogique par une latence ou une consommation RAM excessives.
 
 **Avertissement méthodologique :** cette note ne contient aucun exemple de contenu dangereux réel. Les mentions de « faux positifs », « sur-blocage » ou « contenu toxique » restent génériques, sans texte d'attaque reproductible.
 
@@ -51,7 +51,7 @@ Une nouvelle vague de modèles 2025-2026 (SGuard-v1, GLiGuard, PolyGuard, DynaGu
 
 Sources numérotées en section 4.
 
-## 3. Recommandation classée pour la démo WaveStack
+## 3. Recommandation classée pour la démo HarnessLab
 
 1. **Granite-Guardian-HAP-38M (IBM, Apache 2.0)** — le choix le plus sûr pour une démo CPU : explicitement conçu pour tourner sans GPU, empreinte minimale, licence permissive, facile à faire tenir dans le budget RAM avec un SLM déjà chargé. Limite pédagogique honnête : ne couvre que la toxicité, pas les injections de prompt ni les PII — à présenter comme « un guardrail parmi d'autres », pas une solution complète. Aucune donnée FR trouvée : à tester avec quelques prompts français neutres avant de s'y appuyer dans la démo.
 2. **Llama Guard 3-1B-INT4 (Meta)** — le meilleur compromis couverture/poids si la démo veut montrer un guardrail multi-catégories (pas seulement toxicité) et illustrer le compromis sécurité/faux refus avec des chiffres officiels Meta (y compris pour le français, chiffré par Meta lui-même). Contrepartie : licence gated Meta à faire valider (conditions d'usage/redistribution), et l'effet de filtrage en français reste nettement plus faible qu'en anglais d'après les propres chiffres de Meta (38 % de réduction de violation en FR vs 75 % en EN) — bon point pédagogique à exposer tel quel.

@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WaveStack — maquette de refonte</title>
+<title>HarnessLab — maquette de refonte</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --canvas:#E9EBF3; --panel:#FFFFFF; --band:#F5F6FA; --ink:#1A1733; --ink2:#5B5877; --line:#D8DAE6;
-  --brand:#451DC7;
-  --prompt:#451DC7; --prompt-bg:#EEE9FC;
+  --brand:#0B6B78;
+  --prompt:#0B6B78; --prompt-bg:#EEE9FC;
   --context:#0F7B6C; --context-bg:#E2F3EF;
   --harness:#B8327A; --harness-bg:#FBE7F1;
   --net:#D9A400; --net-bg:#FFF5D1;
@@ -140,7 +140,7 @@ body.linking [data-k].hl{box-shadow:0 0 0 2px var(--c)}
 <body>
 
 <header class="top">
-  <span class="logo">WaveStack</span>
+  <span class="logo">HarnessLab</span>
   <select aria-label="Scénario"><option>Scénario : outils réseau</option></select>
   <div class="gauge" aria-label="Remplissage de la fenêtre de contexte">
     <div class="bar">
@@ -237,7 +237,7 @@ body.linking [data-k].hl{box-shadow:0 0 0 2px var(--c)}
     <div class="pbody">
       <p class="note">Tour 1 : 723 tokens envoyés à Groq, fenêtre de 4 000, réserve de sortie 1 536.</p>
       <div class="seg" data-d="neutral" data-k="gabarit"><header>Gabarit de conversation<span>≈ 0</span></header><pre>{"model":"openai/gpt-oss-120b","messages":[{"role":"system",…</pre></div>
-      <div class="seg" data-d="prompt" data-k="prompt"><header>Prompt système<span>≈ 31</span></header><pre>Tu es l'assistant de démonstration de WaveStack. Réponds en français, de façon claire et concise.</pre></div>
+      <div class="seg" data-d="prompt" data-k="prompt"><header>Prompt système<span>≈ 31</span></header><pre>Tu es l'assistant de démonstration de HarnessLab. Réponds en français, de façon claire et concise.</pre></div>
       <div class="seg" data-d="context" data-k="mglobale"><header>Mémoire globale<span>≈ 38</span></header><pre>Informations retenues lors de conversations précédentes avec l'utilisateur…</pre></div>
       <div class="seg" data-d="harness" data-k="outils reseau"><header>Description des outils<span>≈ 381</span></header><pre>[{"name":"wikipedia_summary","description":"Renvoie le résumé…"}, …]</pre></div>
       <div class="seg" data-d="context" data-k="mcourte"><header>Message utilisateur<span>≈ 12</span></header><pre>Résume l'article Wikipédia sur le Mont-Saint-Michel.</pre></div>

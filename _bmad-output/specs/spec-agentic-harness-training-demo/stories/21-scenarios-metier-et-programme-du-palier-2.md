@@ -44,7 +44,7 @@ deferred:
       hooks.ask exige spec.network et un aperçu de requête ; voir la section « Revue
       indépendante ».
     location: >-
-      src/wavestack/hooks.py (ask)
+      src/harness_lab/hooks.py (ask)
     severity: low
   - summary: >-
       IAM et Souveraineté : pas de repli hors ligne enregistré, seulement l'échec expliqué.
@@ -58,7 +58,7 @@ deferred:
     evidence: |-
       Aucun instantané réel encore ; à brancher dans _mcp_connect avec un seuil [mcp].
     location: >-
-      src/wavestack/session/app_session.py (_mcp_connect)
+      src/harness_lab/session/app_session.py (_mcp_connect)
     severity: low
 ---
 
@@ -89,7 +89,7 @@ deferred:
 
 | Scenario | Input / State | Expected Output / Behavior | Error Handling |
 |----------|--------------|---------------------------|----------------|
-| Programme | Lancement de WaveStack | Sélecteur : 6 modules dans l'ordre de FR-38, puis « Transverses et métier » : `data_flows`, `soc`, `iam`, `sovereignty` | Fichier invalide : `harness_error`, programme vide (inchangé) |
+| Programme | Lancement de HarnessLab | Sélecteur : 6 modules dans l'ordre de FR-38, puis « Transverses et métier » : `data_flows`, `soc`, `iam`, `sovereignty` | Fichier invalide : `harness_error`, programme vide (inchangé) |
 | Début de module | Lancer le premier scénario du module N | Briques des modules 1 à N-1 actives, sauf les exceptions écrites | — |
 | SOC | `soc`, prompt 1 puis prompt 2 | `read_file` sur `alertes_siem.log` journalisé par H2 ; lecture de `confidentiel/comptes_privilegies.txt` bloquée par H1 ; journal d'audit ouvert depuis le schéma | Le modèle n'appelle pas l'outil : forçage `read_file` (préréglage existant) |
 | IAM hors ligne | `iam` sans réseau | Microsoft Learn dessiné indisponible avec sa raison ; le tour aboutit sans outil | Décocher puis recocher le serveur pour réessayer |
@@ -100,10 +100,10 @@ deferred:
 ## Code Map
 
 - `content/scenarios.yaml` -- programme, en-tête de la convention cumulative, 20 scénarios après la story.
-- `src/wavestack/scenarios.py` -- schéma pydantic (inchangé) : `Scenario`, `Module` (30 à 60 min), `transverse`.
-- `src/wavestack/session/app_session.py:3979` `launch_scenario` / `_apply_launch_config:632` -- valeurs de lancement : outils hors ligne, serveur MCP `local`, hooks h1 h2 h3 ; `_emit_preview:2865` compte les extraits RAG à leur maximum (AD-9).
-- `src/wavestack/web/static/app.js:2224` -- libellé du groupe « Transverse » du sélecteur.
-- `src/wavestack/hooks.py:38` -- H1 bloque tout chemin sous `confidentiel/`.
+- `src/harness_lab/scenarios.py` -- schéma pydantic (inchangé) : `Scenario`, `Module` (30 à 60 min), `transverse`.
+- `src/harness_lab/session/app_session.py:3979` `launch_scenario` / `_apply_launch_config:632` -- valeurs de lancement : outils hors ligne, serveur MCP `local`, hooks h1 h2 h3 ; `_emit_preview:2865` compte les extraits RAG à leur maximum (AD-9).
+- `src/harness_lab/web/static/app.js:2224` -- libellé du groupe « Transverse » du sélecteur.
+- `src/harness_lab/hooks.py:38` -- H1 bloque tout chemin sous `confidentiel/`.
 - `content/demo_files/` -- fichiers lus par `read_file` (nouveau : `alertes_siem.log`, `confidentiel/comptes_privilegies.txt`).
 - `tests/test_scenarios.py` -- compte et ordre du programme ; `tests/test_reasoning.py:530`, `tests/test_global_memory.py:453`, `tests/test_rag.py:~505`, `tests/test_compression.py:702` -- briques attendues des scénarios déplacés.
 - `tests/test_mcp.py` -- `McpWeb`, boucle `loop`, serveur MCP local réel ; `tests/test_rag.py` -- `rag_values`, `build`, `place_model`, `Embedders` ; `tests/test_cloud.py` -- `Provider`, `SENTINEL`.
@@ -114,13 +114,13 @@ deferred:
 **Execution:**
 - `content/scenarios.yaml` -- réordonner en 6 modules (1 « Du LLM nu au harnais » 60 min : bare_llm, reasoning, short_memory, system_prompt, global_memory ; 2 « Outils » 45 ; 3 « RAG » 45 ; 4 « MCP » 45 ; 5 « Skills et hooks » 60 ; 6 « Sous-agent et compression » 60), rendre cumulatifs native_tools, rag, mcp_full, skills, subagent (et alignés network_tools, rag_rerank, mcp_lazy, compression), écrire les exceptions en tête, réécrire les consignes qui citaient l'ancien ordre ; ajouter `soc`, `iam`, `sovereignty` dans `transverse`.
 - `content/demo_files/alertes_siem.log`, `content/demo_files/confidentiel/comptes_privilegies.txt` -- fichiers fictifs du scénario SOC.
-- `src/wavestack/web/static/app.js` -- groupe « Transverses et métier ».
+- `src/harness_lab/web/static/app.js` -- groupe « Transverses et métier ».
 - `tests/test_scenarios.py` -- ordre de FR-38, compte, cumul avec exceptions, adéquation à la fenêtre de chaque scénario, configuration des trois scénarios métier ; mettre à jour les tests des autres fichiers qui figeaient l'ancien ordre ou l'ancienne configuration.
 - `tools/e2e/fake_openai.py`, `tools/e2e/run_e2e.py`, `tools/e2e/README.md` -- déclencheurs SOC/IAM/Souveraineté ; scénarios E2E `programme`, `soc`, `iam`, `sovereignty` ; capture 26.
 - `_bmad-output/implementation-artifacts/deferred-work.md` -- clore les reports de placement (stories 13, 14, 15, 19, 20) ; consigner les tests réseau et de fenêtre pour le PC cible.
 
 **Acceptance Criteria:**
-- Given WaveStack lancé, when on ouvre le sélecteur de scénario, then les modules suivent l'ordre de FR-38 et les scénarios métier suivent « Où vont mes données ? ».
+- Given HarnessLab lancé, when on ouvre le sélecteur de scénario, then les modules suivent l'ordre de FR-38 et les scénarios métier suivent « Où vont mes données ? ».
 - Given un module N > 1, when on lance son premier scénario, then les briques des modules précédents sont voulues, hors exceptions écrites en tête de `content/scenarios.yaml`.
 - Given chaque scénario fourni, when on le lance, then l'aperçu de la jauge ne déborde pas et laisse la place du premier prompt.
 - Given le scénario SOC, when on envoie ses deux prompts, then la lecture du journal d'alertes est journalisée par H2 et la lecture du fichier confidentiel est bloquée par H1, visible dans le journal d'audit.
@@ -203,7 +203,7 @@ Triage fait par le coordinateur (`notes-21.md`) : 26 points appliqués, 3 non ap
 **Fichiers.**
 - `content/scenarios.yaml` : programme, convention et exceptions, consignes réécrites, trois scénarios métier.
 - `content/demo_files/alertes_siem.log`, `content/demo_files/confidentiel/comptes_privilegies.txt` : fichiers fictifs du SOC.
-- `src/wavestack/web/static/app.js` : groupe « Transverses et métier » du sélecteur.
+- `src/harness_lab/web/static/app.js` : groupe « Transverses et métier » du sélecteur.
 - `tests/test_program.py` (nouveau) : ordre FR-38, cumul, adéquation à la fenêtre de chaque scénario (estimation, RAG au maximum, serveur MCP local réel), SOC de bout en bout, serveurs publics indisponibles.
 - `tests/test_scenarios.py`, `test_reasoning.py`, `test_global_memory.py`, `test_rag.py`, `test_compression.py` : nouvel ordre et nouvelles briques ; `tests/test_e2e_fake_openai.py` : déclencheurs métier.
 - `tools/e2e/run_e2e.py`, `fake_openai.py`, `README.md` : scénarios `programme`, `soc`, `iam`, `sovereignty`, capture 26.
@@ -228,7 +228,7 @@ Triage fait par le coordinateur (`notes-21.md`) : 26 points appliqués, 3 non ap
 - `uv lock --check --offline` -- expected: lockfile à jour.
 - `uv run ruff check . && uv run ruff format --check .` -- expected: aucun écart.
 - `uv run pytest -q` -- expected: suite complète verte.
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur.
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur.
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` -- expected: 0 échec ; puis `--only programme soc iam sovereignty`.
 
 ## Hypothèses à valider

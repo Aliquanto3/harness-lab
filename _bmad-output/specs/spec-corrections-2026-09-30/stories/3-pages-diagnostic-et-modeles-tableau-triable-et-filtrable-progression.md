@@ -24,7 +24,7 @@ deferred:
     evidence: |-
       L'E2E ne contrôle que le tri et le filtre en de à 1 280 px et prend des captures ; à vérifier pendant la recette de la phase 3 (Edge, trois largeurs, de).
     location: >-
-      src/wavestack/web/static/models.html, diagnostic.html
+      src/harness_lab/web/static/models.html, diagnostic.html
     severity: medium (unverified)
 ---
 
@@ -70,15 +70,15 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/web/static/models.html:126-148` -- `<main>` : `h1`, `#publishers-error`, `#models-legend`, `#models-status`, `table#models-table.model-table` (thead statique de 9 `th scope=col`, un `tbody` par groupe créé en JS), `p.models-note`. `<style>` en ligne l.13-110 (déjà sur tokens). Script l.150-248 : `COLUMN_ORDER` l.157, `row()` l.178-206 (`tr.dataset.value`, cellules `*_text`), `load()` l.208 (fetch unique de `/api/diagnostic`), compteur `models.count`.
-- `src/wavestack/models/catalog.py:349-384` -- `ModelEntry` : `hosting`, `publisher_id`, `params_b`, `size_bytes`, `window`, `tools`, `reasoning` (`never|always|toggle|unknown`, `models/capabilities.py:108`), `usable`, `label_text`, `publisher_text`… ; `sort_key` l.639, `group_models` l.651, `models_payload` l.677. Ajouter aux lignes du tableau des `data-*` bruts (`data-size`, `data-window`, `data-hosting`, `data-publisher`, `data-tools`, `data-reasoning`) côté page.
-- `src/wavestack/web/static/diagnostic.html` -- `<style>` en ligne l.13-66 (rem, 640 px) ; corps l.82-104 (`ul#checks`, `ul#candidates`, `ul#cloud-models`, `dialog#cloud-warning`, `div#select-model`) ; module l.106-616 : `patchList` l.177 (préserve focus et clés saisies), `renderCheck` l.188, `renderCandidates` l.214 (liste vide → `diagnostic.no_candidate`), `servedRow` l.272, `renderCloud` l.341, `fetchDiagnostic`/`loadDiagnostic` l.510-545 (`historyUpTo`), `openStream` l.558 (`EventSource("/api/diagnostic/stream")`, écouteurs par `kind`).
-- `src/wavestack/web/app.py:471` -- `diagnostic_state()` : ajouter `searching` et `progress` ; `_sse_stream` l.894.
-- `src/wavestack/session/diagnostic.py:418-448` -- `_discover` (énumération `discovery.discover`, boucle, cache de sondes, `_probe_candidate` l.444) ; `_emit_check` l.211 (modèle d'émission) ; appelé aussi par `_select_model_locked` l.579 et `_select_server_locked` l.663 ; `last_result` posé à la fin de `_check_model_locked` l.469.
-- `src/wavestack/trace/catalog.py` -- `PAYLOAD_MODELS` (~l.1250), `DiagnosticCheckPayload` l.21 ; précédent de progression `RagRerankProgressPayload{done,total}` l.954.
-- `src/wavestack/web/static/app.js:6175` -- `eventSummary` (cas `diagnostic_check` l.6299, `rag_rerank_progress` l.6277) ; `content/ui.yaml:646+` `main.log.kinds`.
+- `src/harness_lab/web/static/models.html:126-148` -- `<main>` : `h1`, `#publishers-error`, `#models-legend`, `#models-status`, `table#models-table.model-table` (thead statique de 9 `th scope=col`, un `tbody` par groupe créé en JS), `p.models-note`. `<style>` en ligne l.13-110 (déjà sur tokens). Script l.150-248 : `COLUMN_ORDER` l.157, `row()` l.178-206 (`tr.dataset.value`, cellules `*_text`), `load()` l.208 (fetch unique de `/api/diagnostic`), compteur `models.count`.
+- `src/harness_lab/models/catalog.py:349-384` -- `ModelEntry` : `hosting`, `publisher_id`, `params_b`, `size_bytes`, `window`, `tools`, `reasoning` (`never|always|toggle|unknown`, `models/capabilities.py:108`), `usable`, `label_text`, `publisher_text`… ; `sort_key` l.639, `group_models` l.651, `models_payload` l.677. Ajouter aux lignes du tableau des `data-*` bruts (`data-size`, `data-window`, `data-hosting`, `data-publisher`, `data-tools`, `data-reasoning`) côté page.
+- `src/harness_lab/web/static/diagnostic.html` -- `<style>` en ligne l.13-66 (rem, 640 px) ; corps l.82-104 (`ul#checks`, `ul#candidates`, `ul#cloud-models`, `dialog#cloud-warning`, `div#select-model`) ; module l.106-616 : `patchList` l.177 (préserve focus et clés saisies), `renderCheck` l.188, `renderCandidates` l.214 (liste vide → `diagnostic.no_candidate`), `servedRow` l.272, `renderCloud` l.341, `fetchDiagnostic`/`loadDiagnostic` l.510-545 (`historyUpTo`), `openStream` l.558 (`EventSource("/api/diagnostic/stream")`, écouteurs par `kind`).
+- `src/harness_lab/web/app.py:471` -- `diagnostic_state()` : ajouter `searching` et `progress` ; `_sse_stream` l.894.
+- `src/harness_lab/session/diagnostic.py:418-448` -- `_discover` (énumération `discovery.discover`, boucle, cache de sondes, `_probe_candidate` l.444) ; `_emit_check` l.211 (modèle d'émission) ; appelé aussi par `_select_model_locked` l.579 et `_select_server_locked` l.663 ; `last_result` posé à la fin de `_check_model_locked` l.469.
+- `src/harness_lab/trace/catalog.py` -- `PAYLOAD_MODELS` (~l.1250), `DiagnosticCheckPayload` l.21 ; précédent de progression `RagRerankProgressPayload{done,total}` l.954.
+- `src/harness_lab/web/static/app.js:6175` -- `eventSummary` (cas `diagnostic_check` l.6299, `rag_rerank_progress` l.6277) ; `content/ui.yaml:646+` `main.log.kinds`.
 - `content/ui.yaml:903-957` (`diagnostic`), `:959-985` (`models`, `count.one/other`) ; surcouches `content/i18n/{en,de}/ui.yaml`.
-- `src/wavestack/web/static/pages.css` -- styles partagés des pages annexes (après la story 2 : `.site-nav`) ; boutons à reprendre de `llm.css:199-235`.
+- `src/harness_lab/web/static/pages.css` -- styles partagés des pages annexes (après la story 2 : `.site-nav`) ; boutons à reprendre de `llm.css:199-235`.
 - `tests/test_ui_texts.py:134,207` -- clés `t()` des modules en ligne ; regex `<th scope="col">([^<]+)</th>` à adapter aux boutons de tri.
 - `tests/test_web_tokens.py:528,577` -- pas de couleur en dur, `tokens.css` et `theme.js` d'abord.
 - `tests/test_cli_diagnostic.py:336` (ensemble exact des `check`), l.117, l.136, sondes l.204-303 et l.773-858 (`_fake_probe_ok` l.386) ; `tests/test_model_catalog.py:644`.
@@ -88,13 +88,13 @@ deferred:
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/trace/catalog.py` -- `DiagnosticProgressPayload{done: int ≥ 0, total: int ≥ 0}` enregistré sous `diagnostic_progress`.
-- `src/wavestack/session/diagnostic.py` -- émission dans `_discover` (après pré-passage sur le cache, puis après chaque sonde).
-- `src/wavestack/web/app.py` -- `searching`, `progress` dans `/api/diagnostic`.
-- `src/wavestack/web/static/models.html` -- boutons de tri, filtres, compteur, `data-*` bruts, état vide ; styles sur tokens.
-- `src/wavestack/web/static/diagnostic.html` -- état de recherche et progression en direct, refonte des styles et de la hiérarchie.
-- `src/wavestack/web/static/pages.css` -- tableau, badges, boutons, champs partagés.
-- `src/wavestack/web/static/app.js` -- résumé de `diagnostic_progress` dans le journal de l'atelier.
+- `src/harness_lab/trace/catalog.py` -- `DiagnosticProgressPayload{done: int ≥ 0, total: int ≥ 0}` enregistré sous `diagnostic_progress`.
+- `src/harness_lab/session/diagnostic.py` -- émission dans `_discover` (après pré-passage sur le cache, puis après chaque sonde).
+- `src/harness_lab/web/app.py` -- `searching`, `progress` dans `/api/diagnostic`.
+- `src/harness_lab/web/static/models.html` -- boutons de tri, filtres, compteur, `data-*` bruts, état vide ; styles sur tokens.
+- `src/harness_lab/web/static/diagnostic.html` -- état de recherche et progression en direct, refonte des styles et de la hiérarchie.
+- `src/harness_lab/web/static/pages.css` -- tableau, badges, boutons, champs partagés.
+- `src/harness_lab/web/static/app.js` -- résumé de `diagnostic_progress` dans le journal de l'atelier.
 - `content/ui.yaml`, `content/i18n/{en,de}/ui.yaml` -- clés nouvelles.
 - `tests/test_cli_diagnostic.py` -- `diagnostic_progress` : `0/N` puis une émission par sonde ; `0/0` quand tout est en cache ; `searching`/`progress` dans `/api/diagnostic` avant et après le contrôle `model`.
 - `tests/test_ui_texts.py`, `tests/test_web_tokens.py` -- adaptés (en-têtes à boutons, clés nouvelles).

@@ -25,11 +25,11 @@ from test_subagent import RESULT, delegation
 from test_tools import QWEN, call
 from test_turn import _run
 
-from wavestack import config
-from wavestack.hooks import DEMO_HOOKS
-from wavestack.models.servers import ServerError
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.hooks import DEMO_HOOKS
+from harness_lab.models.servers import ServerError
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 CLOSURE = "\n</think>\n\n"  # `reasoning_wrap(QWEN)[1]`
 ANSWER = "Il arrive à 17 h 25."
@@ -490,7 +490,7 @@ def test_the_kv_cache_line_is_the_first_generations_own(reuse, expected):
 def test_the_kv_cache_time_saved_joins_the_sessions_running_total():
     """Story 9 (CAP-7, bilan de séance): 100 tokens ÷ 50/s = 2 s evited, in the session's
     running total (`consumption_updated`), from the same two fields as the line above."""
-    from wavestack.models.openai_chat import reset_spend
+    from harness_lab.models.openai_chat import reset_spend
 
     reset_spend()
     engine = _Cached(

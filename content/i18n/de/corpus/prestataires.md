@@ -1,6 +1,6 @@
 # Sicherheitsrichtlinie für Dienstleister bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
 
 Exemplia ordnet jeden Dienstleister, der Unternehmensinformationen verarbeitet, einer von zwei Stufen zu: kritisch, wenn er Daten hostet oder auf das interne Netzwerk zugreift, oder standard für die übrigen. Die Stufe wird vor der Vertragsunterzeichnung von der Dienstleister-Einheit festgelegt und jedes Jahr überprüft.
 

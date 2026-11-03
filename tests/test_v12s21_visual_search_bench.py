@@ -138,7 +138,7 @@ def test_select_refuses_fewer_pages_than_gold_pages(tmp_path):
 
 def test_real_corpus_gives_the_default_sample():
     pages = b.build_pages("fr")
-    from wavestack.rag.corpus import load_rag_questions
+    from harness_lab.rag.corpus import load_rag_questions
 
     sel = b.select(pages, load_rag_questions("fr"), "fr")
     assert len(sel.pages) == b.N_PAGES and len(sel.queries) == b.N_QUERIES

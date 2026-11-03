@@ -1,8 +1,8 @@
 # Brique « RAG » : corpus de démonstration et textes de la brique (story 15, AD-19, AD-22).
-# Textes fictifs rédigés pour WaveStack : « Exemplia » est une organisation imaginaire, et
+# Textes fictifs rédigés pour HarnessLab : « Exemplia » est une organisation imaginaire, et
 # ces documents originaux sont sous la licence du dépôt.
 notice_text: >-
-  Textes fictifs rédigés pour WaveStack : Exemplia est une organisation imaginaire, ses
+  Textes fictifs rédigés pour HarnessLab : Exemplia est une organisation imaginaire, ses
   règles ne décrivent aucune entreprise réelle.
 
 # Placé avant les extraits, dans le message de l'utilisateur du tour.

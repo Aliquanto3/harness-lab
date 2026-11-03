@@ -1,5 +1,5 @@
 # Atelier LLM (story 29, AD-19) : les textes de la page /llm, validés par pydantic
-# (wavestack.session.llm_lab.LabContent). Un fichier invalide : la page reste servie et dit
+# (harness_lab.session.llm_lab.LabContent). Un fichier invalide : la page reste servie et dit
 # pourquoi. `{…}` : un nombre ou un nom que la session met en forme et que la page place.
 
 title_text: "Atelier LLM : l'intérieur du modèle"
@@ -33,7 +33,7 @@ sections:
       À chaque pas, le modèle donne une probabilité à chaque token du vocabulaire.
       L'échantillonnage est le tirage au sort du token suivant parmi eux ; ces réglages
       décident comment il se fait. L'ordre décrit ici est
-      celui de llama.cpp (moteur de WaveStack, llama-server, Ollama) : top-k (ne garder que
+      celui de llama.cpp (moteur de HarnessLab, llama-server, Ollama) : top-k (ne garder que
       les tokens les plus probables), puis top-p (ne garder qu'un groupe de tokens qui totalise
       une probabilité donnée), puis min-p (écarter les tokens trop improbables), puis la
       température (resserre ou étale les probabilités) ; un fournisseur cloud peut appliquer
@@ -129,7 +129,7 @@ stages:
       d'illustration. Découpez votre texte : ses vrais tokens remplaceront ceux-ci.
     example_cloud_text: >-
       Exemple de découpage, pas celui de ce modèle : son tokenizer est chez son fournisseur.
-      Pour votre texte, WaveStack donne seulement l'estimation ci-contre.
+      Pour votre texte, HarnessLab donne seulement l'estimation ci-contre.
   transfo:
     title_text: "TRANSFORMATION"
     subtitle_text: "les nombres traversent les couches (les étages de calcul) du modèle"
@@ -234,7 +234,7 @@ stages:
       stack_hybrid_text: "couche {n} sur {couches} · plein : attention complète, tirets : récurrente"
       stack_done_text: "{couches} couches traversées"
       stack_unknown_text: "nombre de couches inconnu pour ce modèle"
-      unknown_text: "Dimensions inconnues pour ce modèle : WaveStack ne peut pas les lire."
+      unknown_text: "Dimensions inconnues pour ce modèle : HarnessLab ne peut pas les lire."
     note_text:
       one: >-
         Le moteur n'expose ni les poids d'attention ni les états cachés : {n} token, 8 nombres
@@ -443,7 +443,7 @@ generation:
     événements.
   more_text: "… et {reste} de plus, non affichés (512 puces au plus)."
   legend_text: >-
-    Les couleurs (violet, vert) alternent d'une puce à l'autre sans rien signifier : elles
+    Les couleurs (bleu, orange) alternent d'une puce à l'autre sans rien signifier : elles
     séparent seulement un token de son voisin.
   sent_summary_text: "Voir le prompt envoyé au modèle"
   status:
@@ -453,7 +453,7 @@ generation:
     error: "La génération a échoué."
 
 loading:
-  empty_text: "Aucun chargement depuis le lancement de WaveStack."
+  empty_text: "Aucun chargement depuis le lancement de HarnessLab."
   running_text: "Chargement en cours… {duree}"
   total_text: "{modele} : {statut} en {duree}"
   local_text: "En local : RAM du CPU, pas de GPU. Le modèle tourne sur le processeur de ce poste."
@@ -501,7 +501,7 @@ distribution:
   title_text: "Ce que les réglages font aux candidats"
   intro_text: >-
     Les candidats d'un token déjà produit, tels que le modèle les a vus. Bougez un curseur :
-    WaveStack recalcule qui reste en lice et la chance de chacun d'être tiré, sans nouvelle
+    HarnessLab recalcule qui reste en lice et la chance de chacun d'être tiré, sans nouvelle
     génération. La probabilité du modèle, elle, ne bouge pas.
   empty_text: >-
     Tirez le token suivant, ci-dessous. Générez une réponse avec « Montrer les tokens
@@ -514,7 +514,7 @@ distribution:
   more_text: "… et {reste} autres candidats lus, plus bas, non affichés."
   tail_text: "Reste du vocabulaire"
   tail_help_text: >-
-    WaveStack garde les {lus} candidats les plus probables de chaque token ; le reste du
+    HarnessLab garde les {lus} candidats les plus probables de chaque token ; le reste du
     vocabulaire pèse {reste} de la probabilité. La chance d'être tiré est répartie entre les
     candidats gardés seulement : une approximation, fidèle tant que ce reste est petit.
 

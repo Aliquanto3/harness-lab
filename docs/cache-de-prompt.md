@@ -1,15 +1,15 @@
-# Fiche : le cache de prompt, du bilan d'agent-cost-kit à WaveStack
+# Fiche : le cache de prompt, du bilan d'agent-cost-kit à HarnessLab
 
 [← Retour au guide](guide.md#cache-de-prompt) · module 8 « Cache » du programme de formation.
 
 À chaque appel, un agent renvoie au modèle tout son contexte : prompt système, outils,
 historique. Le fournisseur (ou le moteur local) garde en cache le début de ce contexte déjà lu,
 et ne recalcule que la fin. Le cache est la première ligne de dépense d'un agent : c'est ce que
-montre le bilan tokens d'agent-cost-kit, que WaveStack reproduit avec les mêmes mots.
+montre le bilan tokens d'agent-cost-kit, que HarnessLab reproduit avec les mêmes mots.
 
 ## Les trois cases
 
-| Case du bilan | Ce que c'est | Où la voir dans WaveStack |
+| Case du bilan | Ce que c'est | Où la voir dans HarnessLab |
 |---|---|---|
 | **Lecture cache** | Tokens du début du contexte retrouvés dans le cache. Facturés une fraction de l'entrée (un dixième chez Claude). | Jauge « Cache du dernier appel » (« lu »), bilan « Dépense », ligne « Lecture cache » |
 | **Écriture cache** (5 min ou 1 h) | Tokens nouveaux mis en cache pour les appels suivants. Facturés plus que l'entrée : ×1,25 pour 5 min, ×2 pour 1 h. | Jauge (« écrit »), lignes « Écriture cache 5 min » et « Écriture cache 1 h » |
@@ -21,14 +21,14 @@ La sortie (« Sortie ») est à part : le cache ne la touche pas.
 
 - La lecture domine l'écriture : chaque appel relit un contexte déjà vu.
 - L'écriture ne grossit que du message ajouté.
-- Une écriture qui dépasse la lecture signale un cache perdu. WaveStack l'indique dans
+- Une écriture qui dépasse la lecture signale un cache perdu. HarnessLab l'indique dans
   « Cette conversation » (« beaucoup d'écriture : le cache se perd ») en retirant l'écriture
   d'amorçage du premier appel.
 
 ## Ce qui casse un cache
 
 Le cache ne réutilise que le **début** du contexte, tant qu'il reste identique octet pour octet.
-Tout changement au début réécrit tout ce qui suit. WaveStack nomme la cause (« Cache non
+Tout changement au début réécrit tout ce qui suit. HarnessLab nomme la cause (« Cache non
 réutilisé » dans Orchestration) : message système modifié (prompt système, mémoire globale,
 description d'outil, skill chargé), historique réécrit, brique activée ou désactivée, conversation
 vidée, atelier qui a pris le cache du moteur. Règle : le stable d'abord, le variable en dernier.

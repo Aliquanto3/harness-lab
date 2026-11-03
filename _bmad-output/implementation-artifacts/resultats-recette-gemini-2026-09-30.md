@@ -5,7 +5,7 @@
 - **Poste :** le PC cible (Windows 11, sans droits administrateur, i5-1145G7, 16 Go).
 - **Code :** branche `feat/gemini-ai-studio` (PR #3).
 - **Clé :** clé AI Studio de l'utilisateur, lue dans un fichier hors du dépôt, jamais affichée.
-- **Lancement :** WaveStack réel sur un dossier de données jetable, piloté par Playwright (Chromium sans affichage) et par l'API. Les modèles locaux sont masqués (`OLLAMA_MODELS` et `HF_HUB_CACHE` vides), pour que le diagnostic ne sonde pas les modèles d'Ollama et du cache Hugging Face.
+- **Lancement :** HarnessLab réel sur un dossier de données jetable, piloté par Playwright (Chromium sans affichage) et par l'API. Les modèles locaux sont masqués (`OLLAMA_MODELS` et `HF_HUB_CACHE` vides), pour que le diagnostic ne sonde pas les modèles d'Ollama et du cache Hugging Face.
 - **Coût :** sondes directes et recette ensemble, bien moins de 0,05 $.
 
 ## Résultat : 73 vérifications sur 76
@@ -23,7 +23,7 @@
 | **Raisonnement allumé : réflexion reçue sur les 3 prompts d'« Outils natifs »** | **KO (3 fois)** : voir ci-dessous |
 | Action forcée (calculatrice) : `skip_thought_signature_validator` envoyé, Google accepte, tour `completed` | OK |
 | `/models` : groupe « Réseau · Gemini (Google) » | OK |
-| Fuite de clé (journal complet et `wavestack.log`) : clé entière absente ; 4 premiers et 4 derniers caractères absents hors signatures | OK |
+| Fuite de clé (journal complet et `harness_lab.log`) : clé entière absente ; 4 premiers et 4 derniers caractères absents hors signatures | OK |
 
 Réponses obtenues, par exemple :
 - « Il est 00:06 (mercredi 30 septembre 2026). »

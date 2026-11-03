@@ -2,7 +2,7 @@
 title: Sprint Change Proposal — dépôt privé et règle des modèles génératifs
 date: 2026-09-25
 author: Anaël (avec Claude, workflow bmad-correct-course)
-trigger: forge de l'idée V2 (`_bmad-output/forge/wavestack-v2-demo-client-vente-formations/forged-idea.md`)
+trigger: forge de l'idée V2 (`_bmad-output/forge/harness-lab-v2-demo-client-vente-formations/forged-idea.md`)
 scope: mineur
 status: approuvée et appliquée le 2026-09-25 (avec P13, voir sprint-change-proposal-2026-09-25-story-9b.md)
 ---
@@ -13,7 +13,7 @@ status: approuvée et appliquée le 2026-09-25 (avec P13, voir sprint-change-pro
 
 La forge de l'idée V2 (2026-09-25) a tranché deux points qui touchent le contrat de la V1.
 
-1. **Le dépôt est privé.** Il est hébergé sur GitHub en privé, puis migrera vers le GitLab interne de Wavestone. L'option « dépôt public servant de vitrine » est rejetée. Or NFR-10, NFR-11 et CAP-37 supposent un dépôt GitHub public : « Dépôt GitHub public », « redistribution publique », « dépôt public », « installe WaveStack depuis GitHub ». Deux exigences restent en vigueur : des licences compatibles avec une remise du code à des clients (qui se négocie au cas par cas), et un contenu non confidentiel (la démo se fait chez le client, sur le poste du consultant).
+1. **Le dépôt est privé.** Il est hébergé sur GitHub en privé, puis migrera vers le GitLab interne. L'option « dépôt public servant de vitrine » est rejetée. Or NFR-10, NFR-11 et CAP-37 supposent un dépôt GitHub public : « Dépôt GitHub public », « redistribution publique », « dépôt public », « installe HarnessLab depuis GitHub ». Deux exigences restent en vigueur : des licences compatibles avec une remise du code à des clients (qui se négocie au cas par cas), et un contenu non confidentiel (la démo se fait chez le client, sur le poste du consultant).
 2. **La règle « jamais deux modèles chargés à la fois » (NFR-2) est trop large.** La forge la reformule en « jamais deux modèles génératifs ». Prise à la lettre, la règle actuelle interdit d'ailleurs déjà en V1 l'embedding et le reranker du palier 2 (CAP-18, CAP-19), qu'AD-8 prévoit pourtant à côté du SLM.
 
 **Nature** : un changement de stratégie (hébergement du dépôt) et une clarification d'une exigence ambiguë. Aucun défaut d'implémentation.
@@ -77,18 +77,18 @@ Aucun changement de code, d'infrastructure ni de déploiement. Le seul effet vis
 OLD :
 ```
 - **CAP-37** Installation sans droits admin (FR-35, palier 1)
-  - **intent:** Un utilisateur installe WaveStack depuis GitHub (clone ou zip) sans droits administrateur.
+  - **intent:** Un utilisateur installe HarnessLab depuis GitHub (clone ou zip) sans droits administrateur.
   - **success:** Aucune étape ne demande d'élévation, de service ni de règle de pare-feu ; procédure documentée en français, une commande une fois les prérequis (Git ou zip, `uv`) en place.
 ```
 
 NEW :
 ```
 - **CAP-37** Installation sans droits admin (FR-35, palier 1)
-  - **intent:** Un utilisateur installe WaveStack sans droits administrateur, par un clone authentifié du dépôt privé (GitHub privé, puis GitLab interne Wavestone) ou depuis une archive zip (téléchargée depuis le dépôt, ou remise par le formateur sur un partage interne).
+  - **intent:** Un utilisateur installe HarnessLab sans droits administrateur, par un clone authentifié du dépôt privé (GitHub privé, puis GitLab interne) ou depuis une archive zip (téléchargée depuis le dépôt, ou remise par le formateur sur un partage interne).
   - **success:** Aucune étape ne demande d'élévation, de service ni de règle de pare-feu ; procédure documentée en français, indépendante de l'hébergeur du dépôt, une commande une fois les prérequis (accès au dépôt et Git, ou archive zip ; `uv`) en place.
 ```
 
-Justification : le dépôt n'est plus public. Un participant sans accès au dépôt doit pouvoir installer WaveStack avec une archive zip (UJ-3, SM-5). Ne nommer aucun hébergeur évite une nouvelle correction lors de la migration vers GitLab.
+Justification : le dépôt n'est plus public. Un participant sans accès au dépôt doit pouvoir installer HarnessLab avec une archive zip (UJ-3, SM-5). Ne nommer aucun hébergeur évite une nouvelle correction lors de la migration vers GitLab.
 
 **P2 — NFR-2**
 
@@ -113,7 +113,7 @@ OLD :
 
 NEW :
 ```
-- **NFR-10 Licences.** Dépôt privé (GitHub privé, puis GitLab interne Wavestone), dont le code peut être remis à un client au cas par cas : toutes dépendances et modèles embarqués sous licence compatible avec une redistribution à des clients et une démonstration client ; licences restrictives signalées avant adoption (Caveman proxy BSL-1.1 écarté, LM Studio propriétaire).
+- **NFR-10 Licences.** Dépôt privé (GitHub privé, puis GitLab interne), dont le code peut être remis à un client au cas par cas : toutes dépendances et modèles embarqués sous licence compatible avec une redistribution à des clients et une démonstration client ; licences restrictives signalées avant adoption (Caveman proxy BSL-1.1 écarté, LM Studio propriétaire).
 ```
 
 Justification : l'exigence de licence ne change pas. Seule sa raison change : ce n'est plus une publication, c'est une remise possible du code à des clients.
@@ -122,12 +122,12 @@ Justification : l'exigence de licence ne change pas. Seule sa raison change : ce
 
 OLD :
 ```
-- **NFR-11 Contenu publiable.** Rien de confidentiel dans le dépôt public (corpus RAG, scénarios, mémoire globale de démo, hooks) ; aucune donnée client, document interne Wavestone, secret ni clé d'API.
+- **NFR-11 Contenu publiable.** Rien de confidentiel dans le dépôt public (corpus RAG, scénarios, mémoire globale de démo, hooks) ; aucune donnée client, document interne, secret ni clé d'API.
 ```
 
 NEW :
 ```
-- **NFR-11 Contenu non confidentiel.** Rien de confidentiel dans le dépôt (corpus RAG, scénarios, mémoire globale de démo, hooks), car il est montré et peut être remis à des clients ; aucune donnée client, document interne Wavestone, secret ni clé d'API. Le caractère privé du dépôt n'autorise aucune exception.
+- **NFR-11 Contenu non confidentiel.** Rien de confidentiel dans le dépôt (corpus RAG, scénarios, mémoire globale de démo, hooks), car il est montré et peut être remis à des clients ; aucune donnée client, document interne, secret ni clé d'API. Le caractère privé du dépôt n'autorise aucune exception.
 ```
 
 Justification : un dépôt privé ne rend pas le contenu confidentiel acceptable. Le contenu passe sous les yeux des clients pendant les démos, et le code peut leur être remis. La dernière phrase empêche de relâcher l'exigence au motif que le dépôt est privé.
@@ -138,15 +138,15 @@ Justification : un dépôt privé ne rend pas le contenu confidentiel acceptable
 
 OLD :
 ```
-… La validation par Wavestone de l'usage en clientèle n'est pas requise pour l'usage interne ni pour la publication du dépôt public ; à obtenir avant toute présentation client (V2).
+… La validation de l'usage en clientèle n'est pas requise pour l'usage interne ni pour la publication du dépôt public ; à obtenir avant toute présentation client (V2).
 ```
 
 NEW :
 ```
-… La validation par Wavestone de l'usage en clientèle n'est pas requise pour l'usage interne ; à obtenir avant toute présentation client (V2).
+… La validation de l'usage en clientèle n'est pas requise pour l'usage interne ; à obtenir avant toute présentation client (V2).
 ```
 
-Justification : il n'y a plus de publication. La condition 3 de déclenchement de la V2 (validation Wavestone avant toute présentation client) est inchangée.
+Justification : il n'y a plus de publication. La condition 3 de déclenchement de la V2 (validation avant toute présentation client) est inchangée.
 
 ### Architecture — `ARCHITECTURE-SPINE.md`
 
@@ -209,13 +209,13 @@ NEW :
 ```
 ### Dépôt privé, code remis à des clients (NFR-10, NFR-11)
 
-- Regrouper les mentions des tiers (licences OFL des polices, attribution MIT du skill Caveman). La licence de WaveStack lui-même relève de Wavestone ; la fixer avant toute remise du code à un client.
+- Regrouper les mentions des tiers (licences OFL des polices, attribution MIT du skill Caveman). La licence de HarnessLab lui-même reste ; la fixer avant toute remise du code à un client.
 - Vérifier la licence de chaque modèle proposé au téléchargement :
 ```
 
 Le reste de la section est inchangé : licences des modèles et corpus libre de droits.
 
-Justification : le « fichier de licence » visait une licence open source pour un dépôt public. Un dépôt privé a besoin des mentions des tiers, qui existent déjà en partie (`web/static/fonts/*-OFL.txt`, `content/skills/caveman/NOTICE.md`), et d'une décision de Wavestone sur la licence de WaveStack elle-même.
+Justification : le « fichier de licence » visait une licence open source pour un dépôt public. Un dépôt privé a besoin des mentions des tiers, qui existent déjà en partie (`web/static/fonts/*-OFL.txt`, `content/skills/caveman/NOTICE.md`), et d'une décision sur la licence de HarnessLab elle-même.
 
 ### README — `README.md`
 
@@ -230,16 +230,16 @@ OLD :
 **Procédure :**
 
 ```bash
-git clone https://github.com/<votre-org>/wavestack.git
-cd wavestack
-uv run wavestack
+git clone https://github.com/<votre-org>/harness-lab.git
+cd harness-lab
+uv run harness-lab
 ```
 ````
 
 NEW :
 ````
 **Prérequis :**
-- Un accès au dépôt privé WaveStack et Git, ou une archive zip de WaveStack (téléchargée depuis le
+- Un accès au dépôt privé HarnessLab et Git, ou une archive zip de HarnessLab (téléchargée depuis le
   dépôt, ou remise par votre formateur sur un partage interne).
 - [`uv`](https://docs.astral.sh/uv/) installé pour l'utilisateur courant (aucun droit administrateur requis).
 
@@ -248,12 +248,12 @@ NEW :
 ```bash
 git clone <adresse-du-dépôt>
 cd <dossier-cloné>
-uv run wavestack
+uv run harness-lab
 ```
 
 Au premier clone, Git vous demande de vous authentifier auprès de l'hébergeur du dépôt. Avec
 l'archive zip, décompressez-la, ouvrez un terminal dans le dossier obtenu, puis lancez
-`uv run wavestack`.
+`uv run harness-lab`.
 ````
 
 Justification : la procédure ne dépend plus de l'hébergeur et couvre les deux voies retenues. Le reste du README (proxy, domaines pour `uv`) est inchangé.

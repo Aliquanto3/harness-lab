@@ -1,6 +1,6 @@
 # Dienstreisen und Spesenabrechnungen bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Sätze beschreiben kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Sätze beschreiben kein reales Unternehmen. -->
 
 Jede Dienstreise wird vorab von der Führungskraft im Buchungstool Voyagex genehmigt, das die folgenden Regeln automatisch anwendet. Eine Buchung außerhalb von Voyagex wird nur ausnahmsweise erstattet, mit schriftlicher Begründung.
 

@@ -15,19 +15,19 @@ deferred:
     evidence: |-
       stderr du test hors ligne : « Failed to create tokenizer for gpt-4o: Hôte réseau non autorisé : openaipublic.blob.core.windows.net. Falling back to estimation. » Avant la story, TIKTOKEN_CACHE_DIR pointait sur le dossier de litellm, qui livre aussi fb374d… (o200k_base) ; il pointe désormais sur la seule table livrée (cl100k_base). La compression fonctionne (texte compressé, aucune tentative publique). Correctif possible : livrer aussi o200k_base (LF, sha256 vérifié) ou copier les tables de litellm dans le cache du dossier de données au lancement.
     location: >-
-      src/wavestack/compression/env.py
+      src/harness_lab/compression/env.py
     severity: medium
   - summary: >-
-      CUSTOM_TIKTOKEN_CACHE_DIR et TIKTOKEN_CACHE_DIR pointent sur un dossier suivi du dépôt (src/wavestack/compression/tiktoken/) : une écriture de cache de tiktoken ou de litellm y atterrirait.
+      CUSTOM_TIKTOKEN_CACHE_DIR et TIKTOKEN_CACHE_DIR pointent sur un dossier suivi du dépôt (src/harness_lab/compression/tiktoken/) : une écriture de cache de tiktoken ou de litellm y atterrirait.
     evidence: |-
       Non observé : la table est vérifiée avant l'import (une table fausse rend la brique indisponible avant que tiktoken ne la supprime) et la garde réseau bloque les téléchargements. À trancher : copier la table dans le cache du dossier de données au lancement garderait src/ en lecture seule.
     location: >-
-      src/wavestack/compression/env.py:55-60
+      src/harness_lab/compression/env.py:55-60
     severity: medium (unverified)
   - summary: >-
       Le banc de la story 12 (tools/bench/story12_bench.py) garde l'ancienne logique (TIKTOKEN_CACHE_DIR vers litellm, CUSTOM_TIKTOKEN_CACHE_DIR retiré) et son README le décrit encore ainsi.
     evidence: |-
-      Outil de mesure de développement, hors du chemin de l'application ; sa variante « configurée » ne mesure plus ce que fait WaveStack sur un .venv neuf.
+      Outil de mesure de développement, hors du chemin de l'application ; sa variante « configurée » ne mesure plus ce que fait HarnessLab sur un .venv neuf.
     location: >-
       tools/bench/story12_bench.py:857-891, tools/bench/README.md:40-42
     severity: low
@@ -47,7 +47,7 @@ deferred:
 - **(A) Pile E2E** (`tools/e2e/stack.py`, réglages de la pile) : un budget mémoire fixe et large (par le réglage `[memory]` existant de `config.py`, sinon par la variable ou le réglage que `config.memory_budget` lit déjà) pour que `check_component` ne refuse jamais le reranker factice selon la RAM libre du PC. Le budget réel de l'application ne change pas.
 - **(A) Scénario** `s_rag_rerank` : en cas d'expiration de l'attente, le message d'échec donne `reason_text` de `rag.rerank` (via l'état des briques) et les `harness_error` émis depuis la marque, pour distinguer un refus de budget d'une file du fil de travail encombrée. Délai d'attente inchangé sauf si la cause observée est la file : alors il suit la règle des autres attentes derrière le fil de travail (`TURN_TIMEOUT_S`), justifié dans un commentaire.
 - **(A) Preuve** : la tranche `rag rag_rerank rag_lab` passe trois fois de suite, et une tranche de 8 à 10 scénarios qui contient `rag_rerank` passe une fois.
-- **(B) Table livrée** : `src/wavestack/compression/tiktoken/9b5ad71b2ce5302211f9c61530b329a4922fc6a4` (nom = sha1 de l'URL, comme le cache de tiktoken), octets LF identiques à la table officielle, sha256 `223921b7…` (valeur complète relevée dans `tiktoken_ext/openai_public.py`) ; `.gitattributes` la marque `-text` pour que `core.autocrlf=true` ne la corrompe pas. Licence MIT de tiktoken citée dans un `NOTICE` ou `LICENSE-tiktoken` à côté.
+- **(B) Table livrée** : `src/harness_lab/compression/tiktoken/9b5ad71b2ce5302211f9c61530b329a4922fc6a4` (nom = sha1 de l'URL, comme le cache de tiktoken), octets LF identiques à la table officielle, sha256 `223921b7…` (valeur complète relevée dans `tiktoken_ext/openai_public.py`) ; `.gitattributes` la marque `-text` pour que `core.autocrlf=true` ne la corrompe pas. Licence MIT de tiktoken citée dans un `NOTICE` ou `LICENSE-tiktoken` à côté.
 - **(B) Environnement** : `apply_offline_env()` pose `CUSTOM_TIKTOKEN_CACHE_DIR` (et `TIKTOKEN_CACHE_DIR`) sur ce dossier, avant tout import de litellm ; `tiktoken_cache_dir()` rend ce dossier. Si le fichier manque ou que son sha256 ne correspond pas, la brique compression dit pourquoi elle est indisponible (message par `msg()`, trois langues) au lieu d'appeler le réseau.
 - **(B) Tests** : les deux tests hors ligne copient leur table depuis le dossier livré (plus depuis le cache de litellm) ; un test vérifie le sha256 de la table livrée et l'absence de `\r` ; un test vérifie que `CUSTOM_TIKTOKEN_CACHE_DIR` est posé par `apply_offline_env()`.
 - Les deux entrées de `_bmad-output/implementation-artifacts/deferred-work.md` (« rag_rerank instable sous charge », « table cl100k_base absente d'un .venv neuf ») fermées avec la cause et la preuve.
@@ -61,7 +61,7 @@ deferred:
 
 | Scenario | Input / State | Expected Output / Behavior | Error Handling |
 |----------|--------------|---------------------------|----------------|
-| `.venv` neuf hors ligne | litellm livre `9b5ad71b…` en CRLF | la compression compte avec la table livrée par WaveStack, aucune connexion | — |
+| `.venv` neuf hors ligne | litellm livre `9b5ad71b…` en CRLF | la compression compte avec la table livrée par HarnessLab, aucune connexion | — |
 | Table livrée absente | fichier supprimé | carte compression indisponible avec la raison | pas d'appel réseau |
 | Table livrée altérée | sha256 différent | même comportement que « absente » | pas d'appel réseau |
 | Expiration E2E | carte `rerank` refusée | message d'échec avec la raison et les `harness_error` | — |
@@ -71,22 +71,22 @@ deferred:
 ## Code Map
 
 - `tools/e2e/run_e2e.py:55-98` -- `class Events` (`mark`, `since`, `wait(kind, after, pred, timeout=TURN_TIMEOUT_S=60)`) ; `s_rag_rerank` l.4105, clic « Télécharger le modèle de reranking » ≈l.4150, attente `session_state` (10 s) puis `bricks_changed` avec `rag.rerank.available` (30 s) l.4158-4166 ; `r.bricks()` pour l'état des cartes.
-- `tools/e2e/stack.py:126-138` -- déclaration du reranker factice (2 048 octets, sans sha256, sans `[memory]`) ; réglages de la pile. `tools/e2e/wavestack_e2e.py:30` -- `FakeReranker` (chargement instantané).
-- `src/wavestack/session/app_session.py` -- `download_model` l.5534, `_run_download` l.5619, `_rag_caught_up` l.5579, `_request_rag_sync` l.2921 (`_rerank_loading`, `executor.submit(_sync_rag)` l.2949), `_sync_rag` l.2954 (`_emit_bricks` après chargement l.2987), `_sync_reranker` l.3136, `_load_reranker` l.3170 (`check_component`) ; fil unique `ThreadPoolExecutor(max_workers=1)` l.726.
-- `src/wavestack/models/load_registry.py:87,266,273` -- `process_rss` (processus et enfants), `component_cost` (+ `load_margin_mb` 256 Mo), `check_component`.
-- `src/wavestack/config.py:525-557,714,750` -- calcul du budget (`min(4096, max(512, 0,6 × RAM libre))`), `memory_budget`, `load_margin_mb`.
-- `src/wavestack/compression/env.py:15-43` -- `OFFLINE_ENV`, `tiktoken_cache_dir()` (cherche le dossier de litellm), `apply_offline_env()` ; appelé par `cli.py:29` et `headroom_adapter.py:111-120` (`COUNTING_MODEL = "gpt-4"` l.39).
+- `tools/e2e/stack.py:126-138` -- déclaration du reranker factice (2 048 octets, sans sha256, sans `[memory]`) ; réglages de la pile. `tools/e2e/harness_lab_e2e.py:30` -- `FakeReranker` (chargement instantané).
+- `src/harness_lab/session/app_session.py` -- `download_model` l.5534, `_run_download` l.5619, `_rag_caught_up` l.5579, `_request_rag_sync` l.2921 (`_rerank_loading`, `executor.submit(_sync_rag)` l.2949), `_sync_rag` l.2954 (`_emit_bricks` après chargement l.2987), `_sync_reranker` l.3136, `_load_reranker` l.3170 (`check_component`) ; fil unique `ThreadPoolExecutor(max_workers=1)` l.726.
+- `src/harness_lab/models/load_registry.py:87,266,273` -- `process_rss` (processus et enfants), `component_cost` (+ `load_margin_mb` 256 Mo), `check_component`.
+- `src/harness_lab/config.py:525-557,714,750` -- calcul du budget (`min(4096, max(512, 0,6 × RAM libre))`), `memory_budget`, `load_margin_mb`.
+- `src/harness_lab/compression/env.py:15-43` -- `OFFLINE_ENV`, `tiktoken_cache_dir()` (cherche le dossier de litellm), `apply_offline_env()` ; appelé par `cli.py:29` et `headroom_adapter.py:111-120` (`COUNTING_MODEL = "gpt-4"` l.39).
 - litellm `litellm_core_utils/default_encoding.py:18-55` -- réécrit `TIKTOKEN_CACHE_DIR` sauf si `CUSTOM_TIKTOKEN_CACHE_DIR` est posé, puis `tiktoken.get_encoding("cl100k_base")` à l'import. tiktoken `load.py:54-64` -- `read_file_cached` supprime un fichier au mauvais sha256.
 - `tests/test_compression.py:688-700` (env), `:779` (`_OFFLINE_CHILD` remplace `tiktoken_cache_dir`), `:819-857` (`_tiktoken_file`, `_run_offline_child` : copie depuis le cache de litellm l.832-835), `:866`, `:878`, `:887-897`.
-- `pyproject.toml` -- hatchling, `packages = ["src/wavestack"]` : tout fichier non ignoré sous le paquet est livré. `.gitattributes` -- seulement `tests/fixtures/** -text`.
+- `pyproject.toml` -- hatchling, `packages = ["src/harness_lab"]` : tout fichier non ignoré sous le paquet est livré. `.gitattributes` -- seulement `tests/fixtures/** -text`.
 - Table officielle LF (1 681 126 octets, sha256 conforme) présente dans `C:\Users\anael.yahi\Documents\GitHub\agentic-harness-training-demo\.venv\Lib\site-packages\litellm\litellm_core_utils\tokenizers\9b5ad71b2ce5302211f9c61530b329a4922fc6a4` : la copier en vérifiant son sha256 (aucun téléchargement).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/wavestack/compression/tiktoken/9b5ad71b2ce5302211f9c61530b329a4922fc6a4`, `src/wavestack/compression/tiktoken/LICENSE-tiktoken`, `.gitattributes` -- table livrée, licence, `-text`.
-- `src/wavestack/compression/env.py` -- dossier livré, `CUSTOM_TIKTOKEN_CACHE_DIR`, vérification sha256 (constante).
-- `src/wavestack/compression/headroom_adapter.py` -- raison d'indisponibilité si la table manque ou est altérée ; `content/messages.yaml` et surcouches `en`, `de`.
+- `src/harness_lab/compression/tiktoken/9b5ad71b2ce5302211f9c61530b329a4922fc6a4`, `src/harness_lab/compression/tiktoken/LICENSE-tiktoken`, `.gitattributes` -- table livrée, licence, `-text`.
+- `src/harness_lab/compression/env.py` -- dossier livré, `CUSTOM_TIKTOKEN_CACHE_DIR`, vérification sha256 (constante).
+- `src/harness_lab/compression/headroom_adapter.py` -- raison d'indisponibilité si la table manque ou est altérée ; `content/messages.yaml` et surcouches `en`, `de`.
 - `tests/test_compression.py` -- tests ci-dessus ; copie depuis le dossier livré.
 - `tools/e2e/stack.py`, `tools/e2e/run_e2e.py` -- budget fixe, message d'échec explicite.
 - `_bmad-output/implementation-artifacts/deferred-work.md` -- deux entrées fermées.
@@ -135,7 +135,7 @@ deferred:
     - `[low]` `[defer]` Clés `compression.*` sœurs (`install`, `missing`…) sans en/de — préexistant ; story 7 (traductions restantes).
     - `[low]` `[patch]` README et ARCHITECTURE-SPINE non mis à jour — README (table de comptage, restauration) et SPINE (variables) mis à jour.
     - `[low]` `[patch]` Provenance de la licence incohérente — `LICENSE-tiktoken` dit la copie depuis litellm, sans téléchargement ; vérification de licence à faire avant le GitLab interne (rapport).
-    - `[low]` `[patch]` Conseil de réparation vague, anglais peu idiomatique — « restaurez… (`git checkout -- src/wavestack/compression/tiktoken`) » en fr, en, de.
+    - `[low]` `[patch]` Conseil de réparation vague, anglais peu idiomatique — « restaurez… (`git checkout -- src/harness_lab/compression/tiktoken`) » en fr, en, de.
     - `[low]` `[reject]` `env` importé deux fois, retour en chaînes — style, sans défaut nommé.
     - `[false]` `[reject]` Le message ne nomme pas l'état de chargement — il le nomme (« raison : Chargement du modèle de reranking… »), vu sur l'échec réel.
 

@@ -11,9 +11,9 @@ import time
 import pytest
 from fake_engine import FakeEngine, booted_session
 
-from wavestack.guardrails.manager import GuardrailsManager
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab.guardrails.manager import GuardrailsManager
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.trace.journal import get_journal
 
 
 def wait_idle(session: AppSession) -> None:
@@ -41,11 +41,11 @@ def test_install_guardrails_extra_activates_the_brick_live_on_success(monkeypatc
     session = _session()
     session._guardrails_missing = "non installés"
     monkeypatch.setattr(
-        "wavestack.session.app_session.subprocess.run",
+        "harness_lab.session.app_session.subprocess.run",
         lambda *a, **k: subprocess.CompletedProcess(a[0] if a else [], 0, "", ""),
     )
     monkeypatch.setattr(
-        "wavestack.session.app_session.guardrails_availability.missing_fr", lambda: None
+        "harness_lab.session.app_session.guardrails_availability.missing_fr", lambda: None
     )
     mark = get_journal().last_seq()
 
@@ -64,7 +64,7 @@ def test_install_guardrails_extra_failure_keeps_not_installed(monkeypatch) -> No
     session = _session()
     session._guardrails_missing = "non installés"
     monkeypatch.setattr(
-        "wavestack.session.app_session.subprocess.run",
+        "harness_lab.session.app_session.subprocess.run",
         lambda *a, **k: subprocess.CompletedProcess(a[0] if a else [], 1, "", "proxy refused"),
     )
     mark = get_journal().last_seq()
@@ -116,7 +116,7 @@ def test_install_prompt_guard_saves_token_then_loads_the_classifier(monkeypatch)
     session._guardrails = GuardrailsManager({"injection": lambda: fake})
     saved: list[str] = []
     monkeypatch.setattr(
-        "wavestack.config.write_hf_token", lambda key: saved.append(key.get_secret_value())
+        "harness_lab.config.write_hf_token", lambda key: saved.append(key.get_secret_value())
     )
     mark = get_journal().last_seq()
 
@@ -139,7 +139,7 @@ def test_install_prompt_guard_reports_a_download_failure(monkeypatch) -> None:
             raise RuntimeError("401 unauthorized")
 
     session._guardrails = GuardrailsManager({"injection": lambda: Failing()})
-    monkeypatch.setattr("wavestack.config.write_hf_token", lambda key: None)
+    monkeypatch.setattr("harness_lab.config.write_hf_token", lambda key: None)
     mark = get_journal().last_seq()
 
     session.install_prompt_guard("bad-token")
@@ -167,7 +167,7 @@ def test_uv_sync_offers_no_stop_and_targets_this_environment(monkeypatch) -> Non
         release.wait(5)
         return subprocess.CompletedProcess(args, 1, "", "proxy refused")
 
-    monkeypatch.setattr("wavestack.session.app_session.subprocess.run", fake_run)
+    monkeypatch.setattr("harness_lab.session.app_session.subprocess.run", fake_run)
     mark = get_journal().last_seq()
     session.install_guardrails_extra()
     states = [e.payload for e in get_journal().events_since(mark) if e.kind == "session_state"]
@@ -184,7 +184,7 @@ def test_install_prompt_guard_refused_outside_idle_saves_no_token(monkeypatch) -
     session = _session()
     session._guardrails_missing = None
     saved: list = []
-    monkeypatch.setattr("wavestack.config.write_hf_token", lambda key: saved.append(key))
+    monkeypatch.setattr("harness_lab.config.write_hf_token", lambda key: saved.append(key))
     session.state = "turn"
     with pytest.raises(SendRefused):
         session.install_prompt_guard("hf_token")
@@ -203,7 +203,7 @@ def test_install_prompt_guard_failure_shows_on_the_card(monkeypatch) -> None:
             raise RuntimeError("403 licence")
 
     session._guardrails = GuardrailsManager({"injection": lambda: Failing()})
-    monkeypatch.setattr("wavestack.config.write_hf_token", lambda key: None)
+    monkeypatch.setattr("harness_lab.config.write_hf_token", lambda key: None)
     session.install_prompt_guard("hf_token")
     wait_idle(session)
     [card] = [c for c in session._guardrails_card() if c["id"] == "injection"]
@@ -213,7 +213,7 @@ def test_install_prompt_guard_failure_shows_on_the_card(monkeypatch) -> None:
 def test_install_prompt_guard_stop_reaches_the_download(monkeypatch) -> None:
     import threading
 
-    from wavestack.models.download import DownloadError
+    from harness_lab.models.download import DownloadError
 
     session = _session()
     session._guardrails_missing = None
@@ -230,7 +230,7 @@ def test_install_prompt_guard_stop_reaches_the_download(monkeypatch) -> None:
                 time.sleep(0.01)
 
     session._guardrails = GuardrailsManager({"injection": lambda: Slow()})
-    monkeypatch.setattr("wavestack.config.write_hf_token", lambda key: None)
+    monkeypatch.setattr("harness_lab.config.write_hf_token", lambda key: None)
     mark = get_journal().last_seq()
     session.install_prompt_guard("hf_token")
     assert started.wait(5)
@@ -246,14 +246,14 @@ def test_install_prompt_guard_stop_reaches_the_download(monkeypatch) -> None:
 def test_install_prompt_guard_route_requires_the_licence_box(monkeypatch) -> None:
     from starlette.testclient import TestClient
 
-    from wavestack import config
-    from wavestack.session.diagnostic import DiagnosticSession
-    from wavestack.web.app import create_app
+    from harness_lab import config
+    from harness_lab.session.diagnostic import DiagnosticSession
+    from harness_lab.web.app import create_app
 
     session = _session()
     session._guardrails_missing = None
     saved: list = []
-    monkeypatch.setattr("wavestack.config.write_hf_token", lambda key: saved.append(key))
+    monkeypatch.setattr("harness_lab.config.write_hf_token", lambda key: saved.append(key))
     app = create_app(
         DiagnosticSession(config.load_config(), port=8421),
         port=8421,

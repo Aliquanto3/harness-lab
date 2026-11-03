@@ -53,17 +53,17 @@ context:
 
 ## Code Map
 
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/session/app_session.py` :
   - `send()` (1166-1196) : l'extraire en `_start(message, replay_of)` partagé par `send(message)` et `replay()`. Sous le premier verrou, `send` enregistre `self._last = (turn_id, message, tuple(self._history), frozenset(self._loaded_skills), frozenset(self._loaded_docs))` ; `replay()` lit `_last`, refuse s'il est `None`, remet `_history`, `_loaded_skills`, `_loaded_docs` à l'instantané, puis enregistre le même instantané sous le nouveau `turn_id`. Tout sous le verrou où l'état passe à `turn` et où `armed` est pris.
   - `build_turn_state(origin_turn)` (884-927) : l'instantané étant repris avant l'appel, le paramètre `origin_turn` et le découpage deviennent inutiles ; les supprimer (appelants : `_emit_preview` 1136, `send` 1180, tests).
   - `_run_turn` (1679-1728) : recevoir `replay_of` et l'émettre dans `turn_started` (1691 émet `None`).
   - `clear_conversation()` (1628) : remettre `_last` à `None`.
   - Après reprise de l'instantané dans `replay()` : `_emit_bricks()`, `_emit_architecture()` (le schéma montre les skills chargés, cf. `_apply_skill_loaded` 2188) ; l'aperçu (`_emit_preview`) suit déjà `turn_started`.
   - `SendRefused` (256), `_refusal_reason` (1640).
-- `src/wavestack/trace/catalog.py` : `TurnStartedPayload.replay_of` existe déjà (102) ; aucun changement.
-- `src/wavestack/web/app.py` : `POST /api/intentions/replay` sur le modèle de `send` (211-217), sans corps, renvoie `{"turn_id"}`, `SendRefused` → 409.
-- `src/wavestack/web/static/index.html` : bouton `#replay-last` « Rejouer le dernier prompt » dans `.pane-actions` de la Vue humain (67-68, avant `#clear-conversation`) ; bouton `#compare-turns` « Comparer » dans `.pane-actions` de Contexte LLM (93).
-- `src/wavestack/web/static/app.js` :
+- `src/harness_lab/trace/catalog.py` : `TurnStartedPayload.replay_of` existe déjà (102) ; aucun changement.
+- `src/harness_lab/web/app.py` : `POST /api/intentions/replay` sur le modèle de `send` (211-217), sans corps, renvoie `{"turn_id"}`, `SendRefused` → 409.
+- `src/harness_lab/web/static/index.html` : bouton `#replay-last` « Rejouer le dernier prompt » dans `.pane-actions` de la Vue humain (67-68, avant `#clear-conversation`) ; bouton `#compare-turns` « Comparer » dans `.pane-actions` de Contexte LLM (93).
+- `src/harness_lab/web/static/app.js` :
   - `applyEnvelope` `turn_started` (166-188) : garder `replayOf: p.replay_of` sur le tour.
   - `renderComposer` (1110-1140) : activer/désactiver `#replay-last` comme `#clear-conversation` (1115-1117), plus la condition « au moins un tour affiché » (`shownTurns()` 433) ; `#compare-turns` désactivé avec moins de deux tours affichés.
   - `replayLast()` sur le modèle de `clearConversation()` (953-965) : `postIntention("/api/intentions/replay")`, refus dans `store.composerError`. Branchement dans `boot()` (3117-3118).
@@ -71,15 +71,15 @@ context:
   - `renderSteps()` (2036-2041) : `headParts` crée ses spans une fois (1892) : ajouter une part fixe `turn-group-replay` avec « Rejeu » ou `null`.
   - `renderContext()` (1183-1222) : si `store.compare` est ouvert, rendre la comparaison au lieu du dernier tour. Chiffres : sommes de `step.ended.prompt_tokens`/`output_tokens` des étapes `call` du tour, `turnDuration(turn)` (1905), `fmt`/`seconds` (81-82). Segments : `turn.context.segments` groupés par `brick`, dans l'ordre de première apparition, couleurs via `breakdown`/`GROUP_COLORS` (65) comme la vue habituelle ; texte intégral dans un `<details>`.
   - « Vider la conversation » (`conversation_cleared` 161-165) : fermer la comparaison.
-- `src/wavestack/web/static/app.css` : `.replay-badge` (sur le modèle de `.step-badge` 612), `.turn-compare` en grille à deux colonnes qui passe en une colonne sur écran étroit ; `.turn-group-replay` près de `.turn-group-status` (864).
+- `src/harness_lab/web/static/app.css` : `.replay-badge` (sur le modèle de `.step-badge` 612), `.turn-compare` en grille à deux colonnes qui passe en une colonne sur écran étroit ; `.turn-group-replay` près de `.turn-group-status` (864).
 - Tests : `tests/fake_engine.py` (`FakeEngine(outputs=…)`, `engine.calls` décodables par `bytes(...).decode()`, `booted_session`), `tests/test_turn.py` (`_run` 23, patron 409 avec `TestClient` 192), `tests/test_forced.py` (15-42 : `tool_session`, `skills_session`, `lazy_session`, `loop`, `run`, `armed`), `tests/test_skills.py` (`skills_session` 26), `tests/test_mcp_lazy.py` (`lazy_session` 27).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/session/app_session.py` -- `_start`, `replay`, `_last`, `replay_of` dans `turn_started`, `clear_conversation`, suppression d'`origin_turn` -- AD-17, AD-3.
-- [x] `src/wavestack/web/app.py` -- route `/api/intentions/replay` -- AD-18.
-- [x] `src/wavestack/web/static/index.html`, `app.js`, `app.css` -- bouton de rejeu, badges « Rejeu » (Vue humain, rail), « Comparer » et vue `turn-compare` -- EXPERIENCE.md.
+- [x] `src/harness_lab/session/app_session.py` -- `_start`, `replay`, `_last`, `replay_of` dans `turn_started`, `clear_conversation`, suppression d'`origin_turn` -- AD-17, AD-3.
+- [x] `src/harness_lab/web/app.py` -- route `/api/intentions/replay` -- AD-18.
+- [x] `src/harness_lab/web/static/index.html`, `app.js`, `app.css` -- bouton de rejeu, badges « Rejeu » (Vue humain, rail), « Comparer » et vue `turn-compare` -- EXPERIENCE.md.
 - [x] `tests/test_replay.py` (nouveau) -- une ligne de la matrice par test, plus la route (200, 409).
 - [x] Tests existants qui appellent `build_turn_state(...)` avec un argument -- les adapter si besoin.
 
@@ -134,7 +134,7 @@ Un rejeu arrêté laisse donc la branche à t1, t2 : le tour d'origine en est so
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur
 - `uv run python -m pytest` -- expected: tout passe
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks:**
-- `uv run wavestack` avec Qwen : un tour, activer le prompt système, rejouer, ouvrir « Comparer » ; rejouer le rejeu ; armer Caveman puis rejouer ; recharger la page ; vider la conversation (bouton de rejeu désactivé).
+- `uv run harness-lab` avec Qwen : un tour, activer le prompt système, rejouer, ouvrir « Comparer » ; rejouer le rejeu ; armer Caveman puis rejouer ; recharger la page ; vider la conversation (bouton de rejeu désactivé).

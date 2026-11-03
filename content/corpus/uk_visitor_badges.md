@@ -1,6 +1,6 @@
 # UK subsidiary visitor badge policy (English-only document)
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this policy describes no real company. This document exists in English only, as it is specific to Exemplia's UK subsidiary. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this policy describes no real company. This document exists in English only, as it is specific to Exemplia's UK subsidiary. -->
 
 This policy applies only to Exemplia's United Kingdom subsidiary, in Manchester; it exists in English only, as the local reception team works in that language.
 

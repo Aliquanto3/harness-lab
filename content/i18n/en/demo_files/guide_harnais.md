@@ -1,6 +1,6 @@
 # Guide to the agent harness
 
-WaveStack demonstration document, deliberately long: it is used to show delegation to a
+HarnessLab demonstration document, deliberately long: it is used to show delegation to a
 sub-agent. Original text, not confidential.
 
 ## 1. The model and the harness
@@ -127,7 +127,7 @@ prompt, skills, instructions); sensors check afterwards (hooks, guardrails, test
 control is either computed by code, deterministic and cheap, or inferred by a model, more
 flexible but less reliable (Böckeler).
 
-WaveStack does not show: platforms (ACP, marketplaces), operating-system-level sandboxes,
+HarnessLab does not show: platforms (ACP, marketplaces), operating-system-level sandboxes,
 permission modes.
 
 ## 11. Key takeaways

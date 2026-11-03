@@ -1,0 +1,1115 @@
+"""The model table (story 25, CAP-34, CAP-35): every model available, with its publisher, size,
+hosting, window and capabilities, grouped and sorted here (AD-1), never in the browser.
+
+One truth of the capabilities (AD-6): the same inputs as the session's load go through
+`capabilities_for` — a file or an Ollama blob: its GGUF header, read in pure Python
+(`gguf_meta`); llama-server: no architecture and the template of `/props`, as its adapter —
+and a cloud model through `cloud_capabilities`. The window is `window_for` (AD-9), as the
+gauge's. Nothing loads, probes nor tokenizes a model: a header is read once per (path, size,
+modification time); Ollama's `details` come from the `/api/tags` already read by discovery.
+
+The publishers are content (`content/models/publishers.yaml`, AD-19): an invalid file breaks
+nothing, every model goes to « Autres éditeurs » and the table says why.
+
+Lot 3 of 2026-10-04: the « Diagnostic et modèles » page shows one card per model, and the
+local sources of one model (an Ollama blob and the same model Ollama serves, a copy in the
+Hugging Face cache and in LM Studio…) share a card. The session groups them here, never the
+page (`group_sources`, rules 1 to 3); the picker keeps one option per source.
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+import re
+import threading
+import time
+from collections.abc import Iterable, Sequence
+from functools import cache
+from pathlib import Path
+from typing import Any, Literal
+from urllib.parse import urlsplit
+
+import yaml
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PrivateAttr,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
+
+from harness_lab import config
+from harness_lab.cloud import price_fr, price_reason_fr
+from harness_lab.context.window import window_for
+from harness_lab.messages import Message, msg, number, render
+from harness_lab.models import gguf_meta
+from harness_lab.models.capabilities import (
+    CLOUD_FAMILY,
+    REASONING_FR,
+    Capabilities,
+    ReasoningMode,
+    capabilities_for,
+    cloud_capabilities,
+    reasoning_mode,
+    tools_summary,
+)
+from harness_lab.models.discovery import ModelCandidate, reason_message
+from harness_lab.models.engine import EngineMetadata, pooling_of
+from harness_lab.models.servers import local_path
+
+log = logging.getLogger(__name__)
+
+PUBLISHERS_FILE = Path("models") / "publishers.yaml"
+OTHER_ID = "other"
+GIB = 1024**3
+MIB = 1024**2
+
+
+# ---------- the publishers' table (AD-19) ----------
+
+
+class Publisher(BaseModel):
+    """A publisher: its architecture prefixes (`general.architecture`, Ollama's family, the
+    registry's family) and its name patterns (regular expressions, case-insensitive)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(pattern=r"^[a-z0-9_]+$")
+    label_text: str = Field(min_length=1)
+    architectures: list[str] = []
+    names: list[str] = []
+    # Its names win over the architecture (a distilled model keeps its base's: DeepSeek-R1
+    # distilled on Qwen is `qwen2` for Ollama).
+    names_first: bool = False
+    # Lot 3 of 2026-10-04: its logo, a file of `web/static/logos/` (none: its initial).
+    logo: str | None = Field(default=None, pattern=r"^[a-z0-9_-]+\.png$")
+    _patterns: list[re.Pattern[str]] = PrivateAttr(default_factory=list)
+
+    @field_validator("names")
+    @classmethod
+    def _valid_patterns(cls, value: list[str]) -> list[str]:
+        for pattern in value:
+            try:
+                re.compile(pattern)
+            except re.error as exc:  # not a ValueError: pydantic would let it through
+                raise ValueError(f"expression régulière invalide « {pattern} » : {exc}") from exc
+        return value
+
+    def model_post_init(self, _: Any) -> None:
+        self._patterns = [re.compile(p, re.IGNORECASE) for p in self.names]
+
+    def matches_architecture(self, architecture: str) -> bool:
+        return any(architecture.startswith(p.casefold()) for p in self.architectures if p)
+
+    def matches_name(self, name: str) -> bool:
+        return any(p.search(name) for p in self._patterns)
+
+
+class ServedByFr(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    file: str = Field(min_length=1)
+    ollama: str = Field(min_length=1)
+    llama_server: str = Field(min_length=1)
+
+
+class HostingFr(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    local: str = Field(min_length=1)
+    network: str = Field(min_length=1)
+
+
+class PublishersContent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    legend_text: str = Field(min_length=1)
+    served_by_text: ServedByFr
+    hosting_text: HostingFr
+    other_text: str = Field(min_length=1)
+    publishers: list[Publisher]
+
+    @model_validator(mode="after")
+    def _distinct_ids(self) -> PublishersContent:
+        """An id names one group: twice, or `other` (« Autres éditeurs »), would merge two."""
+        ids = [p.id for p in self.publishers]
+        if OTHER_ID in ids:
+            raise ValueError(f"l'identifiant « {OTHER_ID} » est réservé à « Autres éditeurs »")
+        if len(set(ids)) != len(ids):
+            twice = sorted({i for i in ids if ids.count(i) > 1})
+            raise ValueError(f"identifiant en double : {', '.join(twice)}")
+        return self
+
+
+def _fallback(lang: str) -> PublishersContent:
+    """Only when `publishers.yaml` is unreadable: the table still shows every model, under
+    « Autres éditeurs », with the reason (AD-19: never a crash); in `lang` (languages 5/5)."""
+    return PublishersContent(
+        legend_text=msg("models.catalog.fallback.legend", lang),
+        served_by_text=ServedByFr(
+            file=msg("models.catalog.fallback.file", lang),
+            ollama="Ollama",
+            llama_server="llama-server",
+        ),
+        hosting_text=HostingFr(
+            local=msg("models.catalog.fallback.local", lang),
+            network=msg("models.catalog.fallback.network", lang),
+        ),
+        other_text=msg("models.catalog.fallback.other", lang),
+        publishers=[],
+    )
+
+
+def publishers_path(lang: str = config.DEFAULT_LANGUAGE) -> Path:
+    return config.content_file(PUBLISHERS_FILE, lang)
+
+
+def _cause(exc: Exception) -> str:
+    if isinstance(exc, ValidationError):
+        first = exc.errors()[0]
+        where = ".".join(str(part) for part in first.get("loc", ())) or "racine"
+        return f"{where} : {first.get('msg', '')}"
+    return str(exc) or type(exc).__name__
+
+
+@cache
+def load_publishers(lang: str = config.DEFAULT_LANGUAGE) -> tuple[PublishersContent, str | None]:
+    """`content/models/publishers.yaml` in `lang` (languages 3/5: the session's, never
+    `settings.json`'s), patterns compiled. An invalid translation: the French table, and
+    the reason naming the translated file (AD-19). On any other error, an empty table
+    (every model in « Autres éditeurs ») and the reason naming the file, both in `lang`
+    (languages 5/5)."""
+    path = publishers_path(lang)
+    translated = lang != config.DEFAULT_LANGUAGE and path != publishers_path()
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        return PublishersContent.model_validate(data), None
+    except (OSError, UnicodeDecodeError, yaml.YAMLError, ValidationError, ValueError) as exc:
+        where = f"i18n/{lang}/" if translated else ""
+        log.warning("content/%s%s invalide : %s", where, PUBLISHERS_FILE.as_posix(), exc)
+        if translated:
+            content, error_text = load_publishers()
+            return content, error_text or msg(
+                "models.catalog.publishers.translation_invalid", lang, lang=lang, cause=_cause(exc)
+            )
+        return _fallback(lang), msg("models.catalog.publishers.invalid", lang, cause=_cause(exc))
+
+
+def publisher_for(
+    architectures: Iterable[str | None],
+    names: Iterable[str | None],
+    lang: str = config.DEFAULT_LANGUAGE,
+) -> Publisher:
+    """The publisher of a model: first by the names of the publishers marked `names_first`,
+    then by its architectures (the header's, Ollama's family, the registry's family, in that
+    order; `unknown` and `openai_chat` say nothing), then by its names (`general.basename`,
+    `general.name`, the name shown, a cloud `model`), each in the table's order; « Autres
+    éditeurs » otherwise. `lang`: the language of its label (the patterns are the same in
+    every language)."""
+    content, _ = load_publishers(lang)
+    names = [n for n in names if n]
+    for name in names:
+        for publisher in content.publishers:
+            if publisher.names_first and publisher.matches_name(name):
+                return publisher
+    for arch in architectures:
+        key = (arch or "").strip().casefold()
+        if not key or key in ("unknown", CLOUD_FAMILY):
+            continue
+        for publisher in content.publishers:
+            if publisher.matches_architecture(key):
+                return publisher
+    for name in names:
+        for publisher in content.publishers:
+            if publisher.matches_name(name):
+                return publisher
+    return Publisher(id=OTHER_ID, label_text=content.other_text)
+
+
+# ---------- sizes ----------
+
+# « 2B », « 0.6B », « 270M », « 8x7B », « 30B-A3B » (the first figure), alone or in a name
+# between non-alphanumeric bounds: « Q4_K_M » and « 3.5 » are no sizes.
+_PARAMS = re.compile(
+    r"(?<![A-Za-z0-9.])(?:(\d+)[x×])?(\d+(?:[.,]\d+)?)([BM])(?![A-Za-z0-9])", re.IGNORECASE
+)
+
+
+def _params(text: str | None) -> tuple[float, str] | None:
+    """The parameters (billions) and their label in `text`, or `None`."""
+    if not text:
+        return None
+    match = _PARAMS.search(text)
+    if match is None:
+        return None
+    experts, number, unit = match.groups()
+    value = float(number.replace(",", ".")) * (int(experts) if experts else 1)
+    if unit.upper() == "M":
+        value /= 1000
+    label = match.group(0)[:-1] + unit.upper()
+    return value, label
+
+
+def parse_params(text: str | None) -> float | None:
+    """The parameters in billions a size label or a name says (« 8x7B » = 56, « 270M » =
+    0.27, « 30B-A3B » = 30), else `None`."""
+    found = _params(text)
+    return found[0] if found else None
+
+
+def _first_params(sources: Sequence[str | None]) -> tuple[float | None, str | None]:
+    for text in sources:
+        found = _params(text)
+        if found:
+            return found
+    return None, None
+
+
+def _fr_int(n: int) -> str:
+    """« 4 096 »: French thousands separator (narrow no-break space)."""
+    return f"{n:,}".replace(",", " ")
+
+
+def params_fr(params_label: str, lang: str = config.DEFAULT_LANGUAGE) -> str:
+    """« 0.6B » written the French way: « 0,6 B »; in `lang`'s way otherwise (« 0.6 B »)."""
+    point = number(0.5, lang, 1)[1]  # the decimal separator
+    return re.sub(r"(\d)\.(\d)", rf"\1{point}\2", params_label[:-1]) + "\u00a0" + params_label[-1]
+
+
+def size_fr(
+    params_label: str | None, size_bytes: int | None, lang: str = config.DEFAULT_LANGUAGE
+) -> str:
+    """« 2 B · 1,3 Go », « 0,6 B », « 1,4 Go », « 45 Mo » (below 0,1 Go), or « — » when
+    nothing says it. 1 Go = 1024³ bytes, 1 Mo = 1024² bytes. `lang`: the units and the
+    decimal separator of that language (languages 5/5)."""
+    parts = []
+    if params_label:
+        parts.append(params_fr(params_label, lang))
+    if size_bytes:
+        if size_bytes < GIB / 10:
+            mb = msg("common.units.mb", lang)
+            parts.append(f"{max(1, round(size_bytes / MIB))}\u00a0{mb}")
+        else:
+            gb = msg("common.units.gb", lang)
+            parts.append(number(size_bytes / GIB, lang, 1) + f"\u00a0{gb}")
+    return " · ".join(parts) or "—"
+
+
+# ---------- quantization (lot 3 of 2026-10-04) ----------
+
+# llama.cpp's `llama_ftype`, the integer `general.file_type` of a GGUF header, by the names
+# its quantize tool gives them, which are Ollama's `quantization_level` too. Removed values
+# (4 to 6, 33 to 35) are left out; 38 (`MXFP4_MOE`) is what Ollama calls « MXFP4 ».
+FILE_TYPES = {
+    0: "F32",
+    1: "F16",
+    2: "Q4_0",
+    3: "Q4_1",
+    7: "Q8_0",
+    8: "Q5_0",
+    9: "Q5_1",
+    10: "Q2_K",
+    11: "Q3_K_S",
+    12: "Q3_K_M",
+    13: "Q3_K_L",
+    14: "Q4_K_S",
+    15: "Q4_K_M",
+    16: "Q5_K_S",
+    17: "Q5_K_M",
+    18: "Q6_K",
+    19: "IQ2_XXS",
+    20: "IQ2_XS",
+    21: "Q2_K_S",
+    22: "IQ3_XS",
+    23: "IQ3_XXS",
+    24: "IQ1_S",
+    25: "IQ4_NL",
+    26: "IQ3_S",
+    27: "IQ3_M",
+    28: "IQ2_S",
+    29: "IQ2_M",
+    30: "IQ4_XS",
+    31: "IQ1_M",
+    32: "BF16",
+    36: "TQ1_0",
+    37: "TQ2_0",
+    38: "MXFP4",
+}
+_FTYPE_GUESSED = 1024  # llama.cpp's flag for a type it guessed: never a type of its own
+
+
+def file_type_text(value: Any) -> str | None:
+    """« Q4_K_M » for `general.file_type` 15; `None` for an unknown or absent value."""
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return FILE_TYPES.get(value & ~_FTYPE_GUESSED)
+
+
+# ---------- the GGUF header, read once per (path, size, modification time) ----------
+
+_HEADERS: dict[str, tuple[tuple[int, int], tuple[EngineMetadata, dict[str, Any]] | None]] = {}
+_HEADERS_LOCK = threading.Lock()
+_READ_LOCK = threading.Lock()
+
+
+def _positive(value: Any) -> int | None:
+    try:
+        n = int(value)
+    except (TypeError, ValueError):
+        return None
+    return n if n > 0 else None
+
+
+def _text(value: Any) -> str | None:
+    return (value.strip() or None) if isinstance(value, str) else None
+
+
+def _engine_metadata(raw: dict[str, Any]) -> EngineMetadata:
+    """What `VocabTokenizer` reads in the same header: architecture, template, native
+    context (`{arch}.context_length`)."""
+    arch = _text(raw.get("general.architecture"))
+    template = raw.get("tokenizer.chat_template")
+    return EngineMetadata(
+        architecture=arch,
+        chat_template=template if isinstance(template, str) and template else None,
+        native_context=_positive(raw.get(f"{arch}.context_length")) if arch else None,
+        bos_token="",
+        eos_token="",
+        special_tokens=(),
+        pooling_type=pooling_of(raw.get(f"{arch}.pooling_type")) if arch else None,
+    )
+
+
+def header_metadata(path: str | None) -> tuple[EngineMetadata, dict[str, Any]] | None:
+    """The `EngineMetadata` and the raw key/values of the GGUF header of `path`, read in
+    pure Python and remembered by (path, size, `mtime_ns`); `None` when unreadable."""
+    if not path:
+        return None
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return None
+    stamp = (stat.st_size, stat.st_mtime_ns)
+    key = os.path.normcase(os.path.abspath(path))
+    with _HEADERS_LOCK:
+        hit = _HEADERS.get(key)
+    if hit is not None and hit[0] == stamp:
+        return hit[1]
+    # R1: one read at a time (pure Python, the GIL shares nothing): a request arriving
+    # during `warm_headers` waits for the file being read, then finds it here.
+    with _READ_LOCK:
+        with _HEADERS_LOCK:
+            hit = _HEADERS.get(key)
+        if hit is not None and hit[0] == stamp:
+            return hit[1]
+        raw = gguf_meta.try_read_metadata(path)
+        result = None if raw is None else (_engine_metadata(raw), raw)
+        with _HEADERS_LOCK:
+            _HEADERS[key] = (stamp, result)
+    return result
+
+
+def header_path(candidate: ModelCandidate) -> str | None:
+    """The file of this disk whose header `_local_entry` reads for `candidate`: relative
+    paths resolved (an explicit path, a relative data dir); llama-server reports the file it
+    loaded: only an absolute path is this disk's."""
+    served = candidate.source == "server"
+    path = candidate.gguf_path if served else candidate.path
+    if served and candidate.engine == "llama_server":
+        return local_path(path)
+    return os.path.abspath(path) if path else None
+
+
+def warm_headers(candidates: Iterable[ModelCandidate]) -> threading.Thread:
+    """R1 (recette du 02/10): reads the headers of `candidates` into the cache in a
+    background thread, as soon as the search knows them, so that the first
+    `/api/diagnostic` after the search does not (21 s on the PC pro, 39 candidates)."""
+    paths = list(dict.fromkeys(p for c in candidates if (p := header_path(c))))
+
+    def warm() -> None:
+        started = time.perf_counter()
+        try:
+            for path in paths:
+                header_metadata(path)
+        except Exception:  # noqa: BLE001 - AD-16: a warm-up never dies silently
+            log.exception("Préchauffage des en-têtes GGUF interrompu")
+            return
+        # R1: with the diagnostic's line, says whether a request waited for it.
+        log.debug(
+            "Préchauffage des en-têtes GGUF : %d fichiers en %.0f ms",
+            len(paths),
+            (time.perf_counter() - started) * 1000,
+        )
+
+    thread = threading.Thread(target=warm, name="harness-lab-headers", daemon=True)
+    thread.start()
+    return thread
+
+
+# ---------- R1: where `models_payload` spends its time ----------
+
+
+LOCAL_STEP = "local_entries"  # the step `PayloadTimings.summary` details per candidate
+
+
+class PayloadTimings:
+    """R1 (recette du 02/10): each step of `models_payload` and, for each local candidate,
+    its header read and the rest of its entry, in seconds; `summary` for the diagnostic's
+    log line (never a journal event)."""
+
+    def __init__(self) -> None:
+        self.steps: dict[str, float] = {}
+        self.candidates: list[tuple[str, float, float]] = []  # (name, header, rest)
+        self._started = time.perf_counter()
+
+    def lap(self, name: str) -> None:
+        now = time.perf_counter()
+        self.steps[name] = now - self._started
+        self._started = now
+
+    def candidate(self, name: str, header: float, rest: float) -> None:
+        self.candidates.append((name, header, rest))
+
+    def summary(self) -> str:
+        """« load_publishers 0 ms, local_entries 5400 ms (headers 5390 ms ; gemma3:1b 482 +
+        1 ms ; …), … » (the functions' names, as the R1 line's steps): each candidate from 1 ms,
+        slowest first, its header read then the rest."""
+        parts = []
+        for name, seconds in self.steps.items():
+            part = f"{name} {seconds * 1000:.0f} ms"
+            if name == LOCAL_STEP and self.candidates:
+                slow = sorted(
+                    (c for c in self.candidates if c[1] + c[2] >= 0.001),
+                    key=lambda c: c[1] + c[2],
+                    reverse=True,
+                )
+                headers = sum(c[1] for c in self.candidates)
+                detail = "".join(f" ; {n} {h * 1000:.0f} + {r * 1000:.0f} ms" for n, h, r in slow)
+                part += f" (headers {headers * 1000:.0f} ms{detail})"
+            parts.append(part)
+        return ", ".join(parts)
+
+
+# ---------- the entries ----------
+
+
+class ModelEntry(BaseModel):
+    """One available model, as the picker and the table show it (story 25)."""
+
+    value: str  # the picker's value: `file:`, `server:` or `cloud:` + ref
+    kind: Literal["file", "server", "cloud"]
+    ref: str
+    hosting: Literal["local", "network"]
+    served_by_text: str  # « fichier », « Ollama », « llama-server », the cloud provider
+    hosting_text: str | None = None  # a cloud model's declared hosting
+    hosting_label_text: str  # the table's « Hébergement »: where, then who serves it
+    prefix_text: str  # « Local · Ollama », « RÉSEAU · Groq »
+    name: str
+    label_text: str  # prefix · name · size (parameters only)
+    title_text: str  # the option's tooltip when usable: path, address or hosting
+    publisher_id: str
+    publisher_text: str
+    params_b: float | None = None
+    params_label: str | None = None
+    size_bytes: int | None = None
+    size_text: str
+    window: int | None = None
+    native_context: int | None = None
+    window_text: str
+    window_reason_text: str | None = None  # where the window comes from (AD-9)
+    tools: bool | None = None
+    tools_text: str
+    tools_reason_text: str | None = None
+    reasoning: ReasoningMode
+    reasoning_text: str
+    reason_text: str | None = None  # why it reasons (or not) so
+    usable: bool
+    disabled_text: str | None = None
+    # FinOps: a cloud model's declared prices, « 0,30 $ / 2,50 $ » per million tokens (input /
+    # output); « — » for a local model, or a cloud one without `pricing`.
+    price_text: str = "—"
+    price_reason_text: str | None = None
+    # Lot 3 of 2026-10-04: the card this source belongs to (`group_sources`), its
+    # quantization (« Q4_K_M »), the GGUF file of this disk it reads (a file, an Ollama blob,
+    # the file llama-server loaded), where it was found (« Fichier GGUF · Hugging Face ») and
+    # its publisher's logo (a file of `static/logos/`, none: the initial).
+    card_id: str | None = None
+    bytes_text: str | None = None  # « 2,5 Go », « ≈ 2,7 Go » for a served model
+    quantization_text: str | None = None
+    gguf_path: str | None = None
+    origin_text: str = ""
+    logo: str | None = None
+    # What the grouping compares, and the short origin of the card's « 2 sources · … »:
+    # never sent.
+    _identity: dict[str, Any] = PrivateAttr(default_factory=dict)
+    _origin_short: str = PrivateAttr(default="")
+
+
+def _capabilities(
+    caps: Capabilities | None,
+    unknown_text: str | None,
+    window: int | None,
+    lang: str = config.DEFAULT_LANGUAGE,
+) -> dict[str, Any]:
+    """The table's columns from `caps` (the cards' rules, `capabilities.py`, the reasoning
+    card's window rule included); `unknown_text`: why nothing was read, when it is so. The
+    texts in `lang` (languages 5/5)."""
+    tools, tools_text, tools_reason = tools_summary(caps)
+    mode, reason = reasoning_mode(caps, window)
+    if caps is None and unknown_text:
+        tools_reason = reason = unknown_text
+    return {
+        "tools": tools,
+        "tools_text": render(tools_text, lang),
+        "tools_reason_text": None if tools_reason is None else render(tools_reason, lang),
+        "reasoning": mode,
+        "reasoning_text": render(REASONING_FR[mode], lang),
+        "reason_text": None if reason is None else render(reason, lang),
+    }
+
+
+# AD-9: where the window comes from (`window_for`, `config.cloud_window`); `Message`s,
+# rendered in the table's language (languages 5/5).
+_WINDOW_SOURCE_FR = {
+    source: Message(f"models.catalog.window_source.{source}")
+    for source in ("configured", "native", "server", "override", "tpm")
+}
+
+
+def _window(
+    window: int | None,
+    source: str | None,
+    native: int | None,
+    lang: str = config.DEFAULT_LANGUAGE,
+) -> dict[str, Any]:
+    reason = None
+    if window:
+        reason = _WINDOW_SOURCE_FR.get(source or "", source)
+        reason = None if reason is None else render(reason, lang)
+        if native:
+            reason = msg(
+                "models.catalog.window_with_native", lang, reason=reason, native=_int(native, lang)
+            )
+    return {
+        "window": window,
+        "native_context": native,
+        "window_text": msg("models.catalog.tokens", lang, n=_int(window, lang)) if window else "—",
+        "window_reason_text": reason,
+    }
+
+
+def _int(n: int, lang: str) -> str:
+    """`n` in `lang`'s style; French keeps this module's own separator (`_fr_int`)."""
+    return _fr_int(n) if lang == config.DEFAULT_LANGUAGE else number(n, lang)
+
+
+def _label(prefix: str, name: str, params_label: str | None) -> str:
+    return " · ".join(part for part in (prefix, name, params_label) if part)
+
+
+def _address(url: str | None) -> str:
+    """« 127.0.0.1:8080 » for `http://127.0.0.1:8080`; the text itself otherwise."""
+    if not url:
+        return ""
+    return urlsplit(url).netloc or url
+
+
+def _origin(candidate: ModelCandidate, lang: str) -> tuple[str, str]:
+    """Lot 3 of 2026-10-04: where a local source was found, in full (« Fichier GGUF ·
+    Hugging Face », « Ollama · serveur local déjà lancé », « llama-server · 127.0.0.1:8080 »)
+    and in short, for a card's « 2 sources · Hugging Face, Ollama »."""
+    if candidate.source == "server":
+        if candidate.engine == "llama_server":
+            address = _address(candidate.server_url)
+            return msg("models.catalog.origin.llama_server", lang, address=address), "llama-server"
+        return msg("models.catalog.origin.ollama_served", lang), "Ollama"
+    where = msg(f"models.catalog.where.{candidate.source}", lang)
+    return msg("models.catalog.origin.file", lang, where=where), where
+
+
+def _compared(value: Any) -> str | None:
+    """A header's text as the grouping compares it: trimmed, whatever the case."""
+    if isinstance(value, bool) or not isinstance(value, str | int | float):
+        return None
+    text = str(value).strip().casefold()
+    return text or None
+
+
+def _identity(path: str | None, raw: dict[str, Any], quantization: str | None) -> dict[str, Any]:
+    """What `group_sources` compares for a local source: its file (resolved, as the file
+    system compares paths) and its bytes, its architecture, and the header's base name,
+    variant, version and size, with its quantization; its `general.name`, the card's name."""
+    file = size = None
+    if path:
+        try:
+            size = os.stat(path).st_size
+            file = os.path.normcase(os.path.realpath(path))
+        except OSError:
+            file = size = None
+    return {
+        "file": file,
+        "bytes": size,
+        "architecture": _compared(raw.get("general.architecture")),
+        "basename": _compared(raw.get("general.basename")),
+        "finetune": _compared(raw.get("general.finetune")),
+        "version": _compared(raw.get("general.version")),
+        "size_label": _compared(raw.get("general.size_label")),
+        "quantization": _compared(quantization),
+        "name": _text(raw.get("general.name")),
+    }
+
+
+def _local_entry(
+    candidate: ModelCandidate,
+    cfg: config.Config,
+    window: int | None = None,
+    lang: str = config.DEFAULT_LANGUAGE,
+    timings: PayloadTimings | None = None,
+) -> ModelEntry:
+    started = time.perf_counter()
+    content, _ = load_publishers(lang)
+    configured = cfg.context_window if window is None else window
+    served = candidate.source == "server"
+    engine = candidate.engine if served else None
+    found = candidate.status != "incompatible"
+    path = candidate.gguf_path if served else candidate.path
+    # llama-server's header gives the publisher and the size, never the capabilities
+    # (`/props`).
+    local = header_path(candidate)
+    read = time.perf_counter()
+    header = header_metadata(local)
+    read = time.perf_counter() - read
+    raw = header[1] if header else {}
+    meta: EngineMetadata | None
+    if engine == "llama_server":
+        meta = EngineMetadata(
+            architecture=None,  # AD-6: llama-server exposes none, the template says it
+            chat_template=candidate.server_template,
+            native_context=candidate.native_context,
+            bos_token="",
+            eos_token="",
+            special_tokens=(),
+            server_context=candidate.server_context,
+        )
+    else:
+        meta = header[0] if header else None
+    caps = capabilities_for(meta) if meta is not None and found else None
+    # AD-6: a model without a template fails to load (« Modèle incompatible »): not usable.
+    incompatible = caps.incompatible_reason if caps else None
+    usable = found and not incompatible
+    if not found:
+        reason = reason_message(candidate.reason)
+        unknown_text = render(reason or msg("models.catalog.unusable", lang), lang)
+    else:
+        unknown_text = msg("models.catalog.header_unreadable", lang)
+    name = candidate.name or Path(path or "").name or candidate.ref or "modèle"
+    publisher = publisher_for(
+        [_text(raw.get("general.architecture")), candidate.architecture, candidate.publisher_hint]
+        + ([caps.family] if caps else []),
+        [_text(raw.get("general.basename")), _text(raw.get("general.name")), name],
+        lang,
+    )
+    params_b, params_label = _first_params(
+        [
+            _text(raw.get("general.size_label")),
+            candidate.size_label,
+            candidate.params_label,
+            name,
+            _text(raw.get("general.name")),
+        ]
+    )
+    size_bytes = candidate.size_bytes
+    if size_bytes is None and local:
+        try:
+            size_bytes = Path(local).stat().st_size
+        except OSError:
+            size_bytes = None
+    served_by = getattr(content.served_by_text, engine) if engine else content.served_by_text.file
+    prefix = msg("models.catalog.prefix_local", lang, served_by=served_by)
+    window, source = window_for(meta, configured) if meta is not None and usable else (None, None)
+    if served:
+        kind, ref = "server", candidate.ref or name
+        title = msg(
+            "models.catalog.served_title",
+            lang,
+            provider=candidate.provider,
+            url=candidate.server_url,
+        )
+    else:
+        kind, ref = "file", candidate.path or ""
+        title = candidate.path or name
+    # Lot 3 of 2026-10-04: Ollama says its quantization; a file's header says it.
+    quantization = (candidate.quantization if engine == "ollama" else None) or file_type_text(
+        raw.get("general.file_type")
+    )
+    origin, short = _origin(candidate, lang)
+    entry = ModelEntry(
+        value=f"{kind}:{ref}",
+        kind=kind,
+        ref=ref,
+        hosting="local",
+        served_by_text=served_by,
+        hosting_label_text=f"{content.hosting_text.local} · {served_by}",
+        prefix_text=prefix,
+        name=name,
+        label_text=_label(prefix, name, params_label),
+        title_text=title,
+        publisher_id=publisher.id,
+        publisher_text=publisher.label_text,
+        params_b=params_b,
+        params_label=params_label,
+        size_bytes=size_bytes,
+        size_text=size_fr(params_label, size_bytes, lang),
+        **_window(window, source, meta.native_context if meta is not None else None, lang),
+        **_capabilities(caps, unknown_text, window, lang),
+        usable=usable,
+        disabled_text=None if usable else render(incompatible or unknown_text, lang),
+        bytes_text=None
+        if not size_bytes
+        else (
+            msg("models.catalog.size_served", lang, size=_bytes_text(size_bytes, lang))
+            if served
+            else _bytes_text(size_bytes, lang)
+        ),
+        quantization_text=quantization,
+        gguf_path=local,
+        origin_text=origin,
+        logo=publisher.logo,
+    )
+    entry._origin_short = short
+    entry._identity = _identity(local, raw, quantization)
+    if timings is not None:
+        timings.candidate(name, read, time.perf_counter() - started - read)
+    return entry
+
+
+def local_entries(
+    candidates: Iterable[ModelCandidate],
+    cfg: config.Config,
+    window: int | None = None,
+    lang: str = config.DEFAULT_LANGUAGE,
+    timings: PayloadTimings | None = None,
+) -> list[ModelEntry]:
+    """Every local model the last diagnostic found: the files, once per path (a usable
+    listing wins over an incompatible one), incompatible ones included (greyed, with their
+    reason), and the models of already-running servers. `window` (story 26): the window
+    configured now, else the launch's."""
+    files: dict[str, ModelCandidate] = {}
+    served: list[ModelCandidate] = []
+    for candidate in candidates:
+        if candidate.source == "server":
+            served.append(candidate)
+        elif candidate.path and (
+            candidate.path not in files or files[candidate.path].status != "found"
+        ):
+            files[candidate.path] = candidate
+    return [_local_entry(c, cfg, window, lang, timings) for c in [*files.values(), *served]]
+
+
+def cloud_entries(
+    cfg: config.Config,
+    rows: Iterable[dict[str, Any]] = (),
+    window: int | None = None,
+    lang: str = config.DEFAULT_LANGUAGE,
+) -> list[ModelEntry]:
+    """Every declared cloud model; `rows`: the diagnostic's `cloud_rows`, whose `disabled_text`
+    says why one cannot be chosen now (no key…). `window` (story 26): as `local_entries`."""
+    disabled = {row.get("id"): row.get("disabled_text") for row in rows}
+    entries = []
+    for entry in cfg.cloud_models[0]:
+        caps = cloud_capabilities(entry)
+        effective, source = config.cloud_window(
+            entry, cfg.context_window if window is None else window
+        )
+        params_b, params_label = _first_params([entry.model])
+        publisher = publisher_for([], [entry.model], lang)
+        prefix = msg("models.catalog.prefix_network", lang, provider=entry.provider)
+        reason = disabled.get(entry.id)
+        entries.append(
+            ModelEntry(
+                value=f"cloud:{entry.id}",
+                kind="cloud",
+                ref=entry.id,
+                hosting="network",
+                served_by_text=entry.provider,
+                hosting_text=entry.hosting_text,
+                hosting_label_text=f"{entry.provider} · {entry.hosting_text}",
+                prefix_text=prefix,
+                name=entry.model,
+                label_text=_label(prefix, entry.model, params_label),
+                title_text=msg(
+                    "models.catalog.cloud_title",
+                    lang,
+                    provider=entry.provider,
+                    hosting=entry.hosting_text,
+                ),
+                publisher_id=publisher.id,
+                publisher_text=publisher.label_text,
+                params_b=params_b,
+                params_label=params_label,
+                size_bytes=None,
+                size_text=size_fr(params_label, None, lang),
+                **_window(effective, source, entry.context, lang),
+                **_capabilities(caps, None, effective, lang),
+                usable=not reason,
+                disabled_text=render(reason, lang) if reason else None,
+                price_text=price_fr(entry, lang=lang) or "—",
+                price_reason_text=price_reason_fr(entry, lang=lang)
+                or msg("models.catalog.no_price", lang),
+                card_id=f"card:cloud:{entry.id}",  # a cloud model is never grouped
+                origin_text=entry.provider,
+                logo=publisher.logo,
+            )
+        )
+    return entries
+
+
+# ---------- the cards: one per model, its local sources grouped (lot 3 of 2026-10-04) ----------
+
+
+def _same_file(identity: dict[str, Any]) -> tuple[Any, ...] | None:
+    """Rule 1, certain: the same file (an Ollama blob and the model Ollama serves from it,
+    the file llama-server loaded and the same one in a cache, two paths to one file)."""
+    return None if identity.get("file") is None else ("file", identity["file"])
+
+
+def _same_copy(identity: dict[str, Any]) -> tuple[Any, ...] | None:
+    """Rule 2, an identical copy: the same bytes, architecture, base name and size; never two
+    quantizations, variants or versions (unknown is a value of its own: compared, never
+    required)."""
+    key = tuple(identity.get(k) for k in ("bytes", "architecture", "basename", "size_label"))
+    if None in key:
+        return None
+    compared = tuple(identity.get(k) for k in ("quantization", "finetune", "version"))
+    return ("copy", *key, *compared)
+
+
+def _same_model(identity: dict[str, Any]) -> tuple[Any, ...] | None:
+    """Rule 3, the same model in the same quantization: base name, variant, version, size
+    and quantization; one of them missing, no grouping (prudence)."""
+    fields = ("basename", "finetune", "version", "size_label", "quantization")
+    key = tuple(identity.get(k) for k in fields)
+    return None if None in key else ("model", *key)
+
+
+GROUPING_RULES = (_same_file, _same_copy, _same_model)
+
+
+def group_sources(entries: Sequence[ModelEntry]) -> None:
+    """Lot 3 of 2026-10-04: gives each entry its card (`card_id`). The local sources of one
+    model share a card by rules 1 to 3 (`GROUPING_RULES`), in that order; a cloud model has
+    its own, never shared with a local one. A card's sources all take the publisher of its
+    first source (the first in `entries`), so that the page and the picker group them
+    alike."""
+    parent = list(range(len(entries)))
+
+    def root(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    for rule in GROUPING_RULES:
+        first: dict[tuple[Any, ...], int] = {}
+        for i, entry in enumerate(entries):
+            if entry.hosting != "local":
+                continue
+            key = rule(entry._identity)
+            if key is None:
+                continue
+            if key not in first:
+                first[key] = i
+                continue
+            a, b = root(first[key]), root(i)
+            if a != b:  # the earlier one stays the root: the card's first source
+                parent[max(a, b)] = min(a, b)
+    for i, entry in enumerate(entries):
+        if entry.hosting == "network":
+            entry.card_id = entry.card_id or f"card:{entry.value}"
+            continue
+        head = entries[root(i)]
+        entry.card_id = f"card:{head.value}"
+        if head is not entry:
+            entry.publisher_id, entry.publisher_text = head.publisher_id, head.publisher_text
+            entry.logo = head.logo
+
+
+class ModelCard(BaseModel):
+    """One card of the « Diagnostic et modèles » page: a model and its sources (the values
+    of `models`, the picker's options), its name, size and origin as the card shows them."""
+
+    id: str
+    name: str
+    hosting: Literal["local", "network"]
+    size_bytes_min: int | None = None  # the sort by size: the smallest source
+    size_text: str | None = None  # « 2,5 Go », « ≈ 2,7 Go », « 2,4 à 2,5 Go »; none for cloud
+    params_text: str | None = None  # « 4 B »
+    origin_text: str  # « Fichier GGUF · Hugging Face », « 2 sources · Hugging Face, Ollama »
+    quantization_text: str | None = None
+    source_values: list[str]
+
+
+def _bytes_text(size_bytes: int, lang: str) -> str:
+    return size_fr(None, size_bytes, lang)
+
+
+def _card_size(members: Sequence[ModelEntry], lang: str) -> tuple[int | None, str | None]:
+    """The smallest size, and the card's: one when every source has it, else the range;
+    « ≈ » when every source is a served model (the size its server reports)."""
+    known = [(m.size_bytes, m.kind == "server") for m in members if m.size_bytes]
+    if not known:
+        return None, None
+    low, high = min(n for n, _ in known), max(n for n, _ in known)
+    text = _bytes_text(low, lang)
+    if _bytes_text(high, lang) != text:
+        both_gb = low >= GIB / 10 and high >= GIB / 10
+        start = number(low / GIB, lang, 1) if both_gb else text
+        text = msg("models.catalog.size_range", lang, low=start, high=_bytes_text(high, lang))
+    if all(served for _, served in known):
+        text = msg("models.catalog.size_served", lang, size=text)
+    return low, text
+
+
+def _stem(name: str) -> str:
+    return name[: -len(".gguf")] if name.casefold().endswith(".gguf") else name
+
+
+def _card(members: Sequence[ModelEntry], lang: str) -> ModelCard:
+    head = members[0]
+    local = head.hosting == "local"
+    name = next((m._identity["name"] for m in members if m._identity.get("name")), None)
+    size_min, size_text = _card_size(members, lang) if local else (None, None)
+    params = next((m.params_label for m in members if m.params_label), None)
+    if len(members) > 1:
+        names = ", ".join(dict.fromkeys(m._origin_short for m in members if m._origin_short))
+        origin = msg("models.catalog.origin.sources", lang, count=len(members), names=names)
+    else:
+        origin = head.origin_text
+    return ModelCard(
+        id=head.card_id or f"card:{head.value}",
+        name=name or _stem(head.name),
+        hosting=head.hosting,
+        size_bytes_min=size_min,
+        size_text=size_text,
+        params_text=params_fr(params, lang) if params and local else None,
+        origin_text=origin,
+        quantization_text=next((m.quantization_text for m in members if m.quantization_text), None),
+        source_values=[m.value for m in members],
+    )
+
+
+# ---------- groups ----------
+
+
+class ModelGroup(BaseModel):
+    hosting: Literal["local", "network"]
+    publisher_id: str
+    label_text: str  # « Sur ce poste · Qwen (Alibaba) »
+    models: list[ModelEntry]
+    # Lot 3 of 2026-10-04: the page's cards (a card per model, its sources grouped), in the
+    # order of their first source in `models`; the publisher's name and logo.
+    publisher_text: str = ""
+    logo: str | None = None
+    cards: list[ModelCard] = []
+
+
+def _distinct_names(groups: Sequence[ModelGroup]) -> None:
+    """Two cards of one name (a model in Q4_K_M and in Q8_0): each says its quantization."""
+    cards = [card for group in groups for card in group.cards]
+    counts: dict[str, int] = {}
+    for card in cards:
+        counts[card.name.casefold()] = counts.get(card.name.casefold(), 0) + 1
+    for card in cards:
+        quantization = card.quantization_text
+        if (
+            counts[card.name.casefold()] > 1
+            and quantization
+            and quantization.casefold() not in card.name.casefold()
+        ):
+            card.name = f"{card.name} · {quantization}"
+
+
+def sort_key(entry: ModelEntry) -> tuple[bool, float, bool, int, str]:
+    """Known parameters first, by size; then known bytes, by size; then by name, whatever
+    the case."""
+    return (
+        entry.params_b is None,
+        entry.params_b or 0.0,
+        entry.size_bytes is None,
+        entry.size_bytes or 0,
+        entry.name.casefold(),
+    )
+
+
+def group_models(
+    entries: Iterable[ModelEntry], lang: str = config.DEFAULT_LANGUAGE
+) -> list[ModelGroup]:
+    """Local before network; in each, the publishers in the table's order, « Autres
+    éditeurs » last; empty groups left out; models by `sort_key`. Each group's cards (lot 3
+    of 2026-10-04): by `card_id`, in the order of their first source in `models`, their
+    sources in the order of `entries`."""
+    content, _ = load_publishers(lang)
+    order = {p.id: i for i, p in enumerate(content.publishers)}
+    buckets: dict[tuple[str, str], list[ModelEntry]] = {}
+    position: dict[int, int] = {}
+    for i, entry in enumerate(entries):
+        position[id(entry)] = i
+        buckets.setdefault((entry.hosting, entry.publisher_id), []).append(entry)
+    keys = sorted(buckets, key=lambda k: (k[0] != "local", order.get(k[1], len(order))))
+    groups = []
+    for hosting, publisher_id in keys:
+        models = sorted(buckets[(hosting, publisher_id)], key=sort_key)
+        where = getattr(content.hosting_text, hosting)
+        members: dict[str, list[ModelEntry]] = {}
+        for entry in models:
+            members.setdefault(entry.card_id or f"card:{entry.value}", []).append(entry)
+        cards = [
+            _card(sorted(card, key=lambda e: position[id(e)]), lang) for card in members.values()
+        ]
+        groups.append(
+            ModelGroup(
+                hosting=hosting,  # type: ignore[arg-type]
+                publisher_id=publisher_id,
+                label_text=f"{where} · {models[0].publisher_text}",
+                models=models,
+                publisher_text=models[0].publisher_text,
+                logo=models[0].logo,
+                cards=cards,
+            )
+        )
+    _distinct_names(groups)
+    return groups
+
+
+def models_payload(
+    candidates: Iterable[ModelCandidate],
+    cfg: config.Config,
+    cloud_rows: Iterable[dict[str, Any]] = (),
+    window: int | None = None,
+    lang: str = config.DEFAULT_LANGUAGE,
+    timings: PayloadTimings | None = None,
+) -> dict[str, Any]:
+    """`/api/diagnostic.models`: the legend, the groups (their models, the picker's options,
+    and their cards, the page's), and why the publishers' table could not be read, if so.
+    One answer serves the picker and the « Diagnostic et modèles » page. `window`
+    (story 26): the window configured now (`AppSession.configured_window`); `lang`
+    (languages 3/5): the session's language, for the publishers' texts; `timings` (R1):
+    filled with each step's duration, for the diagnostic's log line."""
+    timings = timings or PayloadTimings()
+    content, error_text = load_publishers(lang)
+    timings.lap("load_publishers")
+    local = local_entries(candidates, cfg, window, lang, timings)
+    group_sources(local)  # lot 3 of 2026-10-04: one card per model, its sources grouped
+    timings.lap(LOCAL_STEP)
+    cloud = cloud_entries(cfg, cloud_rows, window, lang)
+    timings.lap("cloud_entries")
+    groups = [g.model_dump(mode="json") for g in group_models(local + cloud, lang)]
+    timings.lap("group_models")
+    return {
+        "legend_text": content.legend_text,
+        "groups": groups,
+        "publishers_error_text": error_text,
+    }

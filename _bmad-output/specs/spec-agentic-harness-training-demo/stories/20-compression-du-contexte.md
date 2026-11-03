@@ -39,7 +39,7 @@ deferred:
       130 Mo et zéro tentative réseau mesurés hors PC cible par la story 12 ; `tools/bench/
       story12_bench.py headroom` à relancer sur le poste de référence.
     location: >-
-      src/wavestack/compression/headroom_adapter.py, wavestack.toml [compression] cost_mb
+      src/harness_lab/compression/headroom_adapter.py, harness-lab.toml [compression] cost_mb
     severity: medium (unverified)
 ---
 
@@ -55,11 +55,11 @@ deferred:
 
 **Always:**
 - **Dépendance optionnelle (story 12).** `headroom-ai==0.38.0` épinglé exactement, dans l'extra `compression` (`uv sync --extra compression`). Absent ou d'une autre version : brique indisponible, raison en français avec la commande à lancer. Aucun test pytest n'exige headroom : les tests injectent un faux compresseur.
-- **Hors ligne (AD-15, story 12).** `cli` pose avant tout import tiers `LITELLM_LOCAL_MODEL_COST_MAP=True`, `HEADROOM_OFFLINE=1`, `HEADROOM_BEACON=off`, `HEADROOM_UPDATE_CHECK=off`, `DO_NOT_TRACK=1` et `TIKTOKEN_CACHE_DIR` (cache fourni par litellm, trouvé sans l'importer) ; l'adaptateur les repose avant `import headroom`, et pose `HF_HUB_OFFLINE=1` le temps de l'import et de chaque appel seulement (les téléchargements de WaveStack passent par `net`, jamais par `huggingface_hub`). Appel avec `kompress_model="disabled"` et `protect_recent=0`.
+- **Hors ligne (AD-15, story 12).** `cli` pose avant tout import tiers `LITELLM_LOCAL_MODEL_COST_MAP=True`, `HEADROOM_OFFLINE=1`, `HEADROOM_BEACON=off`, `HEADROOM_UPDATE_CHECK=off`, `DO_NOT_TRACK=1` et `TIKTOKEN_CACHE_DIR` (cache fourni par litellm, trouvé sans l'importer) ; l'adaptateur les repose avant `import headroom`, et pose `HF_HUB_OFFLINE=1` le temps de l'import et de chaque appel seulement (les téléchargements de HarnessLab passent par `net`, jamais par `huggingface_hub`). Appel avec `kompress_model="disabled"` et `protect_recent=0`.
 - **Chargement (AD-8).** À l'activation de la brique (`set_brick`, scénario, réinitialisation), sur le thread de travail : contrôle du budget avec `[compression] cost_mb` (130), import et un appel de chauffe, puis `grant` dans le slot `compressor`. Libéré à la désactivation et à `close()` ; éteinte pendant le chargement, la brique ferme et libère le compresseur. Une fois importé, Headroom reste en mémoire (compté par le RSS mesuré) : un nouveau chargement coûte 0. Pendant le chargement : indisponible « Chargement de Headroom… » ; refus du budget ou échec : indisponible avec la raison, jamais de plantage ; un refus du budget est retenté après un changement de modèle, comme le RAG.
 - **Portée (AD-22).** Seuls les `tool_result` d'un outil exécuté (natif, réseau, MCP ; décidé à la création de la réponse, drapeau `tool_output`) et les `rag_excerpt` sont candidats, dans le contexte `main` seul. Jamais : réponses des méta-outils (`source = harness`), `subagent_result`, `skill_body`, `history`, refus d'un hook, erreur réinjectée d'un appel mal formé, contexte `sub{n}`. Un texte de moins de `[compression] min_chars` (300) caractères n'est pas candidat.
 - **Moment (AD-4, ajout seul).** Avant le premier appel du tour : les extraits RAG et les réponses des actions forcées. Avant chaque appel suivant : les réponses d'outils arrivées depuis l'appel précédent, une seule fois. Un texte déjà envoyé au modèle n'est jamais réécrit. Aucun candidat : aucune étape, aucun événement. L'étape agit sur les parties du tour avant leur assemblage (réponses d'outils, extraits RAG), à la place de l'étape d'AD-4, sans point d'accroche de hook (AD-13, report). « Arrêter » agit entre deux textes ; la paire d'événements est toujours complète.
-- **Étape tracée (AD-2).** `{turn}.main.s{n}`, brique `compression`, composant `compression.compressor`, `actor` et `trigger` = `harness`. Paire `compression_started{phase_label, title_fr, items, compressor_fr}` / `compression_ended{status: ok|error, compressor_fr, items[{source_fr, kind, brick, component, tokens_before, tokens_after, text_before, text_after (si changed), changed, transforms, error_fr}], tokens_before, tokens_after, saved_tokens, estimated, unchanged_fr, error_fr, duration_ms}`. Le texte d'origine n'est tracé qu'ici, une fois. Tokens comptés par WaveStack (`_count_tokens` : tokenizer en local, estimation en mode chat), jamais ceux de Headroom. Un résultat vide, identique aux blancs près ou pas plus court en tokens garde le texte d'origine (`changed = false`) ; Headroom ne reçoit pas la question (0.38.0 ne s'en sert pas, mesuré).
+- **Étape tracée (AD-2).** `{turn}.main.s{n}`, brique `compression`, composant `compression.compressor`, `actor` et `trigger` = `harness`. Paire `compression_started{phase_label, title_fr, items, compressor_fr}` / `compression_ended{status: ok|error, compressor_fr, items[{source_fr, kind, brick, component, tokens_before, tokens_after, text_before, text_after (si changed), changed, transforms, error_fr}], tokens_before, tokens_after, saved_tokens, estimated, unchanged_fr, error_fr, duration_ms}`. Le texte d'origine n'est tracé qu'ici, une fois. Tokens comptés par HarnessLab (`_count_tokens` : tokenizer en local, estimation en mode chat), jamais ceux de Headroom. Un résultat vide, identique aux blancs près ou pas plus court en tokens garde le texte d'origine (`changed = false`) ; Headroom ne reçoit pas la question (0.38.0 ne s'en sert pas, mesuré).
 - **Segments (AD-4).** Le remplaçant garde `kind`, `brick` et `component` d'origine et porte `compressed_from{tokens_before, estimated, step_id, item}` : le texte d'avant se lit dans l'étape `step_id`, rang `item`. `context_rendered` porte `uncompressed_used` (le total si ces segments n'étaient pas compressés), calculé par la session. En mode chat, le corps JSON envoyé contient le texte compressé.
 - **Historique.** Un tour terminé garde dans l'historique le texte que le modèle a lu (compressé), en `history`, sans `compressed_from` ; il n'est jamais recompressé.
 - **Échec (AD-16).** Une exception de Headroom sur un candidat : texte d'origine gardé, `harness_error`, `compression_ended{status: error, error_fr}` ; le tour continue.
@@ -88,14 +88,14 @@ deferred:
 ## Code Map
 
 - `pyproject.toml`, `uv.lock` -- extra `compression = ["headroom-ai==0.38.0"]` ; 40 paquets ajoutés au verrou (résolution pypi faite sans llama-cpp-python, index abetlen injoignable, fusionnée à la main comme sqlite-vec en story 15).
-- `src/wavestack/compression/` (nouveau, AD-22) : `__init__.py` (vide de dépendances) ; `env.py` (`OFFLINE_ENV`, `apply_offline_env()`, stdlib seule, appelée par `cli`) ; `port.py` (`Compressed{text, transforms}`, protocole `Compressor{label_fr, compress(text), close()}`, `CompressionContent` + `load_compression_content()` de `content/compression.yaml`) ; `headroom_adapter.py` (`HEADROOM_VERSION`, `missing_fr()`, `HeadroomCompressor`, imports lourds dans le constructeur).
-- `src/wavestack/cli.py` L21-31 -- `apply_offline_env()` juste après la garde réseau.
-- `src/wavestack/config.py` L347 (modèle `rag_top_k`) + `wavestack.toml` -- `[compression] min_chars = 300`, `cost_mb = 130` ; propriétés `compression_min_chars`, `compression_cost_bytes`.
-- `src/wavestack/models/load_registry.py` -- slot `COMPRESSOR = "compressor"` (réutilise `check_component`, `grant`, `release`).
-- `src/wavestack/context/segments.py` -- `CompressedFrom{tokens_before, estimated, step_id, item}` ; `Part.compressed_from` et `Segment.compressed_from` (défaut `None`). `context/render.py` `_attribute` L306 : recopie `compressed_from` de la part. `context/window.py` `gauge` : `uncompressed_used` quand un segment est compressé.
-- `src/wavestack/trace/catalog.py` -- `SegmentPayload.compressed_from`, `ContextWindowPayload.uncompressed_used`, `CompressionItem`, `CompressionStartedPayload`, `CompressionEndedPayload` dans `PAYLOAD_MODELS` (L589).
-- `src/wavestack/bricks/registry.py` -- brique `compression` (`category="context"`), composant `compression.compressor` (`kind="compressor"`, `local_process`, `edges_to=["core.harness"]`).
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/compression/` (nouveau, AD-22) : `__init__.py` (vide de dépendances) ; `env.py` (`OFFLINE_ENV`, `apply_offline_env()`, stdlib seule, appelée par `cli`) ; `port.py` (`Compressed{text, transforms}`, protocole `Compressor{label_fr, compress(text), close()}`, `CompressionContent` + `load_compression_content()` de `content/compression.yaml`) ; `headroom_adapter.py` (`HEADROOM_VERSION`, `missing_fr()`, `HeadroomCompressor`, imports lourds dans le constructeur).
+- `src/harness_lab/cli.py` L21-31 -- `apply_offline_env()` juste après la garde réseau.
+- `src/harness_lab/config.py` L347 (modèle `rag_top_k`) + `harness-lab.toml` -- `[compression] min_chars = 300`, `cost_mb = 130` ; propriétés `compression_min_chars`, `compression_cost_bytes`.
+- `src/harness_lab/models/load_registry.py` -- slot `COMPRESSOR = "compressor"` (réutilise `check_component`, `grant`, `release`).
+- `src/harness_lab/context/segments.py` -- `CompressedFrom{tokens_before, estimated, step_id, item}` ; `Part.compressed_from` et `Segment.compressed_from` (défaut `None`). `context/render.py` `_attribute` L306 : recopie `compressed_from` de la part. `context/window.py` `gauge` : `uncompressed_used` quand un segment est compressé.
+- `src/harness_lab/trace/catalog.py` -- `SegmentPayload.compressed_from`, `ContextWindowPayload.uncompressed_used`, `CompressionItem`, `CompressionStartedPayload`, `CompressionEndedPayload` dans `PAYLOAD_MODELS` (L589).
+- `src/harness_lab/bricks/registry.py` -- brique `compression` (`category="context"`), composant `compression.compressor` (`kind="compressor"`, `local_process`, `edges_to=["core.harness"]`).
+- `src/harness_lab/session/app_session.py` :
   - `__init__` (L405) : `compressor_factory` injectable ; `_compression_missing` (seulement avec la fabrique par défaut), `_compressor`, `_compression_loading`, `_compression_load_error`, `_compression_content`.
   - `_load_content` (L1325) : `content/compression.yaml`, sinon `_content_errors["compression"]`.
   - Modèle RAG L1600-1690 : `_request_compression_sync`, `_sync_compression`, `_load_compressor`, `_release_compressor`, `_compression_unavailable` ; appelés où `_request_rag_sync` l'est (`set_brick` L2384, `_reconfigure` L3417) et à `close()` (L995). `_availability` (L1714).
@@ -103,7 +103,7 @@ deferred:
   - `_turn` (L3640) : `sent` = nombre d'étapes déjà rendues ; avant `before_model_call`, `_transform_context(turn_id, step, state, steps, sent, first=n == 1)` si la brique est effective et le compresseur chargé ; contrôle d'arrêt après.
   - `_emit_architecture` (L781) : infobulle de la puce `compression.compressor`.
 - `content/bricks/compression.yaml`, `content/compression.yaml`, `content/demo_files/journal_serveur.log`, `content/scenarios.yaml`.
-- `src/wavestack/web/static/app.js` : `applyEnvelope` (modèle `rag_search_*` L370) ; `turnRows` (L3024) ; `compressionBody` (modèle `ragBody` L2688) ; `appendSegments` (L2305) et en-tête de `renderContextBody` ; `schemaActivity` (L4280) ; `JOURNAL_LABELS` (L3929) et résumés (L4008) ; `BRICK_ICONS` (L4159). `app.css` : `.compression-items`, `.ctx-compressed`.
+- `src/harness_lab/web/static/app.js` : `applyEnvelope` (modèle `rag_search_*` L370) ; `turnRows` (L3024) ; `compressionBody` (modèle `ragBody` L2688) ; `appendSegments` (L2305) et en-tête de `renderContextBody` ; `schemaActivity` (L4280) ; `JOURNAL_LABELS` (L3929) et résumés (L4008) ; `BRICK_ICONS` (L4159). `app.css` : `.compression-items`, `.ctx-compressed`.
 - `README.md` -- installation de l'extra et commande de lancement.
 - E2E : `tools/e2e/fake_openai.py` (`_plan` L140 : « journal_serveur » → `read_file`), `tools/e2e/run_e2e.py` (scénario `compression` après `rag`), `tools/e2e/README.md`.
 - Tests : `tests/test_rag.py` (`rag_session`, `Embedders`), `tests/test_tools.py`, `tests/fake_engine.py`, `tests/test_cloud.py` (session cloud factice).
@@ -112,11 +112,11 @@ deferred:
 
 **Execution:**
 - [x] `pyproject.toml`, `uv.lock` -- extra `compression`, verrou fusionné ; `uv lock --check --offline`, `uv sync --locked --extra compression`.
-- [x] `src/wavestack/compression/*`, `src/wavestack/cli.py`, `src/wavestack/config.py`, `wavestack.toml`, `src/wavestack/models/load_registry.py` -- port, adaptateur, variables hors ligne, réglages, slot.
-- [x] `src/wavestack/context/segments.py`, `render.py`, `window.py`, `src/wavestack/trace/catalog.py` -- `compressed_from`, `uncompressed_used`, deux événements.
-- [x] `src/wavestack/bricks/registry.py`, `content/bricks/compression.yaml`, `content/compression.yaml` -- brique et textes.
-- [x] `src/wavestack/session/app_session.py` -- chargement, disponibilité, `_transform_context`, parts et étapes compressées, schéma.
-- [x] `src/wavestack/web/static/app.js`, `app.css` -- étape, contexte avant/après, puce, journal.
+- [x] `src/harness_lab/compression/*`, `src/harness_lab/cli.py`, `src/harness_lab/config.py`, `harness-lab.toml`, `src/harness_lab/models/load_registry.py` -- port, adaptateur, variables hors ligne, réglages, slot.
+- [x] `src/harness_lab/context/segments.py`, `render.py`, `window.py`, `src/harness_lab/trace/catalog.py` -- `compressed_from`, `uncompressed_used`, deux événements.
+- [x] `src/harness_lab/bricks/registry.py`, `content/bricks/compression.yaml`, `content/compression.yaml` -- brique et textes.
+- [x] `src/harness_lab/session/app_session.py` -- chargement, disponibilité, `_transform_context`, parts et étapes compressées, schéma.
+- [x] `src/harness_lab/web/static/app.js`, `app.css` -- étape, contexte avant/après, puce, journal.
 - [x] `content/demo_files/journal_serveur.log`, `content/scenarios.yaml` -- module et scénario `compression`.
 - [x] `tests/test_compression.py` (nouveau) -- une ligne de la matrice par test, plus : variables hors ligne, adaptateur Headroom réel (sauté si absent), mode chat (corps compressé, estimation).
 - [x] `tools/e2e/*`, `README.md` -- parcours `compression` visible, documentation.
@@ -125,7 +125,7 @@ deferred:
 - Given la brique activée et un gros résultat d'outil, when on déplie « Compression (Headroom) » dans Orchestration, then on lit pour chaque candidat sa source, ses tokens avant → après et les deux textes, et la ligne porte le total avant → après avec le pourcentage.
 - Given le même tour, when on ouvre Contexte LLM, then le segment « Résultat d'outil » est marqué compressé avec ses tokens d'avant, son texte d'avant se déplie, et l'en-tête donne le total sans compression à côté du total envoyé.
 - Given la brique éteinte, when on rejoue le prompt et qu'on ouvre « Comparer », then le résultat d'outil y pèse ses tokens d'origine.
-- Given headroom-ai absent, when on ouvre le panneau des briques, then la carte « Compression » est indisponible avec la commande d'installation, et le reste de WaveStack fonctionne.
+- Given headroom-ai absent, when on ouvre le panneau des briques, then la carte « Compression » est indisponible avec la commande d'installation, et le reste de HarnessLab fonctionne.
 
 ## Spec Change Log
 
@@ -176,16 +176,16 @@ deferred:
 - **H-2 Historique** : on garde le texte compressé (ce que le modèle a lu), pas l'original. Désactiver la brique ne regonfle pas les tours passés.
 - **H-3 Seuil** : `min_chars = 300` évite une étape pour chaque petit résultat ; à ajuster après la séance pilote.
 - **H-4 Coût mémoire** : 130 Mo, mesuré hors PC cible par la story 12 ; relevé à refaire sur le PC cible.
-- **H-5 Installation** : l'extra n'est pas installé par `uv run wavestack` seul ; la séance doit lancer `uv sync --extra compression` une fois (documenté au README).
-- **H-6 `model="gpt-4o"`** : Headroom l'utilise pour son propre compte (tiktoken `o200k_base`) ; WaveStack compte ses tokens lui-même.
-- **H-7 Libération (corrigée à la revue)** : désactiver la brique rend sa réservation (`LoadRegistry.release`), mais le module Python reste importé jusqu'à l'arrêt de WaveStack et le RSS mesuré le compte toujours. Un nouveau chargement coûte donc 0 (plus de double comptage) ; le budget reste contrôlé par la mesure.
+- **H-5 Installation** : l'extra n'est pas installé par `uv run harness-lab` seul ; la séance doit lancer `uv sync --extra compression` une fois (documenté au README).
+- **H-6 `model="gpt-4o"`** : Headroom l'utilise pour son propre compte (tiktoken `o200k_base`) ; HarnessLab compte ses tokens lui-même.
+- **H-7 Libération (corrigée à la revue)** : désactiver la brique rend sa réservation (`LoadRegistry.release`), mais le module Python reste importé jusqu'à l'arrêt de HarnessLab et le RSS mesuré le compte toujours. Un nouveau chargement coûte donc 0 (plus de double comptage) ; le budget reste contrôlé par la mesure.
 - **H-8 Journal de démonstration** : `journal_serveur.log` a 50 lignes, niveaux `INFO`/`WARN`/`ERROR` en anglais. Mesuré ici : Headroom 0.38.0 ne reconnaît pas un journal de moins de ~50 lignes ni les niveaux français (`ERREUR`, `ALERTE`) ; à 50 lignes, il garde `WARN` et `ERROR` (2 585 → 876 caractères).
 - **H-9 Verrou écrit à la main** (voir `deferred`) : même procédé que sqlite-vec en story 15.
 - **H-10 Écart de processus** : exécution sans humain et sans outil de sous-agent ; plan, implémentation et revue faits par l'agent principal (revue brève, une revue indépendante suivra). Le spine reçoit une précision sous AD-4 (H-1), marquée « hypothèse à valider ».
 - **H-11 Scénario** : briques du module RAG (convention cumulative de la story 15) plus `compression` ; le second prompt montre la perte d'information (le lot 12 est coupé par Headroom).
 - **H-12 Question transmise à Headroom (point de revue écarté après vérification)** : Headroom 0.38.0, sans Kompress, ne se sert pas de la question de l'utilisateur pour choisir ce qu'il garde. Mesuré : sur le journal de démonstration et sur un tableau JSON de 60 enregistrements, la sortie est identique avec « Résultat à compresser. » et avec une question ciblée (« À quelle heure le lot 12… », « Quel est l'état de Ville 42 ? »). Aucune question n'est donc passée ; à revoir si une version suivante la prend en compte.
 - **H-13 Borne de temps (point de revue reporté)** : `compress()` n'a pas de borne de temps, Headroom ne s'annulant pas et n'étant pas sûr entre fils ; « Arrêter » agit entre deux textes. Mesuré : 2,2 s au pire (premier appel), 0,02 s ensuite. Report dans `deferred-work.md`.
-- **H-14 `HF_HUB_OFFLINE`** : posé le temps de l'import et des appels de Headroom seulement ; `huggingface_hub`, importé par ses dépendances, le lit une fois, à son import. `cli` ne le pose toujours pas pour le reste du processus (les téléchargements de WaveStack passent par `net`).
+- **H-14 `HF_HUB_OFFLINE`** : posé le temps de l'import et des appels de Headroom seulement ; `huggingface_hub`, importé par ses dépendances, le lit une fois, à son import. `cli` ne le pose toujours pas pour le reste du processus (les téléchargements de HarnessLab passent par `net`).
 - **H-15 Passage E2E sans Headroom** : `run_e2e.py --no-headroom` simule l'extra absent ; le scénario vérifie la carte et un tour sans étape, puis se saute.
 
 ## Verification
@@ -195,7 +195,7 @@ deferred:
 - `uv sync --locked --extra compression` -- expected: headroom-ai 0.38.0 installé
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucun écart
 - `uv run pytest -q` -- expected: tout vert
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` -- expected: 0 échec
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py --only compression --no-headroom` -- expected: scénario sauté proprement, 0 échec
 

@@ -13,7 +13,7 @@ baseline_commit: '75346a1082ad0c991590f5611d6fdc96a8e87304'
 
 ## Intent
 
-**Problem:** Au démarrage, WaveStack charge d'office le premier modèle trouvé (`first_model_path`), sans choix possible. Avec les 16 modèles Ollama du poste, c'est un `lfm2`, pour lequel la brique Outils est indisponible. Le champ de chemin n'apparaît que si aucun modèle n'est utilisable.
+**Problem:** Au démarrage, HarnessLab charge d'office le premier modèle trouvé (`first_model_path`), sans choix possible. Avec les 16 modèles Ollama du poste, c'est un `lfm2`, pour lequel la brique Outils est indisponible. Le champ de chemin n'apparaît que si aucun modèle n'est utilisable.
 
 **Approach:** La page de diagnostic liste chaque candidat avec un nom lisible, son architecture et un bouton « Choisir ». Le champ de chemin est toujours visible. Le choix est enregistré dans `settings.json` (`selected_model`) et chargé d'office aux lancements suivants. On reste dans AD-21 (palier 1) : aucun changement de modèle à chaud (CAP-34, palier 2).
 
@@ -21,7 +21,7 @@ baseline_commit: '75346a1082ad0c991590f5611d6fdc96a8e87304'
 
 **Always:**
 - AD-3 : `select_model` reste l'unique intention de choix (classe a). Elle charge exactement le fichier choisi, jamais un autre candidat ; un chemin incompatible ou introuvable n'est ni enregistré ni chargé et renvoie sa raison en français.
-- Au démarrage, WaveStack charge le `selected_model` enregistré s'il est encore utilisable. Sinon, il applique la règle de démarrage (décision ci-dessous). Un choix enregistré devenu inutilisable produit un avertissement nommant le fichier.
+- Au démarrage, HarnessLab charge le `selected_model` enregistré s'il est encore utilisable. Sinon, il applique la règle de démarrage (décision ci-dessous). Un choix enregistré devenu inutilisable produit un avertissement nommant le fichier.
 - Une fois un modèle chargé, un nouveau choix est seulement enregistré, avec le message « pris en compte au prochain lancement » : pas de rechargement.
 - Nom lisible : `modèle:étiquette` pour Ollama (tiré du chemin du manifeste), nom de fichier sinon ; architecture tirée du cache de sonde (`probed_models`).
 - Les candidats `server` sont listés sans bouton (palier 2), les incompatibles avec leur raison et sans bouton.
@@ -39,7 +39,7 @@ baseline_commit: '75346a1082ad0c991590f5611d6fdc96a8e87304'
 | Choix enregistré disparu | Fichier supprimé | Avertissement nommant le fichier, puis règle de démarrage | N/A |
 | Un seul candidat | Un fichier utilisable, aucun choix enregistré | Chargé au démarrage (comportement actuel) | N/A |
 | Plusieurs candidats | ≥ 2 fichiers utilisables, aucun choix | Aucun chargement ; « Plusieurs modèles trouvés : choisissez-en un » | Bloquant jusqu'au choix |
-| Clic « Choisir » avant chargement | Candidat utilisable | Enregistré, ce fichier chargé, lien « Ouvrir WaveStack » | N/A |
+| Clic « Choisir » avant chargement | Candidat utilisable | Enregistré, ce fichier chargé, lien « Ouvrir HarnessLab » | N/A |
 | Chemin saisi valide | GGUF hors emplacements | Sondé, enregistré, chargé | N/A |
 | Chemin invalide | Introuvable ou incompatible | Raison affichée ; rien d'enregistré, aucun autre modèle chargé | N/A |
 | Choix après chargement | Modèle déjà chargé | Enregistré, message « prochain lancement », aucun rechargement | N/A |
@@ -49,15 +49,15 @@ baseline_commit: '75346a1082ad0c991590f5611d6fdc96a8e87304'
 
 ## Code Map
 
-- `src/wavestack/config.py` -- `Config.selected_model` (lu dans la config fusionnée) ; `save_setting(key, value)` : lecture-modification-écriture de `settings_path()`, réutilisée par `probe.record_success` (L73-93) au lieu de son code dupliqué.
-- `src/wavestack/models/discovery.py` -- `ModelCandidate` + `name: str | None`, `architecture: str | None` ; `_ollama_candidates` (L58) : `name` depuis `manifest_path.relative_to(manifests_dir)` (`…/library/qwen3.5/9b` → `qwen3.5:9b`). Ordre et emplacements inchangés.
-- `src/wavestack/models/probe.py` -- `already_probed` (L96) : exposer l'entrée du cache (architecture) pour remplir `candidate.architecture`.
-- `src/wavestack/session/diagnostic.py` -- `DiagnosticSession` : `selected_model_path` initialisé depuis `cfg.selected_model` ; `_check_model_locked` (L182) : règle de démarrage, `DiagnosticResult.model_path` = le fichier à charger (ou `None`) ; `select_model` (L220) : n'accepte que le fichier choisi, enregistre, rend `model_path` ; `booted_path` pour distinguer « avant » et « après chargement ».
-- `src/wavestack/cli.py` -- `_run_diagnostic_then_boot` (L111) : `boot(result.model_path)`.
-- `src/wavestack/web/app.py` -- `/api/intentions/select_model` (L137) : charge seulement si aucun modèle n'est chargé, sinon renvoie `{saved: true, next_launch: true}` ; `/api/diagnostic` (L127) : `selected_model` et candidats enrichis.
-- `src/wavestack/session/app_session.py` -- `first_model_path` (L161) : supprimer si plus appelée.
-- `src/wavestack/web/static/diagnostic.html` -- `renderCandidates` : nom, architecture, source, bouton « Choisir » (candidats `found`), repère « choix enregistré » ; `#select-model` toujours visible, libellé neutre.
-- `tests/test_cli_diagnostic.py` -- motifs existants (`monkeypatch` de `discovery`, faux `subprocess.run` de sonde, `WAVESTACK_DATA_DIR` isolé par `conftest.py`).
+- `src/harness_lab/config.py` -- `Config.selected_model` (lu dans la config fusionnée) ; `save_setting(key, value)` : lecture-modification-écriture de `settings_path()`, réutilisée par `probe.record_success` (L73-93) au lieu de son code dupliqué.
+- `src/harness_lab/models/discovery.py` -- `ModelCandidate` + `name: str | None`, `architecture: str | None` ; `_ollama_candidates` (L58) : `name` depuis `manifest_path.relative_to(manifests_dir)` (`…/library/qwen3.5/9b` → `qwen3.5:9b`). Ordre et emplacements inchangés.
+- `src/harness_lab/models/probe.py` -- `already_probed` (L96) : exposer l'entrée du cache (architecture) pour remplir `candidate.architecture`.
+- `src/harness_lab/session/diagnostic.py` -- `DiagnosticSession` : `selected_model_path` initialisé depuis `cfg.selected_model` ; `_check_model_locked` (L182) : règle de démarrage, `DiagnosticResult.model_path` = le fichier à charger (ou `None`) ; `select_model` (L220) : n'accepte que le fichier choisi, enregistre, rend `model_path` ; `booted_path` pour distinguer « avant » et « après chargement ».
+- `src/harness_lab/cli.py` -- `_run_diagnostic_then_boot` (L111) : `boot(result.model_path)`.
+- `src/harness_lab/web/app.py` -- `/api/intentions/select_model` (L137) : charge seulement si aucun modèle n'est chargé, sinon renvoie `{saved: true, next_launch: true}` ; `/api/diagnostic` (L127) : `selected_model` et candidats enrichis.
+- `src/harness_lab/session/app_session.py` -- `first_model_path` (L161) : supprimer si plus appelée.
+- `src/harness_lab/web/static/diagnostic.html` -- `renderCandidates` : nom, architecture, source, bouton « Choisir » (candidats `found`), repère « choix enregistré » ; `#select-model` toujours visible, libellé neutre.
+- `tests/test_cli_diagnostic.py` -- motifs existants (`monkeypatch` de `discovery`, faux `subprocess.run` de sonde, `HARNESS_LAB_DATA_DIR` isolé par `conftest.py`).
 
 ## Tasks & Acceptance
 
@@ -70,7 +70,7 @@ baseline_commit: '75346a1082ad0c991590f5611d6fdc96a8e87304'
 
 **Acceptance Criteria:**
 - Given 16 modèles Ollama détectés, when j'ouvre le diagnostic, then chaque modèle compatible apparaît sous un nom lisible avec son architecture et un bouton « Choisir ».
-- Given un modèle choisi puis WaveStack relancé, when le diagnostic se termine, then ce modèle est chargé sans nouvelle action.
+- Given un modèle choisi puis HarnessLab relancé, when le diagnostic se termine, then ce modèle est chargé sans nouvelle action.
 
 ## Implementation Notes
 
@@ -117,4 +117,4 @@ Groupes routés en `patch` : P1 à P11 ; `defer` : VG4 ; aucun `intent_gap` ni `
 - `uv run pytest` -- expected: tous les tests passent (tests `model` exclus)
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` avec `OLLAMA_MODELS` visible : choisir un Qwen3.5 (`qwen35`), vérifier qu'il se charge et que la brique Outils est disponible ; relancer et vérifier qu'il se recharge seul.
+- `uv run harness-lab` avec `OLLAMA_MODELS` visible : choisir un Qwen3.5 (`qwen35`), vérifier qu'il se charge et que la brique Outils est disponible ; relancer et vérifier qu'il se recharge seul.

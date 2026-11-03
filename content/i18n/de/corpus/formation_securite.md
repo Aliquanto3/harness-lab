@@ -1,6 +1,6 @@
 # Sicherheitsschulung bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
 
 Jede Person bei Exemplia nimmt an einer zweistündigen Online-Schulung zur Informationssicherheit teil und besteht anschließend einen Fragebogen mit mindestens 8 richtigen Antworten von 10, um sie zu erhalten. Neue Mitarbeitende absolvieren sie im ersten Monat; sie wird jedes Jahr für alle erneuert.
 

@@ -53,7 +53,7 @@ Pendant une vérification de mutation de la story S1, la première version d'un 
 
 **Mise à jour du 2026-10-03** : la story 7 des restes est `done` (`resultats-restes-pc-2026-10.md`) : plan Mistral activé par Anaël, E040, E048, E049, E055, E057 vus avec Mistral ; correctifs « Arrêter » pendant un chargement Ollama, fermeture avec une page ouverte, renvoi du raisonnement de Mistral (sans lui, il bouclait sur un outil) et échange passé sans texte. Décisions d'Anaël données (E062, E073, délai de grâce, seuils de V2 S6). Relevé du banc V2 S6 fait. Restent : bmad-spec sur `decision-model-candidates.md` (V2 S6), puis la mise à jour de la PR #19 (rien n'est poussé).
 
-- **Story 1e sur le PC pro**, avec `uv run wavestack` :
+- **Story 1e sur le PC pro**, avec `uv run harness-lab` :
   - le diagnostic affiche « Accès réseau disponible » ;
   - Wikipédia et le calendrier répondent ;
   - data.gouv.fr se connecte en MCP ;

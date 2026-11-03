@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from gguf_writer import write_gguf
 
-from wavestack.models import gguf_meta, probe
+from harness_lab.models import gguf_meta, probe
 
 
 def test_probe_missing_file_reports_reason():
@@ -16,7 +16,7 @@ def test_probe_missing_file_reports_reason():
 
 
 def test_record_success_and_probed_entry_roundtrip(monkeypatch, tmp_path):
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     model_file = tmp_path / "model.gguf"
     model_file.write_bytes(b"fake bytes")
     stat = model_file.stat()
@@ -37,7 +37,7 @@ def test_record_success_and_probed_entry_roundtrip(monkeypatch, tmp_path):
 
 
 def test_probed_entry_none_when_file_changed(monkeypatch, tmp_path):
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     model_file = tmp_path / "model.gguf"
     model_file.write_bytes(b"fake bytes")
     stat = model_file.stat()
@@ -53,7 +53,7 @@ def test_probed_entry_none_when_file_changed(monkeypatch, tmp_path):
 
 
 def test_failed_entry_valid_until_file_or_llama_cpp_changes(monkeypatch, tmp_path):
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     monkeypatch.setattr(probe, "_llama_cpp_version", lambda: "0.3.0")
     model_file = tmp_path / "model.gguf"
     model_file.write_bytes(b"fake bytes")
@@ -71,7 +71,7 @@ def test_failed_entry_valid_until_file_or_llama_cpp_changes(monkeypatch, tmp_pat
 
 
 def test_failure_not_recorded_without_llama_cpp_or_file(monkeypatch, tmp_path):
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     model_file = tmp_path / "model.gguf"
     model_file.write_bytes(b"fake bytes")
     monkeypatch.setattr(probe, "_llama_cpp_version", lambda: None)
@@ -82,7 +82,7 @@ def test_failure_not_recorded_without_llama_cpp_or_file(monkeypatch, tmp_path):
 
 
 def test_success_clears_the_remembered_failure(monkeypatch, tmp_path):
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     monkeypatch.setattr(probe, "_llama_cpp_version", lambda: "0.3.0")
     model_file = tmp_path / "model.gguf"
     model_file.write_bytes(b"fake bytes")
@@ -99,9 +99,9 @@ def test_success_clears_the_remembered_failure(monkeypatch, tmp_path):
 
 @pytest.mark.model
 def test_probe_real_gguf_loads_successfully():
-    gguf_path = os.environ.get("WAVESTACK_TEST_GGUF")
+    gguf_path = os.environ.get("HARNESS_LAB_TEST_GGUF")
     if not gguf_path or not Path(gguf_path).is_file():
-        pytest.skip("WAVESTACK_TEST_GGUF not set to a real GGUF file")
+        pytest.skip("HARNESS_LAB_TEST_GGUF not set to a real GGUF file")
 
     result = probe.probe_file(gguf_path)
     assert result.ok is True
@@ -116,7 +116,7 @@ TINY = str(Path(__file__).parent / "fixtures" / "tiny-llama.gguf")
 def test_probe_of_tiny_llama_evaluates_a_full_batch_at_the_window(monkeypatch, tmp_path):
     """E2: loaded at the window, one full batch (llama-cpp-python's 512) evaluated, the RSS
     read after it: `probe_version = 2`, `rss_eval_tokens`, and a complete entry."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
 
     result = probe.probe_file(TINY, window=4096)
 
@@ -139,7 +139,7 @@ def test_probe_of_tiny_llama_evaluates_a_full_batch_at_the_window(monkeypatch, t
 def test_old_or_incomplete_entries_are_not_measured(monkeypatch, tmp_path):
     """E2: only a complete entry of the current probe counts; a `null` KV the probe wrote
     (a GGUF that does not say it) is complete, a missing key is not."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     model_file = tmp_path / "model.gguf"
     model_file.write_bytes(b"fake bytes")
     path, stat = str(model_file), model_file.stat()
@@ -276,7 +276,7 @@ def test_memory_or_eval_failures_are_transient(monkeypatch, tmp_path, step, erro
 def test_failures_written_before_lot_e_are_probed_again(monkeypatch, tmp_path):
     """Lot E: a `failed_probes` entry without `probe_version = 2` (its reason may be
     llama.cpp's English message) is ignored."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     monkeypatch.setattr(probe, "_llama_cpp_version", lambda: "0.3.35")
     model_file = tmp_path / "blob"
     model_file.write_bytes(b"fake bytes")
@@ -315,7 +315,7 @@ def test_probe_arguments_window_then_path():
 
 def test_gguf_kv_is_read_without_the_weights(monkeypatch, tmp_path):
     """E1: the KV of a GGUF llama-server loaded, from its header read in Python."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
     assert probe.gguf_kv_bytes_per_token(TINY) == 128
     assert probe.gguf_kv_bytes_per_token(str(tmp_path / "absent.gguf")) is None
     assert probe.gguf_kv_bytes_per_token(None) is None
@@ -334,7 +334,7 @@ def test_the_kv_and_the_catalog_read_a_header_once(monkeypatch, tmp_path, catalo
     diagnostic warms anyway: one read of a GGUF header per file version (it was 82 % of
     `discovery.discover()` on the target PC, 19 Ollama blobs read twice). The diagnostic's
     order first: the catalog warmed, then `discover()` asks for the KV."""
-    from wavestack.models import catalog
+    from harness_lab.models import catalog
 
     reads: list[str] = []
     real = gguf_meta.try_read_metadata
@@ -417,7 +417,7 @@ def test_main_prints_ascii_json_whatever_the_reason(monkeypatch, capsys, tmp_pat
 
     path = str(tmp_path / "m.gguf")
     monkeypatch.setattr(sys, "argv", ["probe", "--window", "4096", path])
-    monkeypatch.setattr("wavestack.net.guard.install", lambda hosts: None)
+    monkeypatch.setattr("harness_lab.net.guard.install", lambda hosts: None)
     monkeypatch.setattr(
         probe, "probe_file", lambda p, w: probe.ProbeResult(ok=False, path=p, reason=REASON)
     )
@@ -448,8 +448,8 @@ def test_repair_mojibake_keeps_what_it_cannot_or_need_not_repair(text):
 
 
 def test_failed_entry_repairs_the_reason_without_rewriting_settings(monkeypatch, tmp_path):
-    """C6: a reason an older WaveStack wrote garbled reads right; settings.json is untouched."""
-    from wavestack import config
+    """C6: a reason an older HarnessLab wrote garbled reads right; settings.json is untouched."""
+    from harness_lab import config
 
     monkeypatch.setattr(probe, "_llama_cpp_version", lambda: "0.3.35")
     model = tmp_path / "bad.gguf"
@@ -522,8 +522,8 @@ def test_an_older_probe_entry_is_recomputed_from_the_header_without_rewriting(
 ):
     """A2: the 2B probed before lot K (49 152 bytes a token): read back as 12 288 from its
     header, settings.json untouched; an unreadable header keeps the stored value."""
-    monkeypatch.setenv("WAVESTACK_DATA_DIR", str(tmp_path / "data"))
-    from wavestack import config
+    monkeypatch.setenv("HARNESS_LAB_DATA_DIR", str(tmp_path / "data"))
+    from harness_lab import config
 
     path = write_gguf(tmp_path / "Qwen3.5-2B-Q4_K_M.gguf", QWEN35_2B)
     _old_entry(path, 49_152)

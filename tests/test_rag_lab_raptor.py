@@ -20,13 +20,13 @@ from test_rag_lab import ended, stage, wait_idle
 from test_rag_lab_graphrag import Stopping
 from test_rag_lab_no_index import lab, preset, presets, summary, update
 
-from wavestack import config
-from wavestack.rag import exposed, workcopy
-from wavestack.rag import lab as rag_lab
-from wavestack.rag import raptor as rag_raptor
-from wavestack.rag.corpus import load_rag_questions
-from wavestack.session.app_session import SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.rag import exposed, workcopy
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag import raptor as rag_raptor
+from harness_lab.rag.corpus import load_rag_questions
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace.journal import get_journal
 
 QUESTIONS = {q.id: q.question_text for q in load_rag_questions("fr")}
 GLOBAL = QUESTIONS["q_global_rh"]

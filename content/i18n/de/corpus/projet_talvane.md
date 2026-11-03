@@ -1,6 +1,6 @@
 # Projekt Talvane (Sentinel-Dokument, inaktiv)
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Sentinel-Dokument dient Löschdemonstrationen (CAP-14) und ist standardmäßig nie aktiv. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Sentinel-Dokument dient Löschdemonstrationen (CAP-14) und ist standardmäßig nie aktiv. -->
 
 Dieses Sentinel-Dokument dient Demonstrationen zum Löschen eines Dokuments aus dem Korpus (Story 18): Es trägt einen leicht erkennbaren Inhalt, der nach Entfernung des Dokuments vollständig aus einer Suche verschwinden muss.
 

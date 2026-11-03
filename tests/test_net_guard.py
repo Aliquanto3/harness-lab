@@ -9,7 +9,7 @@ import textwrap
 
 import pytest
 
-from wavestack.net.guard import NetworkBlocked, find_blocked, is_host_allowed, office_proxies
+from harness_lab.net.guard import NetworkBlocked, find_blocked, is_host_allowed, office_proxies
 
 
 def test_loopback_always_allowed():
@@ -84,7 +84,7 @@ def test_guard_blocks_the_real_mcp_client_under_proactor_event_loop():
 # connect filter is exercised by `sys.audit`, never by a real connection.
 _CHILD_PREAMBLE = """
 import asyncio, socket, sys, urllib.request
-from wavestack.net.guard import NetworkBlocked, install
+from harness_lab.net.guard import NetworkBlocked, install
 
 for lookup in ("getproxies_registry", "getproxies_macosx_sysconf"):  # this machine's proxy
     if hasattr(urllib.request, lookup):
@@ -142,7 +142,7 @@ def record_connects():
 
 def blocked(fn, *args):
     # True when `fn` fails on the guard, however a library wraps the refusal.
-    from wavestack.net.guard import find_blocked
+    from harness_lab.net.guard import find_blocked
     try:
         fn(*args)
     except Exception as exc:
@@ -432,7 +432,7 @@ def test_install_confiscates_the_proxy_from_the_environment() -> None:
     _run_guarded(
         """
         import os, urllib.request
-        from wavestack.net.guard import office_proxies
+        from harness_lab.net.guard import office_proxies
         assert not [n for n in os.environ if n.lower().endswith("_proxy")]
         assert urllib.request.getproxies() == {}
         if sys.platform == "win32":
@@ -448,7 +448,7 @@ def test_install_copies_then_blinds_the_windows_registry_proxy() -> None:
     _run_guarded(
         """
         import urllib.request
-        from wavestack.net.guard import office_proxies
+        from harness_lab.net.guard import office_proxies
         assert office_proxies() == {"https": "127.0.0.1:9000"}
         assert urllib.request.getproxies_registry() == {}
         assert urllib.request.getproxies() == {}
@@ -467,7 +467,7 @@ def test_a_second_install_keeps_the_first_copy() -> None:
     _run_guarded(
         """
         import os
-        from wavestack.net.guard import office_proxies
+        from harness_lab.net.guard import office_proxies
         os.environ["HTTPS_PROXY"] = "http://127.0.0.1:1"
         install([])
         assert office_proxies() == {"https": "http://127.0.0.1:9000"}
@@ -498,7 +498,7 @@ def test_the_mcp_sdk_without_factory_is_refused_under_proactor_despite_the_proxy
     _run_guarded(
         """
         from mcp import Client
-        from wavestack.net.guard import find_blocked
+        from harness_lab.net.guard import find_blocked
 
         async def connect():
             async with Client("https://blocked.example.test/mcp", mode="legacy", cache=None):
@@ -524,7 +524,7 @@ def test_a_child_process_inherits_no_proxy() -> None:
         child = (
             "import os, urllib.request\\n"
             "urllib.request.getproxies_registry = lambda: {}\\n"
-            "from wavestack.net import guard\\n"
+            "from harness_lab.net import guard\\n"
             "names = [n for n in os.environ if n.lower().endswith('_proxy')]\\n"
             "guard.install([])\\n"
             "print(names, guard.office_proxies())\\n"
@@ -546,7 +546,7 @@ def test_a_remote_proxy_serves_the_factory_only() -> None:
     _run_guarded(
         """
         import httpx
-        from wavestack.net.factory import create_client
+        from harness_lab.net.factory import create_client
         reached = record_connects()
         with create_client() as client:
             try:
@@ -567,7 +567,7 @@ def test_a_remote_proxy_serves_the_factory_only() -> None:
 
 
 def test_the_test_session_holds_no_proxy() -> None:
-    """conftest removes this machine's proxy before any guard install (`wavestack.cli`
+    """conftest removes this machine's proxy before any guard install (`harness_lab.cli`
     installs one when imported): the suite runs the same with or without `HTTPS_PROXY`."""
     assert office_proxies() == {}
     assert not [n for n in os.environ if n.lower().endswith("_proxy")]

@@ -1,6 +1,6 @@
 # Rapport du run des retours du 27/10 (v1.7.0)
 
-Run autonome du 2026-10-27, de 06:10 à environ 14:30, orchestré par Opus 5.5. Journal détaillé : [run-autonome.md](run-autonome.md). Spec : `_bmad-output/specs/spec-wavestack-retours-2026-10-27/`.
+Run autonome du 2026-10-27, de 06:10 à environ 14:30, orchestré par Opus 5.5. Journal détaillé : [run-autonome.md](run-autonome.md). Spec : `_bmad-output/specs/spec-harness-lab-retours-2026-10-27/`.
 
 ## Livré
 

@@ -1,7 +1,7 @@
 {
  "candidate": "laya",
  "tier": "2",
- "models_dir": "C:\\Users\\anael.yahi\\.cache\\wavestack-bench",
+ "models_dir": "C:\\Users\\anael.yahi\\.cache\\harness-lab-bench",
  "platform": "Windows-11-10.0.26200-SP0",
  "machine": "AMD64",
  "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
@@ -18,7 +18,7 @@
  "rss_added_method": "pic",
  "v1_rag_rss_mb": 1170,
  "llama_server": {
-  "exe": "C:\\Users\\anael.yahi\\AppData\\Local\\WaveStack\\bench\\llama-b11378\\llama-server.exe",
+  "exe": "C:\\Users\\anael.yahi\\AppData\\Local\\HarnessLab\\bench\\llama-b11378\\llama-server.exe",
   "source": "dossier par défaut",
   "version_line": "version: 0.5.0-dev (build 11378, commit edd6e2bbd)",
   "version": "0.5.0-dev",
@@ -27,7 +27,7 @@
   "exe_sha256": "6d2e001e3e366dd64f24578bad2ff461bcfdea4a0c86b134c280a952401eee20",
   "impl_sha256": "68f82bb0491f057728f5c4b1f0036b0b4e50113a1fd2bb16eda14fd4a41bd62e",
   "archive": {
-   "path": "C:\\Users\\anael.yahi\\AppData\\Local\\WaveStack\\bench\\llama-b11378-bin-win-cpu-x64.zip",
+   "path": "C:\\Users\\anael.yahi\\AppData\\Local\\HarnessLab\\bench\\llama-b11378-bin-win-cpu-x64.zip",
    "sha256": "11bcb3aea659bce73f62305e3812764f935d90f44de1e70cd2b68aa3c9f41b8d",
    "expected_sha256": "11bcb3aea659bce73f62305e3812764f935d90f44de1e70cd2b68aa3c9f41b8d",
    "sha256_ok": true
@@ -37,7 +37,7 @@
   "repo": "ggml-org/Laya-GGUF",
   "file": "Laya-Q8_0.gguf",
   "revision": "da4b4753d62197659d8c90103cd4c43bef9afea6",
-  "path": "C:\\Users\\anael.yahi\\.cache\\wavestack-bench\\hf\\models--ggml-org--Laya-GGUF\\snapshots\\da4b4753d62197659d8c90103cd4c43bef9afea6\\Laya-Q8_0.gguf",
+  "path": "C:\\Users\\anael.yahi\\.cache\\harness-lab-bench\\hf\\models--ggml-org--Laya-GGUF\\snapshots\\da4b4753d62197659d8c90103cd4c43bef9afea6\\Laya-Q8_0.gguf",
   "size_mb": 428,
   "sha256": "c06528c5746d3bb8baa72a27938be95abbfd0b226f8471e8a9e365ed0bb066d2",
   "expected_sha256": "c06528c5746d3bb8baa72a27938be95abbfd0b226f8471e8a9e365ed0bb066d2",
@@ -51,9 +51,9 @@
  },
  "llama_server_launch": {
   "argv": [
-   "C:\\Users\\anael.yahi\\AppData\\Local\\WaveStack\\bench\\llama-b11378\\llama-server.exe",
+   "C:\\Users\\anael.yahi\\AppData\\Local\\HarnessLab\\bench\\llama-b11378\\llama-server.exe",
    "-m",
-   "C:\\Users\\anael.yahi\\.cache\\wavestack-bench\\hf\\models--ggml-org--Laya-GGUF\\snapshots\\da4b4753d62197659d8c90103cd4c43bef9afea6\\Laya-Q8_0.gguf",
+   "C:\\Users\\anael.yahi\\.cache\\harness-lab-bench\\hf\\models--ggml-org--Laya-GGUF\\snapshots\\da4b4753d62197659d8c90103cd4c43bef9afea6\\Laya-Q8_0.gguf",
    "--host",
    "127.0.0.1",
    "--port",
@@ -67,7 +67,7 @@
   ],
   "url": "http://127.0.0.1:54913",
   "port": 54913,
-  "log": "C:\\Users\\anael.yahi\\.cache\\wavestack-bench\\llama-server\\laya.log",
+  "log": "C:\\Users\\anael.yahi\\.cache\\harness-lab-bench\\llama-server\\laya.log",
   "pid": 13836,
   "start_s": 0.5,
   "startup_remotes": [],
@@ -82,8 +82,8 @@
   ]
  },
  "id": "laya",
- "guard": "wavestack.net.guard",
- "slm": "C:\\Users\\anael.yahi\\AppData\\Local\\WaveStack\\models\\Qwen3.5-2B-Q4_K_M.gguf",
+ "guard": "harness_lab.net.guard",
+ "slm": "C:\\Users\\anael.yahi\\AppData\\Local\\HarnessLab\\models\\Qwen3.5-2B-Q4_K_M.gguf",
  "slm_n_ctx": 4096,
  "llama_cpp_version": "0.3.35",
  "slm_load_s": 1.77,
@@ -753,7 +753,7 @@
     "id": "cpu_windows",
     "label": "CPU sous Windows 11, sans droits admin",
     "ok": true,
-    "detail": "Windows 11, session sans droits admin ; vérifier dans la sortie de uv qu'aucun paquet n'a été compilé (« Building … ») ; llama-server version: 0.5.0-dev (build 11378, commit edd6e2bbd) : binaire portable décompressé hors du dépôt (C:\\Users\\anael.yahi\\AppData\\Local\\WaveStack\\bench\\llama-b11378\\llama-server.exe), ni installé ni lancé en admin, démarré et arrêté par le banc ; « sans exécutable à installer » : constat pour décision d'Anaël, pas un échec ; aucun paquet Python ajouté"
+    "detail": "Windows 11, session sans droits admin ; vérifier dans la sortie de uv qu'aucun paquet n'a été compilé (« Building … ») ; llama-server version: 0.5.0-dev (build 11378, commit edd6e2bbd) : binaire portable décompressé hors du dépôt (C:\\Users\\anael.yahi\\AppData\\Local\\HarnessLab\\bench\\llama-b11378\\llama-server.exe), ni installé ni lancé en admin, démarré et arrêté par le banc ; « sans exécutable à installer » : constat pour décision d'Anaël, pas un échec ; aucun paquet Python ajouté"
    },
    {
     "id": "ram",

@@ -59,7 +59,7 @@ def test_counts_per_language(built):
 
 
 def test_filter_labels_by_construction(built):
-    from wavestack.rag.corpus import load_rag_questions
+    from harness_lab.rag.corpus import load_rag_questions
 
     for lang in b.LANGS:
         for q in load_rag_questions(lang):
@@ -81,7 +81,7 @@ def test_filter_labels_by_construction(built):
 
 
 def test_inactive_documents_never_in_items(built):
-    from wavestack.rag.corpus import load_rag_content
+    from harness_lab.rag.corpus import load_rag_content
 
     texts = " ".join(i.text for i in built.items)
     inactive = [d.title_text for d in load_rag_content("fr").documents if not d.active]

@@ -16,14 +16,14 @@ deferred:
     evidence: |-
       Même écart que pour les stories 5b à 11b : aucun banc de test JS ; retirer le bloc de Contexte LLM ou ignorer l'option passerait pytest et `node --check`. Le harnais E2E (tools/e2e/, faux serveur OpenAI + Playwright) en cours de création pourra le couvrir.
     location: >-
-      src/wavestack/web/static/app.js (renderChat, renderContext, renderBricks)
+      src/harness_lab/web/static/app.js (renderChat, renderContext, renderBricks)
     severity: medium
   - summary: >-
       Non vérifié : un fournisseur au format `field` accepte-t-il le raisonnement renvoyé dans le champ `reasoning` du message assistant (`resend = true`) ?
     evidence: |-
       Aucun préréglage ne déclare `resend = true` ; la forme est tirée d'AD-4 (« dans la forme reçue ») et du champ lu par l'adaptateur. À trancher par un tour réel avec `resend = true` déclaré dans settings.json : si le fournisseur refuse (400), renvoyer sous le nom de champ reçu.
     location: >-
-      src/wavestack/session/app_session.py (_assistant_message)
+      src/harness_lab/session/app_session.py (_assistant_message)
     severity: medium
 ---
 
@@ -71,35 +71,35 @@ deferred:
 
 ## Code Map
 
-- `src/wavestack/models/capabilities.py:17-65` -- `Capabilities` : ajouter `reasoning: bool` (vrai si `reasoning_variable`) et `reasoning_always: bool = False` ; `capabilities_for` les remplit. `ChannelSplitter` (72-131) : réutilisé tel quel.
-- `src/wavestack/bricks/registry.py:34` -- `BRICKS` : déclarer `reasoning` (capacité exigée `reasoning`), après `system_prompt`.
+- `src/harness_lab/models/capabilities.py:17-65` -- `Capabilities` : ajouter `reasoning: bool` (vrai si `reasoning_variable`) et `reasoning_always: bool = False` ; `capabilities_for` les remplit. `ChannelSplitter` (72-131) : réutilisé tel quel.
+- `src/harness_lab/bricks/registry.py:34` -- `BRICKS` : déclarer `reasoning` (capacité exigée `reasoning`), après `system_prompt`.
 - `content/bricks/reasoning.yaml` (nouveau) -- libellé, catégorie, hébergement, explication (ce qu'ajoute le raisonnement, son coût en tokens et en temps, la réserve de 1 536).
-- `src/wavestack/config.py:64-136` -- `CloudModel.reserve` et `reasoning_params` deviennent fonction du raisonnement actif (`always` force l'actif) ; `MAX_RESERVE` = 1 536 (déjà là) ; `context/window.py:9` `OUTPUT_RESERVE` = 512.
-- `src/wavestack/cloud.py:83-90` -- `chat_fields(entry, max_tokens, reasoning=False)`. `session/diagnostic.py:682` : appel « brique éteinte ».
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/config.py:64-136` -- `CloudModel.reserve` et `reasoning_params` deviennent fonction du raisonnement actif (`always` force l'actif) ; `MAX_RESERVE` = 1 536 (déjà là) ; `context/window.py:9` `OUTPUT_RESERVE` = 512.
+- `src/harness_lab/cloud.py:83-90` -- `chat_fields(entry, max_tokens, reasoning=False)`. `session/diagnostic.py:682` : appel « brique éteinte ».
+- `src/harness_lab/session/app_session.py` :
   - `_CAPABILITIES_FR` 164, `_availability` 1031-1053 : raison propre au raisonnement (local / cloud).
   - `_emit_bricks` 732-782 : `always_fr` sur la carte `reasoning` d'une entrée `always`.
   - `_boot` 845-851 / `_boot_cloud` 911-924 : capacités cloud `reasoning`, `reasoning_always` ; `self._reserve` retiré au profit d'une réserve par `TurnState` (`_reasoning_on(state)`).
   - `_render` 1300-1334 (variable du gabarit, réserve), `_render_chat` 1336-1359 et `_chat_gauge` 1361-1374 (réserve passée), `_emit_preview` 1376.
   - `_step_messages` 1110-1181 et `_messages` 1217-1254 : raisonnement enveloppé en `Part` (`assistant_turn` / `history`) en local ; en chat, seulement si `resend`, dans la forme du format.
   - `_turn` 2092-2239 : passe la réserve à `_call_model`. `_call_model` 2661-2787 : `max_tokens` = réserve du tour (2732, 2772, 2784) ; analyse des appels sur la sortie hors raisonnement. `_call_model_chat` 2789-2855 : réserve du tour (2817, 2845, 2853).
-- `src/wavestack/context/render.py:258-270` -- `_attribute` : un `content` fait de blocs (liste de `dict`) est préparé comme toute autre valeur, pour les blocs `thinking` renvoyés.
-- `src/wavestack/trace/catalog.py:256-273` -- `BrickState.always_fr: str | None = None`.
+- `src/harness_lab/context/render.py:258-270` -- `_attribute` : un `content` fait de blocs (liste de `dict`) est préparé comme toute autre valeur, pour les blocs `thinking` renvoyés.
+- `src/harness_lab/trace/catalog.py:256-273` -- `BrickState.always_fr: str | None = None`.
 - `content/scenarios.yaml` -- module « Raisonnement » et scénario `reasoning`.
-- `src/wavestack/web/static/index.html:70-75`, `app.js` (store 195-265, `renderBricks` 523-545, `renderChat` 1159-1164, `renderContext` 1426-1461), `app.css` (bulles 496-530) -- option, `reasoning-block`, bloc de Contexte LLM, carte `always_fr`.
+- `src/harness_lab/web/static/index.html:70-75`, `app.js` (store 195-265, `renderBricks` 523-545, `renderChat` 1159-1164, `renderContext` 1426-1461), `app.css` (bulles 496-530) -- option, `reasoning-block`, bloc de Contexte LLM, carte `always_fr`.
 - Tests : `tests/fake_engine.py` (`FakeEngine(template=…)`, `booted_session`), `tests/test_turn.py:249-275` (capacités, départ en raisonnement), `tests/test_cloud.py:62-104` (`Provider`, `_cloud_session`, flux SSE), `tests/test_scenarios.py:30-45` (compte de scénarios), `tests/fixtures/qwen3_5_chat_template.jinja:90-153` (gabarit qui garde le raisonnement du tour).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/models/capabilities.py` -- capacités `reasoning`, `reasoning_always`.
-- [x] `src/wavestack/bricks/registry.py`, `content/bricks/reasoning.yaml` -- déclaration et contenu de la brique.
-- [x] `src/wavestack/config.py`, `src/wavestack/cloud.py` -- paramètres et réserve selon le raisonnement actif. `src/wavestack/session/diagnostic.py` n'a pas eu à changer : `chat_fields(entry, entry.reserve)` garde le corps « brique éteinte » par la valeur par défaut `reasoning=False`.
-- [x] `src/wavestack/context/render.py` -- contenu en blocs.
-- [x] `src/wavestack/trace/catalog.py` -- `always_fr`.
-- [x] `src/wavestack/session/app_session.py` -- disponibilité, réserve par tour, variable du gabarit, corps cloud, renvoi, attribution, appels d'outils hors raisonnement.
+- [x] `src/harness_lab/models/capabilities.py` -- capacités `reasoning`, `reasoning_always`.
+- [x] `src/harness_lab/bricks/registry.py`, `content/bricks/reasoning.yaml` -- déclaration et contenu de la brique.
+- [x] `src/harness_lab/config.py`, `src/harness_lab/cloud.py` -- paramètres et réserve selon le raisonnement actif. `src/harness_lab/session/diagnostic.py` n'a pas eu à changer : `chat_fields(entry, entry.reserve)` garde le corps « brique éteinte » par la valeur par défaut `reasoning=False`.
+- [x] `src/harness_lab/context/render.py` -- contenu en blocs.
+- [x] `src/harness_lab/trace/catalog.py` -- `always_fr`.
+- [x] `src/harness_lab/session/app_session.py` -- disponibilité, réserve par tour, variable du gabarit, corps cloud, renvoi, attribution, appels d'outils hors raisonnement.
 - [x] `content/scenarios.yaml` -- module et scénario.
-- [x] `src/wavestack/web/static/index.html`, `app.js`, `app.css` -- option, blocs, carte.
+- [x] `src/harness_lab/web/static/index.html`, `app.js`, `app.css` -- option, blocs, carte.
 - [x] `tests/test_reasoning.py` (nouveau), `tests/test_scenarios.py`, tests existants touchés par les signatures -- une ligne de la matrice au moins par test.
 
 **Acceptance Criteria:**
@@ -195,7 +195,7 @@ Renvoi en `content_blocks` : `content` du message assistant = `[{"type": "thinki
 - `uv run ruff check .` -- expected: aucun écart
 - `uv run ruff format --check .` -- expected: aucun fichier à reformater
 - `uv run pytest -q` -- expected: tous les tests passent
-- `node --check src/wavestack/web/static/app.js` -- expected: syntaxe valide (si `node` est présent)
+- `node --check src/harness_lab/web/static/app.js` -- expected: syntaxe valide (si `node` est présent)
 
 **Manual checks (if no CLI):**
 - Sur le PC cible avec Qwen3.5 : brique active, un tour montre le raisonnement replié dans la Vue humain et dans Contexte LLM, jauge avec réserve 1 536 ; option décochée, la bulle n'a plus que le texte.
@@ -209,23 +209,23 @@ Status: done
 **Résumé :** brique `reasoning` (catégorie prompt, composant `reasoning.mode`), disponible selon la capacité `reasoning` du modèle actif (variable `enable_thinking` du gabarit en local, déclaration `reasoning` en cloud), raison « Indisponible : le modèle actif ne sait pas raisonner. » sinon ; carte « Toujours active pour ce modèle » pour une entrée `always`. Réserve de sortie tirée du `TurnState` (1 536 raisonnement actif, 512 sinon), appliquée à la jauge, à l'aperçu, au `max_tokens` local et cloud et aux messages de sortie coupée. Variable du gabarit à `True` quand la brique est effective ; `reasoning.on`/`off` dans le corps cloud ; renvoi `resend` dans la forme du format ; raisonnement rendu attribué (`assistant_turn` / `history`) ; appels d'outils analysés hors du raisonnement. Front : option « Afficher le raisonnement » (mémorisée, cochée par défaut), `reasoning-block` replié dans la Vue humain et bloc « Raisonnement du modèle » toujours présent dans Contexte LLM. Scénario `reasoning` dans un module « Raisonnement » (30 min).
 
 **Fichiers :**
-- `src/wavestack/models/capabilities.py` — capacités `reasoning`, `reasoning_always`.
-- `src/wavestack/bricks/registry.py`, `content/bricks/reasoning.yaml` — déclaration et explication de la brique.
-- `src/wavestack/config.py`, `src/wavestack/cloud.py` — réserve et paramètres de raisonnement selon le raisonnement actif.
-- `src/wavestack/context/render.py` — `content` en blocs accepté (bloc `thinking` renvoyé).
-- `src/wavestack/trace/catalog.py` — `BrickState.always_fr`.
-- `src/wavestack/session/app_session.py` — disponibilité, réserve par tour, variable du gabarit, corps cloud, renvoi, attribution, appels hors raisonnement.
+- `src/harness_lab/models/capabilities.py` — capacités `reasoning`, `reasoning_always`.
+- `src/harness_lab/bricks/registry.py`, `content/bricks/reasoning.yaml` — déclaration et explication de la brique.
+- `src/harness_lab/config.py`, `src/harness_lab/cloud.py` — réserve et paramètres de raisonnement selon le raisonnement actif.
+- `src/harness_lab/context/render.py` — `content` en blocs accepté (bloc `thinking` renvoyé).
+- `src/harness_lab/trace/catalog.py` — `BrickState.always_fr`.
+- `src/harness_lab/session/app_session.py` — disponibilité, réserve par tour, variable du gabarit, corps cloud, renvoi, attribution, appels hors raisonnement.
 - `content/scenarios.yaml` — module et scénario « Raisonnement ».
-- `src/wavestack/web/static/index.html`, `app.js`, `app.css` — option, blocs de raisonnement, carte « toujours active ».
+- `src/harness_lab/web/static/index.html`, `app.js`, `app.css` — option, blocs de raisonnement, carte « toujours active ».
 - `tests/test_reasoning.py` (nouveau, 13 tests), `tests/test_bricks.py`, `tests/test_scenarios.py` — matrice et comptes mis à jour.
 
 **Revue :** 2 correctifs appliqués (1 medium, 1 low), 2 éléments reportés (`deferred`), 7 rejetés avec leur raison (triage ci-dessus). Recommandation de passe de suivi : `false` selon la règle (aucun high, un seul medium corrigé) ; la revue non indépendante reste un risque résiduel.
 
-**Vérification :** `uv run ruff check .` (vert), `uv run ruff format --check .` (vert), `node --check src/wavestack/web/static/app.js` (vert), `uv run pytest -q` : 396 réussis, 3 sautés. Audit de la matrice : chaque ligne couverte par un test de `tests/test_reasoning.py` ou `tests/test_scenarios.py` ; contrôle par mutation de cinq chemins (analyse hors raisonnement, variable du gabarit, attribution, `always`, raison d'indisponibilité) : chaque mutation fait échouer au moins un test.
+**Vérification :** `uv run ruff check .` (vert), `uv run ruff format --check .` (vert), `node --check src/harness_lab/web/static/app.js` (vert), `uv run pytest -q` : 396 réussis, 3 sautés. Audit de la matrice : chaque ligne couverte par un test de `tests/test_reasoning.py` ou `tests/test_scenarios.py` ; contrôle par mutation de cinq chemins (analyse hors raisonnement, variable du gabarit, attribution, `always`, raison d'indisponibilité) : chaque mutation fait échouer au moins un test.
 
 **Risques résiduels :** front non testé automatiquement ; comportement réel de Qwen3.5 avec `enable_thinking=True` (longueur du raisonnement face à la réserve de 1 536 et à NFR-1 sur CPU) ; renvoi `resend` jamais essayé contre un fournisseur réel.
 
 ### Correctifs de la revue indépendante (2026-09-26)
 
-Les 19 points « À corriger » ont été appliqués (détail dans le Review Triage Log), avec 12 tests Python de plus dans `tests/test_reasoning.py` (25 au total) ; le front (points 11, 12, 13, 17) n'a pas de banc de test JS. Vérification : `uv run ruff check .`, `uv run ruff format --check .`, `node --check src/wavestack/web/static/app.js` verts ; `uv run pytest -q` : 408 réussis, 3 sautés. `followup_review_recommended` reste `false` : la revue indépendante a eu lieu, et chaque correctif testable côté Python a son test.
+Les 19 points « À corriger » ont été appliqués (détail dans le Review Triage Log), avec 12 tests Python de plus dans `tests/test_reasoning.py` (25 au total) ; le front (points 11, 12, 13, 17) n'a pas de banc de test JS. Vérification : `uv run ruff check .`, `uv run ruff format --check .`, `node --check src/harness_lab/web/static/app.js` verts ; `uv run pytest -q` : 408 réussis, 3 sautés. `followup_review_recommended` reste `false` : la revue indépendante a eu lieu, et chaque correctif testable côté Python a son test.
 

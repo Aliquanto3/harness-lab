@@ -21,22 +21,22 @@ from test_rag import build, place_model
 from test_rag_lab import QUESTION, ended, run, run_status, stage
 from test_rag_rerank import Rerankers, place_reranker, rerank_config, session_for
 
-from wavestack import config
-from wavestack.config import RerankerModel
-from wavestack.messages import render
-from wavestack.models import discovery
-from wavestack.models import reranker as reranker_module
-from wavestack.models.load_registry import RERANKER
-from wavestack.models.reranker import (
+from harness_lab import config
+from harness_lab.config import RerankerModel
+from harness_lab.messages import render
+from harness_lab.models import discovery
+from harness_lab.models import reranker as reranker_module
+from harness_lab.models.load_registry import RERANKER
+from harness_lab.models.reranker import (
     PAIR,
     LlamaCppReranker,
     RerankerRefused,
     RerankFormat,
     rerank_format,
 )
-from wavestack.rag import lab as rag_lab
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab.rag import lab as rag_lab
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.trace.journal import get_journal
 
 URL = "https://huggingface.co/demo/resolve/main/lab-reranker.gguf"
 QWEN = "qwen3-reranker-0.6b"

@@ -3,9 +3,9 @@ session in `gauge()` (AD-1, AD-9)."""
 
 from __future__ import annotations
 
-from wavestack.context.segments import Segment, SegmentKind, load_labels
-from wavestack.context.window import context_sections, gauge, seen_prefix
-from wavestack.trace.catalog import ContextWindowPayload
+from harness_lab.context.segments import Segment, SegmentKind, load_labels
+from harness_lab.context.window import context_sections, gauge, seen_prefix
+from harness_lab.trace.catalog import ContextWindowPayload
 
 T, SP, UM, TC, TR, AT = (
     SegmentKind.TEMPLATE,

@@ -353,7 +353,7 @@ scenarios:
       Posez enfin le second prompt : ce que Headroom a coupé est perdu pour le modèle. La
       compression réduit ce qui entre, Caveman ce qui sort. Si la carte indique que
       Headroom n'est pas installé, lancez `uv sync --extra compression` puis relancez
-      WaveStack.
+      HarnessLab.
     bricks: [short_memory, system_prompt, global_memory, tools, mcp, skills, hooks, compression]
     tools: [read_file]
     mcp_lazy: true
@@ -515,11 +515,11 @@ scenarios:
     title_text: Lire un bilan d'agent-cost-kit
     description_text: >-
       Les briques du scénario précédent restent actives. Le bilan tokens d'un agent de code
-      a les mêmes colonnes que WaveStack : « Lecture cache », « Écriture cache 5 min » ou
+      a les mêmes colonnes que HarnessLab : « Lecture cache », « Écriture cache 5 min » ou
       « 1 h », « Non caché » et « Sortie ». Envoyez les trois prompts, puis ouvrez
       « Dépense » dans la barre du haut. La colonne « Cette conversation » compte depuis le
       dernier « Vider la conversation », « Depuis le lancement » depuis le démarrage de
-      WaveStack. Lisez case par case : la lecture est la plus grosse, c'est normal, chaque
+      HarnessLab. Lisez case par case : la lecture est la plus grosse, c'est normal, chaque
       appel relit tout le contexte déjà vu et, chez Claude, la lecture coûte le dixième de l'entrée. Une
       écriture qui dépasse la lecture signale un cache perdu, préfixe cassé ou cache expiré :
       cliquez « Vider le cache », envoyez un prompt, et l'écriture grimpe. « Non caché »
@@ -611,7 +611,7 @@ scenarios:
       comparaison après un changement. Sur un seul cas, « Lancer » avec « 3 essais » donne «
       réussis sur 3 », [[g:pass_at_k|pass@3]] (au moins un essai réussi) et
       [[g:pass_hat_k|pass^3]] (tous réussis) : la fiabilité d'un agent est pass^k, pas la
-      meilleure des tentatives. Le [[g:replay|rejeu]] de WaveStack réexécute les outils : le
+      meilleure des tentatives. Le [[g:replay|rejeu]] de HarnessLab réexécute les outils : le
       fichier relu ou l'heure demandée peuvent différer d'un essai à l'autre. Des outils figés
       (leurs réponses enregistrées) rendraient tout ce qui n'est pas le modèle
       [[g:determinism|déterministe]], donc une comparaison plus nette, mais ne testeraient plus
@@ -653,7 +653,7 @@ scenarios:
     title_text: Où vont mes données ?
     description_text: >-
       Tout est actif au lancement : les outils locaux et la brique MCP, en lazy loading,
-      avec le serveur local (Glossaire WaveStack) et le serveur public data.gouv.fr.
+      avec le serveur local (Glossaire HarnessLab) et le serveur public data.gouv.fr.
       Lisez d'abord le schéma : les outils et le serveur MCP local restent dans la zone
       Poste de travail, data.gouv.fr est dessiné dans la zone Réseau. Décochez puis
       recochez data.gouv.fr dans la carte MCP : le flux qui franchit la frontière du poste

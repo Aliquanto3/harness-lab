@@ -1,6 +1,6 @@
 # Guide du harnais d'agent
 
-Document de démonstration de WaveStack, volontairement long : il sert à montrer la
+Document de démonstration de HarnessLab, volontairement long : il sert à montrer la
 délégation à un sous-agent. Texte original, non confidentiel.
 
 ## 1. Le modèle et le harnais
@@ -128,7 +128,7 @@ agisse (prompt système, skills, consignes) ; les capteurs vérifient après cou
 garde-fous, tests). Un contrôle est soit calculé par du code, déterministe et peu coûteux,
 soit déduit par un modèle, plus souple mais moins sûr (Böckeler).
 
-WaveStack ne montre pas : les plateformes (ACP, marketplaces), les bacs à sable au
+HarnessLab ne montre pas : les plateformes (ACP, marketplaces), les bacs à sable au
 niveau du système d'exploitation, les modes de permission.
 
 ## 11. À retenir

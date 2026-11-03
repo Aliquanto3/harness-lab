@@ -2,14 +2,14 @@
 
 - **Date** : 2026-10-25
 - **Demandeur** : Anaël
-- **Déclencheur** : lecture du cours « Building a Coding Agent From Scratch » (Decoding AI), comparé à WaveStack dans `research/comparaison-cours-decode-2026-10-25.md`
+- **Déclencheur** : lecture du cours « Building a Coding Agent From Scratch » (Decoding AI), comparé à HarnessLab dans `research/comparaison-cours-decode-2026-10-25.md`
 - **Mode de revue** : batch
 - **Statut** : approuvée par Anaël le 2026-10-25 : incrément 1 seul, développement lancé dès la spec validée, sans attendre la recette du 2026-10-25 ; incrément 2 revu plus tard (décisions en section 6)
 - **Portée** : modérée. Un nouveau lot en deux incréments : 6 stories à spécifier tout de suite, 5 pistes à spécifier ensuite sous condition. Aucun retour arrière ; deux non-objectifs de la V1.4 seraient revus dans l'incrément 2.
 
 ## 1. Résumé du problème
 
-WaveStack montre ce que fait un agent, tour par tour. Il ne montre pas comment on vérifie qu'un agent se comporte comme prévu, ni comment on s'aperçoit qu'un changement (de modèle, de prompt système, de brique) l'a dégradé. L'évaluation existe, mais seulement pour le RAG (V1.2 story 15).
+HarnessLab montre ce que fait un agent, tour par tour. Il ne montre pas comment on vérifie qu'un agent se comporte comme prévu, ni comment on s'aperçoit qu'un changement (de modèle, de prompt système, de brique) l'a dégradé. L'évaluation existe, mais seulement pour le RAG (V1.2 story 15).
 
 decode consacre deux leçons sur huit à ce sujet. Son argument : les tests de régression sont « la partie la plus importante des évaluations d'une application d'IA », et sans eux on a « peur de changer ses prompts ». C'est aussi le sujet qui manque le plus aux deux publics de la V2 en brouillon : les équipes techniques et la gouvernance.
 
@@ -46,7 +46,7 @@ Type de changement : nouveau besoin, issu d'une veille. Ce n'est ni un échec ni
 
 ### Numérotation
 
-« V1.5 » est un nom de lot. Le dossier de spec est nommé par thème (`spec-wavestack-evaluer-l-agent`). Le numéro SemVer est attribué à la livraison (probablement 1.6.0).
+« V1.5 » est un nom de lot. Le dossier de spec est nommé par thème (`spec-harness-lab-evaluer-l-agent`). Le numéro SemVer est attribué à la livraison (probablement 1.6.0).
 
 ## 3. Approche recommandée
 
@@ -66,14 +66,14 @@ Type de changement : nouveau besoin, issu d'une veille. Ce n'est ni un échec ni
 Options écartées :
 - un banc d'essai à vérificateur caché (il faut un bac à sable et git) ;
 - un juge LLM dans la régression (Qwen3.5-2B n'est pas viable comme juge, H7 à 64 %) ;
-- les modes de permission (aucun outil de WaveStack ne modifie quoi que ce soit, ils n'auraient rien à interdire) ;
+- les modes de permission (aucun outil de HarnessLab ne modifie quoi que ce soit, ils n'auraient rien à interdire) ;
 - le rejeu à outils figés (reporté) ;
 - la file de réorientation ;
 - Opik et Kitaru.
 
 ## 4. Propositions détaillées
 
-### 4.1 Incrément 1 : nouvelle spec `_bmad-output/specs/spec-wavestack-evaluer-l-agent/`
+### 4.1 Incrément 1 : nouvelle spec `_bmad-output/specs/spec-harness-lab-evaluer-l-agent/`
 
 - **CAP-1 Contrat d'un cas et vérifications sur la trace** (écart 1)
   - **intent:** Un cas d'agent est une donnée : un prompt, une configuration (briques, hooks, prompt système, fenêtre), un historique pré-rempli facultatif, et une à trois vérifications lues dans le journal du tour. Il porte aussi un symptôme, une assertion en une phrase, un plafond d'appels au modèle et une provenance (tour d'origine, date, modèle, « corrigé dans »).
@@ -91,7 +91,7 @@ Options écartées :
 - **CAP-2 Suite de cas fournie** (écarts 1 et 3)
   - **intent:** Le formateur dispose d'environ 8 cas prêts, chacun lié à une brique du programme.
   - **success:**
-    - Les cas visés, transposés de decode et ancrés dans WaveStack :
+    - Les cas visés, transposés de decode et ancrés dans HarnessLab :
       - l'heure avec `get_datetime` en deux appels au plus ;
       - pas de chemin inventé pour `read_file` ;
       - H1 bloque `confidentiel/` ;
@@ -126,7 +126,7 @@ Options écartées :
       - démo, banc d'essai et régression ;
       - un plafond d'appels observé, jamais deviné ;
       - le rejeu témoin ;
-      - pourquoi le rejeu de WaveStack réexécute les outils, et ce que changerait des outils figés ;
+      - pourquoi le rejeu de HarnessLab réexécute les outils, et ce que changerait des outils figés ;
       - pourquoi on évite ici le juge LLM.
     - L'accroche « l'agent tient en quelques lignes, le reste est le harnais » au module 1.
     - fr, en et de.
@@ -166,17 +166,17 @@ Points de contrôle de spec (`spec_checkpoint`) : stories 3 et 4 (maquettes), et
 ### 4.4 Renvoi dans la V2
 
 ```
-Spec : spec-wavestack-v2/SPEC.md
+Spec : spec-harness-lab-v2/SPEC.md
 Section : Capabilities, CAP-1
 
 AJOUT :
-- Voisine des cas d'agent de la V1.5 (spec-wavestack-evaluer-l-agent, CAP-1 et CAP-2) :
+- Voisine des cas d'agent de la V1.5 (spec-harness-lab-evaluer-l-agent, CAP-1 et CAP-2) :
   réutiliser leur contrat si la V2 est déclenchée après la V1.5.
 ```
 
 ## 5. Passage de relais
 
-- **Étape 1, spec** : `bmad-spec` crée `spec-wavestack-evaluer-l-agent` à partir de la section 4.1. Il produit les maquettes du formulaire et de la vue, `brownfield.md` (persistance des cas, réinitialisation, moteur de vérification) et `stories.yaml`. Anaël valide la spec avant toute ligne de code.
+- **Étape 1, spec** : `bmad-spec` crée `spec-harness-lab-evaluer-l-agent` à partir de la section 4.1. Il produit les maquettes du formulaire et de la vue, `brownfield.md` (persistance des cas, réinitialisation, moteur de vérification) et `stories.yaml`. Anaël valide la spec avant toute ligne de code.
 - **Étape 2, développement** : dès la spec validée, sans attendre la recette du 2026-10-25 (D1). Chaîne agent-cost-kit par story (`dev-story` → `second-avis` → `reviewer`), en run autonome avec `run-autonome.md`.
 - **Étape 3, incrément 2** : après la recette de l'incrément 1, test préalable des pistes A et B, décisions sur C et D, puis une proposition courte et une spec.
 - **Critères de réussite du lot** : en formation, hors ligne, avec le modèle local, un participant :

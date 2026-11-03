@@ -24,11 +24,11 @@ from test_rag import Embedders, index, place_model, rag_values  # noqa: F401 - f
 from test_tools import call
 from test_turn import _run
 
-from wavestack import config, scenarios
-from wavestack.net import guard
-from wavestack.session.app_session import AppSession
-from wavestack.tools.native import read_file
-from wavestack.trace.journal import get_journal
+from harness_lab import config, scenarios
+from harness_lab.net import guard
+from harness_lab.session.app_session import AppSession
+from harness_lab.tools.native import read_file
+from harness_lab.trace.journal import get_journal
 
 # FR-38: the order in which the bricks come into the programme.
 FR38 = [
@@ -59,7 +59,7 @@ VARIANTS = {"network_tools": "native_tools", "rag_rerank": "rag", "mcp_lazy": "m
 # mission rules would overflow the window at compression's second prompt).
 HOOKS_NOT_CARRIED_FR = {"h3": "sans l'injection de contexte (H3)"}
 LAUNCH_HOOKS = {"h1", "h2", "h3"}  # `hooks` absent: the launch values (story 8)
-# Lot B (B3): without `WAVESTACK_TEST_GGUF`, the test session estimates 2 characters per
+# Lot B (B3): without `HARNESS_LAB_TEST_GGUF`, the test session estimates 2 characters per
 # token, calibrated on the target PC (`mcp_full`: 3 204 tokens by Qwen3.5's tokenizer, 1 530
 # at 4 characters per token). Lot J: with it, the session boots that GGUF in local mode and
 # the gauge is exact, template included (counting the chat rendering with the local tokenizer
@@ -84,7 +84,7 @@ LOCAL_ANSWER_MAX = 200  # the measure above, with margin: a longer answer revisi
 # `resultats-lot-k-2026-09-29.md`, `subagent`: 470, 245, 223 and 213 tokens), not at the
 # output reserve: at the reserve, `subagent` p4 overflowed by 9 tokens (1 326 + 2 267 >
 # 3 584) whereas the real gauge read 2 997 / 3 584. The whole history is counted with the
-# GGUF's tokenizer (`WAVESTACK_TEST_GGUF`, the exact gauge where the overflow was raised);
+# GGUF's tokenizer (`HARNESS_LAB_TEST_GGUF`, the exact gauge where the overflow was raised);
 # the 2-character estimate already counts `subagent`'s context 40 % over (1 848 against
 # 1 326 exact), so there only the previous exchange is added, its answer at the reserve as
 # before (the worst case of one exchange, never weaker than the check it replaces). The
@@ -263,7 +263,7 @@ FALLBACK_SCENARIOS = (
 def test_small_model_prompts_name_the_tool_or_skill_and_the_fallback():
     """Story 27: for a small model, the prompts name the tool or skill expected; CAP-5: the
     instructions give the replay to fall back on, never a forced action."""
-    from wavestack.skills import load_skills_content
+    from harness_lab.skills import load_skills_content
 
     content = _content()
     scenario = content.scenarios
@@ -388,7 +388,7 @@ def test_call_presets_name_real_tools_and_their_arguments(loop):  # noqa: F811
     the preset (the session keeps only the declared parameters)."""
     from test_mcp import enable
 
-    from wavestack.mcp.servers import load_mcp_content
+    from harness_lab.mcp.servers import load_mcp_content
 
     session = mcp_session(loop)
     enable(session)
@@ -413,8 +413,8 @@ def test_call_presets_name_real_tools_and_their_arguments(loop):  # noqa: F811
 def test_meta_tools_say_which_is_which():
     """Story 27 (H2): `load_tool_doc` loads no skill; `load_skill` loads a skill of the
     « Skills disponibles » list by its name, and is not an MCP tool."""
-    from wavestack.mcp.servers import load_mcp_content
-    from wavestack.skills import load_skills_content
+    from harness_lab.mcp.servers import load_mcp_content
+    from harness_lab.skills import load_skills_content
 
     tool_doc = load_mcp_content().load_tool_doc.intro
     skills = load_skills_content([])
@@ -520,11 +520,11 @@ def _wait_mcp(mark: int, timeout: float = 30) -> None:
 
 
 def _gguf_tokenizer():  # noqa: ANN202 - `VocabTokenizer`, imported only when used
-    """The GGUF's tokenizer when `WAVESTACK_TEST_GGUF` points to one, else `None`."""
-    path = os.environ.get("WAVESTACK_TEST_GGUF")
+    """The GGUF's tokenizer when `HARNESS_LAB_TEST_GGUF` points to one, else `None`."""
+    path = os.environ.get("HARNESS_LAB_TEST_GGUF")
     if not path or not Path(path).is_file():
         return None
-    from wavestack.models.engine import VocabTokenizer
+    from harness_lab.models.engine import VocabTokenizer
 
     return VocabTokenizer(path)
 
@@ -620,7 +620,7 @@ def _check_overflow_prompt(
 
 
 def test_every_scenario_fits_the_default_window_with_every_prompt(index, loop, web):  # noqa: F811
-    """With `WAVESTACK_TEST_GGUF`, that GGUF booted in local mode: the exact local gauge
+    """With `HARNESS_LAB_TEST_GGUF`, that GGUF booted in local mode: the exact local gauge
     (lot J). Else as the cloud estimate does at 2 characters per token, with a safety factor.
     Both with the reasoning reserve, the RAG excerpts at their declared maximum, the
     demonstration memory, the real local MCP server and the public servers' tools (snapshot
@@ -647,7 +647,7 @@ def test_every_scenario_fits_the_default_window_with_every_prompt(index, loop, w
     tokenizer = _gguf_tokenizer()
     if tokenizer is not None:  # the local rendering, its template and its gauge (lot J)
         session = AppSession(cfg, embedder_factory=Embedders())
-        assert session.boot(os.environ["WAVESTACK_TEST_GGUF"]).result() == "ok"
+        assert session.boot(os.environ["HARNESS_LAB_TEST_GGUF"]).result() == "ok"
         safety = EXACT
     else:
         entry = cfg.cloud_model("mistral")  # reasoning on demand, 4 096-token window

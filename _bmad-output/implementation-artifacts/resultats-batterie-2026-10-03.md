@@ -21,10 +21,10 @@
 | Quart 2 (17 fichiers) | **693 passés**, 6 désélectionnés | 5 min 37 |
 | Quart 3 (17 fichiers) | **398 passés**, 3 sautés, 6 désélectionnés | 2 min 40 |
 | Quart 4 (14 fichiers) | **546 passés** | 2 min 54 |
-| `-m model`, `WAVESTACK_TEST_GGUF` = Qwen3.5-2B-Q4_K_M | **10 passés**, 2 sautés | 1 min 21 |
-| Les 2 sautés (`test_rag.py:546`, `test_rag_rerank.py:828`), rejoués avec `WAVESTACK_TEST_MODELS_DIR` | **2 passés** | 9 s |
+| `-m model`, `HARNESS_LAB_TEST_GGUF` = Qwen3.5-2B-Q4_K_M | **10 passés**, 2 sautés | 1 min 21 |
+| Les 2 sautés (`test_rag.py:546`, `test_rag_rerank.py:828`), rejoués avec `HARNESS_LAB_TEST_MODELS_DIR` | **2 passés** | 9 s |
 
-Total : 5 392 tests passés, 0 échec ; les 12 tests `model` passent (les deux RAG demandent `WAVESTACK_TEST_MODELS_DIR` en plus de `WAVESTACK_TEST_GGUF`).
+Total : 5 392 tests passés, 0 échec ; les 12 tests `model` passent (les deux RAG demandent `HARNESS_LAB_TEST_MODELS_DIR` en plus de `HARNESS_LAB_TEST_GGUF`).
 
 ## 3. E2E (faux fournisseur, réseau coupé), onze tranches `--only`
 
@@ -54,7 +54,7 @@ Total : **1 074 vérifications réussies, 1 en échec**.
 
 ## 4. Recette dans le navigateur (Claude in Chrome)
 
-WaveStack lancé sur 127.0.0.1:8420 (port vérifié libre avant), clés Anthropic et OpenAI lues dans l'environnement utilisateur et passées au seul serveur, `settings.json` et `memory.json` sauvegardés avant et restaurés à l'identique après (empreintes égales). Pilotage : les intentions de l'API locale depuis la page (`fetch` même origine), lecture de l'écran par captures et par le DOM. Langue de la séance : `fr`. Scénario `native_tools`. Par fournisseur : un tour Outils (« Quelle heure est-il ? », brique Raisonnement éteinte), puis un tour Raisonnement (« Un train part à 14 h 47 et roule pendant 3 h 03… », brique allumée).
+HarnessLab lancé sur 127.0.0.1:8420 (port vérifié libre avant), clés Anthropic et OpenAI lues dans l'environnement utilisateur et passées au seul serveur, `settings.json` et `memory.json` sauvegardés avant et restaurés à l'identique après (empreintes égales). Pilotage : les intentions de l'API locale depuis la page (`fetch` même origine), lecture de l'écran par captures et par le DOM. Langue de la séance : `fr`. Scénario `native_tools`. Par fournisseur : un tour Outils (« Quelle heure est-il ? », brique Raisonnement éteinte), puis un tour Raisonnement (« Un train part à 14 h 47 et roule pendant 3 h 03… », brique allumée).
 
 | # | Fournisseur | Outils | Raisonnement | Contexte LLM | Coût, empreinte | Verdict |
 |---|---|---|---|---|---|---|
@@ -83,7 +83,7 @@ Coût de la recette : 0,0214 $ (fournisseurs) + 0,0012 $ (plafond) ≈ **0,023 $
 ## 6. Actions d'Anaël
 
 1. ~~Ajouter du crédit OpenAI~~ : **fait** le 2026-10-03 au soir ; rejouer Luna : voir la section 7.
-2. **Console Anthropic : coût comparé** le 2026-10-03 au soir. Le tableau de bord d'Anthropic affiche **0,16 $** pour le mois. Les estimations de WaveStack pour cette clé, toutes du 2026-10-03, font **≈ 0,159 $** : mesures de la story 3 (0,0258 $), recette de la story 5 (0,1123 $), recette Chrome Haiku et Sonnet (≈ 0,0194 $, soit le total de la séance moins les 0,0021 $ de Groq, Mistral et Gemini), test du plafond (0,0012 $). Écart sous l'arrondi au centime du tableau de bord (au plus ≈ 3 %), donc dans les 10 % du Success signal de SPEC.md, en supposant que la clé n'a servi qu'à WaveStack ce mois-ci. **OK.** **Console OpenAI : comparée le 2026-10-03 au soir, voir la section 8.**
+2. **Console Anthropic : coût comparé** le 2026-10-03 au soir. Le tableau de bord d'Anthropic affiche **0,16 $** pour le mois. Les estimations de HarnessLab pour cette clé, toutes du 2026-10-03, font **≈ 0,159 $** : mesures de la story 3 (0,0258 $), recette de la story 5 (0,1123 $), recette Chrome Haiku et Sonnet (≈ 0,0194 $, soit le total de la séance moins les 0,0021 $ de Groq, Mistral et Gemini), test du plafond (0,0012 $). Écart sous l'arrondi au centime du tableau de bord (au plus ≈ 3 %), donc dans les 10 % du Success signal de SPEC.md, en supposant que la clé n'a servi qu'à HarnessLab ce mois-ci. **OK.** **Console OpenAI : comparée le 2026-10-03 au soir, voir la section 8.**
 3. ~~Trancher le critère 1 de Julia-1~~ : **accepté** par Anaël le 2026-10-03 (binaire `llama-server` portable admis comme prérequis externe, comme Ollama) ; reporté dans `decision-model-candidates.md`.
 4. ~~Confirmer les GIF~~ : **fait**, Anaël les a téléchargés.
 
@@ -95,21 +95,21 @@ Coût de la recette : 0,0214 $ (fournisseurs) + 0,0012 $ (plafond) ≈ **0,023 $
 - **Success signal de SPEC.md** : atteint pour les trois modèles (Haiku, Sonnet, Luna) ; coût Anthropic comparé à la console (OK). Reste la console OpenAI : 20 appels de 17:37:16 à 17:38:59 UTC, 12 289 / 965 tokens, 0,001711 $ (plus ≈ 0,0024 $ de mesures et 0,00036 $ de recette Chrome) ; au centime près, seuls les comptes de tokens peuvent montrer un écart de 10 %.
 - **Précision sur le masquage** : les signatures d'Anthropic et l'`encrypted_content` d'OpenAI apparaissent en clair dans `model_call_ended.raw_output` et dans `outbound_request.body`. « Masqué » désigne, dans le code comme pour la signature de Gemini, le masquage de la clé d'API (AD-15) ; le corps tracé doit rester égal au corps envoyé (CAP-1). Ces jetons opaques du fournisseur ne sont pas des secrets du poste.
 
-## 8. Console OpenAI : écart avec les estimations de WaveStack (2026-10-03 au soir)
+## 8. Console OpenAI : écart avec les estimations de HarnessLab (2026-10-03 au soir)
 
-Relevé par Claude in Chrome sur `platform.openai.com/usage` (organisation Wavestone, filtre « All projects », « All API keys », 7 derniers jours ; le filtre par défaut sur le projet « ProjetCommande » n'affiche rien : la clé de WaveStack n'en dépend pas). Seul le 2026-10-03 porte de l'usage.
+Relevé par Claude in Chrome sur `platform.openai.com/usage` (organisation, filtre « All projects », « All API keys », 7 derniers jours ; le filtre par défaut sur le projet « ProjetCommande » n'affiche rien : la clé de HarnessLab n'en dépend pas). Seul le 2026-10-03 porte de l'usage.
 
-| Mesure | Console OpenAI | WaveStack (estimation) | Écart |
+| Mesure | Console OpenAI | HarnessLab (estimation) | Écart |
 |---|---|---|---|
 | Dépense du jour | **0,00 $** (arrondi au centime ; « October spend » 0,00 $ / 100 $) | ≈ **0,0045 $** (0,001711 recette story 5 + 0,0024 mesures story 4 + 0,00036 recette Chrome) | non mesurable : l'estimation est sous le centime, donc sous la résolution de la console |
 | Requêtes (Responses) | **64** | **65** (39 mesures + 20 recette + 6 Chrome) | -1 (≈ 1,5 %) |
 | Tokens d'entrée | **27 889** | 12 289 pour la seule recette (20 appels) ; les totaux des mesures (39 appels) et de la recette Chrome (6 appels) ne sont pas consignés | non vérifiable en l'état : les 15 600 tokens restants pour 44 à 45 requêtes (≈ 350 par requête) restent plausibles |
 | Tokens de sortie | non affichés par la carte « Responses and Chat Completions » | 965 pour la recette | non comparable |
 
-Lecture : le coût ne peut pas être comparé au centime près, comme prévu (section 7) ; le décompte des requêtes concorde à une requête près, et les 7 requêtes refusées pour crédit épuisé avant la recharge n'y figurent pas (sinon la console en compterait 72). L'écart d'une requête n'a pas été expliqué (retard d'agrégation de la console ou appel compté deux fois côté WaveStack, non tranché). Le Success signal de SPEC.md (écart de coût sous 10 %) est donc **non démontrable pour OpenAI** à ces montants ; il reste démontré pour Anthropic (0,16 $ contre ≈ 0,159 $). Pour une vraie comparaison OpenAI, il faudrait un lot d'au moins 1 $ ou la page des coûts (granularité plus fine) : à décider par Anaël, sans urgence.
+Lecture : le coût ne peut pas être comparé au centime près, comme prévu (section 7) ; le décompte des requêtes concorde à une requête près, et les 7 requêtes refusées pour crédit épuisé avant la recharge n'y figurent pas (sinon la console en compterait 72). L'écart d'une requête n'a pas été expliqué (retard d'agrégation de la console ou appel compté deux fois côté HarnessLab, non tranché). Le Success signal de SPEC.md (écart de coût sous 10 %) est donc **non démontrable pour OpenAI** à ces montants ; il reste démontré pour Anthropic (0,16 $ contre ≈ 0,159 $). Pour une vraie comparaison OpenAI, il faudrait un lot d'au moins 1 $ ou la page des coûts (granularité plus fine) : à décider par Anaël, sans urgence.
 
 ## 9. Gemini 3.5 flash-lite : réflexion en streaming (décision du 03/10)
 
-Sonde sur l'API réelle (prompt du scénario Raisonnement, streaming) : à `thinking_level` « medium », le résumé de la réflexion (`<thought>…</thought>`) n'arrive que 3 fois sur 8 ; à « high », 4 fois sur 4 (non-streaming : 4 sur 4). Ce n'est pas un défaut de WaveStack : l'API n'émet le résumé que lorsque la réflexion est assez longue, et le traducteur `openai_chat.py` lit déjà tous les formats observés. Décision d'Anaël : `high` pour `gemini-3.5-flash-lite` (config `wavestack.toml`, README, tests, E2E `gemini_shape`) ; Gemma et les autres fournisseurs inchangés. Coût : une réflexion plus longue, facturée comme sortie (2,50 $ par million de tokens).
+Sonde sur l'API réelle (prompt du scénario Raisonnement, streaming) : à `thinking_level` « medium », le résumé de la réflexion (`<thought>…</thought>`) n'arrive que 3 fois sur 8 ; à « high », 4 fois sur 4 (non-streaming : 4 sur 4). Ce n'est pas un défaut de HarnessLab : l'API n'émet le résumé que lorsque la réflexion est assez longue, et le traducteur `openai_chat.py` lit déjà tous les formats observés. Décision d'Anaël : `high` pour `gemini-3.5-flash-lite` (config `harness-lab.toml`, README, tests, E2E `gemini_shape`) ; Gemma et les autres fournisseurs inchangés. Coût : une réflexion plus longue, facturée comme sortie (2,50 $ par million de tokens).
 
 Sonde rejouée à `high` après le changement (03/10, streaming, 8 appels par prompt) : prompt du train 8 sur 8, prompt de logique (trois amis) 8 sur 8 ; 3,9 à 7,5 s par appel. Soit 16 sur 16 avec le résumé de réflexion visible, contre 3 sur 8 à « medium ».

@@ -9,15 +9,15 @@ import pytest
 from fake_engine import CHATML, FakeEngine, booted_session
 from starlette.testclient import TestClient
 
-from wavestack import config
-from wavestack.context.segments import Segment, SegmentKind, load_labels
-from wavestack.context.window import gauge
-from wavestack.models.capabilities import ChannelSplitter, capabilities_for
-from wavestack.models.engine import EngineMetadata, cut_stop
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.context.segments import Segment, SegmentKind, load_labels
+from harness_lab.context.window import gauge
+from harness_lab.models.capabilities import ChannelSplitter, capabilities_for
+from harness_lab.models.engine import EngineMetadata, cut_stop
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 
 def _run(session, message: str) -> dict[str, list[dict]]:

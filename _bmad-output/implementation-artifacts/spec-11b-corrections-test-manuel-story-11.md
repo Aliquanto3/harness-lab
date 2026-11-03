@@ -67,7 +67,7 @@ context:
   - Texte du 429 : « quota dépassé par seconde » quand la portée est `second`. Si elle est inconnue : « quota dépassé (par seconde, par minute ou par jour) ».
   - Si l'entrée déclare `min_interval_s`, une piste propose de l'augmenter dans sa déclaration.
 - **Choix après chargement.**
-  - `select_model` (fichier ou cloud) une fois un modèle chargé renvoie `message_fr = "Choix enregistré : relancez WaveStack pour l'utiliser."`.
+  - `select_model` (fichier ou cloud) une fois un modèle chargé renvoie `message_fr = "Choix enregistré : relancez HarnessLab pour l'utiliser."`.
   - `/api/diagnostic` porte `next_launch_fr` (le même texte) tant que le choix enregistré diffère du modèle chargé.
   - `diagnostic.html` l'affiche dans un bloc `role="status"` en haut de la page, qui survit au rechargement.
 - **Documentation.** README : `key_env` (avec `setx NOM valeur`, sans droits administrateur, puis un nouveau terminal), `min_interval_s`, page ouverte au lancement. Spine : AD-20 (`key_env`), AD-21 (étape 2 du lancement), AD-16 (`second`, `min_interval_s`, message du fournisseur).
@@ -78,7 +78,7 @@ context:
   - Un poste utilisé avant cette story compte comme premier lancement une seule fois, par la seule clé `diagnostic_shown`.
   - La spec est gardée entière malgré ses ~5 000 tokens.
 
-**Never:** changement de modèle à chaud (CAP-34) ; espacement ou nouvel essai déduits de `x-ratelimit-*` (lecture de `x-ratelimit-limit-req-minute` permise pour le seul message « aucun quota actif », décision D6 du 2026-10-01) ; valeur de clé dans `wavestack.toml`, `settings.json` ou une réponse ; modification du rendu local ou du préfixe en ajout seul ; nouvel événement de catalogue.
+**Never:** changement de modèle à chaud (CAP-34) ; espacement ou nouvel essai déduits de `x-ratelimit-*` (lecture de `x-ratelimit-limit-req-minute` permise pour le seul message « aucun quota actif », décision D6 du 2026-10-01) ; valeur de clé dans `harness-lab.toml`, `settings.json` ou une réponse ; modification du rendu local ou du préfixe en ajout seul ; nouvel événement de catalogue.
 
 ## I/O & Edge-Case Matrix
 
@@ -97,46 +97,46 @@ context:
 | Mistral, deux appels rapprochés | `min_interval_s = 1` | le 2ᵉ envoi part ≥ 1 s après le 1ᵉʳ ; `prompt_ms` sans l'attente |
 | Annulation pendant l'attente | arrêt demandé | appel `cancelled`, aucun envoi |
 | 429 par seconde | « Requests rate limit exceeded per second » | `quota_scope = second`, texte « par seconde » |
-| Choix après chargement | GGUF chargé, choix cloud confirmé | message « Choix enregistré : relancez WaveStack pour l'utiliser. », visible après rechargement de la page |
+| Choix après chargement | GGUF chargé, choix cloud confirmé | message « Choix enregistré : relancez HarnessLab pour l'utiliser. », visible après rechargement de la page |
 
 </frozen-after-approval>
 
 ## Code Map
 
-- `src/wavestack/config.py`
+- `src/harness_lab/config.py`
   - `CloudModel` 86-105 : ajouter `key_env: str | None` (motif) et `min_interval_s: float | None` (`gt=0`, `le=60`).
   - `cloud_key` 402 : ajouter le repli sur l'environnement ; ajouter `cloud_key_source`.
   - `api_key_host_changed` 410 : inchangé ; le diagnostic ne l'affiche plus quand la variable fournit la clé.
   - `read_settings` 355 : utilisé pour lire `diagnostic_shown`.
-- `wavestack.toml` 72-99 : `min_interval_s = 1` dans `mistral` ; `key_env = "GROQ_API_KEY"` et `"MISTRAL_API_KEY"` ; mentionner les deux champs dans le commentaire des exemples.
-- `src/wavestack/models/engine.py:25-34` `CancelToken` : ajouter `wait(timeout) → bool`, qui renvoie vrai si l'annulation arrive.
-- `src/wavestack/models/openai_chat.py` :
+- `harness-lab.toml` 72-99 : `min_interval_s = 1` dans `mistral` ; `key_env = "GROQ_API_KEY"` et `"MISTRAL_API_KEY"` ; mentionner les deux champs dans le commentaire des exemples.
+- `src/harness_lab/models/engine.py:25-34` `CancelToken` : ajouter `wait(timeout) → bool`, qui renvoie vrai si l'annulation arrive.
+- `src/harness_lab/models/openai_chat.py` :
   - `ChatEnd` 50 : ajouter `provider_message: str | None`.
   - `_refused` 206-275 et flux 322-331 : `tool_use_failed` remplit `provider_message = mask(error.message)` ; un suffixe commun « Message du fournisseur : … » (tronqué) pour chaque `ProviderError` ; la 400/422 garde son texte sans doublon.
   - `_quota_scope` 117 : ajouter `second`.
   - Le texte du 429 dépend de la portée ; piste `min_interval_s`.
   - Registre d'espacement au niveau du module : dictionnaire `entry.id → dernier départ` sous verrou, avec `pace(entry, cancel) → bool`.
   - `run_call` 445 : appeler `pace` avant `started` et `model_call_started` (l'adaptateur expose `entry`). Si l'appel est annulé, rendre un `ChatCall` `cancelled` sans appeler `complete`. Lignes 534-535 : le détail cite `end.provider_message`.
-- `src/wavestack/trace/catalog.py:48` : ajouter `second` à `quota_scope`.
-- `src/wavestack/session/app_session.py`
+- `src/harness_lab/trace/catalog.py:48` : ajouter `second` à `quota_scope`.
+- `src/harness_lab/session/app_session.py`
   - Boucle du tour vers 2091-2112 : en mode chat, `self._render(...)` reçoit l'état complété par `loaded_in_turn`, en réutilisant la règle de `build_turn_state` 1066-1072 (`tools` + outils documentés, `loadable` diminué, `LOAD_TOOL_DOC` retiré si `loadable` est vide). `_render` 1284 et `_render_chat` 1320 ne changent pas.
   - Mode local : garder `state` tel quel.
-- `src/wavestack/tools/executor.py:80` `reject` : aucun changement si le texte réinjecté reprend déjà `detail_fr`, sinon l'aligner.
-- `src/wavestack/session/diagnostic.py`
+- `src/harness_lab/tools/executor.py:80` `reject` : aucun changement si le texte réinjecté reprend déjà `detail_fr`, sinon l'aligner.
+- `src/harness_lab/session/diagnostic.py`
   - `_cloud_refusal` 466 : inchangé une fois que `cloud_key` lit la variable.
   - `cloud_rows` 491 : ajouter `key_source` et `key_env`.
   - `_select_model_locked` 396-439 et `select_cloud` 553-564 : texte après chargement.
   - Ajouter `next_launch_fr()`, qui compare `selected_*` et `booted_*`.
   - Ajouter `launch_page(result) → "/" | "/diagnostic"` et `first_launch() → bool`, qui écrit `diagnostic_shown` par `apply_setting(SettingWrite(...))`, comme `_save_choice` 441.
-- `src/wavestack/cli.py`
+- `src/harness_lab/cli.py`
   - Lignes 102-107 : pour l'instance existante, lire `/api/diagnostic` et choisir la page.
   - `_run_diagnostic_then_boot` 89 : signaler le résultat, par exemple par un `threading.Event` et le résultat.
   - `_open_browser` 129-133 : premier lancement, ouverture de `/diagnostic` à 1 s ; sinon, attente du résultat (30 s au plus) puis `launch_page`.
-- `src/wavestack/web/app.py:225-264` : `/api/diagnostic` porte `next_launch_fr`, et chaque ligne cloud porte `key_source` et `key_env`.
-- `src/wavestack/web/static/diagnostic.html`
+- `src/harness_lab/web/app.py:225-264` : `/api/diagnostic` porte `next_launch_fr`, et chaque ligne cloud porte `key_source` et `key_env`.
+- `src/harness_lab/web/static/diagnostic.html`
   - Lignes cloud 193-218 : ligne « Clé fournie par la variable X » ; placeholder adapté.
   - Ajouter le bloc `#next-launch` près de `#open-link` (42), rempli par `loadDiagnostic` (313).
-- `src/wavestack/web/static/app.js` `renderMenu` 2482 (ou `index.html` 22-30) : lien « Diagnostic » en bas de la liste, après un séparateur.
+- `src/harness_lab/web/static/app.js` `renderMenu` 2482 (ou `index.html` 22-30) : lien « Diagnostic » en bas de la liste, après un séparateur.
 - `README.md` section modèle cloud ; `ARCHITECTURE-SPINE.md` AD-20, AD-21 (ligne 536, étape 2), AD-16.
 - Tests à réutiliser :
   - `tests/test_cloud.py` : `Provider`, `sse`, `delta`, `_cloud_session` 80, `_app` 334, `_no_sentinel` 103, `SENTINEL` 25. Adapter `test_tool_use_failed_follows_the_malformed_path` 257, `test_provider_refusals_become_explained_errors` 201 et `test_a_choice_after_a_model_is_loaded_waits_for_the_next_launch` 531.
@@ -148,19 +148,19 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/config.py`, `wavestack.toml` : `key_env`, `min_interval_s`, repli de `cloud_key`, `cloud_key_source`, préréglages.
-- [x] `src/wavestack/models/engine.py`, `src/wavestack/models/openai_chat.py`, `src/wavestack/trace/catalog.py` : `CancelToken.wait`, registre d'espacement dans `run_call`, `provider_message`, suffixe « Message du fournisseur », 429 par seconde.
-- [x] `src/wavestack/session/app_session.py` (et `tools/executor.py` si besoin) : `tools` du corps chat complété par `loaded_in_turn`, détail du refus réinjecté.
-- [x] `src/wavestack/session/diagnostic.py`, `src/wavestack/web/app.py` : `key_source`, `key_env`, `next_launch_fr`, texte après chargement, `first_launch`, `launch_page`.
-- [x] `src/wavestack/cli.py` : page ouverte selon le premier lancement, le résultat et l'instance existante.
-- [x] `src/wavestack/web/static/diagnostic.html`, `app.js` / `index.html` : ligne de clé par variable, bloc `#next-launch`, entrée « Diagnostic ».
+- [x] `src/harness_lab/config.py`, `harness-lab.toml` : `key_env`, `min_interval_s`, repli de `cloud_key`, `cloud_key_source`, préréglages.
+- [x] `src/harness_lab/models/engine.py`, `src/harness_lab/models/openai_chat.py`, `src/harness_lab/trace/catalog.py` : `CancelToken.wait`, registre d'espacement dans `run_call`, `provider_message`, suffixe « Message du fournisseur », 429 par seconde.
+- [x] `src/harness_lab/session/app_session.py` (et `tools/executor.py` si besoin) : `tools` du corps chat complété par `loaded_in_turn`, détail du refus réinjecté.
+- [x] `src/harness_lab/session/diagnostic.py`, `src/harness_lab/web/app.py` : `key_source`, `key_env`, `next_launch_fr`, texte après chargement, `first_launch`, `launch_page`.
+- [x] `src/harness_lab/cli.py` : page ouverte selon le premier lancement, le résultat et l'instance existante.
+- [x] `src/harness_lab/web/static/diagnostic.html`, `app.js` / `index.html` : ligne de clé par variable, bloc `#next-launch`, entrée « Diagnostic ».
 - [x] `README.md`, `ARCHITECTURE-SPINE.md` : documentation et spine.
 - [x] `tests/test_cloud.py`, `tests/test_cli_launch.py`, `tests/test_cli_diagnostic.py` : une ligne de la matrice par test. L'espacement se teste avec un petit `min_interval_s` ou une horloge remplacée. La clé sentinelle, posée en variable d'environnement, est absente du journal et des réponses.
 
 **Acceptance Criteria:**
 - Given aucune variable ni clé, when on lance `pytest`, then tout reste vert, en particulier le rendu local de référence et `test_mcp_lazy.py`.
 - Given le scénario « MCP lazy loading » avec Groq, when le tour documente puis appelle `local__list_terms`, then aucun appel n'est refusé et la réponse cite le glossaire.
-- Given un choix enregistré après chargement, when on recharge `/diagnostic`, then « Choix enregistré : relancez WaveStack pour l'utiliser. » reste affiché.
+- Given un choix enregistré après chargement, when on recharge `/diagnostic`, then « Choix enregistré : relancez HarnessLab pour l'utiliser. » reste affiché.
 
 ## Implementation Notes
 
@@ -224,7 +224,7 @@ La page d'ouverture n'attend le résultat qu'après le premier lancement : au pr
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur
 - `uv run python -m pytest` -- expected: tout passe
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks:**
 - PC cible :

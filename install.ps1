@@ -1,17 +1,17 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Installe uv, WaveStack et le modele Qwen par defaut sans droits administrateur,
+    Installe uv, HarnessLab et le modele Qwen par defaut sans droits administrateur,
     puis lance l'application. Idempotent : relancer ce script ne retelecharge ni le
     projet ni le modele s'ils sont deja presents.
 
 .PARAMETER InstallDir
     Dossier du projet. Par defaut : le dossier du script s'il contient deja
-    pyproject.toml (clone ou zip existant), sinon "<Documents>\WaveStack".
+    pyproject.toml (clone ou zip existant), sinon "<Documents>\HarnessLab".
 
 .PARAMETER DataDir
-    Dossier de donnees (venv, caches, modeles). Par defaut WAVESTACK_DATA_DIR ou
-    "%LOCALAPPDATA%\WaveStack". Reste toujours hors de $InstallDir et de Documents.
+    Dossier de donnees (venv, caches, modeles). Par defaut HARNESS_LAB_DATA_DIR ou
+    "%LOCALAPPDATA%\HarnessLab". Reste toujours hors de $InstallDir et de Documents.
 
 .PARAMETER UvInstallDir
     Dossier d'installation de uv (passe a son installeur via UV_INSTALL_DIR).
@@ -23,11 +23,11 @@
     Modeles locaux facultatifs a telecharger en plus de Qwen3.5-2B (qui reste le modele par
     defaut), identifiants separes par des virgules : qwen3.5-0.8b, minicpm5, granite-4.0-350m, granite-4.0-1b. `-Models list`
     affiche la table (identifiant, fichier, taille, licence) puis s'arrete. Equivalent :
-    WAVESTACK_MODELS=id1,id2 (sous `irm | iex`, qui ne passe pas d'option). Chaque fichier
+    HARNESS_LAB_MODELS=id1,id2 (sous `irm | iex`, qui ne passe pas d'option). Chaque fichier
     est verifie par son empreinte SHA-256 apres telechargement.
 
 .PARAMETER WithMiniCPM
-    Alias de `-Models minicpm5` (publie en 1.2.0). Equivalent : WAVESTACK_WITH_MINICPM=1.
+    Alias de `-Models minicpm5` (publie en 1.2.0). Equivalent : HARNESS_LAB_WITH_MINICPM=1.
 
 .PARAMETER DryRun
     Affiche les dossiers resolus sans rien installer, cloner, telecharger ni lancer.
@@ -47,6 +47,18 @@ param(
 # pas dans la session de l'utilisateur.
 & {
     $ErrorActionPreference = 'Stop'
+
+    # 2.0.0 : une variable HARNESS_LAB_X absente est lue sous son ancien nom WAVESTACK_X, avec
+    # un avertissement (sans rien ecrire dans la session de l'utilisateur).
+    function Get-EnvCompat([string]$Name) {
+        $value = [Environment]::GetEnvironmentVariable("HARNESS_LAB_$Name")
+        if ($null -ne $value) { return $value }
+        $value = [Environment]::GetEnvironmentVariable("WAVESTACK_$Name")
+        if ($null -ne $value) {
+            Write-Warning "WAVESTACK_$Name est obsolete, utilisez HARNESS_LAB_$Name (lue en repli)."
+        }
+        return $value
+    }
 
     # Memes valeurs que README.md (une seule source de verite : voir tests/test_installers.py)
     $QwenUrl  = 'https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf'
@@ -71,20 +83,20 @@ param(
            Sha256 = '22ec0f9cc99a90185312de3c882c84e7bd6789bdd050389844380a01a831d7f1'
            Url = 'https://huggingface.co/ibm-granite/granite-4.0-1b-GGUF/resolve/b27c2fe3f211b7f44e80fa620177aea371099aaa/granite-4.0-1b-Q4_K_M.gguf' }
     )
-    $RepoUrl  = 'https://github.com/Aliquanto3/wavestack.git'
-    $ZipUrl   = 'https://github.com/Aliquanto3/wavestack/archive/refs/heads/main.zip'
-    $ZipRoot  = 'wavestack-main'
+    $RepoUrl  = 'https://github.com/Aliquanto3/harness-lab.git'
+    $ZipUrl   = 'https://github.com/Aliquanto3/harness-lab/archive/refs/heads/main.zip'
+    $ZipRoot  = 'harness-lab-main'
 
     # -- Modeles facultatifs demandes : valides avant toute action (rien n'est cree si un
     #    identifiant est inconnu). `list` affiche la table et s'arrete.
     $requested = @()
     # [string[]] : `-Models a,b` saisi dans une session PowerShell arrive en tableau, sous -File en
     # une chaine ; les deux formes sont rejointes puis coupees aux virgules.
-    $modelsArg = if ($Models) { $Models -join ',' } else { $env:WAVESTACK_MODELS }
+    $modelsArg = if ($Models) { $Models -join ',' } else { (Get-EnvCompat 'MODELS') }
     if ($modelsArg) {
         $requested += @($modelsArg -split ',' | ForEach-Object { $_.Trim().ToLowerInvariant() } | Where-Object { $_ })
     }
-    if ($WithMiniCPM -or ($env:WAVESTACK_WITH_MINICPM -eq '1')) { $requested += 'minicpm5' }
+    if ($WithMiniCPM -or ((Get-EnvCompat 'WITH_MINICPM') -eq '1')) { $requested += 'minicpm5' }
     if ($requested -contains 'list') {
         Write-Host 'Modeles facultatifs (Qwen3.5-2B est toujours telecharge) :'
         foreach ($m in $OptionalModels) {
@@ -124,14 +136,23 @@ param(
             $InstallDir = $PSScriptRoot
         } else {
             $documents = [Environment]::GetFolderPath('MyDocuments')
-            $InstallDir = Join-Path $documents 'WaveStack'
+            $InstallDir = Join-Path $documents 'HarnessLab'
         }
     }
 
     # -- Dossier de donnees : venv, caches et modeles, jamais sous Documents/OneDrive.
     if (-not $DataDir) {
-        $DataDir = $env:WAVESTACK_DATA_DIR
-        if (-not $DataDir) { $DataDir = Join-Path $env:LOCALAPPDATA 'WaveStack' }
+        $DataDir = (Get-EnvCompat 'DATA_DIR')
+        if (-not $DataDir) { $DataDir = Join-Path $env:LOCALAPPDATA 'HarnessLab' }
+        # 2.0.0 : l'ancien dossier par defaut est copie une fois (jamais supprime).
+        $LegacyDataDir = Join-Path $env:LOCALAPPDATA 'WaveStack'
+        if (-not $DryRun -and -not (Test-Path -LiteralPath $DataDir) -and (Test-Path -LiteralPath $LegacyDataDir -PathType Container)) {
+            Write-Host "Copie de l'ancien dossier de donnees $LegacyDataDir vers $DataDir (l'ancien reste en place)..."
+            $staging = "$DataDir.migration"
+            if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
+            Copy-Item -LiteralPath $LegacyDataDir -Destination $staging -Recurse
+            Move-Item -LiteralPath $staging -Destination $DataDir
+        }
     }
     $VenvDir   = Join-Path $DataDir 'venv'
     $CacheDir  = Join-Path $DataDir 'uv-cache'
@@ -160,7 +181,7 @@ param(
 
     # -- Projet : clone si absent ; inchange s'il est deja la (idempotent).
     if (-not (Test-Path (Join-Path $InstallDir 'pyproject.toml'))) {
-        Write-Host "Recuperation de WaveStack dans $InstallDir..."
+        Write-Host "Recuperation de HarnessLab dans $InstallDir..."
         $parent = Split-Path -Parent $InstallDir
         if ($parent) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
         if (Get-Command git -ErrorAction SilentlyContinue) {
@@ -168,14 +189,14 @@ param(
             if ($LASTEXITCODE -ne 0) { throw "git clone a echoue (code $LASTEXITCODE)." }
         } else {
             # Pas de git sur le poste : archive zip de la branche main, sans droits admin.
-            $zip = Join-Path $env:TEMP 'wavestack-main.zip'
+            $zip = Join-Path $env:TEMP 'harness-lab-main.zip'
             Invoke-WebRequest -UseBasicParsing $ZipUrl -OutFile $zip
             Expand-Archive -LiteralPath $zip -DestinationPath $parent -Force
             Rename-Item -LiteralPath (Join-Path $parent $ZipRoot) (Split-Path -Leaf $InstallDir)
             [IO.File]::Delete($zip)  # Remove-Item refuse les chemins courts 8.3 de %TEMP%
         }
     } else {
-        Write-Host "WaveStack deja present dans $InstallDir, pas de nouveau clone."
+        Write-Host "HarnessLab deja present dans $InstallDir, pas de nouveau clone."
     }
 
     # -- Modele Qwen : telecharge si absent (idempotent).
@@ -208,12 +229,12 @@ param(
         # Venv et caches sous le dossier de donnees, jamais sous Documents ; l'appli lit ses
         # modeles dans le meme dossier. Variables retirees ensuite (session de `irm | iex`).
         $saved = @{}
-        $vars = @{ UV_PROJECT_ENVIRONMENT = $VenvDir; UV_CACHE_DIR = $CacheDir; WAVESTACK_DATA_DIR = $DataDir }
+        $vars = @{ UV_PROJECT_ENVIRONMENT = $VenvDir; UV_CACHE_DIR = $CacheDir; HARNESS_LAB_DATA_DIR = $DataDir }
         foreach ($k in $vars.Keys) { $saved[$k] = [Environment]::GetEnvironmentVariable($k); Set-Item "env:$k" $vars[$k] }
         Push-Location $InstallDir
         try {
-            Write-Host 'Lancement de WaveStack...'
-            & uv run wavestack
+            Write-Host 'Lancement de HarnessLab...'
+            & uv run harness-lab
         } finally {
             Pop-Location
             foreach ($k in $saved.Keys) { [Environment]::SetEnvironmentVariable($k, $saved[$k]) }
@@ -221,5 +242,5 @@ param(
     }
 
     Write-Host ''
-    Write-Host 'Pour relancer WaveStack plus tard : reexecutez install.bat (ou install.ps1) dans ce dossier.'
+    Write-Host 'Pour relancer HarnessLab plus tard : reexecutez install.bat (ou install.ps1) dans ce dossier.'
 }

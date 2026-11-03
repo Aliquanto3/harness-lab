@@ -20,14 +20,14 @@ from test_bricks import HEADERS
 from test_rag import COVERED, Embedders, build, place_model
 from test_rag_rerank import Rerankers, place_reranker, rerank_config, session_for
 
-from wavestack import config
-from wavestack.models.load_registry import EMBEDDING, RERANKER
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import load_rag_content
-from wavestack.session.app_session import AppSession, SendRefused
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.models.load_registry import EMBEDDING, RERANKER
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import load_rag_content
+from harness_lab.session.app_session import AppSession, SendRefused
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
+from harness_lab.web.app import create_app
 
 QUESTION = "Combien de jours de télétravail par semaine ?"
 KINDS = ["chunking", "embedding", "vector_store", "vector_search", "rerank", "context"]
@@ -764,7 +764,7 @@ def test_the_comparison_is_gone_from_the_backend():
     """Lot 5c-1: one chain per run and per validation; nothing of lane B survives."""
     for name in ("LANES_MAX", "compare", "_compared", "_Lane"):
         assert not hasattr(rag_lab, name), name
-    from wavestack.trace import catalog as trace_catalog
+    from harness_lab.trace import catalog as trace_catalog
 
     for name in ("RagLabLaneId", "RagLabLane", "RagLabCompared", "RagLabComparison"):
         assert not hasattr(trace_catalog, name), name
@@ -878,7 +878,7 @@ def test_bm25_drops_the_stop_words_of_the_sessions_language():
         "hr",
         "it",
     ]
-    # French by default, and for a language WaveStack does not know.
+    # French by default, and for a language HarnessLab does not know.
     assert rag_lab.bm25_terms("le the der") == ["the", "der"]
     assert rag_lab.bm25_terms("le the der", "xx") == ["the", "der"]
     # The query's stop words never score: « the » alone finds nothing in English.
@@ -1550,7 +1550,7 @@ def test_the_budget_refusal_names_the_model_with_its_article(lang, kind, said):
     """Finition V1 (#9, review BH8 of the 2026-10-01 leftovers): « pour charger le modèle
     d'embedding X », never « pour charger modèle d'embedding X », in each language; the
     reranker's too (the article is the key's, the noun a variable)."""
-    from wavestack.messages import Message, render
+    from harness_lab.messages import Message, render
 
     noun = Message(f"session.rag_lab.noun.{kind}")
     assert render(Message("session.rag_lab.to_load", noun=noun, model="granite"), lang) == said

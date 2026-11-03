@@ -14,21 +14,21 @@ import yaml
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
-from wavestack import config
-from wavestack.mcp.policy import RISKS
-from wavestack.rag import erasure, lab, sheets
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.mcp.policy import RISKS
+from harness_lab.rag import erasure, lab, sheets
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.web.app import create_app
 
 LANGS = ("fr", "en", "de")
 CONTENT = config.repo_root() / "content"
-STATIC = config.repo_root() / "src" / "wavestack" / "web" / "static"
+STATIC = config.repo_root() / "src" / "harness_lab" / "web" / "static"
 SPEC = (
     config.repo_root()
     / "_bmad-output"
     / "specs"
-    / "spec-wavestack-v1-2-atelier-recherche-documentaire"
+    / "spec-harness-lab-v1-2-atelier-recherche-documentaire"
 )
 LITERATURE = SPEC / "litterature.md"
 AVERAGE = re.compile(r"\b(mean|average|avg|mrr|recall_at_k|aggregates?)\b", re.IGNORECASE)

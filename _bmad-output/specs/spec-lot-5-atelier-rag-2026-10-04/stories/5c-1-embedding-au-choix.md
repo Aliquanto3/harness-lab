@@ -17,7 +17,7 @@ context:
 
 **Problem:** L'étape Embedding de l'Atelier RAG ne propose que le modèle de la brique et fastembed ; un GGUF d'embedding d'architecture LLM (Qwen3-Embedding) posé hors de `models/embedding/` serait proposé comme modèle de conversation ; la troncature des chunks est silencieuse ; la voie B (comparaison A/B) survit dans le backend alors que la page l'a retirée.
 
-**Approach:** Déclarer des modèles d'embedding supplémentaires pour l'atelier dans `wavestack.toml` (multilingual-e5-small TwinSunsLLC, Qwen3-Embedding-0.6B, valeurs d'`essai-modeles-5c.md`), chacun option de l'étape Embedding (id = id déclaré) avec disponibilité et raison, son emplacement mémoire et son cache de vecteurs ; signaler et écarter des modèles de conversation tout GGUF portant `{arch}.pooling_type` ; avertir de la troncature ; retirer la voie B du backend et les clés `ui.yaml` orphelines.
+**Approach:** Déclarer des modèles d'embedding supplémentaires pour l'atelier dans `harness-lab.toml` (multilingual-e5-small TwinSunsLLC, Qwen3-Embedding-0.6B, valeurs d'`essai-modeles-5c.md`), chacun option de l'étape Embedding (id = id déclaré) avec disponibilité et raison, son emplacement mémoire et son cache de vecteurs ; signaler et écarter des modèles de conversation tout GGUF portant `{arch}.pooling_type` ; avertir de la troncature ; retirer la voie B du backend et les clés `ui.yaml` orphelines.
 
 ## Boundaries & Constraints
 
@@ -48,24 +48,24 @@ context:
 
 ## Code Map
 
-- `wavestack.toml` -- `[rag.embedding]` l. 86-105 (modèle de forme) ; ajouter `[[rag_lab.embeddings]]` après `[rag_lab]` (l. 126). URL `resolve/<commit complet>/…` (commit complet via le Hub), size et sha256 d'`essai-modeles-5c.md` ; e5 : dims 384, max_tokens 512, préfixes `query: ` / `passage: `, MIT, RSS 440 ; Qwen3 : dims 1024, max_tokens 2048, query_prefix `Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:`, Apache-2.0, RSS 1055.
-- `src/wavestack/config.py` -- `EmbeddingModel` l. 402, `Config.rag_embedding` l. 831 ; ajouter `Config.rag_lab_embeddings` (liste validée entrée par entrée, sur le modèle de `cloud_models` l. 664-690 et `cloud_rejected`).
-- `src/wavestack/models/discovery.py` -- `_rag_model_files` l. 86-94 : inclure les fichiers déclarés de l'atelier.
-- `src/wavestack/session/diagnostic.py` -- `_discover` l. 420-477 : pour un GGUF `found`, `catalog.header_metadata(path)` (cache, préchauffé) ; `{arch}.pooling_type` présent → `status="incompatible"`, `reason` dédiée (auto-sélection `_usable` l. 1228 et fichier unique l. 546 lisent `status`).
-- `src/wavestack/models/catalog.py` + `models/capabilities.py` -- `_engine_metadata` l. 369 lit déjà `raw` ; porter `pooling_type` dans `EngineMetadata`, `capabilities_for` l. 45-58 pose `incompatible_reason` dédié (précédent `no_template`) → `disabled_text` de la carte. `diagnostic.html` inchangé (pastille rouge existante).
-- `src/wavestack/models/embedding.py` -- `_embed(truncate=True)` l. 60-82 : compter les textes tronqués du dernier `embed_passages` (attribut lu par l'atelier).
-- `src/wavestack/rag/lab.py` -- `OPTIONS` l. 65 et `_every_kind_option_and_setting` l. 313-340 : options statiques exigées dans le YAML, options de modèles déclarés ajoutées par le catalogue (libellé = `label_text` du toml) ; `Catalog.payload()` l. 436-482 parcourt aussi ces options ; `Stage.option` max 32 ; `_embedding` l. 1647-1718 (troncature après l. 1683) ; `Loans` l. 1152-1221 (retirer `_by_key`) ; voie B : `LANES_MAX` l. 90, `run()` l. 1362-1427, `_Lane.lane`, `_compared`/`compare` l. 2189-2261.
-- `src/wavestack/trace/catalog.py` -- l. 1224-1343 : retirer `RagLabLaneId`, `lane`, `lanes`, `RagLabCompared`, `RagLabComparison`, `comparison` ; ajouter `warning_text: str | None = None` à `RagLabStageEndedPayload`.
-- `src/wavestack/session/app_session.py` -- `_rag_lab_catalog` l. 9166-9203 (options déclarées : disponible si fichiers présents, sinon raison) ; `_rag_lab_embedder` l. 9389-9427 (slot par modèle, sha256, `_embedder_factory`) ; `_rag_lab_identity` l. 9527 ; `run_rag_lab` l. 9248-9282 et `validate_rag_lab` l. 9296-9313 (voie B).
-- `src/wavestack/web/app.py` -- `LANES_MAX` l. 39, 239, 252 : `pipelines` de longueur 1.
-- `src/wavestack/web/static/rag.js` -- restes de voie B (l. 10, 38, 143-176, 200, 223, 278, 373, 621, 1008, 1027-1029, 1070, 1184) ; afficher `warning_text` dans le focus et `#rag-details`.
+- `harness-lab.toml` -- `[rag.embedding]` l. 86-105 (modèle de forme) ; ajouter `[[rag_lab.embeddings]]` après `[rag_lab]` (l. 126). URL `resolve/<commit complet>/…` (commit complet via le Hub), size et sha256 d'`essai-modeles-5c.md` ; e5 : dims 384, max_tokens 512, préfixes `query: ` / `passage: `, MIT, RSS 440 ; Qwen3 : dims 1024, max_tokens 2048, query_prefix `Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:`, Apache-2.0, RSS 1055.
+- `src/harness_lab/config.py` -- `EmbeddingModel` l. 402, `Config.rag_embedding` l. 831 ; ajouter `Config.rag_lab_embeddings` (liste validée entrée par entrée, sur le modèle de `cloud_models` l. 664-690 et `cloud_rejected`).
+- `src/harness_lab/models/discovery.py` -- `_rag_model_files` l. 86-94 : inclure les fichiers déclarés de l'atelier.
+- `src/harness_lab/session/diagnostic.py` -- `_discover` l. 420-477 : pour un GGUF `found`, `catalog.header_metadata(path)` (cache, préchauffé) ; `{arch}.pooling_type` présent → `status="incompatible"`, `reason` dédiée (auto-sélection `_usable` l. 1228 et fichier unique l. 546 lisent `status`).
+- `src/harness_lab/models/catalog.py` + `models/capabilities.py` -- `_engine_metadata` l. 369 lit déjà `raw` ; porter `pooling_type` dans `EngineMetadata`, `capabilities_for` l. 45-58 pose `incompatible_reason` dédié (précédent `no_template`) → `disabled_text` de la carte. `diagnostic.html` inchangé (pastille rouge existante).
+- `src/harness_lab/models/embedding.py` -- `_embed(truncate=True)` l. 60-82 : compter les textes tronqués du dernier `embed_passages` (attribut lu par l'atelier).
+- `src/harness_lab/rag/lab.py` -- `OPTIONS` l. 65 et `_every_kind_option_and_setting` l. 313-340 : options statiques exigées dans le YAML, options de modèles déclarés ajoutées par le catalogue (libellé = `label_text` du toml) ; `Catalog.payload()` l. 436-482 parcourt aussi ces options ; `Stage.option` max 32 ; `_embedding` l. 1647-1718 (troncature après l. 1683) ; `Loans` l. 1152-1221 (retirer `_by_key`) ; voie B : `LANES_MAX` l. 90, `run()` l. 1362-1427, `_Lane.lane`, `_compared`/`compare` l. 2189-2261.
+- `src/harness_lab/trace/catalog.py` -- l. 1224-1343 : retirer `RagLabLaneId`, `lane`, `lanes`, `RagLabCompared`, `RagLabComparison`, `comparison` ; ajouter `warning_text: str | None = None` à `RagLabStageEndedPayload`.
+- `src/harness_lab/session/app_session.py` -- `_rag_lab_catalog` l. 9166-9203 (options déclarées : disponible si fichiers présents, sinon raison) ; `_rag_lab_embedder` l. 9389-9427 (slot par modèle, sha256, `_embedder_factory`) ; `_rag_lab_identity` l. 9527 ; `run_rag_lab` l. 9248-9282 et `validate_rag_lab` l. 9296-9313 (voie B).
+- `src/harness_lab/web/app.py` -- `LANES_MAX` l. 39, 239, 252 : `pipelines` de longueur 1.
+- `src/harness_lab/web/static/rag.js` -- restes de voie B (l. 10, 38, 143-176, 200, 223, 278, 373, 621, 1008, 1027-1029, 1070, 1184) ; afficher `warning_text` dans le focus et `#rag-details`.
 - `content/messages.yaml`, `content/ui.yaml`, `content/rag_lab.yaml` et copies `content/i18n/{en,de}/` -- clés ajoutées ou retirées dans les trois langues (`test_i18n.py` l. 240-266, `test_backend_messages.py`, `test_ui_texts.py`).
 - Tests -- `tests/test_rag_lab.py` (voie B : l. 313-318, 340, 381, 467, 513, 529, 625, 716, 746, 1284), `tests/test_rag_lab_alt.py` (l. 58-319), `tests/test_rag.py` / `test_rag_rerank.py` (toml), `tools/e2e/run_e2e.py` (zone RAG).
 
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `wavestack.toml`, `config.py` -- déclarer et valider `[[rag_lab.embeddings]]` -- source unique des modèles proposés.
+- [x] `harness-lab.toml`, `config.py` -- déclarer et valider `[[rag_lab.embeddings]]` -- source unique des modèles proposés.
 - [x] `trace/catalog.py`, `rag/lab.py`, `app_session.py`, `web/app.py`, `rag.js`, messages, `ui.yaml` -- retirer la voie B -- une seule chaîne, clés orphelines supprimées.
 - [x] `rag/lab.py`, `app_session.py`, `rag_lab.yaml` ×3 -- options d'embedding déclarées, disponibilité, emplacement et cache par modèle.
 - [x] `models/embedding.py`, `rag/lab.py`, `trace/catalog.py`, `rag.js` -- avertissement de troncature.
@@ -80,7 +80,7 @@ context:
 
 ## Implementation Notes
 
-- `[[rag_lab.embeddings]]` : commits complets relevés via l'API du Hub (`b6cac9615d4e…`, `370f27d7550e…`, mêmes préfixes que l'essai). `load_config` remet la liste de `wavestack.toml` après la fusion avec `settings.json` (jamais déclarés par settings.json) ; une entrée écartée est tracée une fois en `harness_error` (contexte `rag_lab`), les autres restent.
+- `[[rag_lab.embeddings]]` : commits complets relevés via l'API du Hub (`b6cac9615d4e…`, `370f27d7550e…`, mêmes préfixes que l'essai). `load_config` remet la liste de `harness-lab.toml` après la fusion avec `settings.json` (jamais déclarés par settings.json) ; une entrée écartée est tracée une fois en `harness_error` (contexte `rag_lab`), les autres restent.
 - Voie B : `LabRun(run_id, question, pipeline, deps)`, `run_rag_lab(question, pipeline=None)`, `validate_rag_lab(pipeline)` ; l'API garde la forme `{"pipelines": [...]}` avec `max_length=1` (deux : 422). `step_id` devient `lab{n}.s{i}`. `rag_lab_run_started` porte `stages` à la place de `lanes`. Le journal est en mémoire (perdu au redémarrage, `instance_id` force la resynchronisation) : aucun `last_run` d'avant ce lot ne peut être relu, pas de tolérance de l'ancien format ajoutée. Clés `session.rag_lab.two_chains`, `session.rag_lab.lane`, `rag_lab.compare.*` retirées des trois `messages.yaml`. L'entrée correspondante de `deferred-work.md` est soldée.
 - Identité du cache : prefixes et `max_tokens` ajoutés aussi pour le modèle de la brique : les caches Granite existants hors index de la brique sont recalculés une fois.
 - Troncature : `LlamaCppEmbedder.last_truncated` (tokenisation comme `embed`, BOS compris) et `max_tokens` ; le compte est écrit dans `chunks.json` du cache et redit à la relecture. fastembed et l'index de la brique relu tel quel : pas d'avertissement.

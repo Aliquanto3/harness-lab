@@ -2,8 +2,8 @@
 
 [← Retour à Contribuer](../../CONTRIBUTING.md)
 
-Les scripts de ce dossier régénèrent `docs/assets/wavestack-demo.gif` et
-`docs/assets/wavestack-demo.mp4` à partir de la vraie interface : le scénario « LLM nu » puis
+Les scripts de ce dossier régénèrent `docs/assets/harness-lab-demo.gif` et
+`docs/assets/harness-lab-demo.mp4` à partir de la vraie interface : le scénario « LLM nu » puis
 « Outils natifs » sur « Quelle heure est-il ? » (avec le bilan de la séance et la jauge du cache
 de la barre du bas), la carte du harnais de cette conversation, puis les trois étapes de
 l'Atelier LLM (INPUT, TRANSFORMATION, OUTPUT) sur « La capitale de la France est », jusqu'au
@@ -32,19 +32,19 @@ contrôle et une limite dépliés). À refaire quand l'interface change.
    minutes avec beaucoup de modèles Ollama) et ne trouve pas le modèle du dossier habituel :
    indiquez alors son chemin au diagnostic.
 
-2. Lancez WaveStack sur ce dossier :
+2. Lancez HarnessLab sur ce dossier :
 
    ```powershell
-   $env:WAVESTACK_DATA_DIR = "$env:TEMP\wavestack-demo"
+   $env:HARNESS_LAB_DATA_DIR = "$env:TEMP\harness-lab-demo"
    $env:BROWSER = "cmd /c rem %s"   # aucun navigateur ne s'ouvre
-   uv run wavestack
+   uv run harness-lab
    ```
 
 3. Dans un autre terminal, capturez les écrans (1600 × 900), puis montez le GIF et la vidéo :
 
    ```powershell
-   uv run --with playwright==1.56.0 python tools/demo/drive.py $env:TEMP\wavestack-frames
-   uv run --with pillow --with imageio-ffmpeg python tools/demo/compose.py $env:TEMP\wavestack-frames
+   uv run --with playwright==1.56.0 python tools/demo/drive.py $env:TEMP\harness-lab-frames
+   uv run --with pillow --with imageio-ffmpeg python tools/demo/compose.py $env:TEMP\harness-lab-frames
    ```
 
    Sans Chrome, ajoutez `--channel msedge` à la commande de `drive.py`.

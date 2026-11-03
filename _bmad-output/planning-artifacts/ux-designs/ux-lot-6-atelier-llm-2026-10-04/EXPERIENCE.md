@@ -89,7 +89,7 @@ pas ».
 | Token tiré | 🎲 Tirer le token suivant — ↺ Ajouter à la suite — Retirer le dernier — derniers tirages : … |
 | Sans moteur en processus | la raison existante `candidates.reason_text` (serveur, cloud), dans l'OUTPUT, sous le graphique du Tirage, après la note de l'exemple (correction C du 2026-10-05 : les graphiques d'exemple restent ; la raison n'est plus répétée sous « Tirer », pour que l'étape tienne à 1366 × 768) |
 | Token tiré dans l'exemple (correction F du 2026-10-05) | Puce suivie du badge « exemple » ; nom accessible « {texte}, tiré dans l'exemple » |
-| Exemple (correction C du 2026-10-05) | Badges « Exemple · tokens d'illustration », « Exemple · probabilités d'illustration » — Exemple : un texte découpé comme le ferait un tokenizer, avec des identifiants d'illustration. Découpez votre texte : ses vrais tokens remplaceront ceux-ci. — Exemple de découpage, pas celui de ce modèle : son tokenizer est chez son fournisseur. Pour votre texte, WaveStack donne seulement l'estimation ci-contre. — Exemple d'illustration, pas le calcul du modèle : les réglages le font bouger comme le vrai tirage. — Il ne bouge que l'exemple. |
+| Exemple (correction C du 2026-10-05) | Badges « Exemple · tokens d'illustration », « Exemple · probabilités d'illustration » — Exemple : un texte découpé comme le ferait un tokenizer, avec des identifiants d'illustration. Découpez votre texte : ses vrais tokens remplaceront ceux-ci. — Exemple de découpage, pas celui de ce modèle : son tokenizer est chez son fournisseur. Pour votre texte, HarnessLab donne seulement l'estimation ci-contre. — Exemple d'illustration, pas le calcul du modèle : les réglages le font bouger comme le vrai tirage. — Il ne bouge que l'exemple. |
 
 ## Component Patterns
 
@@ -141,7 +141,7 @@ pas ».
 ### Flux 1 — Pascal montre la boucle en salle (temps fort : le token revient dans l'INPUT)
 
 Pascal, consultant, anime une formation de deux heures devant huit stagiaires ; le PC est
-projeté, Qwen3.5-2B chargé dans WaveStack.
+projeté, Qwen3.5-2B chargé dans HarnessLab.
 
 1. Il ouvre « LLM », tape « Le chat dort sur le » et clique « Découper en tokens ».
 2. INPUT, ▶ ▶ : le texte se découpe en 5 morceaux, puis en 5 numéros : « le modèle ne voit
@@ -163,9 +163,9 @@ projeté, Qwen3.5-2B chargé dans WaveStack.
    donne les tokens exacts ; la TRANSFORMATION porte la note « Architecture non lue ».
 2. L'OUTPUT montre l'exemple étiqueté : ses curseurs font bouger les barres, ce qui suffit à
    expliquer le tirage ; il dit que les vrais candidats ne sont lus qu'avec un modèle chargé
-   dans WaveStack ; « Tirer » tire dans l'exemple, puce marquée « exemple » (correction F
+   dans HarnessLab ; « Tirer » tire dans l'exemple, puce marquée « exemple » (correction F
    du 2026-10-05).
-3. **Temps fort** : elle charge le GGUF dans WaveStack avant la session ; à l'ouverture de
+3. **Temps fort** : elle charge le GGUF dans HarnessLab avant la session ; à l'ouverture de
    `/llm`, l'INPUT et l'OUTPUT montrent alors des valeurs réelles sans clic.
 
 ### Flux 3 — Anaël avec un modèle cloud (correction C du 2026-10-05)

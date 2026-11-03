@@ -25,10 +25,10 @@ from test_cloud import (
     sse,
 )
 
-from wavestack import config
-from wavestack.config import CloudPricing
-from wavestack.models import cloud_base
-from wavestack.models.cloud_base import (
+from harness_lab import config
+from harness_lab.config import CloudPricing
+from harness_lab.models import cloud_base
+from harness_lab.models.cloud_base import (
     CallCost,
     ChatBody,
     ProviderError,
@@ -38,9 +38,9 @@ from wavestack.models.cloud_base import (
     record_spend,
     run_call,
 )
-from wavestack.models.engine import CancelToken, Sampling
-from wavestack.session.app_session import AppSession
-from wavestack.trace.journal import get_journal
+from harness_lab.models.engine import CancelToken, Sampling
+from harness_lab.session.app_session import AppSession
+from harness_lab.trace.journal import get_journal
 
 _opened: list[AppSession] = []
 
@@ -403,7 +403,7 @@ def test_a_cached_part_without_a_declared_price_is_flagged_unpriced():
 
 
 def test_the_sessions_economies_sum_across_calls_and_reset():
-    from wavestack.models.openai_chat import reset_spend, session_spend
+    from harness_lab.models.openai_chat import reset_spend, session_spend
 
     reset_spend()
     record_spend(CallCost(0.01, 0.02, "api"), 0.86, cache_saved_usd=0.002)

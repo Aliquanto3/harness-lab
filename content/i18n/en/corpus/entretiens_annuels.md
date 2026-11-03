@@ -1,6 +1,6 @@
 # Exemplia annual review procedure
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this procedure describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this procedure describes no real company. -->
 
 This document describes Exemplia's annual review, led by each employee's direct manager; it is classed as a human resources document.
 

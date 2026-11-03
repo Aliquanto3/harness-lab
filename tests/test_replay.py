@@ -15,8 +15,8 @@ from test_skills import load as load_skill
 from test_tools import _segments
 from test_turn import _run
 
-from wavestack.session.app_session import SendRefused
-from wavestack.trace.journal import get_journal
+from harness_lab.session.app_session import SendRefused
+from harness_lab.trace.journal import get_journal
 
 NOTHING = "Aucun prompt à rejouer : envoyez d'abord un message."
 

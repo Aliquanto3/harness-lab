@@ -1,11 +1,11 @@
 ---
-title: PRD — WaveStack
+title: PRD — HarnessLab
 status: final
 created: 2026-09-22
 updated: 2026-09-24
 ---
 
-# PRD : WaveStack
+# PRD : HarnessLab
 
 *Démonstrateur pédagogique de harnais agentique. Les hypothèses restantes sont marquées `[ASSUMPTION]` et reprises au §11, avec la personne chargée de les trancher et le moment prévu.*
 
@@ -22,14 +22,14 @@ Le détail technique (pistes de moteur d'inférence, bibliothèques, veille) est
 
 ## 1. Vision
 
-WaveStack rend visible, brique par brique, ce qu'un harnais agentique fait à un modèle de langage :
+HarnessLab rend visible, brique par brique, ce qu'un harnais agentique fait à un modèle de langage :
 - le formateur part d'un LLM nu ;
 - il active les briques une à une : raisonnement, mémoire courte, prompt système, mémoire globale, outils, RAG, MCP, skills, hooks, sous-agent, compression du contexte ;
 - sur le même écran, les participants voient à la fois ce que voit un utilisateur de chatbot et ce que le harnais envoie réellement au modèle, décide et exécute.
 
-L'enjeu n'est pas la qualité des réponses mais la compréhension. Les collègues de Wavestone utilisent des chatbots, mais ne distinguent pas un LLM nu d'un LLM outillé et confondent skill, plugin, outil et MCP. Ils peinent donc à se poser la question clé de leurs missions de sécurité, de souveraineté et de conformité : **où sont hébergés le harnais, les données et le modèle ?** WaveStack leur donne le vocabulaire et les repères pour raisonner sur l'agentique. Il les aide aussi à imaginer des cas d'usage dans leur métier.
+L'enjeu n'est pas la qualité des réponses mais la compréhension. Les consultants utilisent des chatbots, mais ne distinguent pas un LLM nu d'un LLM outillé et confondent skill, plugin, outil et MCP. Ils peinent donc à se poser la question clé de leurs missions de sécurité, de souveraineté et de conformité : **où sont hébergés le harnais, les données et le modèle ?** HarnessLab leur donne le vocabulaire et les repères pour raisonner sur l'agentique. Il les aide aussi à imaginer des cas d'usage dans leur métier.
 
-WaveStack tourne entièrement en local, sur CPU, avec de petits modèles (SLM). Il incarne ainsi ce qu'il enseigne sur la souveraineté et le numérique responsable.
+HarnessLab tourne entièrement en local, sur CPU, avec de petits modèles (SLM). Il incarne ainsi ce qu'il enseigne sur la souveraineté et le numérique responsable.
 
 Aucun outil existant ne réunit ces éléments dans une même interface locale en français :
 - l'activation progressive des briques ;
@@ -59,30 +59,30 @@ Trajectoire :
 ### 2.2 Non-utilisateurs (V1)
 
 - Les clients en autonomie : la démo client, menée par un formateur, est une cible V2.
-- Les développeurs qui cherchent un framework agentique réutilisable : WaveStack est un outil pédagogique, pas une bibliothèque.
+- Les développeurs qui cherchent un framework agentique réutilisable : HarnessLab est un outil pédagogique, pas une bibliothèque.
 - Les personnes qui évaluent la qualité d'un modèle : ce n'est pas un banc d'essai.
 
 ### 2.3 Parcours utilisateurs clés
 
-*Déroulé par défaut d'une session : le formateur est seul aux commandes, WaveStack est projeté. Une session dure de 30 min à 1 h ; le programme complet se découpe en modules, répartis sur plusieurs sessions pour découvrir les briques progressivement. Quelques profils techniques installeront WaveStack sur leur poste, en amont ou après, en suivant le README.*
+*Déroulé par défaut d'une session : le formateur est seul aux commandes, HarnessLab est projeté. Une session dure de 30 min à 1 h ; le programme complet se découpe en modules, répartis sur plusieurs sessions pour découvrir les briques progressivement. Quelques profils techniques installeront HarnessLab sur leur poste, en amont ou après, en suivant le README.*
 
 - **UJ-1. Anaël anime une session et fait émerger le « déclic MCP ».**
-  - *Contexte.* Anaël forme douze consultants de la BU en salle, pour un premier module d'une heure. WaveStack tourne sur son portable, projeté.
-  - *Lancement.* Il lance WaveStack d'une commande et part du LLM nu. Il demande l'heure : le modèle invente, et la vue harnais montre que seul le message a été envoyé, dans le gabarit de conversation.
+  - *Contexte.* Anaël forme douze consultants de la BU en salle, pour un premier module d'une heure. HarnessLab tourne sur son portable, projeté.
+  - *Lancement.* Il lance HarnessLab d'une commande et part du LLM nu. Il demande l'heure : le modèle invente, et la vue harnais montre que seul le message a été envoyé, dans le gabarit de conversation.
   - *Premières briques.* Il active la mémoire courte, puis le prompt système. Il rejoue le même prompt : le contexte grossit sous les yeux de la salle, compteur de tokens à l'appui.
   - *Outils.* Il active les outils. Le schéma d'architecture s'anime : le modèle demande l'outil « heure » et le harnais l'exécute puis réinjecte le résultat.
   - *Déclic.* Il active un serveur MCP public. Le schéma montre qu'un composant sort du poste. Un participant demande « donc là, mes données partent où ? ». La salle a compris la question de l'hébergement.
-  - *Fin.* Il réinitialise WaveStack pour la session suivante.
+  - *Fin.* Il réinitialise HarnessLab pour la session suivante.
   - *Cas limite.* Le modèle produit un appel d'outil mal formé. La vue harnais montre l'échec du parsing et ce que le harnais en fait. Anaël s'en sert comme illustration plutôt que de le subir.
-- **UJ-2. Karim, consultant SOC, reprend WaveStack seul après la session.**
+- **UJ-2. Karim, consultant SOC, reprend HarnessLab seul après la session.**
   - *Contexte.* Karim veut vérifier ce qu'un hook peut bloquer.
-  - *Installation.* Il installe WaveStack sur son poste professionnel sans droits admin, en suivant la procédure en français. Il lance le scénario « Hooks ».
+  - *Installation.* Il installe HarnessLab sur son poste professionnel sans droits admin, en suivant la procédure en français. Il lance le scénario « Hooks ».
   - *Test.* Il modifie le prompt pour que le modèle tente de lire un fichier sensible ; si le modèle ne s'y risque pas, Karim force l'appel (FR-42). Le hook de garde-fou bloque l'appel d'outil, et la vue harnais indique que c'est du code du harnais, pas le modèle, qui a décidé.
   - *Résultat.* Karim note une idée de cas d'usage pour la détection d'incidents.
-- **UJ-3. Léa, consultante cloud, installe WaveStack sur un poste verrouillé avant la session.**
+- **UJ-3. Léa, consultante cloud, installe HarnessLab sur un poste verrouillé avant la session.**
   - *Installation.* Elle suit le README. Le proxy bloque le téléchargement du modèle depuis Hugging Face. Le diagnostic de démarrage le signale en français et propose la voie hors ligne : copier le fichier du modèle depuis un partage fourni par le formateur.
-  - *Résultat.* Léa relance, WaveStack démarre, et le diagnostic est vert.
-- **UJ-4 (usage client en V2, scénario livré en V1). Anaël montre WaveStack à un client RSSI.**
+  - *Résultat.* Léa relance, HarnessLab démarre, et le diagnostic est vert.
+- **UJ-4 (usage client en V2, scénario livré en V1). Anaël montre HarnessLab à un client RSSI.**
   - Anaël ouvre directement le scénario « Où vont mes données ? ». Dès le lancement (story 27), sont actifs :
     - un outil local ;
     - un MCP local ;
@@ -112,7 +112,7 @@ Trajectoire :
 - **Brique** : une capacité du harnais que l'on peut activer ou désactiver indépendamment. Liste V1 : raisonnement, mémoire courte, prompt système, mémoire globale, outils, RAG, MCP, skills, hooks, sous-agent, compression du contexte.
 - **Tour** : un cycle complet, du message de l'utilisateur jusqu'à la réponse finale. Un tour peut contenir plusieurs appels au modèle.
 - **Contexte** : l'ensemble exact des tokens envoyés au modèle lors d'un appel. Il est composé de segments, chacun attribué à la brique qui l'a produit.
-- **Fenêtre de contexte** : le nombre maximal de tokens que le contexte peut atteindre. WaveStack la plafonne en dessous de la limite du modèle.
+- **Fenêtre de contexte** : le nombre maximal de tokens que le contexte peut atteindre. HarnessLab la plafonne en dessous de la limite du modèle.
 - **Vue humain** : le volet qui montre la conversation telle qu'un utilisateur de chatbot la voit.
 - **Vue harnais** : l'ensemble des deux volets contexte LLM et orchestration, qui montrent ce que le harnais a réellement fait à chaque tour.
 - **Contexte LLM** : le volet qui montre le contexte exact de chaque appel au modèle, segmenté par brique, et la sortie brute du modèle.
@@ -132,16 +132,16 @@ Trajectoire :
 - **Scénario** : une séquence préparée de configuration des briques et de prompts, qui illustre une brique ou un message pédagogique.
 - **Programme** : la suite ordonnée des scénarios, du LLM nu au harnais complet. Il se découpe en modules, chacun tenant dans une session de formation de 30 min à 1 h.
 - **Rejeu d'un prompt** : le renvoi du dernier message avec une autre configuration de briques, à partir de l'état qui précédait le tour d'origine, pour comparer deux tours (FR-7).
-- **Formateur** : la personne qui anime une session de formation avec WaveStack.
-- **Participant** : une personne formée, qui regarde WaveStack projeté. Certains profils techniques l'installent aussi sur leur poste.
-- **Utilisateur** : toute personne aux commandes de WaveStack, formateur ou participant qui l'a installé sur son poste.
+- **Formateur** : la personne qui anime une session de formation avec HarnessLab.
+- **Participant** : une personne formée, qui regarde HarnessLab projeté. Certains profils techniques l'installent aussi sur leur poste.
+- **Utilisateur** : toute personne aux commandes de HarnessLab, formateur ou participant qui l'a installé sur son poste.
 - **Poste de référence** : le PC professionnel sur lequel les exigences de performance sont mesurées : HP EliteBook (édition Bang & Olufsen), Windows 11, Intel Core i5 vPro, sans GPU dédié, 16 Go de RAM.
 
 ## 4. Fonctionnalités
 
 ### 4.1 Interface à volets synchronisés
 
-**Description.** WaveStack est une application web locale, ouverte dans le navigateur du poste. L'écran juxtapose cinq volets ; l'utilisateur peut masquer et réafficher chacun d'eux :
+**Description.** HarnessLab est une application web locale, ouverte dans le navigateur du poste. L'écran juxtapose cinq volets ; l'utilisateur peut masquer et réafficher chacun d'eux :
 - panneau des briques ;
 - vue humain ;
 - contexte LLM (vue harnais) ;
@@ -178,9 +178,9 @@ Sélectionner un élément dans un volet met en évidence ses correspondants dan
 **Description.** Le formateur construit le harnais devant la salle, brique après brique. Chaque brique s'accompagne d'une courte explication en français. Réalise UJ-1.
 
 #### FR-5 : Activation indépendante des briques
-L'utilisateur peut activer ou désactiver chaque brique sans redémarrer WaveStack.
+L'utilisateur peut activer ou désactiver chaque brique sans redémarrer HarnessLab.
 - Le changement prend effet au tour suivant.
-- Quand toutes les briques sont désactivées, WaveStack se comporte exactement comme le LLM nu.
+- Quand toutes les briques sont désactivées, HarnessLab se comporte exactement comme le LLM nu.
 - Une brique qui dépend d'une autre indique pourquoi elle est indisponible. Par exemple, le lazy loading MCP exige la brique MCP.
 
 #### FR-6 : Explication pédagogique de chaque brique
@@ -248,7 +248,7 @@ Des informations sont conservées d'une conversation à l'autre et réinjectées
 **Description.** Le modèle demande un outil ; le harnais l'exécute et réinjecte le résultat. C'est le premier moment où le LLM « agit ». Réalise UJ-1.
 
 #### FR-13 : Catalogue d'outils
-WaveStack fournit un catalogue d'outils activables individuellement. Liste V1, choisie pour être simple à réaliser et parlante en démonstration :
+HarnessLab fournit un catalogue d'outils activables individuellement. Liste V1, choisie pour être simple à réaliser et parlante en démonstration :
 - **hors ligne** :
   - heure et date : le LLM nu ne peut pas les connaître ;
   - calculatrice : un SLM calcule mal de tête ;
@@ -275,14 +275,14 @@ La vue harnais montre le cycle complet d'un appel d'outil :
 
 #### FR-15 : Échecs d'appel visibles
 Quand le modèle émet un appel d'outil mal formé ou inexistant, la vue harnais montre l'échec du parsing et la réaction du harnais : nouvel essai, message d'erreur réinjecté ou arrêt. Réalise le cas limite d'UJ-1.
-- Un appel mal formé ne fait jamais planter WaveStack.
+- Un appel mal formé ne fait jamais planter HarnessLab.
 
 ### 4.5 RAG
 
 **Description.** Le harnais retrouve des extraits de documents et les injecte dans le contexte, avec d'abord un RAG simple, puis un reranking. Réalise UJ-5.
 
 #### FR-16 : Corpus de démonstration
-WaveStack fournit un corpus de démonstration en français, prêt à l'emploi. L'indexation de documents propres à l'utilisateur est reportée en V2.
+HarnessLab fournit un corpus de démonstration en français, prêt à l'emploi. L'indexation de documents propres à l'utilisateur est reportée en V2.
 - L'index est stocké localement, et le schéma d'architecture l'indique comme fichier local.
 
 #### FR-17 : RAG simple visible
@@ -296,15 +296,15 @@ L'utilisateur peut activer le reranking. Le volet orchestration montre alors l'o
 
 ### 4.6 MCP
 
-**Description.** La brique MCP est au cœur pédagogique de WaveStack, avec les skills et les hooks. Elle montre qu'un serveur MCP est un processus séparé, éventuellement distant, qui expose des outils. Elle montre aussi comment le chargement de leur documentation pèse sur le contexte. Réalise UJ-1 et UJ-4.
+**Description.** La brique MCP est au cœur pédagogique de HarnessLab, avec les skills et les hooks. Elle montre qu'un serveur MCP est un processus séparé, éventuellement distant, qui expose des outils. Elle montre aussi comment le chargement de leur documentation pèse sur le contexte. Réalise UJ-1 et UJ-4.
 
 #### FR-19 : Serveur MCP local
-WaveStack fournit au moins un serveur MCP local, lancé automatiquement.
+HarnessLab fournit au moins un serveur MCP local, lancé automatiquement.
 - Il fonctionne hors ligne et sans droits admin.
 - Le schéma d'architecture le montre comme un processus local distinct du harnais.
 
 #### FR-20 : Serveur MCP public
-WaveStack peut se connecter à au moins un serveur MCP public, gratuit et sans clé d'API :
+HarnessLab peut se connecter à au moins un serveur MCP public, gratuit et sans clé d'API :
 - serveur principal : le serveur MCP de **data.gouv.fr**, qui donne accès aux données publiques françaises et intéresse le secteur public et la souveraineté ;
 - serveur secondaire : **Microsoft Learn**, qui donne accès à la documentation Azure et Entra ID et parle aux practices cloud et IAM.
 
@@ -330,7 +330,7 @@ La vue harnais montre les échanges avec les serveurs MCP : découverte des outi
 **Description.** Un skill est un paquet d'instructions et de ressources que le harnais ne charge qu'au besoin. La brique montre en quoi un skill diffère d'un outil, d'un serveur MCP et d'un prompt système.
 
 #### FR-23 : Catalogue de skills
-WaveStack fournit au moins deux skills de démonstration activables, dont Caveman.
+HarnessLab fournit au moins deux skills de démonstration activables, dont Caveman.
 
 #### FR-24 : Chargement progressif visible
 Tant qu'un skill n'est pas déclenché, seuls son nom et sa description figurent dans le contexte. Une fois déclenché, par le modèle ou par l'utilisateur (FR-42), son contenu est chargé.
@@ -354,7 +354,7 @@ Des hooks peuvent s'exécuter aux événements suivants :
 5. en fin de tour.
 
 #### FR-27 : Hooks de démonstration
-WaveStack fournit quatre hooks de démonstration, simples à réaliser et parlants pour les practices. Chacun s'active et se désactive séparément dans la brique hooks : on compose les contrôles selon les besoins. Chaque scénario fixe la liste de ses hooks actifs.
+HarnessLab fournit quatre hooks de démonstration, simples à réaliser et parlants pour les practices. Chacun s'active et se désactive séparément dans la brique hooks : on compose les contrôles selon les besoins. Chaque scénario fixe la liste de ses hooks actifs.
 - **H1, garde-fou fichier sensible** (avant l'exécution d'un outil) : bloque la lecture d'un fichier du dossier confidentiel de démonstration. C'est le harnais qui dit non, pas le modèle. Réalise UJ-2.
 - **H2, journal d'audit** (après l'exécution d'un outil, en fin de tour) : consigne chaque appel au modèle et chaque appel d'outil, horodatés, dans un fichier local visible. Le schéma d'architecture montre ce fichier. Sert le scénario SOC (FR-40).
 - **H3, injection de contexte** (à la réception du message) : ajoute automatiquement la date et les règles de la mission au message. Même effet que l'outil « heure », mais sans décision du modèle : deux architectures possibles pour un même besoin.
@@ -379,7 +379,7 @@ Le harnais peut déléguer une sous-tâche à un sous-agent qui a son propre con
 **Description.** Le compteur de tokens est le fil rouge du context engineering. La compression du contexte démontre qu'on peut réduire ce qui *entre* dans le modèle, en miroir de Caveman qui réduit ce qui *sort*. En local, le gain se mesure en latence plutôt qu'en coût. Réalise UJ-7.
 
 #### FR-30 : Compteur de tokens
-Pour chaque appel au modèle, WaveStack affiche :
+Pour chaque appel au modèle, HarnessLab affiche :
 - le nombre de tokens du contexte, au total et par segment, donc par brique ;
 - le nombre de tokens de sortie ;
 - le temps écoulé.
@@ -389,7 +389,7 @@ L'utilisateur peut activer la compression du contexte, démontrée avec Headroom
 - La compression porte au moins sur les résultats d'outils et les extraits RAG.
 
 #### FR-41 : Jauge de remplissage du contexte
-WaveStack affiche en permanence le taux de remplissage de la fenêtre de contexte, à l'image de la commande `/context` de Claude Code.
+HarnessLab affiche en permanence le taux de remplissage de la fenêtre de contexte, à l'image de la commande `/context` de Claude Code.
 - La jauge est ventilée selon les segments de FR-2, plus l'espace libre.
 - Elle se met à jour à chaque appel au modèle, y compris pendant les étapes d'un même tour.
 - Quand la fenêtre approche de sa limite, la jauge le signale.
@@ -401,25 +401,25 @@ WaveStack affiche en permanence le taux de remplissage de la fenêtre de context
 
 #### FR-32 : Changer de modèle
 L'utilisateur peut changer de modèle depuis l'interface ou la configuration, sans modifier le code.
-- Le changement se fait entre deux tours, sans redémarrer WaveStack, avec un indicateur de chargement.
+- Le changement se fait entre deux tours, sans redémarrer HarnessLab, avec un indicateur de chargement.
 - La conversation est conservée : le harnais reconstruit le contexte à chaque tour.
-- WaveStack fournit un modèle par défaut de 2B paramètres au plus.
+- HarnessLab fournit un modèle par défaut de 2B paramètres au plus.
 
 #### FR-33 : Capacités du modèle
-WaveStack connaît les capacités du modèle actif : appel d'outils, raisonnement, taille de contexte, gabarit de conversation. Les briques qui exigent une capacité absente sont indisponibles, et l'interface explique pourquoi.
+HarnessLab connaît les capacités du modèle actif : appel d'outils, raisonnement, taille de contexte, gabarit de conversation. Les briques qui exigent une capacité absente sont indisponibles, et l'interface explique pourquoi.
 - Les capacités sont réévaluées à chaque changement de modèle (FR-32).
 - Pour un modèle inconnu, les capacités sont lues dans son fichier. Si le fichier ne les indique pas, les briques qui les exigent sont indisponibles, avec une explication.
-- L'appel d'outils n'est disponible que pour les familles de modèle dont le format d'appel est connu de WaveStack.
+- L'appel d'outils n'est disponible que pour les familles de modèle dont le format d'appel est connu de HarnessLab.
 
 #### FR-34 : Modèle déjà présent sur le poste
 L'utilisateur peut utiliser un modèle sans le télécharger. Réalise UJ-3.
 - **Fichier local** : il installe un modèle à partir d'un fichier, par exemple depuis un partage ou une clé USB, sans accès à Internet.
 - **Fichier déjà présent** : le diagnostic de démarrage et le choix du modèle proposent les fichiers de modèle trouvés dans les emplacements usuels : cache Hugging Face, dossier de modèles de LM Studio, modèles d'Ollama. L'utilisateur peut aussi saisir un chemin.
-- **Serveur local déjà lancé** : WaveStack peut utiliser un modèle servi sur le poste par Ollama ou llama.cpp, via son point d'entrée natif en texte brut (Ollama `/api/generate` en mode `raw`, llama-server `/completion`, palier 2). WaveStack construit lui-même le texte envoyé au modèle, gabarit compris, pour que le contexte affiché reste le contexte réel (FR-2). Le schéma d'architecture montre le modèle comme un processus local distinct de WaveStack.
+- **Serveur local déjà lancé** : HarnessLab peut utiliser un modèle servi sur le poste par Ollama ou llama.cpp, via son point d'entrée natif en texte brut (Ollama `/api/generate` en mode `raw`, llama-server `/completion`, palier 2). HarnessLab construit lui-même le texte envoyé au modèle, gabarit compris, pour que le contexte affiché reste le contexte réel (FR-2). Le schéma d'architecture montre le modèle comme un processus local distinct de HarnessLab.
 
 #### FR-43 : Modèle cloud via API
 En option, l'utilisateur choisit au diagnostic un modèle cloud déclaré en configuration, pour montrer que le même harnais pilote des modèles plus gros, beaucoup plus vite qu'un SLM sur CPU (palier 1).
-- Préréglages Groq et Mistral ; Google, NVIDIA et OpenRouter en exemples de configuration, avec leur avertissement. Un point d'accès interne (Wavestone sur Azure ou GCP) s'ajoute par simple configuration, hors du dépôt.
+- Préréglages Groq et Mistral ; Google, NVIDIA et OpenRouter en exemples de configuration, avec leur avertissement. Un point d'accès interne (sur Azure ou GCP) s'ajoute par simple configuration, hors du dépôt.
 - Chaque modèle cloud affiche un pictogramme réseau et une infobulle : hébergement, usage des données pour l'entraînement, offre d'essai, quotas renvoyés vers la console du fournisseur.
 - Le choisir affiche un avertissement sur ses conséquences (données qui partent, gabarit et appels d'outils traités chez le fournisseur, tokens estimés), à confirmer avant tout appel qui porte des données de l'utilisateur. La barre haute signale ensuite un modèle réseau.
 - La clé API est saisie dans l'interface et stockée hors du dépôt. Un bouton « Tester » prouve streaming et appel d'outils avant la séance, avec une invite fixe, sans donnée de l'utilisateur.
@@ -428,20 +428,20 @@ En option, l'utilisateur choisit au diagnostic un modèle cloud déclaré en con
 
 ### 4.12 Installation et exploitation sur poste professionnel
 
-**Description.** WaveStack s'installe depuis GitHub sur un poste professionnel verrouillé. Le cas principal est le poste du formateur ; l'installation par les participants est un confort, visé pour les profils techniques. Si l'installation échoue, le repli assumé est la démo pilotée par le formateur, ou la vidéo d'une session précédente. Réalise UJ-2 et UJ-3.
+**Description.** HarnessLab s'installe depuis GitHub sur un poste professionnel verrouillé. Le cas principal est le poste du formateur ; l'installation par les participants est un confort, visé pour les profils techniques. Si l'installation échoue, le repli assumé est la démo pilotée par le formateur, ou la vidéo d'une session précédente. Réalise UJ-2 et UJ-3.
 
 #### FR-35 : Installation sans droits admin
-Un utilisateur peut installer WaveStack depuis GitHub, par clone ou par archive zip, sans droits administrateur.
+Un utilisateur peut installer HarnessLab depuis GitHub, par clone ou par archive zip, sans droits administrateur.
 - La procédure est documentée en français.
 - Prérequis : Git, ou à défaut une archive zip, et `uv`, qui s'installe sans droits admin et fournit Python.
 - Une fois les prérequis en place, l'installation tient en une commande.
 - Aucune étape ne demande d'élévation de droits, d'installation de service ni de règle de pare-feu.
 
 #### FR-36 : Lancement en une commande
-Une seule commande démarre WaveStack et ouvre l'interface dans le navigateur local.
+Une seule commande démarre HarnessLab et ouvre l'interface dans le navigateur local.
 
 #### FR-37 : Diagnostic de démarrage
-Au démarrage, WaveStack vérifie :
+Au démarrage, HarnessLab vérifie :
 - la mémoire disponible ;
 - la présence du modèle, ou des modèles déjà présents sur le poste (FR-34) ;
 - l'accès au réseau ;
@@ -451,10 +451,10 @@ Chaque problème est signalé en français, avec l'action corrective, par exempl
 
 ### 4.13 Scénarios et conduite de session
 
-**Description.** Les scénarios rendent la démonstration reproductible. Le formateur n'improvise pas ses prompts devant la salle et sait qu'ils mettent en valeur la brique malgré un modèle faible. En dernier recours, quand le modèle est trop lent, le formateur projette la vidéo d'une session précédente, enregistrée en réunion Teams. Ce repli ne demande aucune fonctionnalité dans WaveStack.
+**Description.** Les scénarios rendent la démonstration reproductible. Le formateur n'improvise pas ses prompts devant la salle et sait qu'ils mettent en valeur la brique malgré un modèle faible. En dernier recours, quand le modèle est trop lent, le formateur projette la vidéo d'une session précédente, enregistrée en réunion Teams. Ce repli ne demande aucune fonctionnalité dans HarnessLab.
 
 #### FR-38 : Scénarios par brique et programme
-WaveStack fournit au moins un scénario par brique : une configuration de briques et des prompts suggérés.
+HarnessLab fournit au moins un scénario par brique : une configuration de briques et des prompts suggérés.
 - L'utilisateur lance un scénario en un clic.
 - Au moins un scénario transverse porte sur l'hébergement : « Où vont mes données ? » (UJ-4).
 - Les scénarios sont ordonnés en un programme découpé en modules de 30 min à 1 h. L'utilisateur peut démarrer un module directement, avec les briques des modules précédents déjà actives.
@@ -464,7 +464,7 @@ WaveStack fournit au moins un scénario par brique : une configuration de brique
 L'utilisateur peut revenir en un geste à l'état initial : LLM nu, conversation vide, mémoire globale de démonstration restaurée.
 
 #### FR-40 : Scénarios métier
-WaveStack fournit au moins trois scénarios ancrés dans le métier d'une practice, pour aider les participants à imaginer des usages. Contribue à SM-4.
+HarnessLab fournit au moins trois scénarios ancrés dans le métier d'une practice, pour aider les participants à imaginer des usages. Contribue à SM-4.
 - SOC : un hook journalise les actions de l'agent et bloque une action interdite.
 - IAM : une question sur Entra ID, traitée via le serveur MCP Microsoft Learn.
 - Souveraineté : une recherche dans les données publiques françaises, via le serveur MCP data.gouv.fr, avec le schéma qui montre ce qui sort du poste.
@@ -482,9 +482,9 @@ D'autres métiers s'ajouteront au fil des sessions, sans modifier le code.
 
   La latence est toujours rendue visible (voir FR-1 et FR-30), jamais masquée.
   Ces bornes visent les modèles locaux. Pour un modèle cloud (FR-43), aucune borne : premier token, durée et débit sont mesurés et affichés.
-- **NFR-2 Empreinte mémoire.** WaveStack tient sur un poste de 16 Go de RAM partagé avec le système d'exploitation et les applications de travail du formateur (visio, navigateur, outils bureautiques).
-  - Plafond : 4 Go de RAM pour WaveStack, modèle compris, toutes briques actives. Cible : 2 à 3 Go.
-  - `[ASSUMPTION]` Le périmètre mesuré couvre les processus de WaveStack (harnais, modèle, serveurs MCP locaux, index RAG), hors navigateur.
+- **NFR-2 Empreinte mémoire.** HarnessLab tient sur un poste de 16 Go de RAM partagé avec le système d'exploitation et les applications de travail du formateur (visio, navigateur, outils bureautiques).
+  - Plafond : 4 Go de RAM pour HarnessLab, modèle compris, toutes briques actives. Cible : 2 à 3 Go.
+  - `[ASSUMPTION]` Le périmètre mesuré couvre les processus de HarnessLab (harnais, modèle, serveurs MCP locaux, index RAG), hors navigateur.
   - Un modèle servi par un serveur local déjà lancé (FR-34) est compté dans ce budget tant que le serveur répond ; jamais deux modèles chargés à la fois.
   - Un modèle cloud (FR-43) ne coûte rien en mémoire ; quand il est actif, le modèle local est libéré.
 - **NFR-3 Local et hors ligne.** Toutes les briques fonctionnent sans réseau, sauf celles explicitement marquées réseau (outils réseau, serveur MCP public).
@@ -511,24 +511,24 @@ D'autres métiers s'ajouteront au fil des sessions, sans modifier le code.
 - **NFR-10 Licences.** Le dépôt GitHub est public. Toutes les dépendances et tous les modèles embarqués ont des licences compatibles avec une redistribution publique et une démonstration en clientèle.
   - Les licences restrictives sont signalées avant adoption : Caveman proxy en BSL-1.1, LM Studio propriétaire.
 - **NFR-11 Contenu publiable.** Le dépôt étant public, rien de ce qu'il contient n'est confidentiel : corpus RAG, scénarios, mémoire globale de démonstration et exemples de hooks.
-  - Aucune donnée client ni document interne à Wavestone.
+  - Aucune donnée client ni document interne.
   - Aucun secret ni clé d'API dans le dépôt.
   - Les clés API sont stockées hors du dépôt, dans le dossier de données ; un point d'accès interne se déclare dans la configuration locale, jamais dans le dépôt.
 
 ## 6. Non-objectifs
 
-- WaveStack n'est **pas** un framework agentique réutilisable ni une bibliothèque.
-- WaveStack ne cherche **pas** la qualité des réponses : la faiblesse du SLM est assumée et devient un matériau pédagogique.
-- WaveStack n'exige **aucun** fournisseur de modèle cloud et n'en utilise aucun par défaut : le cloud reste une option explicite (FR-43).
-- WaveStack n'est **pas** un banc d'essai ni un comparateur de modèles.
-- WaveStack ne propose **pas** de gestion d'utilisateurs, de comptes ni de mode serveur partagé : une instance par poste.
-- WaveStack évite CrewAI et, plus largement, tout framework multi-agents lourd.
+- HarnessLab n'est **pas** un framework agentique réutilisable ni une bibliothèque.
+- HarnessLab ne cherche **pas** la qualité des réponses : la faiblesse du SLM est assumée et devient un matériau pédagogique.
+- HarnessLab n'exige **aucun** fournisseur de modèle cloud et n'en utilise aucun par défaut : le cloud reste une option explicite (FR-43).
+- HarnessLab n'est **pas** un banc d'essai ni un comparateur de modèles.
+- HarnessLab ne propose **pas** de gestion d'utilisateurs, de comptes ni de mode serveur partagé : une instance par poste.
+- HarnessLab évite CrewAI et, plus largement, tout framework multi-agents lourd.
 
 ## 7. Périmètre MVP
 
 ### 7.1 Dans le périmètre (V1)
 
-Toute la liste ci-dessous fait partie de la V1 : Anaël ne présente WaveStack qu'une fois la V1 complète, pour marquer les esprits dès la première session. La livraison suit deux paliers, pour tester tôt et obtenir des victoires rapides. En cas d'arbitrage, MCP, skills et hooks, cœur pédagogique du brief, passent avant le sous-agent et la compression du contexte.
+Toute la liste ci-dessous fait partie de la V1 : Anaël ne présente HarnessLab qu'une fois la V1 complète, pour marquer les esprits dès la première session. La livraison suit deux paliers, pour tester tôt et obtenir des victoires rapides. En cas d'arbitrage, MCP, skills et hooks, cœur pédagogique du brief, passent avant le sous-agent et la compression du contexte.
 
 **Palier 1 : socle**
 - Interface à cinq volets synchronisés : panneau des briques, vue humain, contexte LLM, orchestration, schéma d'architecture.
@@ -550,7 +550,7 @@ Toute la liste ci-dessous fait partie de la V1 : Anaël ne présente WaveStack q
 - **Serveur local au format chat** (compatible OpenAI) comme voie visée : V2. En V1, le format chat sert aux modèles cloud (FR-43) ; en local, le texte brut natif montre le gabarit.
 - **RAG avancé** (HyDE, self-RAG) : V2. Les stratégies RAG restent interchangeables pour le préparer.
 - **Indexation de documents propres à l'utilisateur** : V2.
-- **Enregistrement et relecture de sessions dans WaveStack** : non prévu. Le repli est une vidéo de réunion Teams.
+- **Enregistrement et relecture de sessions dans HarnessLab** : non prévu. Le repli est une vidéo de réunion Teams.
 - **Démonstration client** : conditionnée au succès des sessions internes. C'est la trajectoire qui justifie l'investissement ; NFR-10 et FR-38 la préparent dès la V1.
 
 ### 7.3 Trajectoire
@@ -572,7 +572,7 @@ Toute la liste ci-dessous fait partie de la V1 : Anaël ne présente WaveStack q
 **Secondaires**
 - **SM-5 : Installation.** Part des participants qui tentent l'installation (profils techniques, en amont ou après la session) et réussissent sur leur poste professionnel sans droits admin, en moins de 20 minutes. Cible : 80 % ou plus. Valide FR-35 à FR-37.
 - **SM-6 : Fiabilité en session.** Part des sessions menées sans repli forcé (plantage, blocage du modèle). Cible : 90 % ou plus. Valide NFR-8 et FR-38.
-- **SM-7 : Présentable en clientèle.** WaveStack est montré au moins une fois à un client sans adaptation majeure. Cible V2, sans chiffre en V1. Valide NFR-10, NFR-11 et FR-38.
+- **SM-7 : Présentable en clientèle.** HarnessLab est montré au moins une fois à un client sans adaptation majeure. Cible V2, sans chiffre en V1. Valide NFR-10, NFR-11 et FR-38.
 
 **Contre-indicateurs (à ne pas optimiser)**
 - **SM-C1 : Qualité des réponses du modèle.** Améliorer les réponses au prix d'un modèle plus gros ou d'un contexte masqué trahirait l'objectif. Contrebalance SM-6.
@@ -597,7 +597,7 @@ Toute la liste ci-dessous fait partie de la V1 : Anaël ne présente WaveStack q
 
 1. **Volets.** Question close le 2026-09-23 : cinq volets, chacun masquable (§4.1).
 2. **Questionnaire de mesure.** Construit par Anaël avant la session pilote (§8).
-3. **Validation par Wavestone de l'usage en clientèle.** Non requise pour l'usage interne ni pour la publication du dépôt public. À obtenir avant toute présentation client (V2).
+3. **Validation de l'usage en clientèle.** Non requise pour l'usage interne ni pour la publication du dépôt public. À obtenir avant toute présentation client (V2).
 
 ## 11. Hypothèses différées
 

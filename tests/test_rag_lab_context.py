@@ -19,12 +19,12 @@ from test_rag_lab import QUESTION, ended, run, run_status, stage
 from test_rag_lab_generation import own_chain
 from test_rag_rerank import place_reranker, rerank_config, session_for
 
-from wavestack import config
-from wavestack.compression.port import Compressed
-from wavestack.messages import msg, render
-from wavestack.rag import lab as rag_lab
-from wavestack.rag.corpus import load_rag_content
-from wavestack.session.app_session import AppSession
+from harness_lab import config
+from harness_lab.compression.port import Compressed
+from harness_lab.messages import msg, render
+from harness_lab.rag import lab as rag_lab
+from harness_lab.rag.corpus import load_rag_content
+from harness_lab.session.app_session import AppSession
 
 LANGS = ("fr", "en", "de")
 # The context text `excerpts` built before the story (top_k 3, chunks of 700 characters).
@@ -401,7 +401,7 @@ def test_the_catalog_gives_the_reason_next_to_the_option(index, monkeypatch):
     importlib.util.find_spec("headroom") is None, reason="headroom-ai (extra) absent"
 )
 def test_the_real_headroom_compresses_an_extract_of_the_corpus(index):
-    from wavestack.compression import headroom_adapter
+    from harness_lab.compression import headroom_adapter
 
     session = ready(index, min_chars=0)
     compressor = headroom_adapter.HeadroomCompressor()

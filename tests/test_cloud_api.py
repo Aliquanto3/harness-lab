@@ -3,7 +3,7 @@
 
 The `openai_chat` bodies are pinned by fingerprints taken BEFORE the refactoring
 (`fixtures/openai_chat_bodies.json`): the same reference history, rendered for the `groq`,
-`mistral`, `gemini` and `gemma` entries of `wavestack.toml`, reasoning on and off, must give
+`mistral`, `gemini` and `gemma` entries of `harness-lab.toml`, reasoning on and off, must give
 the same bytes. Every provider answer comes from an `httpx.MockTransport`.
 """
 
@@ -19,18 +19,18 @@ import pytest
 from pydantic import SecretStr, ValidationError
 from test_cloud import GROQ_TEXT, GROQ_TOOL, SENTINEL, Provider, _no_sentinel, _of, _turn
 
-from wavestack import config
-from wavestack.cloud import chat_fields
-from wavestack.context import render as render_module
-from wavestack.context.render import render_chat_body
-from wavestack.context.segments import Joined, Part, SegmentKind
-from wavestack.models import cloud_api
-from wavestack.models.cloud_api import create_cloud_engine
-from wavestack.models.engine import DEFAULT_SAMPLING
-from wavestack.models.openai_chat import OpenAIChatEngine
-from wavestack.session.app_session import AppSession
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.trace.journal import get_journal
+from harness_lab import config
+from harness_lab.cloud import chat_fields
+from harness_lab.context import render as render_module
+from harness_lab.context.render import render_chat_body
+from harness_lab.context.segments import Joined, Part, SegmentKind
+from harness_lab.models import cloud_api
+from harness_lab.models.cloud_api import create_cloud_engine
+from harness_lab.models.engine import DEFAULT_SAMPLING
+from harness_lab.models.openai_chat import OpenAIChatEngine
+from harness_lab.session.app_session import AppSession
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.trace.journal import get_journal
 
 FIXTURE = Path(__file__).parent / "fixtures" / "openai_chat_bodies.json"
 ENTRIES = ("groq", "mistral", "gemini", "gemma")
@@ -86,7 +86,7 @@ def reference_history(
         {
             "role": "system",
             "content": [
-                Part(SegmentKind.SYSTEM_PROMPT, "Tu es un assistant « WaveStack ».", None, "core")
+                Part(SegmentKind.SYSTEM_PROMPT, "Tu es un assistant « HarnessLab ».", None, "core")
             ],
         },
         {"role": "user", "content": [Part(SegmentKind.USER_MESSAGE, "Quelle heure est-il ?")]},
@@ -166,7 +166,7 @@ def test_openai_chat_bodies_are_byte_for_byte_those_before_the_refactoring():
 # ---------- the `api` field and `extra_headers` (CAP-1, AD-5) ----------
 
 
-def test_wavestack_toml_entries_declare_their_api_and_only_anthropic_has_extra_headers():
+def test_harness_lab_toml_entries_declare_their_api_and_only_anthropic_has_extra_headers():
     """Except Anthropic's (native providers 3/5), with its two fixed headers, and OpenAI's
     (native providers 4/5), through the Responses API without any."""
     raw = config.load_config().get("cloud", "models", default=[])

@@ -70,7 +70,7 @@ L'échantillonnage devient un paramètre de chaque appel des trois moteurs locau
   - `tools/e2e/fake_local_server.py` et `tools/e2e/fake_openai.py`.
 - Documentation et parcours E2E :
   - `uv run pytest -q` reste entièrement vert : aucune story livrée ne casse ;
-  - mettre à jour EXPERIENCE.md, DESIGN.md (composants), SPEC.md (nouvel écran), README, `wavestack.toml` et le spine (AD-2, AD-3, AD-5, AD-18, AD-19) ;
+  - mettre à jour EXPERIENCE.md, DESIGN.md (composants), SPEC.md (nouvel écran), README, `harness-lab.toml` et le spine (AD-2, AD-3, AD-5, AD-18, AD-19) ;
   - ajouter les vérifications d'interface au parcours `tools/e2e/run_e2e.py`.
 - Chaque incrément livré est commité seul, avec la documentation et l'E2E de son périmètre. Un incrément non livré est noté comme tel dans cette spec et dans le rapport, sans rien casser des précédents.
 
@@ -103,7 +103,7 @@ L'échantillonnage devient un paramètre de chaque appel des trois moteurs locau
 
 Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fichiers avant celle-ci. On se repère aux **symboles**, jamais aux numéros de ligne.
 
-- `src/wavestack/models/engine.py`
+- `src/harness_lab/models/engine.py`
   - `TEMPERATURE`, `TOP_P`, `TOP_K` : constantes à remplacer par `Sampling`.
   - `Fragment(text, output_tokens, stop_reason)`, `EngineMetadata`, `Engine` (Protocol, `complete(prompt_ids, stop, max_tokens, cancel)`).
   - `VocabTokenizer` : `_lib`, `_model`, `_vocab`, `tokenize` (`special=True`), `token_pieces`, `is_eog`, `_read_metadata`. Avec `vocab_only`, les hyperparamètres ne sont pas chargés (`n_ctx_train()` = 0).
@@ -113,22 +113,22 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
   - `Llama._init_sampler` enchaîne `top_k`, `typical`, `top_p`, `min_p`, `temp`, `dist` : la température vient *après* le tri.
   - Quand `generate` rend un token, `llama_cpp.llama_get_logits_ith(ctx, -1)` pointe sur les logits dont il a été tiré (`n_vocab()` flottants).
   - Dimensions : `llama_model_n_embd`, `llama_model_n_layer`, `llama_model_n_head`, `llama_vocab_n_tokens`.
-- `src/wavestack/models/servers.py`
+- `src/harness_lab/models/servers.py`
   - Importe `TEMPERATURE`, `TOP_K`, `TOP_P`.
   - `_sampling()` : dict envoyé, pénalités neutres comprises.
   - `LlamaServerEngine._read_metadata` : `/v1/models`, `meta` (`n_ctx_train`) ; le vrai serveur y donne aussi `n_vocab` et `n_embd`.
   - `LlamaServerEngine.complete` : corps `/completion`, `**_sampling()`.
   - `OllamaRawEngine.complete` : `options`, `**_sampling()`. `_open_tokenizer`.
-- `src/wavestack/cloud.py` -- `chat_fields(entry, max_tokens, reasoning)` : champs du corps chat, dans leur ordre.
-- `src/wavestack/config.py`
+- `src/harness_lab/cloud.py` -- `chat_fields(entry, max_tokens, reasoning)` : champs du corps chat, dans leur ordre.
+- `src/harness_lab/config.py`
   - `CloudModel` (strict), `output_reserve`, `OUTPUT_RESERVE`, `MAX_RESERVE`, `MIN_REASONING_BUDGET`.
   - `Config.reasoning_budget_tokens`, `estimate_tokens`, `Config.chars_per_token`, `content_dir()`.
-- `src/wavestack/models/gguf_meta.py` -- `try_read_metadata` : clés de l'en-tête. Les tableaux longs (le vocabulaire) valent `None`, d'où un vocabulaire lu au tokenizer.
-- `src/wavestack/models/capabilities.py` -- `Capabilities` (`reasoning_variable`, `reasoning`, `reasoning_always`, `reasoning_tags`, `stop_sequences`) ; `ChannelSplitter`. La story 25 y ajoute `reasoning_mode`, à réutiliser si elle est livrée.
-- `src/wavestack/models/openai_chat.py` -- `run_call(engine, body, cancel, *, phase_label, …)` : `model_call_started`, puis `model_delta` groupé par `DELTA_INTERVAL_S`, puis `model_call_ended`.
-- `src/wavestack/models/load_registry.py` -- `process_rss()`, `LoadRegistry.grant`, `_size`. La story 24 y ajoute `baseline()` et `grant(…, base=)`.
-- `src/wavestack/context/render.py` -- `render_context(engine, template, messages, *, call_id, special_tokens, **template_vars)`, `render_chat_body`.
-- `src/wavestack/session/app_session.py`
+- `src/harness_lab/models/gguf_meta.py` -- `try_read_metadata` : clés de l'en-tête. Les tableaux longs (le vocabulaire) valent `None`, d'où un vocabulaire lu au tokenizer.
+- `src/harness_lab/models/capabilities.py` -- `Capabilities` (`reasoning_variable`, `reasoning`, `reasoning_always`, `reasoning_tags`, `stop_sequences`) ; `ChannelSplitter`. La story 25 y ajoute `reasoning_mode`, à réutiliser si elle est livrée.
+- `src/harness_lab/models/openai_chat.py` -- `run_call(engine, body, cancel, *, phase_label, …)` : `model_call_started`, puis `model_delta` groupé par `DELTA_INTERVAL_S`, puis `model_call_ended`.
+- `src/harness_lab/models/load_registry.py` -- `process_rss()`, `LoadRegistry.grant`, `_size`. La story 24 y ajoute `baseline()` et `grant(…, base=)`.
+- `src/harness_lab/context/render.py` -- `render_context(engine, template, messages, *, call_id, special_tokens, **template_vars)`, `render_chat_body`.
+- `src/harness_lab/session/app_session.py`
   - Génération :
     - `_call_model` : fonctions internes `generate`, `take`, `flush`, `end` ; `reasoning_cut` ; `output_truncated`.
     - `_call_model_chat` : émet `context_reconciled` et modifie `self._ratio`. **À ne pas utiliser pour l'écran.**
@@ -141,13 +141,13 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
     - `_load` : `off_turn`, `model_load_started`, `_release`, `_checkpoint`, sonde, `_install`, `model_load_ended` dans le `finally`.
     - `_install` : `_engine_factory` ou `_server_factory`, puis `capabilities_for`.
   - Aides : `active_model()`, `_engine`, `_caps`, `_cloud`, `_fr`, `_ms`.
-- `src/wavestack/trace/catalog.py` -- `SessionState` (Literal), `ModelCallStartedPayload`, `ModelLoadEndedPayload`, `PAYLOAD_MODELS`. `trace/scope.py` : `scoped`.
-- `src/wavestack/web/app.py`
+- `src/harness_lab/trace/catalog.py` -- `SessionState` (Literal), `ModelCallStartedPayload`, `ModelLoadEndedPayload`, `PAYLOAD_MODELS`. `trace/scope.py` : `scoped`.
+- `src/harness_lab/web/app.py`
   - Modèles d'intention.
   - Route `send`, modèle du 409 sur `SendRefused` ; `stop` ; `index_page` et `diagnostic_page` (`FileResponse`).
   - `api_state` : `main` n'exclut que `sub*`.
   - `_sse_stream`.
-- `src/wavestack/web/static/`
+- `src/harness_lab/web/static/`
   - `index.html` : `header.top-bar` ; la story 26 y met `#window-toggle`, la story 31 `#theme-picker` avant `#reset-button`.
   - `app.js` :
     - `applyEnvelope`, dont le garde `SUB_KINDS` pour les sous-agents ;
@@ -199,24 +199,24 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
 ## Incréments
 
 **Incrément 1 — Écran, tokenisation et vectorisation.** Petit et sûr, il ne touche pas à la génération. Critères : les trois `[I1]`.
-- `content/llm_lab.yaml` (nouveau) et `src/wavestack/session/llm_lab.py` (nouveau, fonctions pures) --
+- `content/llm_lab.yaml` (nouveau) et `src/harness_lab/session/llm_lab.py` (nouveau, fonctions pures) --
   - `load_lab_content()` : `@cache`, pydantic, sur le modèle de `cloud.load_cloud_content`. Il porte le titre, les intertitres des six sections, les textes de la tokenisation, de la vectorisation et des légendes du schéma. Les incréments suivants y ajoutent les leurs.
   - `dimensions_from_header(meta) -> dict` : `{arch}.embedding_length`, `block_count`, `attention.head_count` (le maximum si c'est un tableau), `context_length`.
   - `token_rows(ids, pieces, specials, limit=512)` : `[{id, text, special}]` et `more`.
   - Tout en français, testable sans moteur.
-- `src/wavestack/models/engine.py`, `servers.py` -- Méthode facultative `dimensions() -> dict | None`, que la session tolère absente, comme `snapshot` :
+- `src/harness_lab/models/engine.py`, `servers.py` -- Méthode facultative `dimensions() -> dict | None`, que la session tolère absente, comme `snapshot` :
   - `LlamaCppEngine` : API llama.cpp ;
   - `OllamaRawEngine` : `llama_vocab_n_tokens` du `VocabTokenizer`, plus l'en-tête du blob ;
   - `LlamaServerEngine` : `n_vocab` et `n_embd` de `/v1/models`, gardés par `_read_metadata`, plus l'en-tête de `model_path` s'il est lisible.
-- `src/wavestack/trace/catalog.py` -- `LlmTokenizedPayload` : `request_id`, `text`, `model_label`, `hosting`, `exact`, `tokenizer_fr`, `tokens`, `token_count`, `more`, `estimate | None`, `unavailable_fr | None`, `dimensions | None`, `dimensions_fr`. Ajouter `"llm_tokenized"` à `PAYLOAD_MODELS`.
-- `src/wavestack/session/app_session.py` --
+- `src/harness_lab/trace/catalog.py` -- `LlmTokenizedPayload` : `request_id`, `text`, `model_label`, `hosting`, `exact`, `tokenizer_fr`, `tokens`, `token_count`, `more`, `estimate | None`, `unavailable_fr | None`, `dimensions | None`, `dimensions_fr`. Ajouter `"llm_tokenized"` à `PAYLOAD_MODELS`.
+- `src/harness_lab/session/app_session.py` --
   - `llm_tokenize(text) -> str` : `SendRefused` hors `idle` ; soumis au worker ; émet `llm_tokenized` dans `scoped(context_id="llm", turn_id=None, step_id=f"llm{n}")`.
   - `lab_state() -> dict` pour `GET /api/llm_lab` : `content`, `content_error_fr`, `active_model`, `tokenizer {exact, reason_fr}` et `seq`.
   - Tokenise le texte brut, sans gabarit (`tokenize`, puis `token_pieces`).
-- `src/wavestack/web/app.py` --
+- `src/harness_lab/web/app.py` --
   - `GET /llm` (`FileResponse` de `llm.html`) et `GET /api/llm_lab`.
   - `LlmTokenizeIntention(text: str, min 1, max 2000)` sur `POST /api/intentions/llm_tokenize` : 409 sur `SendRefused`, réponse `{request_id}`.
-- `src/wavestack/web/static/llm.html`, `llm.css`, `llm.js` (nouveaux) --
+- `src/harness_lab/web/static/llm.html`, `llm.css`, `llm.js` (nouveaux) --
   - En tête, `theme.js` puis `fonts.css`, `tokens.css` et `llm.css`.
   - En-tête de page :
     - titre « LLM nu : l'intérieur du modèle » ;
@@ -231,7 +231,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
     - un schéma en HTML et CSS : texte → tokens → identifiants → ligne de la table d'embedding (vocabulaire × dimension) → vecteur de *d* nombres → *L* couches, avec les dimensions réelles, ou « inconnue » et sa raison ;
     - pour un modèle cloud, `unavailable_fr` et l'estimation.
   - `llm.js` (module) : `GET /api/llm_lab`, puis `EventSource("/api/stream")` à partir de `seq`. La page filtre `context_id === "llm"` et `session_state`, et recharge sur un nouveau `server_instance`.
-- `src/wavestack/web/static/index.html`, `app.js`, `app.css` --
+- `src/harness_lab/web/static/index.html`, `app.js`, `app.css` --
   - Lien `<a id="llm-link" class="screen-link" href="/llm">LLM nu</a>` dans `.top-bar`, avant le sélecteur de thème, ou avant `#reset-button`.
   - Dans `applyEnvelope`, les événements `context_id === "llm"` ne vont qu'au journal (`store.journal`), avant tout `switch`.
   - Onglet « LLM nu » ajouté à `nav.page-tabs` de `diagnostic.html` et `models.html` s'ils existent.
@@ -257,20 +257,20 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
   DESIGN.md : composants `token-chip` et `embedding-diagram`, faits de jetons existants. SPEC.md : nouvelle capacité « Écran LLM nu », au numéro CAP suivant, partie 1. README : section « Écran LLM nu ». Spine : AD-2 (`llm_tokenized`, contexte `llm`), AD-18 (`/llm`), AD-19 (`llm_lab.yaml`).
 
 **Incrément 2 — Réglages d'échantillonnage, lecture du prompt, génération token par token.** Critères : les trois `[I2]`.
-- `src/wavestack/models/engine.py` -- `Sampling`, dataclass figée : `temperature`, `top_k`, `top_p`, `min_p`.
+- `src/harness_lab/models/engine.py` -- `Sampling`, dataclass figée : `temperature`, `top_k`, `top_p`, `min_p`.
   - `DEFAULT_SAMPLING = Sampling(0.7, 20, 0.8, 0.0)`.
   - Bornes `SAMPLING_BOUNDS` : température 0 à 2, top-k 1 à 100, top-p 0,05 à 1, min-p 0 à 0,5.
   - `Fragment` gagne `token_id: int | None = None` et `piece: bytes | None = None`.
   - `LlamaCppEngine.complete(..., *, sampling=None)` : `None` vaut `DEFAULT_SAMPLING`. Il remplit `token_id` et `piece`.
   - Les constantes sont supprimées et leurs imports suivent.
-- `src/wavestack/models/servers.py` -- `_sampling(sampling)` ; `complete(..., *, sampling=None)` sur les deux adaptateurs, qui mettent le morceau reçu dans `piece`.
-- `src/wavestack/config.py`, `wavestack.toml`, `tools/e2e/stack.py` --
+- `src/harness_lab/models/servers.py` -- `_sampling(sampling)` ; `complete(..., *, sampling=None)` sur les deux adaptateurs, qui mettent le morceau reçu dans `piece`.
+- `src/harness_lab/config.py`, `harness-lab.toml`, `tools/e2e/stack.py` --
   - `CloudModel.sampling: list[Literal["temperature", "top_p"]] = []` ;
   - préréglages Groq et Mistral à `["temperature", "top_p"]`, avec un commentaire ;
   - entrées A, B et R de la pile E2E identiques.
-- `src/wavestack/cloud.py` -- `chat_fields(..., sampling: Sampling | None = None)` : les champs déclarés, après la limite de sortie, **seulement si `sampling` est donné**. Les corps de l'atelier restent donc identiques.
-- `src/wavestack/models/openai_chat.py` -- `run_call(..., sampling_trace=None)`, qui le met dans `model_call_started`.
-- `src/wavestack/trace/catalog.py` --
+- `src/harness_lab/cloud.py` -- `chat_fields(..., sampling: Sampling | None = None)` : les champs déclarés, après la limite de sortie, **seulement si `sampling` est donné**. Les corps de l'atelier restent donc identiques.
+- `src/harness_lab/models/openai_chat.py` -- `run_call(..., sampling_trace=None)`, qui le met dans `model_call_started`.
+- `src/harness_lab/trace/catalog.py` --
   - `SamplingTrace` : `temperature`, `top_k`, `top_p`, `min_p`, chacun `None` s'il n'est pas envoyé ; `source: harness|screen|provider` ; `note_fr`.
   - `ModelCallStartedPayload.sampling: SamplingTrace | None = None`.
   - Nouveaux payloads :
@@ -278,7 +278,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
     - `llm_token` : `request_id`, `index`, `token_id | None`, `text`, `channel`, `elapsed_ms` ;
     - `llm_generation_ended` : `request_id`, `status: completed|cancelled|limit|error`, `duration_ms`, `read_tps | None`, `reasoning_tokens`, `answer_tokens`, `message_fr | None`.
   - `SessionState` gagne `llm_lab`.
-- `src/wavestack/session/app_session.py` --
+- `src/harness_lab/session/app_session.py` --
   - `_call_model(..., sampling=None, on_token=None)` :
     - les paramètres ne sont passés au moteur (`**extra`) que s'ils sont donnés, si bien que les moteurs de test à quatre arguments restent valides ;
     - `on_token(fragment, channel)` est appelé pour chaque fragment dont la pièce ou le texte n'est pas vide ;
@@ -298,7 +298,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
   - `_PREFIX_CAUSES_FR["llm"]` : « L'écran « LLM nu » a occupé le cache du moteur{why}. »
   - `_LAB_FR` : « L'écran « LLM nu » génère une réponse : attendez sa fin ou arrêtez-la. »
   - `lab_state()` ajoute `sampling {defaults, bounds, supported: {nom: raison_fr | null}, source_fr}`.
-- `src/wavestack/web/app.py` -- `LlmGenerateIntention` : `prompt` (1 à 2 000) et `sampling` (4 champs bornés par `Field`), sur `POST /api/intentions/llm_generate`. Le champ `reasoning` n'arrive qu'à l'incrément 3 ; d'ici là, un modèle qui raisonne toujours suit sa déclaration (`chat_fields`, réserve `reserve_for`). Réponse `{request_id}`, 409 ou 422.
+- `src/harness_lab/web/app.py` -- `LlmGenerateIntention` : `prompt` (1 à 2 000) et `sampling` (4 champs bornés par `Field`), sur `POST /api/intentions/llm_generate`. Le champ `reasoning` n'arrive qu'à l'incrément 3 ; d'ici là, un modèle qui raisonne toujours suit sa déclaration (`chat_fields`, réserve `reserve_for`). Réponse `{request_id}`, 409 ou 422.
 - `llm.html`, `llm.css`, `llm.js` --
   - Section 2 « Réglages d'échantillonnage » : un curseur et un champ numérique par réglage, l'explication tirée du YAML, « Valeurs du harnais : … », et « Revenir aux valeurs du harnais ». Un réglage non supporté est désactivé, sa raison visible.
   - Section 4 « Lecture du prompt » :
@@ -307,7 +307,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
     - débit de lecture `read_tps`.
   - Section 5 « Génération » : une puce par `llm_token`, au fil de l'eau ; compteur ; débit final (`output_tps`) ; bouton « Arrêter » (`/api/intentions/stop`). Pour un modèle cloud, le texte « fragments reçus du fournisseur, pas des tokens un par un ».
   - « Générer » est désactivé hors `idle`, avec `reason_fr`.
-- `src/wavestack/web/static/app.js` -- `SESSION_STATES.llm_lab = "écran LLM nu"`. Dans `eventSummary`, `model_call_started` affiche `phase_label · T 0,7 · top-k 20 · top-p 0,8 · min-p 0` quand `sampling` est là.
+- `src/harness_lab/web/static/app.js` -- `SESSION_STATES.llm_lab = "écran LLM nu"`. Dans `eventSummary`, `model_call_started` affiche `phase_label · T 0,7 · top-k 20 · top-p 0,8 · min-p 0` quand `sampling` est là.
 - Tests : `tests/fake_engine.py`, `tests/test_llm_lab.py`, `tests/test_model_servers.py`, `tests/test_cloud.py` --
   - `FakeEngine.complete(..., *, sampling=None)` note `self.samplings`.
   - Paramètres transmis :
@@ -337,8 +337,8 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
   README : l'échantillonnage devient un paramètre de chaque appel, réglable dans l'écran ; ajouter la clé `sampling` des modèles cloud. Spine : AD-2 (kinds, `sampling`), AD-3 (état `llm_lab`, intentions de classe b), AD-5 (`complete(..., sampling)`), AD-20 (`sampling` déclaré). SPEC : partie 2 de la capacité.
 
 **Incrément 3 — Chargement du modèle et raisonnement.** Critères : `[I3]`, plus les critères de raisonnement ci-dessous (tests et E2E).
-- `src/wavestack/trace/catalog.py` -- `ModelLoadStepPayload` : `model`, `step: release|probe|check|engine|ready`, `label_fr`, `elapsed_ms`, `rss_bytes | None`. `ModelLoadEndedPayload.memory: LoadMemory | None = None`, avec `rss_before`, `rss_after`, `cost_bytes`, `where_fr`.
-- `src/wavestack/session/app_session.py` --
+- `src/harness_lab/trace/catalog.py` -- `ModelLoadStepPayload` : `model`, `step: release|probe|check|engine|ready`, `label_fr`, `elapsed_ms`, `rss_bytes | None`. `ModelLoadEndedPayload.memory: LoadMemory | None = None`, avec `rss_before`, `rss_after`, `cost_bytes`, `where_fr`.
+- `src/harness_lab/session/app_session.py` --
   - Dans `_load`, en portée `off_turn`, émettre `model_load_step` à chaque étape franchie, avec `process_rss()` :
     - libération ;
     - sonde, si elle a lieu ;
@@ -367,7 +367,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
     - interrupteur, grisé avec sa raison, ou verrouillé « toujours » ;
     - deux couloirs, « Réflexion » puis « Réponse » ;
     - compteurs, budget, marque de coupe avec `reasoning_cut.message_fr`.
-- `src/wavestack/web/static/app.js` -- Dans `eventSummary`, `model_load_step` rend `label_fr · durée`.
+- `src/harness_lab/web/static/app.js` -- Dans `eventSummary`, `model_load_step` rend `label_fr · durée`.
 - Tests : `tests/test_llm_lab.py`, `tests/test_model_switch.py` --
   - étapes et ordre pour un fichier (`FakeEngine`), un modèle servi et un cloud ;
   - `memory` avec `rss_fn` injecté ;
@@ -381,13 +381,13 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
 - Docs -- EXPERIENCE, SPEC (partie 3), README, spine AD-2 (`model_load_step`, `memory`) et AD-8 (mémoire affichée).
 
 **Incrément 4 — Probabilités des tokens candidats.** Critères : `[I4]`.
-- `src/wavestack/session/llm_lab.py` (ou `models/candidates.py`) -- `candidates_from_logits(logits, sampling, chosen_id, n=5)`, avec numpy importé dans la fonction. Il calcule :
+- `src/harness_lab/session/llm_lab.py` (ou `models/candidates.py`) -- `candidates_from_logits(logits, sampling, chosen_id, n=5)`, avec numpy importé dans la fonction. Il calcule :
   - `p` : softmax à température 1 ;
   - `kept` : dans top-k, puis top-p cumulé sur les probabilités renormalisées, puis min-p, soit l'ordre de llama.cpp ;
   - `p_sampled` : softmax de `logits / T` restreint aux gardés ; T = 0 donne 1 pour le plus probable.
   Il renvoie les n premiers, plus le token tiré s'il n'en fait pas partie.
-- `src/wavestack/models/engine.py` -- `Fragment.candidates: tuple | None = None`. `LlamaCppEngine.complete(..., candidates: int = 0)` lit, à chaque token rendu par `generate`, `llama_get_logits_ith(self._llm.ctx, -1)` sur `n_vocab()` flottants, puis `candidates_from_logits`. Le texte d'un candidat vient de `token_pieces`.
-- `src/wavestack/trace/catalog.py`, `app_session.py`, `web/app.py` --
+- `src/harness_lab/models/engine.py` -- `Fragment.candidates: tuple | None = None`. `LlamaCppEngine.complete(..., candidates: int = 0)` lit, à chaque token rendu par `generate`, `llama_get_logits_ith(self._llm.ctx, -1)` sur `n_vocab()` flottants, puis `candidates_from_logits`. Le texte d'un candidat vient de `token_pieces`.
+- `src/harness_lab/trace/catalog.py`, `app_session.py`, `web/app.py` --
   - `llm_token.candidates: list[{token_id, text, p, kept, p_sampled, chosen}] | None`.
   - `lab_state().candidates {available, reason_fr, n}` : disponible pour un fichier seulement, avec la raison pour llama-server, Ollama et le cloud.
   - `LlmGenerateIntention.candidates: bool = False`, avec 409 si indisponible.
@@ -397,7 +397,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
   - fonction pure sur des logits synthétiques : température, glouton, top-k, top-p, min-p, token tiré hors des cinq ;
   - `FakeEngine(candidates_script=…)` jusqu'à `llm_token.candidates` ;
   - raisons d'indisponibilité ;
-  - un test `model` (sauté sans `WAVESTACK_TEST_GGUF`) sur le vrai moteur : somme des `p` ≤ 1, et le token tiré est parmi les gardés.
+  - un test `model` (sauté sans `HARNESS_LAB_TEST_GGUF`) sur le vrai moteur : somme des `p` ≤ 1, et le token tiré est parmi les gardés.
 - `tools/e2e/run_e2e.py` -- Sur le faux llama-server, la case est grisée et sa raison contient « llama-server ». Même contrôle sur le cloud A.
 - Docs -- EXPERIENCE (patron `candidates-popover`), SPEC (partie 4), README, spine AD-5 (`candidates`, lecture de la dernière position).
 
@@ -474,7 +474,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
 - `uv run ruff check .` -- expected: aucune erreur
 - `uv run ruff format --check .` -- expected: aucun fichier à reformater
 - `uv run pytest -q` -- expected: tout vert, `tests/test_llm_lab.py` compris ; aucun test existant supprimé
-- `node --check src/wavestack/web/static/llm.js && node --check src/wavestack/web/static/app.js` -- expected: pas d'erreur (si `node` est présent)
+- `node --check src/harness_lab/web/static/llm.js && node --check src/harness_lab/web/static/app.js` -- expected: pas d'erreur (si `node` est présent)
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py` -- expected: aucun FAIL ; scénario `llm_screen` passé pour les incréments livrés ; captures `NN-llm-nu-*` écrites dans `tools/e2e/screenshots/` et listées dans `tools/e2e/README.md`
 
 **Manual checks (if no CLI):**
@@ -504,7 +504,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
 ## À vérifier sur PC
 
 - **Vitesse token par token**
-  - **Geste** : PowerShell, `uv run wavestack`, Qwen3.5-2B GGUF actif. Dans Chrome, cliquer « LLM nu », saisir « Explique en deux phrases ce qu'est un token. », puis « Générer ».
+  - **Geste** : PowerShell, `uv run harness-lab`, Qwen3.5-2B GGUF actif. Dans Chrome, cliquer « LLM nu », saisir « Explique en deux phrases ce qu'est un token. », puis « Générer ».
   - **Attendu** : les puces arrivent une à une ; premier token, puis débit.
   - **Critère** : premier token en moins de 10 s (NFR-1, LLM nu), débit affiché ≥ 8 tokens/s, pas de saccade de plus de 1 s entre deux puces.
   - **Moyen** : Claude in Chrome ; mesure croisée par script AppSession.
@@ -517,7 +517,7 @@ Les stories 33, 23, 34, 32, 24, 25, 26, 27 et 31 modifient plusieurs de ces fich
   - **Geste** : Qwen3.5-2B, « Montrer les tokens candidats » coché, prompt « La capitale de la France est ». Survoler la première puce.
   - **Attendu** : cinq candidats, « Paris » en tête.
   - **Critère** : somme des `p` affichés ≤ 100 %. Le token tiré est marqué, et le débit baisse de moins de 20 % par rapport à la case décochée.
-  - **Moyen** : Claude in Chrome, puis `pytest -m model` avec `WAVESTACK_TEST_GGUF`.
+  - **Moyen** : Claude in Chrome, puis `pytest -m model` avec `HARNESS_LAB_TEST_GGUF`.
 - **Dimensions réelles**
   - **Geste** : découper un texte avec Qwen3.5-2B, puis 4B.
   - **Attendu** : dimension d'embedding, couches, têtes et vocabulaire conformes à la fiche du modèle.
@@ -560,7 +560,7 @@ Statut : done (2026-09-29, orchestrateur de nuit ; étapes 1 à 4 menées par l'
 
 **Changement :** nouvel écran `/llm` « LLM nu », atteint par un lien de la barre haute et un onglet de `/diagnostic` et `/models`. (1) Tokenisation du texte par le tokenizer du modèle actif (puces avec identifiants, tokens spéciaux), schéma texte → vecteurs aux dimensions réelles. (2) Échantillonnage devenu paramètre de chaque appel (température, top-k dont 0 = désactivé, top-p, min-p), tracé dans `model_call_started.sampling` ; l'atelier envoie toujours les valeurs du harnais, octet pour octet. Génération depuis l'écran dans un état `llm_lab` : lecture du prompt, temps jusqu'au premier token, puces en direct (fragments pour un serveur ou un fournisseur), débit, « Arrêter ». (3) Chargement du modèle étape par étape (`model_load_step`), mémoire occupée, « RAM du CPU, pas de GPU » ; raisonnement en deux couloirs, budget et coupe. (4) Tokens candidats et probabilités pour le moteur intégré seulement (logits de la dernière position, jamais `logits_all`) ; option grisée avec sa raison ailleurs.
 
-**Fichiers :** `models/{engine.py,candidates.py (nouveau),gguf_meta.py,servers.py}`, `session/{llm_lab.py (nouveau),app_session.py}`, `content/llm_lab.yaml` (nouveau), `trace/catalog.py`, `config.py`, `web/app.py`, `web/static/{llm.html,llm.js,llm.css (nouveaux),app.js,index.html,diagnostic.html,models.html}`, `tests/{test_llm_lab.py,test_engine_candidates.py}` (nouveaux) et tests associés, `tools/e2e/{run_e2e.py,fake_*,README.md}`, EXPERIENCE.md, DESIGN.md, SPEC.md (CAP-44), ARCHITECTURE-SPINE.md, README, wavestack.toml, captures 52 à 54.
+**Fichiers :** `models/{engine.py,candidates.py (nouveau),gguf_meta.py,servers.py}`, `session/{llm_lab.py (nouveau),app_session.py}`, `content/llm_lab.yaml` (nouveau), `trace/catalog.py`, `config.py`, `web/app.py`, `web/static/{llm.html,llm.js,llm.css (nouveaux),app.js,index.html,diagnostic.html,models.html}`, `tests/{test_llm_lab.py,test_engine_candidates.py}` (nouveaux) et tests associés, `tools/e2e/{run_e2e.py,fake_*,README.md}`, EXPERIENCE.md, DESIGN.md, SPEC.md (CAP-44), ARCHITECTURE-SPINE.md, README, harness-lab.toml, captures 52 à 54.
 
 **Revue :** 36 constats — 25 corrigés (1 high, 6 medium, 18 low), 2 différés, 9 regroupés ; voir le triage. Le défaut high (onglet de l'atelier bloqué en « écran LLM nu » après une génération) est corrigé et couvert par pytest et l'E2E. **Revue de suivi recommandée : true** — risque non vérifié : la lecture des logits dépend des internes de llama-cpp-python, et les chemins du moteur intégré (candidats, échantillonnage, dimensions) ne passent dans aucun parcours navigateur.
 

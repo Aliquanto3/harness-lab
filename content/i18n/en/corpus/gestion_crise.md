@@ -1,6 +1,6 @@
 # Exemplia crisis management procedure
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this procedure describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this procedure describes no real company. -->
 
 This procedure takes over from the incident reporting procedure as soon as a level 3 incident is declared, or when several Exemplia sites are affected at the same time.
 

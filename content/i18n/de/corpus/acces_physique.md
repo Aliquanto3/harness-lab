@@ -1,6 +1,6 @@
 # Richtlinie für den physischen Zugang zu den Räumlichkeiten von Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Diese Richtlinie beschreibt kein reales Unternehmen. -->
 
 Jeder Standort von Exemplia ist in 3 Zonen unterteilt: normal (Empfang, Großraumbüro), eingeschränkt (sensible Besprechungsräume, technische Räume) und gesichert (Serverraum, Krisenraum). Ein persönliches Zugangsabzeichen, das jeder Person ab ihrem ersten Tag ausgestellt wird, gewährt Zugang zu den für ihre Stelle notwendigen Zonen.
 

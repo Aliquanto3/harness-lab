@@ -1,8 +1,8 @@
-# Vérification technique : amendements cloud du spine WaveStack (FR-43)
+# Vérification technique : amendements cloud du spine HarnessLab (FR-43)
 
 - **Date :** 2026-09-24
 - **Objet :** `ARCHITECTURE-SPINE.md`, amendements du 2026-09-24 (AD-4 mode chat, AD-5 `openai_chat`, AD-6, AD-9, AD-15, AD-16, AD-20, AD-21, Deferred).
-- **Méthode :** lecture préalable de la recherche `technical-api-llm-cloud-gratuites-2026-09-24` (quotas, offres, données : non refait ici) ; documentation officielle des fournisseurs (Groq, Mistral, Microsoft Learn, Google Cloud) ; tickets GitHub datés quand la documentation se tait ; code source de httpx 0.28.1 installé dans le `.venv` du dépôt ; `pyproject.toml` et `src/wavestack/net/` du worktree. Aucun appel réel avec clé : **rien n'a été testé clé en main**. Le spine n'a pas été modifié.
+- **Méthode :** lecture préalable de la recherche `technical-api-llm-cloud-gratuites-2026-09-24` (quotas, offres, données : non refait ici) ; documentation officielle des fournisseurs (Groq, Mistral, Microsoft Learn, Google Cloud) ; tickets GitHub datés quand la documentation se tait ; code source de httpx 0.28.1 installé dans le `.venv` du dépôt ; `pyproject.toml` et `src/harness_lab/net/` du worktree. Aucun appel réel avec clé : **rien n'a été testé clé en main**. Le spine n'a pas été modifié.
 - **Constat général :** les amendements ont été écrits sur le modèle de l'API OpenAI de référence. La recherche d'appui ne couvre pas le protocole de streaming (elle le signale elle-même comme lacune). Plusieurs affirmations d'AD-5 relèvent donc de la mémoire, et deux sont fausses pour Mistral.
 
 ## Synthèse

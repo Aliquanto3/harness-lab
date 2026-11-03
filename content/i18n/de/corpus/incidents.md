@@ -1,6 +1,6 @@
 # Meldung und Behandlung von Sicherheitsvorfällen bei Exemplia
 
-<!-- Fiktiver Text, geschrieben für WaveStack. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
+<!-- Fiktiver Text, geschrieben für HarnessLab. Exemplia ist eine erfundene Organisation: Dieses Verfahren beschreibt kein reales Unternehmen. -->
 
 Ein Sicherheitsvorfall ist jedes Ereignis, das die Vertraulichkeit, Integrität oder Verfügbarkeit der Informationen von Exemplia bedroht: eine geöffnete Phishing-E-Mail, ein verlorener Laptop, ein entdecktes Virus, ein vertrauliches Dokument an den falschen Empfänger, eine verdächtige Anmeldung.
 

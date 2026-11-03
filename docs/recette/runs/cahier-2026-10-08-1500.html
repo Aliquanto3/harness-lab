@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cahier de tests WaveStack</title>
+<title>Cahier de tests HarnessLab</title>
 <style>
   :root {
     --bg: #f6f7f9; --surface: #ffffff; --text: #1b1f24; --muted: #5b6470; --border: #d9dde3;
@@ -70,13 +70,13 @@
 </head>
 <body>
 <main>
-  <h1>Cahier de tests fonctionnels : WaveStack</h1>
+  <h1>Cahier de tests fonctionnels : HarnessLab</h1>
   <p class="lead">Campagne de démonstration exécutée par Claude in Chrome. Chaque cas cible ce qu'un test
     unitaire, d'intégration ou E2E scripté vérifie mal : un jugement sur le sens, un recoupement entre
     sources, un avis visuel ou une exploration.</p>
 
   <section class="meta" aria-label="Contexte de la campagne">
-    <div><span>Application</span>WaveStack, http://127.0.0.1:8420</div>
+    <div><span>Application</span>HarnessLab, http://127.0.0.1:8420</div>
     <div><span>Version</span><span id="meta-version">main @ d239b09</span></div>
     <div><span>Campagne</span><span id="meta-run">2026-10-08-1500</span></div>
     <div><span>Environnement</span>Windows 11, Chrome, modèle local sur CPU</div>
@@ -100,7 +100,7 @@
       <li>Relever les erreurs de la console JavaScript.</li>
     </ol>
     <h3>Résultat attendu</h3>
-    <p>Chaque écran s'affiche sans erreur, l'onglet actif est mis en évidence dans la barre, et le titre du navigateur correspond à celui de la page (« WaveStack — Atelier LLM », etc.).</p>
+    <p>Chaque écran s'affiche sans erreur, l'onglet actif est mis en évidence dans la barre, et le titre du navigateur correspond à celui de la page (« HarnessLab — Atelier LLM », etc.).</p>
     <p class="beyond"><strong>Au-delà de l'E2E :</strong> le testeur juge si l'écran « a l'air cassé » (zone vide, texte tronqué) sans sélecteur prévu à l'avance.</p>
     <div class="verdict" data-case="CT-01"></div>
   </article>
@@ -169,7 +169,7 @@
       <li>Revenir au français.</li>
     </ol>
     <h3>Résultat attendu</h3>
-    <p>Tous les libellés visibles sont en allemand. Les noms propres (WaveStack, MCP, RAG) et les contenus générés par le modèle sont hors périmètre.</p>
+    <p>Tous les libellés visibles sont en allemand. Les noms propres (HarnessLab, MCP, RAG) et les contenus générés par le modèle sont hors périmètre.</p>
     <p class="beyond"><strong>Au-delà de l'E2E :</strong> repérer une phrase française dans une page allemande demande de lire la langue, pas de comparer des clés.</p>
     <div class="verdict" data-case="CT-06"></div>
   </article>
@@ -179,11 +179,11 @@
   </footer>
 </main>
 <!-- Results embedded by scripts/new_recette_run.py --seed (an archived campaign); {} for a blank copy. -->
-<script id="seed" type="application/json">{"CT-01": {"status": "ko", "note": "KO mineur, intermittent. 5 écrans OK : titre du navigateur = titre de page (Atelier LLM, Atelier RAG, Atelier MCP, Diagnostic et modèles), onglet actif marqué (aria-current), 0 erreur console. Anomalie : au 1er passage sur Diagnostic, les 43 logos d'éditeurs restent vides (img.complete=false, largeur 0) alors que /static/logos/qwen.png répond 200. Non reproduit après rechargement ni au 2e passage. Piste : connexions HTTP saturées (flux SSE d'autres onglets) juste après le lancement."}, "CT-02": {"status": "ok", "note": "OK. Réponse (bonsai:8b-q1_0) : « Je n'ai pas accès à la date ou à l'heure actuelle… consulter les horaires ou le calendrier » : aveu d'ignorance, aucune heure inventée. Contexte LLM : gabarit + « Quelle heure est-il ? » (18 tokens). Orchestration : Tour 1, 1 appel au modèle, 18 tokens en entrée, 45 en sortie, 2,7 s, aucun outil."}, "CT-03": {"status": "ok", "note": "OK. Le modèle appelle get_datetime de lui-même (« Déclenché par le modèle », aucune action forcée). Orchestration : appel modèle (626 lus) > demande d'outil get_datetime > exécution OK 0 s > réinjection +28 tokens > réponse (683 lus, 11 écrits). Réponse : « Il est 15 heures et 8 minutes », lien « Outils consultés : Heure et date ». Horloge du poste relevée juste après : 15:09:10, écart < 1 min."}, "CT-04": {"status": "ok", "note": "OK. Schéma : zone RÉSEAU « Aucun composant réseau : rien ne sort du poste » et « aucune donnée n'a quitté le poste ». Navigateur : 115 requêtes, toutes vers 127.0.0.1:8420 (ou URI data:). Recoupement supplémentaire côté serveur (Get-NetTCPConnection sur le processus WaveStack) : 4 connexions établies, toutes vers 127.0.0.1. Ce que dit l'écran est conforme au trafic réel."}, "CT-05": {"status": "ko", "note": "KO mineur (fenêtre 1912x863, thème sombre + projection). Contrastes corrects en sombre. 1) Vue humain : la zone de conversation n'a que 127 px visibles pour 182 px de contenu, la réponse « Il est 15 heures et 8 minutes » est coupée à mi-hauteur ; les 3 prompts suggérés mangent la place. 2) Barre du bas : « Changer de modèl… » tronqué (select natif : invisible pour scrollWidth, vu seulement à l'œil). 3) Panneau des briques : barre de défilement horizontale (débordement mesuré sur #bricks). Faux positif écarté : volets grisés = effet de survol voulu (souris sur une étape), normal une fois la souris retirée. Thème et mode remis à l'origine."}, "CT-06": {"status": "ko", "note": "KO mineur. 443 textes balayés sur le Harnais (texte, title, aria-label, placeholder), puis l’Atelier LLM ; l’interface visible est en allemand. 1) VISIBLE, Atelier LLM, section « ④ Laden des Modells » : les intitulés (FREIGABE, BUDGET, ENGINE, BEREIT) sont en allemand mais les messages restent en français (« Aucun modèle à libérer… », « Prêt : bonsai:8b-q1_0 est actif. », ligne Mémoire vive). La traduction existe (de/messages.yaml : « Bereit: {label} ist aktiv. ») : messages figés dans la langue active au chargement du modèle, jamais retraduits. 2) Infobulles des modèles cloud du menu « Modell wechseln » en français (« Google (hébergement non précisé) », « États-Unis (Groq) »…) : limite CONNUE et documentée (wavestack.toml l. 326-331, décision du 2026-10-01), pas un défaut. Faux positifs écartés : « Français » (nom de langue), recette_crepes.txt (nom de fichier), article allemand « des »."}}</script>
+<script id="seed" type="application/json">{"CT-01": {"status": "ko", "note": "KO mineur, intermittent. 5 écrans OK : titre du navigateur = titre de page (Atelier LLM, Atelier RAG, Atelier MCP, Diagnostic et modèles), onglet actif marqué (aria-current), 0 erreur console. Anomalie : au 1er passage sur Diagnostic, les 43 logos d'éditeurs restent vides (img.complete=false, largeur 0) alors que /static/logos/qwen.png répond 200. Non reproduit après rechargement ni au 2e passage. Piste : connexions HTTP saturées (flux SSE d'autres onglets) juste après le lancement."}, "CT-02": {"status": "ok", "note": "OK. Réponse (bonsai:8b-q1_0) : « Je n'ai pas accès à la date ou à l'heure actuelle… consulter les horaires ou le calendrier » : aveu d'ignorance, aucune heure inventée. Contexte LLM : gabarit + « Quelle heure est-il ? » (18 tokens). Orchestration : Tour 1, 1 appel au modèle, 18 tokens en entrée, 45 en sortie, 2,7 s, aucun outil."}, "CT-03": {"status": "ok", "note": "OK. Le modèle appelle get_datetime de lui-même (« Déclenché par le modèle », aucune action forcée). Orchestration : appel modèle (626 lus) > demande d'outil get_datetime > exécution OK 0 s > réinjection +28 tokens > réponse (683 lus, 11 écrits). Réponse : « Il est 15 heures et 8 minutes », lien « Outils consultés : Heure et date ». Horloge du poste relevée juste après : 15:09:10, écart < 1 min."}, "CT-04": {"status": "ok", "note": "OK. Schéma : zone RÉSEAU « Aucun composant réseau : rien ne sort du poste » et « aucune donnée n'a quitté le poste ». Navigateur : 115 requêtes, toutes vers 127.0.0.1:8420 (ou URI data:). Recoupement supplémentaire côté serveur (Get-NetTCPConnection sur le processus HarnessLab) : 4 connexions établies, toutes vers 127.0.0.1. Ce que dit l'écran est conforme au trafic réel."}, "CT-05": {"status": "ko", "note": "KO mineur (fenêtre 1912x863, thème sombre + projection). Contrastes corrects en sombre. 1) Vue humain : la zone de conversation n'a que 127 px visibles pour 182 px de contenu, la réponse « Il est 15 heures et 8 minutes » est coupée à mi-hauteur ; les 3 prompts suggérés mangent la place. 2) Barre du bas : « Changer de modèl… » tronqué (select natif : invisible pour scrollWidth, vu seulement à l'œil). 3) Panneau des briques : barre de défilement horizontale (débordement mesuré sur #bricks). Faux positif écarté : volets grisés = effet de survol voulu (souris sur une étape), normal une fois la souris retirée. Thème et mode remis à l'origine."}, "CT-06": {"status": "ko", "note": "KO mineur. 443 textes balayés sur le Harnais (texte, title, aria-label, placeholder), puis l’Atelier LLM ; l’interface visible est en allemand. 1) VISIBLE, Atelier LLM, section « ④ Laden des Modells » : les intitulés (FREIGABE, BUDGET, ENGINE, BEREIT) sont en allemand mais les messages restent en français (« Aucun modèle à libérer… », « Prêt : bonsai:8b-q1_0 est actif. », ligne Mémoire vive). La traduction existe (de/messages.yaml : « Bereit: {label} ist aktiv. ») : messages figés dans la langue active au chargement du modèle, jamais retraduits. 2) Infobulles des modèles cloud du menu « Modell wechseln » en français (« Google (hébergement non précisé) », « États-Unis (Groq) »…) : limite CONNUE et documentée (harness-lab.toml l. 326-331, décision du 2026-10-01), pas un défaut. Faux positifs écartés : « Français » (nom de langue), recette_crepes.txt (nom de fichier), article allemand « des »."}}</script>
 <script>
   const STATUSES = [["todo", "À exécuter"], ["ok", "OK"], ["ko", "KO"], ["blocked", "Bloqué"]];
   // One state per copy: each campaign file starts blank, whatever the other copies hold.
-  const KEY = "wavestack-cahier:" + location.pathname;
+  const KEY = "harness-lab-cahier:" + location.pathname;
   let state = null;
   try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
   if (!state) { try { state = JSON.parse(document.getElementById("seed").textContent) || {}; } catch (e) { state = {}; } }

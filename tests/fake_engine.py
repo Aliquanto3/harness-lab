@@ -6,9 +6,9 @@ import threading
 import time
 from collections.abc import Iterator, Sequence
 
-from wavestack import config
-from wavestack.models.candidates import piece_text, read_logits, top_from_logits
-from wavestack.models.engine import (
+from harness_lab import config
+from harness_lab.models.candidates import piece_text, read_logits, top_from_logits
+from harness_lab.models.engine import (
     DEFAULT_SAMPLING,
     PREFILL_BATCH,
     CancelToken,
@@ -17,7 +17,7 @@ from wavestack.models.engine import (
     Fragment,
     common_prefix_len,
 )
-from wavestack.session.app_session import AppSession
+from harness_lab.session.app_session import AppSession
 
 CHATML = (
     r"{% for message in messages %}"

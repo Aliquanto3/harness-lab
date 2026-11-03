@@ -19,8 +19,8 @@ from test_cloud import GEMINI_TEXT, GeminiProvider, _cloud_session, _of, _turn
 from test_tools import QWEN
 from test_turn import _run
 
-from wavestack import config
-from wavestack.models.cloud_base import (
+from harness_lab import config
+from harness_lab.models.cloud_base import (
     CallCost,
     cost_ring,
     record_spend,
@@ -28,9 +28,9 @@ from wavestack.models.cloud_base import (
     reset_spend,
     session_spend,
 )
-from wavestack.models.engine import Sampling
-from wavestack.trace.catalog import ConsumptionUpdatedPayload, SpendColumn
-from wavestack.trace.journal import get_journal
+from harness_lab.models.engine import Sampling
+from harness_lab.trace.catalog import ConsumptionUpdatedPayload, SpendColumn
+from harness_lab.trace.journal import get_journal
 
 CELLS = ("read", "write", "write_1h", "uncached")
 
@@ -201,7 +201,7 @@ def test_local_calls_of_the_fake_engine_sum_to_their_prompts():
 )
 @pytest.mark.parametrize("model_id", ["claude_haiku", "openai_luna", "gemini"])
 def test_the_ring_posts_sum_to_the_cost(model_id, cached_read, cached_write, prompt, one_hour):
-    from wavestack.models.cloud_base import call_cost
+    from harness_lab.models.cloud_base import call_cost
 
     pricing = config.load_config().cloud_model(model_id).pricing
     assert pricing is not None
@@ -220,7 +220,7 @@ def test_the_ring_posts_sum_to_the_cost(model_id, cached_read, cached_write, pro
 
 
 def test_the_ring_puts_the_whole_write_in_the_5_minute_post_without_a_1h_count():
-    from wavestack.models.cloud_base import call_cost
+    from harness_lab.models.cloud_base import call_cost
 
     pricing = config.load_config().cloud_model("claude_haiku").pricing
     cost = call_cost(pricing, 1000, 10, "api", cached_read=0, cached_write=150)
@@ -231,7 +231,7 @@ def test_the_ring_puts_the_whole_write_in_the_5_minute_post_without_a_1h_count()
 
 
 def test_the_ring_prices_the_1h_part_at_the_1h_price():
-    from wavestack.models.cloud_base import call_cost, write_1h_price
+    from harness_lab.models.cloud_base import call_cost, write_1h_price
 
     pricing = config.load_config().cloud_model("claude_haiku").pricing
     cost = call_cost(pricing, 1000, 10, "api", cached_read=0, cached_write=150, cached_write_1h=50)

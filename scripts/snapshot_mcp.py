@@ -3,7 +3,7 @@
     uv run python scripts/snapshot_mcp.py [--server datagouv] [--out content/mcp_snapshots]
 
 Connects to each public server of the `mcp` brick (data.gouv.fr, Microsoft Learn) as
-WaveStack does, lists its tools, and writes them to `{out}/{server_id}.json`. To run on the
+HarnessLab does, lists its tools, and writes them to `{out}/{server_id}.json`. To run on the
 target workstation, network open: the scenario window test (`tests/test_program.py`) counts
 these snapshots instead of the plausible fixtures of `tests/fixtures/mcp_tools/`.
 The network guard is installed first, with the hosts of `[net] allowed_hosts`.
@@ -18,15 +18,15 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from wavestack import config as _config
-from wavestack.net.guard import install as _install_guard
+from harness_lab import config as _config
+from harness_lab.net.guard import install as _install_guard
 
 # AD-15: before any third-party import.
 _install_guard(_config.load_config().allowed_hosts)
 
-from wavestack import config  # noqa: E402
-from wavestack.mcp.connection import McpConnection, describe_error  # noqa: E402
-from wavestack.mcp.servers import mcp_servers  # noqa: E402
+from harness_lab import config  # noqa: E402
+from harness_lab.mcp.connection import McpConnection, describe_error  # noqa: E402
+from harness_lab.mcp.servers import mcp_servers  # noqa: E402
 
 
 async def _tools(server, timeout: float) -> list[dict]:  # noqa: ANN001

@@ -58,26 +58,26 @@ baseline_commit: '9febb5a7f706c6af7419f7a9dddcec3fd101bc51'
 
 ## Code Map
 
-- `src/wavestack/hooks.py` (nouveau, anglais) : `HookPoint` (5 points), `HookContext` (dataclass figée), `HookResult{decision, detail_fr, effects, injection, arguments}`, `ALLOWED` par point, `Hook{id, points, fn}`, `DEMO_HOOKS = (h1, h2, h3)`. Fonctions pures ; H1 réutilise `tools.native.demo_dir()` et la résolution de `read_file` (L91-97) ; H2 formate les lignes depuis `ctx.events` (enveloppes du tour : `journal.all_events()` filtré par `turn_id`) ; H3 réutilise `_WEEKDAYS_FR` de `tools/native.py`. `content/hooks.yaml` : libellés des hooks et des points, texte H3, `audit_label_fr`. `content/bricks/hooks.yaml` : carte (hook = code déterministe à un point du tour ; H3 face à l'outil « heure » : deux architectures pour un même besoin).
-- `src/wavestack/session/effects.py` : `AuditAppend{kind: "audit_append", lines}` ajouté à `Effect`.
-- `src/wavestack/bricks/registry.py` : brique `hooks`, `HOOKS = ("h1", "h2", "h3")` sur le modèle de `SKILLS`.
-- `src/wavestack/trace/catalog.py` : payloads `hook_decided` et `effect_applied` dans `PAYLOAD_MODELS` (L286) ; `ArchitectureNode.kind` reçoit `"hook"` ; `TurnStatus` (L96) reçoit `blocked`.
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/hooks.py` (nouveau, anglais) : `HookPoint` (5 points), `HookContext` (dataclass figée), `HookResult{decision, detail_fr, effects, injection, arguments}`, `ALLOWED` par point, `Hook{id, points, fn}`, `DEMO_HOOKS = (h1, h2, h3)`. Fonctions pures ; H1 réutilise `tools.native.demo_dir()` et la résolution de `read_file` (L91-97) ; H2 formate les lignes depuis `ctx.events` (enveloppes du tour : `journal.all_events()` filtré par `turn_id`) ; H3 réutilise `_WEEKDAYS_FR` de `tools/native.py`. `content/hooks.yaml` : libellés des hooks et des points, texte H3, `audit_label_fr`. `content/bricks/hooks.yaml` : carte (hook = code déterministe à un point du tour ; H3 face à l'outil « heure » : deux architectures pour un même besoin).
+- `src/harness_lab/session/effects.py` : `AuditAppend{kind: "audit_append", lines}` ajouté à `Effect`.
+- `src/harness_lab/bricks/registry.py` : brique `hooks`, `HOOKS = ("h1", "h2", "h3")` sur le modèle de `SKILLS`.
+- `src/harness_lab/trace/catalog.py` : payloads `hook_decided` et `effect_applied` dans `PAYLOAD_MODELS` (L286) ; `ArchitectureNode.kind` reçoit `"hook"` ; `TurnStatus` (L96) reçoit `blocked`.
+- `src/harness_lab/session/app_session.py` :
   - `__init__` (L202) : paramètre `hooks` (défaut `DEMO_HOOKS`) pour les hooks de test ; `_hooks_enabled = {h1, h2, h3}` ; `_sent` (L260) gagne un 7e élément ; `_pending_ids` (L396), `_emit_bricks` (L469, `_hook_options` sur le modèle de `_skill_options` L428), `_drawn_components` (L283), `_emit_architecture` (L329 : `kind: "hook"` ; le code du nœud `file.demo_dir` L336-351 généralisé à `file.audit`, avec `detail_fr` = chemin) ; `set_hook` sur le modèle de `set_skill` (L1029) ; `_load_content` charge `content/hooks.yaml` (échec → brique indisponible).
   - `TurnState` (L171) : `hooks: tuple[str, ...]` (actifs si la brique est effective) et `injection: str = ""` ; `Exchange` (L145) : `injection: str = ""`. `_messages` (L837) : `Part(HOOK_INJECTION, …, "hooks", "hooks.h3")` avant le message du tour, et `Part(HISTORY, …)` avant `ex.user` dans l'historique.
   - `_hook(point, state, **ctx) -> HookResult | None` : appelle les hooks actifs du point, valide, émet `hook_decided` sur une nouvelle étape, s'arrête au premier `block`. `_run_tool(call, spec, state, cancel, effects) -> str | None` extrait de `_turn` (L1461-1476) : `before_tool` (block, modify), exécuteur, `after_tool` ; c'est là que 8b branchera `ask_human` et que la story 9 passera.
   - `_run_turn` (L1346) : `on_user_message` avant `_turn` (`dataclasses.replace(state, injection=…)`), `on_turn_end` dans `finally` avant `turn_ended`. `_turn` (L1374) : `before_model_call` avant `_render` ; effets `AuditAppend` dans la boucle d'effets (L1484) via `_apply_audit(lines)`, aussi appelée pour `on_turn_end`.
-- `src/wavestack/web/app.py` : `POST /api/intentions/hook {hook, enabled}` (404 si inconnu), sur le modèle de `skill` (L225) ; `GET /api/audit` → `{path, text}`.
-- `src/wavestack/web/static/app.js` : `applyEnvelope` (L102) : `hook_decided` → étape `{type: "hook"}`, `effect_applied` rattache ses lignes à la dernière étape `hook` ; `renderSteps` (L930) : carte via `harnessEvent` (L778, `is-error` pour `block`) + mention de `malformedCard` (L926) ; `setOption` (L468) → `/api/intentions/hook` ; `BRICK_ICONS` (L1063) : `hooks` ; `renderSchema` (L1238-1273) : `detail_fr` dans l'infobulle de tout nœud, classe `is-blocked` sur un nœud de hook qui a bloqué dans le dernier tour, clic sur `file.audit` → tiroir (`<dialog>` en lecture seule, ou le tiroir existant du prompt système s'il se réutilise). `app.css` : `.arch-node.is-blocked` (filet `--color-state-error`).
+- `src/harness_lab/web/app.py` : `POST /api/intentions/hook {hook, enabled}` (404 si inconnu), sur le modèle de `skill` (L225) ; `GET /api/audit` → `{path, text}`.
+- `src/harness_lab/web/static/app.js` : `applyEnvelope` (L102) : `hook_decided` → étape `{type: "hook"}`, `effect_applied` rattache ses lignes à la dernière étape `hook` ; `renderSteps` (L930) : carte via `harnessEvent` (L778, `is-error` pour `block`) + mention de `malformedCard` (L926) ; `setOption` (L468) → `/api/intentions/hook` ; `BRICK_ICONS` (L1063) : `hooks` ; `renderSchema` (L1238-1273) : `detail_fr` dans l'infobulle de tout nœud, classe `is-blocked` sur un nœud de hook qui a bloqué dans le dernier tour, clic sur `file.audit` → tiroir (`<dialog>` en lecture seule, ou le tiroir existant du prompt système s'il se réutilise). `app.css` : `.arch-node.is-blocked` (filet `--color-state-error`).
 - Tests : réutiliser `FakeEngine`, `QWEN`, `call`, `_segments` (`tests/test_tools.py`), `_run` (`tests/test_turn.py`), aides de `tests/test_skills.py` (L22-64). `config.data_dir()` pointe vers `tmp_path` (voir `tests/conftest.py`).
 
 ## Tasks & Acceptance
 
 **Execution:**
 - [x] `content/hooks.yaml`, `content/bricks/hooks.yaml` -- libellés, texte H3, carte -- AD-19, FR-27
-- [x] `src/wavestack/hooks.py`, `session/effects.py`, `bricks/registry.py`, `trace/catalog.py` -- contrat de hook, trois hooks, `AuditAppend`, brique, événements -- AD-2, AD-12, AD-13, AD-23
-- [x] `src/wavestack/session/app_session.py` -- points d'accroche, `_run_tool`, audit, injection, sous-options, schéma -- AD-13, AD-14, AD-17
-- [x] `src/wavestack/web/app.py`, `static/app.js`, `static/app.css` -- intention `hook`, `GET /api/audit`, cartes, tiroir, schéma -- AD-1, AD-18
+- [x] `src/harness_lab/hooks.py`, `session/effects.py`, `bricks/registry.py`, `trace/catalog.py` -- contrat de hook, trois hooks, `AuditAppend`, brique, événements -- AD-2, AD-12, AD-13, AD-23
+- [x] `src/harness_lab/session/app_session.py` -- points d'accroche, `_run_tool`, audit, injection, sous-options, schéma -- AD-13, AD-14, AD-17
+- [x] `src/harness_lab/web/app.py`, `static/app.js`, `static/app.css` -- intention `hook`, `GET /api/audit`, cartes, tiroir, schéma -- AD-1, AD-18
 - [x] `tests/test_hooks.py` -- les lignes de la matrice ; chaque rendu : somme des tokens égale au total, aucun `harness_error` d'attribution
 
 **Acceptance Criteria:**
@@ -133,7 +133,7 @@ H2 est sans état : il déduit des événements du tour ce qui suit sa dernière
 **Commands:**
 - `uv run ruff check .` et `uv run ruff format --check .` -- expected: aucune erreur
 - `uv run pytest` -- expected: tous les tests passent (tests `model` exclus)
-- `node --check src/wavestack/web/static/app.js` -- expected: aucune erreur
+- `node --check src/harness_lab/web/static/app.js` -- expected: aucune erreur
 
 **Manual checks (if no CLI):**
-- `uv run wavestack` : activer « Outils » et « Hooks » ; demander le budget du dossier confidentiel (événement rouge, nœud H1 rouge) ; cliquer sur « Journal d'audit » ; vérifier l'ajout H3 dans Contexte LLM.
+- `uv run harness-lab` : activer « Outils » et « Hooks » ; demander le budget du dossier confidentiel (événement rouge, nœud H1 rouge) ; cliquer sur « Journal d'audit » ; vérifier l'ajout H3 dans Contexte LLM.

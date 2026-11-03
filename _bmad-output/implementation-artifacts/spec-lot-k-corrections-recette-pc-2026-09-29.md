@@ -38,7 +38,7 @@ consignes de Lazy loading et Souveraineté passent à ce secours. Le refus du 20
 
 **Always:** textes en français, code en anglais ; `uv`, `ruff`, `pytest` ; E2E sans FAIL (ici
 sous Windows, polices de Windows, faute de conteneur) ; dossier de données réel jamais touché
-(tests et E2E sous `WAVESTACK_DATA_DIR` temporaire) ; décisions par défaut consignées dans les
+(tests et E2E sous `HARNESS_LAB_DATA_DIR` temporaire) ; décisions par défaut consignées dans les
 Implementation Notes.
 
 **Never:** changer AD-17 (un tour non `completed` reste hors de l'historique) : si c'est
@@ -61,7 +61,7 @@ sondes ; relancer une sonde de tous les modèles.
 
 ## Code Map
 
-- `src/wavestack/models/probe.py` -- `kv_bytes_per_token` (l. 75-108), `probed_entry` (l. 341),
+- `src/harness_lab/models/probe.py` -- `kv_bytes_per_token` (l. 75-108), `probed_entry` (l. 341),
   `gguf_kv_bytes_per_token` / `_header_kv` (l. 347-364, `lru_cache`, en-tête seul) ;
   `PROBE_VERSION = 2` (le monter ferait resonder tous les modèles et invaliderait `failed_probes`).
 - Lecteurs de la valeur sondée : `load_registry.py:140-152` (`file_cost` : `max(rss, taille) + kv ×
@@ -70,29 +70,29 @@ sondes ; relancer une sonde de tous les modèles.
   par `probed_entry` : y recalculer suffit.
 - Tests KV : `tests/test_probe.py` (`HYBRID` l. 282, `write_gguf`), `tests/test_model_switch.py:666`,
   `tests/test_context_window_setting.py:303`.
-- `src/wavestack/web/static/app.css` -- `.top-bar` l. 173, `.top-bar > :not(.gauge)` l. 561,
+- `src/harness_lab/web/static/app.css` -- `.top-bar` l. 173, `.top-bar > :not(.gauge)` l. 561,
   sélecteur de scénario l. 568 / 3607 / 3877 / 4589, indicateur du modèle l. 573, `model-picker`
   l. 588, `.pane-chips` l. 613-618 (`flex: 0 1000 auto`), `.pane-chips > .pane-chip` l. 620 / 629,
   `.gauge-stack` l. 636 (300 px), `.gauge-figures` l. 706, sélecteur de thème l. 4142-4168
   (`@media (max-width:1400px)`), projection `:root.projection` l. 4563-4590 (`.gauge` en
   `flex-shrink: 1000000` : les chiffres disparaissent), fenêtre l. 3833-3952.
-- `src/wavestack/web/static/app.js` -- `renderChips` l. 5571-5607 ; `renderWindowPicker`
+- `src/harness_lab/web/static/app.js` -- `renderChips` l. 5571-5607 ; `renderWindowPicker`
   l. 2364 (infobulle de `#window-toggle`) ; `forceButton` l. 1561, `cardForce` l. 1590 (`aria-expanded`
   posé à la construction, pas à l'ouverture), `forceForm` l. 1631, `forceUiChanged` l. 1056.
-- `src/wavestack/web/static/theme.js` -- `pageshow` seulement si `persisted` (l. 69) ; pickers
+- `src/harness_lab/web/static/theme.js` -- `pageshow` seulement si `persisted` (l. 69) ; pickers
   `index.html:59`, `diagnostic.html:73`, `models.html:117`, `llm.html:19`.
-- `src/wavestack/web/static/index.html` -- panneau Fenêtre l. 25-43 ; tiroir de la mémoire
+- `src/harness_lab/web/static/index.html` -- panneau Fenêtre l. 25-43 ; tiroir de la mémoire
   l. 97-123 (`drawer-head` / `drawer-scroll` / `drawer-foot`, colonne flex, CSS l. 2672-2778 : à
   reprendre).
-- `src/wavestack/models/servers.py:888-904` -- `context_warning_fr` (seul cas « trop grand ») ;
+- `src/harness_lab/models/servers.py:888-904` -- `context_warning_fr` (seul cas « trop grand ») ;
   appelant `discovery.py:222` avec la fenêtre configurée ; affichage `diagnostic.py:623` / `792`,
   `diagnostic.html:290-296`. Tests `tests/test_model_servers.py:1332-1408`.
 - `content/scenarios.yaml` -- `mcp_lazy` l. 206-228, `skills` l. 230-249, `soc` l. 357-393, `iam`
   l. 395-426, `sovereignty` l. 428-463 ; secours décrits en prose dans `description_fr`.
-- `src/wavestack/session/app_session.py` -- `arm` l. 4005 (kind `tool` l. 4010-4029),
+- `src/harness_lab/session/app_session.py` -- `arm` l. 4005 (kind `tool` l. 4010-4029),
   `_consume_armed` l. 6120, `_armed_unavailable` l. 6213, `_tool_options` l. 1283, `Exchange`
   l. 412, AD-17 l. 5452 ; plafond des résultats global `[tools] result_max_tokens = 1200`
-  (`wavestack.toml:140`).
+  (`harness-lab.toml:140`).
 - `tests/test_program.py` -- `FIRST_RESULT_ROOM` l. 69, `_verdict` l. 403, test `fits` l. 434-524
   (premier prompt seulement) ; `test_small_model_prompts_name_the_tool_or_skill_and_the_fallback`
   l. 215 (libellés des consignes).
@@ -131,7 +131,7 @@ sondes ; relancer une sonde de tous les modèles.
   emplacement est sous la fenêtre choisie ; infobulle « …, 8 192 choisi » quand configurée ≠
   effective ; N26-6 et N26-7 alignés (bouton sur la fenêtre effective).
 - [x] 5 · `theme.js`, `index.html`, `diagnostic.html`, `models.html`, `llm.html` --
-  `autocomplete="off"` et relecture de `wavestack.theme` à chaque `pageshow`. E2E : « Sombre »,
+  `autocomplete="off"` et relecture de `harness_lab.theme` à chaque `pageshow`. E2E : « Sombre »,
   `/diagnostic`, « Clair », `page.go_back()` : sélecteur sur « Clair ».
 - [x] 6 · `app.js`, `index.html`, `app.css` -- `aria-expanded` suit l'ouverture du formulaire
   d'action forcée ; panneau Fenêtre en colonne avec pied épinglé « Appliquer » / « Fermer ».
@@ -178,7 +178,7 @@ les exceptions notées plus bas (points 3a et 6).
   projection, la barre compacte de moins de 1 400 px (« Projection », « LLM », « Fenêtre » sans
   le mot, sélecteur de thème compact) vaut jusqu'à 1 600 px, et sous 1 400 px les noms
   descendent encore (2 à 2,5 rem) pour garder 10 px de marge à la puce à 1 280. Sous 1 100 px
-  (1 280 à 125 %), le titre « WaveStack » disparaît et la puce « · lié » peut céder, en dernier :
+  (1 280 à 125 %), le titre « HarnessLab » disparaît et la puce « · lié » peut céder, en dernier :
   à 1 024 px la barre tient et la légende n'est plus recouverte, la puce peut y être tronquée
   (le critère de la spec à 1 024 ne porte que sur la légende). Mesures Chromium avec la puce
   « · lié » : chiffres entiers ou presque à 1 366, 1 600 et 1 700 px en mode normal, coupés à
@@ -253,7 +253,7 @@ le cache de préfixe ; rien n'est changé sans ta décision.
 | 3b | « Métier SOC », prompts 1 puis 2 | prompt 1 `completed` (pas `limit`) ; prompt 2 : lecture bloquée par H1, escalade | tour 1 `completed` ; `hook_decided h1 block` au tour 2 |
 | 3b | « Métier IAM », prompt 1, « Vider la conversation », prompt 2 | ≥ 1 appel par prompt, deux liens learn.microsoft.com par réponse, aucun « Contexte dépassé » | liens présents ; pas de `context_overflow` |
 | 3b | « Métier Souveraineté », prompt 1 ; secours « Forcer l'appel · datagouv__search_datasets », préréglage « cybersécurité » ; « Vider la conversation » ; prompt 2 (secours mslearn si besoin) | requête sortante vers mcp.data.gouv.fr puis learn.microsoft.com, vrais jeux de données cités | une `outbound_request` par serveur ; aucune réponse inventée |
-| 4 | Fenêtre 8 192 enregistrée, llama-server `-np 1 -c 4096`, relancer WaveStack | bouton « Fenêtre 4 096 ▾ », infobulle « …, 8 192 choisi. » ; `/diagnostic` : « relancez-le avec `-np 1 -c 8192` » | texte du conseil présent ; infobulle juste |
+| 4 | Fenêtre 8 192 enregistrée, llama-server `-np 1 -c 4096`, relancer HarnessLab | bouton « Fenêtre 4 096 ▾ », infobulle « …, 8 192 choisi. » ; `/diagnostic` : « relancez-le avec `-np 1 -c 8192` » | texte du conseil présent ; infobulle juste |
 | 5 | Chrome et Edge : « Sombre », `/diagnostic`, « Clair », « Précédent » | atelier clair, sélecteur « ☀ Clair » | sélecteur = thème appliqué |
 | 6 | Edge, lecteur d'écran ou DevTools : « Sous-agent », « Déléguer au sous-agent » | `aria-expanded="true"` formulaire ouvert, `false` fermé | valeur juste dans l'arbre d'accessibilité |
 | 6 | 1 280 × 650, 100 % puis 125 % et 150 %, « Fenêtre ▾ » | « Appliquer » et « Fermer » visibles en pied, les choix défilent au-dessus | boutons visibles sans défiler |
@@ -270,7 +270,7 @@ touche que la CSS et l'E2E ; `test_web_tokens` et `test_web_app` relancés aprè
 652 vérifications réussies, 0 en échec ; 5 `harness_error` voulus (429, 500, flux cassé, 401,
 téléchargement d'embedding) et 3 erreurs de console attendues (réseau coupé du parcours), comme
 dans le rapport de recette. Le test `fits` n'a tourné qu'en estimation (2 caractères par token) :
-relancé ensuite en décompte exact avec `WAVESTACK_TEST_GGUF` = le 2B du poste (lecture seule du
+relancé ensuite en décompte exact avec `HARNESS_LAB_TEST_GGUF` = le 2B du poste (lecture seule du
 GGUF, dossier de données temporaire) : réussi, plus petite marge `mcp_full` p1 380 ; en-têtes
 réels lus par `gguf_kv_bytes_per_token` : 2B 12 288, 4B 32 768 octets par token.
 « Échoue avant » vérifié point par point : point 1 (4 tests), 2 (E2E, 7 px à 1 280 projection),
@@ -285,7 +285,7 @@ Prompt de recette pour le Claude Code du PC :
 ### Vérification finale (après la revue, tête `bfe28eb`)
 
 `uv run ruff check .` et `uv run ruff format --check .` : propres. `uv run pytest -q` : 1 253
-réussis, 3 sautés. `fits` exact (`WAVESTACK_TEST_GGUF` = le 2B du poste) : réussi. E2E complet
+réussis, 3 sautés. `fits` exact (`HARNESS_LAB_TEST_GGUF` = le 2B du poste) : réussi. E2E complet
 (`PYTHONUTF8=1`, sortie redirigée vers un fichier ; sans cette variable, la console cp1252 lève
 `UnicodeEncodeError` et fait échouer la suite en cascade) : 653 vérifications réussies, 0 en
 échec. Deux constats reportés dans `deferred-work.md` (contrôle d'`aria-expanded`, historique

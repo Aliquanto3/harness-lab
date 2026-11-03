@@ -9,9 +9,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from wavestack import config
-from wavestack.rag import contexts, lab
-from wavestack.rag.corpus import (
+from harness_lab import config
+from harness_lab.rag import contexts, lab
+from harness_lab.rag.corpus import (
     Chunk,
     DocText,
     chunk_documents,

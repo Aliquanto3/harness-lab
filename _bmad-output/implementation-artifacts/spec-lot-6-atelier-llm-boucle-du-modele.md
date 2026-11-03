@@ -48,15 +48,15 @@ context:
 
 ## Code Map
 
-- `src/wavestack/session/llm_lab.py` -- `LabContent` (strict) : ajouter les textes `stages` (input, transfo, output, liens, pas, bandeaux, note) ; `architecture_from_header(meta)` ; `read_architecture(path)` (cache chemin + mtime) ; paramètre `architecture=` de `dimensions_payload` (défaut `None`).
-- `src/wavestack/models/gguf_meta.py` -- `try_read_metadata`, `positive_size` : réutiliser, ne pas modifier.
-- `src/wavestack/trace/catalog.py:1087` -- `LlmDimensions` : `architecture: LlmArchitecture | None = None` (classe ajoutée au-dessus).
-- `src/wavestack/session/app_session.py` -- dernier recours, à signaler : `_lab_dimensions` (l.~8323) passe `architecture=` ; nouvelle méthode `llm_step(prompt, continuation, sampling)` sur le modèle de `llm_generate` (l.8478 : `_lab_begin(False, True)`, refus si continuation > 64 ou id ≥ vocabulaire) ; `_run_lab` (l.8665) gagne `continuation: Sequence[int] = ()` (ids ajoutés après `rendered.ids`) et `max_tokens: int | None = None` (remplace `reserve` dans l'appel `_call_model`). Le request id du pas est `llm{n}.step` ; la mémoire `_lab_top` garde le token 0, donc `llm_distribution(0, …)` marche tel quel.
-- `src/wavestack/web/app.py:189-215, 422-470` -- ajouter `LlmStepIntention` (prompt ≤ 2 000, `continuation: list[int]` ≤ 64, `sampling`) et `POST /api/intentions/llm_step` (409 sur `SendRefused`), à la suite des routes `llm_*`.
-- `src/wavestack/web/static/diagram.js` -- ajout : option `liveText` de `createStepper` (défaut `t("common.diagram.live")`) ; réutiliser `svgEl`, `block`, `light`, `explain`.
-- `src/wavestack/web/static/llm.html:66-116` -- sections 1 et 2 remplacées par les trois cartes ; sections 3 à 6 renumérotées 4 à 7.
-- `src/wavestack/web/static/llm.js` -- `renderTokenized`/`renderDiagram` (l.~200-385) → INPUT et TRANSFORMATION ; `renderSampling`, `renderDistribution` (l.~400-640) → OUTPUT ; routage des événements `llm{n}.step` dans `applyEnvelope` (comme le couloir B) ; ajouts gardés dans le store, effacés quand le texte change.
-- `src/wavestack/web/static/llm.css:291-395, 782-925` -- règles `embedding-*` remplacées par `llm-stage-*`, `llm-input-*`, `llm-transfo-*`, `llm-output-*` ; reprise du CSS de la maquette, jetons seulement.
+- `src/harness_lab/session/llm_lab.py` -- `LabContent` (strict) : ajouter les textes `stages` (input, transfo, output, liens, pas, bandeaux, note) ; `architecture_from_header(meta)` ; `read_architecture(path)` (cache chemin + mtime) ; paramètre `architecture=` de `dimensions_payload` (défaut `None`).
+- `src/harness_lab/models/gguf_meta.py` -- `try_read_metadata`, `positive_size` : réutiliser, ne pas modifier.
+- `src/harness_lab/trace/catalog.py:1087` -- `LlmDimensions` : `architecture: LlmArchitecture | None = None` (classe ajoutée au-dessus).
+- `src/harness_lab/session/app_session.py` -- dernier recours, à signaler : `_lab_dimensions` (l.~8323) passe `architecture=` ; nouvelle méthode `llm_step(prompt, continuation, sampling)` sur le modèle de `llm_generate` (l.8478 : `_lab_begin(False, True)`, refus si continuation > 64 ou id ≥ vocabulaire) ; `_run_lab` (l.8665) gagne `continuation: Sequence[int] = ()` (ids ajoutés après `rendered.ids`) et `max_tokens: int | None = None` (remplace `reserve` dans l'appel `_call_model`). Le request id du pas est `llm{n}.step` ; la mémoire `_lab_top` garde le token 0, donc `llm_distribution(0, …)` marche tel quel.
+- `src/harness_lab/web/app.py:189-215, 422-470` -- ajouter `LlmStepIntention` (prompt ≤ 2 000, `continuation: list[int]` ≤ 64, `sampling`) et `POST /api/intentions/llm_step` (409 sur `SendRefused`), à la suite des routes `llm_*`.
+- `src/harness_lab/web/static/diagram.js` -- ajout : option `liveText` de `createStepper` (défaut `t("common.diagram.live")`) ; réutiliser `svgEl`, `block`, `light`, `explain`.
+- `src/harness_lab/web/static/llm.html:66-116` -- sections 1 et 2 remplacées par les trois cartes ; sections 3 à 6 renumérotées 4 à 7.
+- `src/harness_lab/web/static/llm.js` -- `renderTokenized`/`renderDiagram` (l.~200-385) → INPUT et TRANSFORMATION ; `renderSampling`, `renderDistribution` (l.~400-640) → OUTPUT ; routage des événements `llm{n}.step` dans `applyEnvelope` (comme le couloir B) ; ajouts gardés dans le store, effacés quand le texte change.
+- `src/harness_lab/web/static/llm.css:291-395, 782-925` -- règles `embedding-*` remplacées par `llm-stage-*`, `llm-input-*`, `llm-transfo-*`, `llm-output-*` ; reprise du CSS de la maquette, jetons seulement.
 - `content/llm_lab.yaml`, `content/i18n/{en,de}/llm_lab.yaml` -- textes du tableau Voice and Tone d'EXPERIENCE.md ; `tests/test_i18n.py` vérifie la parité.
 - `tests/test_llm_lab.py` -- tests propres au lot.
 - `tools/e2e/run_e2e.py` -- `s_llm_screen` (l.10856), `s_llm_live` (l.11461) inchangés ; ajouter `s_llm_loop` et ses fonctions `_llm_loop_*`, et l'entrée `("llm_loop", s_llm_loop)` à la liste.
@@ -64,13 +64,13 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `src/wavestack/trace/catalog.py` -- `LlmArchitecture` (name, family, attention_interval, kv_head_count, feed_forward_length, expert_count, expert_used_count, figures_text) et le champ de `LlmDimensions`.
-- [x] `src/wavestack/session/llm_lab.py` -- classification, lecture cachée, textes `stages`, paramètre de `dimensions_payload`.
-- [x] `src/wavestack/session/app_session.py` -- `_lab_dimensions`, `llm_step`, paramètres de `_run_lab` (signalés dans les notes de fusion).
-- [x] `src/wavestack/web/app.py` -- `LlmStepIntention` et la route.
+- [x] `src/harness_lab/trace/catalog.py` -- `LlmArchitecture` (name, family, attention_interval, kv_head_count, feed_forward_length, expert_count, expert_used_count, figures_text) et le champ de `LlmDimensions`.
+- [x] `src/harness_lab/session/llm_lab.py` -- classification, lecture cachée, textes `stages`, paramètre de `dimensions_payload`.
+- [x] `src/harness_lab/session/app_session.py` -- `_lab_dimensions`, `llm_step`, paramètres de `_run_lab` (signalés dans les notes de fusion).
+- [x] `src/harness_lab/web/app.py` -- `LlmStepIntention` et la route.
 - [x] `content/llm_lab.yaml` + en + de -- textes des trois étapes.
-- [x] `src/wavestack/web/static/diagram.js` -- option `liveText`.
-- [x] `src/wavestack/web/static/llm.html`, `llm.js`, `llm.css` -- les trois étapes, l'aide des réglages, le pas à pas réel, la renumérotation.
+- [x] `src/harness_lab/web/static/diagram.js` -- option `liveText`.
+- [x] `src/harness_lab/web/static/llm.html`, `llm.js`, `llm.css` -- les trois étapes, l'aide des réglages, le pas à pas réel, la renumérotation.
 - [x] `tests/test_llm_lab.py` -- matrice I/O côté session : classification (dense, hybride, MoE, hybride+MoE, inconnu, cache), `llm_step` (un token, candidats, continuation lue, refus 409 : hors idle, sans moteur en processus, > 64, id hors vocabulaire), `/distribution` après un pas, contenus valides en trois langues.
 - [x] `tools/e2e/run_e2e.py` -- `s_llm_loop` : INPUT pas à pas, TRANSFORMATION 7 pas et bandeau sur un en-tête hybride simulé, OUTPUT : aide d'un réglage, pas tiré simulé (`page.route` sur `llm_step` et `/distribution`, comme `_LiveLab`), « Ajouter à la suite » puis « Retirer le dernier », chaque étape ≤ hauteur de l'écran à 1600 × 1000 et 1366 × 768, aucune erreur JavaScript.
 - [x] `_bmad-output/planning-artifacts/ux-designs/ux-lot-6-atelier-llm-2026-10-04/notes-de-fusion.md` -- fichiers carrefour touchés, ajouts à diagram.js, sections UX à reverser, conflits probables avec les lots 3, 4 et 5.
@@ -144,4 +144,4 @@ La TRANSFORMATION est dessinée par `llm.js` en SVG (`svgEl`) sur une poignée d
 - `uv run --with playwright==1.56.0 python tools/e2e/run_e2e.py --only llm_loop llm_screen llm_live --channel msedge` -- expected: tout vert ; puis une passe complète à la fin
 
 **Manual checks (if no CLI):**
-- `uv run wavestack --port 8426`, page `/llm` avec Qwen3.5-2B déjà choisi (ne pas changer de modèle) : bandeau hybride, pas tiré réel, captures clair/sombre à 1600 × 1000 et 1366 × 768.
+- `uv run harness-lab --port 8426`, page `/llm` avec Qwen3.5-2B déjà choisi (ne pas changer de modèle) : bandeau hybride, pas tiré réel, captures clair/sombre à 1600 × 1000 et 1366 × 768.

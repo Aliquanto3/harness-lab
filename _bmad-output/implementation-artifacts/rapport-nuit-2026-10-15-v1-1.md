@@ -1,6 +1,6 @@
 # Rapport de la nuit du 2026-10-15 : V1.1, vague 1
 
-Plan : `plan-nuit-2026-10-15-v1-1.md`. Spec : `_bmad-output/specs/spec-wavestack-v1-1-vague-1/`.
+Plan : `plan-nuit-2026-10-15-v1-1.md`. Spec : `_bmad-output/specs/spec-harness-lab-v1-1-vague-1/`.
 État final : `main` à `3b9d4db`, les 5 stories fusionnées, une seule branche distante (`main`).
 
 ## Bilan
@@ -21,7 +21,7 @@ Plan : `plan-nuit-2026-10-15-v1-1.md`. Spec : `_bmad-output/specs/spec-wavestack
   - Corrigés à la relecture : GGUF partiel pris pour présent (téléchargement en `.part` puis
     renommage) ; échec natif ignoré sous PowerShell (`$LASTEXITCODE`) ; réglages uv qui fuyaient
     dans la session sous `irm | iex` (bloc `& { }`) ; git absent (repli sur l'archive de
-    `main`) ; `pause` au double-clic ; `WAVESTACK_DATA_DIR` exporté avant le lancement.
+    `main`) ; `pause` au double-clic ; `HARNESS_LAB_DATA_DIR` exporté avant le lancement.
   - Non vérifié : `irm | iex` réel sur un PC sans droits admin ; `install.sh` sur macOS et
     Linux ; vraies URL du zip et du tarball GitHub ; `shellcheck` (absent du poste, seul
     `bash -n`).
@@ -75,7 +75,7 @@ Plan : `plan-nuit-2026-10-15-v1-1.md`. Spec : `_bmad-output/specs/spec-wavestack
 - **Incidents d'agents** : 4 blocages du flux (watchdog de 600 s) et 1 coupure réseau, tous
   repris avec leur contexte, sans perte. Un agent a relancé un `python -` avec heredoc (shell
   bloqué), sans effet sur le poste.
-- **Résidu** : un dossier `--keep` de l'E2E reste dans `%TEMP%` (`wavestack-e2e-49komurf`).
+- **Résidu** : un dossier `--keep` de l'E2E reste dans `%TEMP%` (`harness-lab-e2e-49komurf`).
 
 ## Recherches de la vague 2 (lane R)
 Fichiers dans `_bmad-output/planning-artifacts/research/`.
@@ -103,7 +103,7 @@ Fichiers dans `_bmad-output/planning-artifacts/research/`.
 5. SGuard, GLiGuard, PolyGuard, gpt-oss-safeguard : à suivre, trop récents ou trop gros.
 
 **FinOps du harnais** (`recon-finops-harnais-2026-10-15.md`)
-1. WaveStack mesure déjà beaucoup : coûts cloud par appel, tour et séance, tokens de cache des
+1. HarnessLab mesure déjà beaucoup : coûts cloud par appel, tour et séance, tokens de cache des
    trois fournisseurs, débit local, compression Headroom, coût du sous-agent sommé.
 2. Ce qui manque, c'est l'affichage : économie du cache, gain de compression en continu, coût
    du sous-agent isolé, champs `timings` de llama-server peu exploités.
@@ -138,7 +138,7 @@ Fichiers dans `_bmad-output/planning-artifacts/research/`.
 - **README** : il manquait comment ouvrir PowerShell. Ajouté par #44 (README, plus la section
   « Ouvrir PowerShell » de `docs/installation.md`).
 - **Signal de succès de la spec non encore validé** : aucun collègue n'a encore installé
-  WaveStack seul sur son PC pro. La vague 1 n'est close qu'après ce test.
+  HarnessLab seul sur son PC pro. La vague 1 n'est close qu'après ce test.
 - **Reste à faire** : refaire le GIF ou la vidéo du README (`tools/demo/drive.py`, puis
   `compose.py`) et mettre à jour `docs/guide.md` après les changements d'interface (🏠/☁️,
   « Ajouter d'autres modèles… », ⛶ sur la Séquence).

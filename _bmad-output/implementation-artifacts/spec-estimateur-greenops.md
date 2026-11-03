@@ -13,7 +13,7 @@ context: []
 
 ## Intent
 
-**Problem:** La formation parle de sobriété, mais WaveStack ne montre ni l'énergie ni les émissions d'un appel au modèle, qu'il soit local ou cloud. L'estimateur FinOps (story précédente) couvre le coût, pas l'empreinte.
+**Problem:** La formation parle de sobriété, mais HarnessLab ne montre ni l'énergie ni les émissions d'un appel au modèle, qu'il soit local ou cloud. L'estimateur FinOps (story précédente) couvre le coût, pas l'empreinte.
 
 **Approach:** Estimer, pour chaque appel à un modèle, l'énergie (Wh) et les émissions (g CO₂e), puis les additionner par tour et par séance, avec le même affichage que le FinOps :
 - **modèles cloud :** méthode EcoLogits, avec la bibliothèque `ecologits` (cœur seul, hors ligne) ;
@@ -84,23 +84,23 @@ La spec est approuvée par délégation, pendant la nuit, et relue le matin.
 
 ## Code Map
 
-- `pyproject.toml` / `uv.lock` -- `uv add ecologits` et `uv add --optional greenops codecarbon`, à la manière de l'extra `compression` (Headroom). Voir `src/wavestack/compression/env.py` pour la détection d'un extra absent.
-- `wavestack.toml` :
+- `pyproject.toml` / `uv.lock` -- `uv add ecologits` et `uv add --optional greenops codecarbon`, à la manière de l'extra `compression` (Headroom). Voir `src/harness_lab/compression/env.py` pour la détection d'un extra absent.
+- `harness-lab.toml` :
   - ajouter `impacts` aux trois entrées cloud ;
   - créer la section `[greenops]` (`local_gco2e_per_kwh`, `codecarbon_cost_mb`), commentée avec les sources : EcoLogits, CodeCarbon, RTE.
-- `src/wavestack/config.py` -- ajouter `CloudImpacts` et le champ `impacts` à `CloudModel`, plus les propriétés de `[greenops]`.
-- Nouveau module `src/wavestack/greenops.py`, le seul endroit qui importe EcoLogits et CodeCarbon (imports paresseux) :
+- `src/harness_lab/config.py` -- ajouter `CloudImpacts` et le champ `impacts` à `CloudModel`, plus les propriétés de `[greenops]`.
+- Nouveau module `src/harness_lab/greenops.py`, le seul endroit qui importe EcoLogits et CodeCarbon (imports paresseux) :
   - `cloud_impacts(entry, output_tokens, latency_s) -> Impact | None` ;
   - `LocalMeter` (start/stop, mode process ou machine, budget) ;
   - la dataclass `Impact` (min, max, méthode, note).
-- `src/wavestack/models/openai_chat.py` `run_call` -- empreinte cloud à côté du coût FinOps, dans le même registre (`consumption_updated`).
-- `src/wavestack/session/app_session.py` :
+- `src/harness_lab/models/openai_chat.py` `run_call` -- empreinte cloud à côté du coût FinOps, dans le même registre (`consumption_updated`).
+- `src/harness_lab/session/app_session.py` :
   - l'émission locale de `model_call_ended` (≈ :6794, moteur local) : entourer la génération locale du `LocalMeter` ;
   - les sommes du tour ;
   - l'état pour le rechargement.
-- `src/wavestack/trace/catalog.py` -- ajouter les nouveaux champs facultatifs.
-- `src/wavestack/memory.py` (ou l'endroit où `faiss_cost_mb` est compté) -- ajouter le coût de CodeCarbon au premier usage.
-- `src/wavestack/web/static/app.js`, `index.html`, `app.css` -- ajouter la ligne « Empreinte estimée » dans le corps de l'appel et l'en-tête du tour, et compléter le bloc `#consumption` du FinOps. Ce bloc fait deux lignes (« Dépense estimée », puis « 0,0008 $ + 0,0003 $ »), avec la phrase complète dans `title` et `aria-label`. La barre haute est déjà pleine à 1 600 px : la vérification E2E « barre haute : toutes les commandes entières » doit rester verte à 1 280, 1 440 et 1 600 px, en mode normal et en projection. L'empreinte de la séance y est visible seulement si elle tient, par exemple « · 0,12 g CO₂e » en fin de deuxième ligne ; sinon, dans la phrase de `title` et `aria-label`.
+- `src/harness_lab/trace/catalog.py` -- ajouter les nouveaux champs facultatifs.
+- `src/harness_lab/memory.py` (ou l'endroit où `faiss_cost_mb` est compté) -- ajouter le coût de CodeCarbon au premier usage.
+- `src/harness_lab/web/static/app.js`, `index.html`, `app.css` -- ajouter la ligne « Empreinte estimée » dans le corps de l'appel et l'en-tête du tour, et compléter le bloc `#consumption` du FinOps. Ce bloc fait deux lignes (« Dépense estimée », puis « 0,0008 $ + 0,0003 $ »), avec la phrase complète dans `title` et `aria-label`. La barre haute est déjà pleine à 1 600 px : la vérification E2E « barre haute : toutes les commandes entières » doit rester verte à 1 280, 1 440 et 1 600 px, en mode normal et en projection. L'empreinte de la séance y est visible seulement si elle tient, par exemple « · 0,12 g CO₂e » en fin de deuxième ligne ; sinon, dans la phrase de `title` et `aria-label`.
 - Le FinOps (déjà livré sur cette branche) fournit le registre de la séance (`record_spend`, `session_spend`, `consumption_updated`, sous `_spend_lock`, dans `models/openai_chat.py`), les coûts par appel (`CallCost`, `model_call_ended.cost_*`), les sommes du tour (`_turn_costs` dans `app_session.py`, `turn_ended.cost_*`) et leur affichage (`costText`, `renderConsumption` dans `app.js`). Les étendre, sans les dupliquer. Un appel local n'a pas de coût, mais il a une empreinte : le registre et l'événement doivent l'accepter.
 - `README.md` -- ajouter une section GreenOps : méthode, limites, installation de l'extra.
 - Tests :
@@ -111,15 +111,15 @@ La spec est approuvée par délégation, pendant la nuit, et relue le matin.
 ## Tasks & Acceptance
 
 **Execution:**
-- [x] `pyproject.toml`, `uv.lock`, `wavestack.toml`, `src/wavestack/config.py` -- dépendances et déclarations.
-- [x] `src/wavestack/greenops.py` -- les estimateurs, isolés.
-- [x] `src/wavestack/models/openai_chat.py`, `src/wavestack/session/app_session.py`, `src/wavestack/trace/catalog.py`, le budget mémoire -- le branchement et les sommes.
-- [x] `src/wavestack/web/static/*` -- l'affichage.
+- [x] `pyproject.toml`, `uv.lock`, `harness-lab.toml`, `src/harness_lab/config.py` -- dépendances et déclarations.
+- [x] `src/harness_lab/greenops.py` -- les estimateurs, isolés.
+- [x] `src/harness_lab/models/openai_chat.py`, `src/harness_lab/session/app_session.py`, `src/harness_lab/trace/catalog.py`, le budget mémoire -- le branchement et les sommes.
+- [x] `src/harness_lab/web/static/*` -- l'affichage.
 - [x] `tests/*`, `tools/e2e/*`, `README.md` -- la matrice, l'E2E et la documentation.
 
 **Acceptance Criteria:**
 - Given un tour Gemini puis un tour du modèle local, when les deux sont finis, then chaque appel montre son empreinte (fourchette pour Gemini, mesure CodeCarbon pour le local) et la barre haute cumule les deux.
-- Given WaveStack lancé sans l'extra `greenops`, when on fait un tour local, then le tour aboutit, l'empreinte locale est « indisponible », et la commande d'installation est donnée.
+- Given HarnessLab lancé sans l'extra `greenops`, when on fait un tour local, then le tour aboutit, l'empreinte locale est « indisponible », et la commande d'installation est donnée.
 
 ## Verification
 

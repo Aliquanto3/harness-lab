@@ -1,10 +1,10 @@
 ---
 name: demo-recette-chrome
-description: Rejoue en direct la démo de recette fonctionnelle de WaveStack avec Claude in Chrome, dans une copie vierge du cahier de tests (docs/recette). Utiliser quand l'utilisateur demande la démo de recette Chrome, de rejouer la campagne de tests, ou tape /demo-recette-chrome. Argument facultatif « gif » pour enregistrer la démo.
+description: Rejoue en direct la démo de recette fonctionnelle de HarnessLab avec Claude in Chrome, dans une copie vierge du cahier de tests (docs/recette). Utiliser quand l'utilisateur demande la démo de recette Chrome, de rejouer la campagne de tests, ou tape /demo-recette-chrome. Argument facultatif « gif » pour enregistrer la démo.
 allowed-tools: Bash(uv run *), Bash(curl *), Bash(date *), Bash(git rev-parse *), PowerShell(Get-NetTCPConnection *), mcp__claude-in-chrome__*
 ---
 
-# Démo de recette WaveStack avec Claude in Chrome
+# Démo de recette HarnessLab avec Claude in Chrome
 
 Objectif : montrer en partage d'écran ce que Claude in Chrome ajoute aux TU, TI et E2E :
 juger le sens d'une réponse, recouper l'écran avec une source extérieure, porter un avis
@@ -20,13 +20,13 @@ La personne qui partage son écran ne sait pas où tu vas agir. Juste **avant** 
 d'outil visible dans Chrome (ou chaque `browser_batch`), écris une ligne de repère, seule
 sur sa ligne, au format :
 
-`👀 Onglet <WaveStack | Cahier> › <zone> : <ce qui va bouger>`
+`👀 Onglet <HarnessLab | Cahier> › <zone> : <ce qui va bouger>`
 
-- « WaveStack » désigne l'onglet de l'application (titre « WaveStack — Atelier … ») et
-  « Cahier » l'onglet « Cahier de tests WaveStack ». À la préparation, une fois les deux
+- « HarnessLab » désigne l'onglet de l'application (titre « HarnessLab — Atelier … ») et
+  « Cahier » l'onglet « Cahier de tests HarnessLab ». À la préparation, une fois les deux
   onglets ouverts, le dire une fois en clair au présentateur.
-- Exemples : `👀 Onglet WaveStack › barre du bas à gauche : je choisis le scénario « LLM nu ».`,
-  `👀 Onglet WaveStack › volet ③ Orchestration (en haut à droite) : l'appel à get_datetime va apparaître.`,
+- Exemples : `👀 Onglet HarnessLab › barre du bas à gauche : je choisis le scénario « LLM nu ».`,
+  `👀 Onglet HarnessLab › volet ③ Orchestration (en haut à droite) : l'appel à get_datetime va apparaître.`,
   `👀 Onglet Cahier › cas CT-03 : je coche OK et je tape le constat.`
 - **Changement d'onglet** : quand l'action suivante se passe dans l'autre onglet que la
   précédente, commencer par `👀 Basculez sur l'onglet <nom>` : les actions dans un onglet
@@ -38,15 +38,15 @@ sur sa ligne, au format :
 - Ce qui ne se voit pas dans la page (`javascript_tool`, `read_network_requests`, console,
   `date`, PowerShell) : l'annoncer `👀 Terminal : <ce que je vérifie en coulisse>`, pour
   que la personne regarde le terminal et explique que c'est la partie « au-delà de l'E2E ».
-- Une attente du modèle : `👀 Onglet WaveStack › ① Vue humain : réponse en cours (quelques secondes sur CPU).`
+- Une attente du modèle : `👀 Onglet HarnessLab › ① Vue humain : réponse en cours (quelques secondes sur CPU).`
 - Découper les `browser_batch` par zone regardée : un repère, puis un lot qui reste dans
   cette zone. Ne pas annoncer une zone et agir dans une autre.
 - Pas de repère pour les captures d'écran seules ni pour les `find` : rien ne bouge.
 
 ## 1. Préparation (hors caméra si possible, une minute)
 
-1. WaveStack : `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8420/`. Si ce n'est
-   pas 200, lancer `uv run wavestack` en arrière-plan et attendre le 200.
+1. HarnessLab : `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8420/`. Si ce n'est
+   pas 200, lancer `uv run harness-lab` en arrière-plan et attendre le 200.
 2. Serveur du cahier : même test sur `http://127.0.0.1:8430/cahier-tests-chrome.html`.
    Sinon lancer en arrière-plan
    `uv run python -m http.server 8430 --bind 127.0.0.1 -d docs/recette`.
@@ -56,11 +56,11 @@ sur sa ligne, au format :
    `tabs_close_mcp`, `navigate`, `computer`, `find`, `read_page`, `get_page_text`,
    `form_input`, `javascript_tool`, `read_console_messages`, `read_network_requests`,
    `browser_batch`, et `gif_creator` si l'argument « gif » est donné.
-5. `tabs_context_mcp`, puis deux nouveaux onglets : la copie du cahier, et WaveStack sur
+5. `tabs_context_mcp`, puis deux nouveaux onglets : la copie du cahier, et HarnessLab sur
    `http://127.0.0.1:8420/`. Ne jamais réutiliser un ID d'onglet d'une autre session.
 6. Appeler tout de suite `read_console_messages` (pattern `.`, onlyErrors) et
-   `read_network_requests` sur l'onglet WaveStack : le suivi ne commence qu'au premier
-   appel. Recharger ensuite l'onglet WaveStack pour capter le chargement.
+   `read_network_requests` sur l'onglet HarnessLab : le suivi ne commence qu'au premier
+   appel. Recharger ensuite l'onglet HarnessLab pour capter le chargement.
 
 ## 2. Déroulé
 
@@ -68,7 +68,7 @@ Pour chaque cas, dans l'ordre CT-01 à CT-06 :
 
 1. Lire le cas dans l'onglet du cahier (`get_page_text` ou `find`) : c'est la page qui fait
    foi, pas ce fichier. Annoncer le cas en une ligne.
-2. L'exécuter dans l'onglet WaveStack. Regrouper les actions prévisibles dans
+2. L'exécuter dans l'onglet HarnessLab. Regrouper les actions prévisibles dans
    `browser_batch`. Cibler les éléments par `find` (refs) : la taille de la fenêtre change
    en partage d'écran, et les coordonnées ne valent que pour une capture fraîche.
 3. Saisir le verdict dans le cahier : `find` « bouton CT-0X : OK » (ou KO, Bloqué), clic,
@@ -107,7 +107,7 @@ Pour chaque cas, dans l'ordre CT-01 à CT-06 :
   et trier à la lecture : l'article allemand « des », « Français » (nom de langue) et
   `recette_crepes.txt` sont des faux positifs. Les infobulles d'hébergement des modèles
   cloud (« Google (hébergement non précisé) »…) sont une **limite connue** documentée dans
-  `wavestack.toml` (commentaire avant `[[cloud.models]]`) : la citer, ne pas la compter.
+  `harness-lab.toml` (commentaire avant `[[cloud.models]]`) : la citer, ne pas la compter.
   Ouvrir l'Atelier LLM, section « Chargement du modèle » : le 2026-10-08, ses messages
   restaient en français sous des intitulés allemands.
 
@@ -117,7 +117,7 @@ Pour chaque cas, dans l'ordre CT-01 à CT-06 :
   sinon ; Bloqué si le cas n'a pas pu s'exécuter (modèle absent, page en erreur).
 - Un écart ne compte qu'une fois vérifié : rechargement, deuxième essai, ou mesure dans le
   DOM. Dire quand un défaut ne se reproduit pas.
-- Ne pas modifier le code de WaveStack pendant la démo.
+- Ne pas modifier le code de HarnessLab pendant la démo.
 - Aucune boîte de dialogue JavaScript : ne cliquer ni « Supprimer » ni « Réinitialiser ».
 
 ## 3. GIF (seulement avec l'argument « gif »)
@@ -128,7 +128,7 @@ pour CT-04 à CT-06 (`demo-recette-partie-2.gif`). Annoncer les fichiers téléc
 
 ## 4. Remise en état et bilan
 
-1. Dans WaveStack : thème clair, mode projection désactivé, langue français.
+1. Dans HarnessLab : thème clair, mode projection désactivé, langue français.
 2. Remonter en haut du cahier pour montrer le compteur d'avancement.
 3. Laisser les deux onglets ouverts (l'audience les regarde) et les serveurs tourner.
 4. Dans le chat : un tableau cas / verdict / constat en une ligne, puis la comparaison

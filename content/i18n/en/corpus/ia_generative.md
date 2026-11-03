@@ -1,6 +1,6 @@
 # Exemplia's generative AI use charter
 
-<!-- Fictitious text written for WaveStack. Exemplia is an imaginary organisation: this charter describes no real company. -->
+<!-- Fictitious text written for HarnessLab. Exemplia is an imaginary organisation: this charter describes no real company. -->
 
 Exemplia encourages the use of generative artificial intelligence to save time on writing, summarising and translating, in line with this charter. It applies to chat assistants, image generators and code completion tools.
 

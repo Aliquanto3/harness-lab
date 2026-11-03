@@ -113,7 +113,7 @@ def test_attempts_summary_drops_loopback_and_duplicates(bench):
 
 
 def test_blocked_attempt_is_found_behind_the_library_exception(bench):
-    from wavestack.net.guard import NetworkBlocked
+    from harness_lab.net.guard import NetworkBlocked
 
     try:
         try:
@@ -242,7 +242,7 @@ def _stub_child(bench, monkeypatch, rss: list[int], peaks: list[int]) -> None:
 
 
 def test_headroom_child_counts_with_the_adapter_model_in_both_variants(bench, monkeypatch):
-    from wavestack.compression import headroom_adapter
+    from harness_lab.compression import headroom_adapter
 
     seen: list[tuple] = []
 
@@ -337,7 +337,7 @@ def test_embed_download_measures_each_candidate_and_survives_a_failure(
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(b"GGUF")
                 downloaded.append(c.id)
-        return {"guard": "wavestack.net.guard", "hosts": ["huggingface.co"], "errors": {}}
+        return {"guard": "harness_lab.net.guard", "hosts": ["huggingface.co"], "errors": {}}
 
     def runner(c, models_dir):
         if c.id == "factice_q8":

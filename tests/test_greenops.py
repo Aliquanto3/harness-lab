@@ -38,10 +38,10 @@ from test_cloud import (
 )
 from test_model_servers import FakeServer, _booted
 
-from wavestack import config, greenops
-from wavestack.models import servers
-from wavestack.models.load_registry import GREENOPS_CODECARBON
-from wavestack.trace.catalog import (
+from harness_lab import config, greenops
+from harness_lab.models import servers
+from harness_lab.models.load_registry import GREENOPS_CODECARBON
+from harness_lab.trace.catalog import (
     ConsumptionUpdatedPayload,
     ModelCallEndedPayload,
     TurnEndedPayload,
@@ -323,8 +323,8 @@ def test_the_turn_sums_the_footprint_of_the_sub_agent():
 
 
 def test_tester_and_the_llm_screen_add_to_the_session_footprint(monkeypatch):
-    from wavestack.models.engine import Sampling
-    from wavestack.trace.journal import get_journal
+    from harness_lab.models.engine import Sampling
+    from harness_lab.trace.journal import get_journal
 
     provider = GeminiProvider(GEMINI_TEXT)
     _, app_session, _, client = _app(monkeypatch, provider)
@@ -384,7 +384,7 @@ def test_a_local_call_on_the_embedded_engine_is_measured_in_process(codecarbon):
     assert ended["energy_wh_min"] == ended["energy_wh_max"] == pytest.approx(KWH * 1000)
     assert ended["gco2e_min"] == pytest.approx(KWH * 41.4)
     assert "estimation (TDP × charge, sans droits administrateur)" in ended["impact_note_text"]
-    assert "processus de WaveStack seul" in ended["impact_note_text"]
+    assert "processus de HarnessLab seul" in ended["impact_note_text"]
     (spend,) = events["consumption_updated"]
     assert spend["calls"] == 0 and spend["total_usd"] == 0 and spend["impact_calls"] == 1
     assert spend["gco2e_max"] == pytest.approx(KWH * 41.4)
@@ -608,16 +608,16 @@ _OFFLINE = textwrap.dedent(
     """
     import json, sys, time
 
-    from wavestack.net import guard
+    from harness_lab.net import guard
 
-    guard.install([])  # WaveStack's network guard, nothing allowed
+    guard.install([])  # HarnessLab's network guard, nothing allowed
     seen = []
     sys.addaudithook(
         lambda event, args: seen.append([event, repr(args)[:120]])
         if event in ("socket.getaddrinfo", "socket.connect", "socket.gethostbyname")
         else None
     )
-    from wavestack import config, greenops
+    from harness_lab import config, greenops
 
     cfg = config.load_config()
     impacts = [greenops.cloud_impacts(cfg.cloud_model(i), 800, 3.0).estimated
@@ -635,9 +635,9 @@ _OFFLINE = textwrap.dedent(
 
 
 def test_ecologits_and_the_offline_tracker_never_reach_the_network(tmp_path):
-    """Under WaveStack's network guard (nothing allowed), with an audit hook recording every
+    """Under HarnessLab's network guard (nothing allowed), with an audit hook recording every
     resolution and connection: none, and no `emissions.csv` written."""
-    env = {**os.environ, "PYTHONUTF8": "1", "WAVESTACK_DATA_DIR": str(tmp_path / "data")}
+    env = {**os.environ, "PYTHONUTF8": "1", "HARNESS_LAB_DATA_DIR": str(tmp_path / "data")}
     result = subprocess.run(
         [sys.executable, "-c", _OFFLINE],
         cwd=tmp_path,

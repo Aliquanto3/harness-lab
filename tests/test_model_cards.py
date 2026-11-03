@@ -18,12 +18,12 @@ import yaml
 from fake_engine import CHATML
 from gguf_writer import write_gguf
 
-from wavestack import config
-from wavestack.models import catalog
-from wavestack.models.discovery import ModelCandidate
+from harness_lab import config
+from harness_lab.models import catalog
+from harness_lab.models.discovery import ModelCandidate
 
 GIB = 1024**3
-STATIC = config.repo_root() / "src" / "wavestack" / "web" / "static"
+STATIC = config.repo_root() / "src" / "harness_lab" / "web" / "static"
 LOGOS = STATIC / "logos"
 
 
@@ -39,7 +39,7 @@ def _gguf(path: Path, padding: int = 0, **meta) -> Path:
     fields = {k.replace("__", "."): v for k, v in meta.items()}
     fields.setdefault("tokenizer.chat_template", CHATML)
     if padding:
-        fields["wavestack.padding"] = "x" * padding  # other bytes, the same model
+        fields["harness_lab.padding"] = "x" * padding  # other bytes, the same model
     return write_gguf(path, fields)
 
 

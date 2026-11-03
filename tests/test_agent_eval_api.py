@@ -12,12 +12,12 @@ from starlette.testclient import TestClient
 from test_agent_eval_runner import case
 from test_tools import QWEN, call
 
-from wavestack import config
-from wavestack.agent_eval import store
-from wavestack.agent_eval.cases import load_provided_cases
-from wavestack.messages import msg
-from wavestack.session.diagnostic import DiagnosticSession
-from wavestack.web.app import create_app
+from harness_lab import config
+from harness_lab.agent_eval import store
+from harness_lab.agent_eval.cases import load_provided_cases
+from harness_lab.messages import msg
+from harness_lab.session.diagnostic import DiagnosticSession
+from harness_lab.web.app import create_app
 
 HEADERS = {"origin": "http://127.0.0.1:8421"}
 GD = call("get_datetime")

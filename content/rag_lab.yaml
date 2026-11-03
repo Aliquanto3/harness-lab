@@ -1,5 +1,5 @@
 # Atelier RAG (story 30, AD-19) : les textes de la page /rag, validés par pydantic
-# (wavestack.rag.lab.RagLabContent). Un fichier invalide : la page reste servie et dit
+# (harness_lab.rag.lab.RagLabContent). Un fichier invalide : la page reste servie et dit
 # pourquoi. `{…}` : une valeur que la session ou la page place.
 
 title_text: "Atelier recherche documentaire : l'architecture de recherche à manipuler"
@@ -56,7 +56,7 @@ legend_live_text: "Exécution en cours…"
 legend_done_text: "Exécution terminée : rejouez avec ◀ ▶."
 legend_replay_text: "Relecture de l'exécution."
 details_text: "Toutes les étapes en détail (tableaux complets, durées, mémoire)"
-results_empty_text: "Lancez la chaîne : chaque étape affichera ici ce qu'elle reçoit, ce qu'elle produit, sa durée et la mémoire de WaveStack."
+results_empty_text: "Lancez la chaîne : chaque étape affichera ici ce qu'elle reçoit, ce qu'elle produit, sa durée et la mémoire de HarnessLab."
 generation_not_run_text: >-
   Non exécutée : vous avez choisi de ne pas générer (option « Ne pas générer »). Voici ce que le
   modèle recevrait.
@@ -76,7 +76,7 @@ input_text: "Entrée"
 output_text: "Sortie"
 facts_text: "Chiffres"
 duration_text: "Durée"
-memory_text: "Mémoire de WaveStack"
+memory_text: "Mémoire de HarnessLab"
 last_run_text: "Dernière exécution"
 reset_chain_text: "Revenir à la chaîne livrée"
 unavailable_text: "indisponible"
@@ -695,7 +695,7 @@ tree:
   tokens_count_text: "{count} tokens"
   length_text: "réserve de sortie atteinte"
   otel_missing_text: "Export OTLP : installez l'extra otel (uv sync --extra otel) et réglez l'URL de votre Langfuse ou Phoenix. Rien ne sort du poste sinon."
-  otel_unset_text: "Export OTLP : réglez [otel] endpoint, l'URL de votre Langfuse ou Phoenix, puis redémarrez WaveStack. Rien ne sort du poste sinon."
+  otel_unset_text: "Export OTLP : réglez [otel] endpoint, l'URL de votre Langfuse ou Phoenix, puis redémarrez HarnessLab. Rien ne sort du poste sinon."
   otel_ready_text: "Export OTLP vers {endpoint}, aux conventions GenAI d'OpenTelemetry. Sans les textes : ni question, ni passage, ni réponse."
   otel_content_text: "Export OTLP vers {endpoint}, aux conventions GenAI d'OpenTelemetry. Les textes partent aussi : question, prompts avec les passages du corpus, et réponses (capture_content)."
   export_text: "Exporter cette exécution"
@@ -799,8 +799,8 @@ sheets:
         url: "https://arxiv.org/abs/2004.04906"
   embedding.fastembed:
     purpose_text: "Vectoriser avec un second modèle d'embedding, exécuté par fastembed (format ONNX, sans PyTorch ni GPU, fichiers du modèle copiés à la main sur le poste), pour comparer son effet à celui du modèle de la brique RAG."
-    when_text: "À utiliser pour comparer deux modèles d'embedding sur le même corpus. À éviter sans fastembed ni le modèle : ni l'un ni l'autre n'est livré ou téléchargé par WaveStack (le guide, docs/guide.md, donne la commande d'installation), l'option reste alors indisponible et dit pourquoi. Les vecteurs de deux modèles n'ont pas la même dimension et ne se mélangent pas : changer de modèle refait l'index."
-    cost_text: "Charger fastembed et onnxruntime ajoute de la mémoire pour toute la vie de WaveStack (150 Mo attendus par défaut, réglable), en plus du modèle ; ensuite un passage par chunk à l'indexation et un par question, sur processeur."
+    when_text: "À utiliser pour comparer deux modèles d'embedding sur le même corpus. À éviter sans fastembed ni le modèle : ni l'un ni l'autre n'est livré ou téléchargé par HarnessLab (le guide, docs/guide.md, donne la commande d'installation), l'option reste alors indisponible et dit pourquoi. Les vecteurs de deux modèles n'ont pas la même dimension et ne se mélangent pas : changer de modèle refait l'index."
+    cost_text: "Charger fastembed et onnxruntime ajoute de la mémoire pour toute la vie de HarnessLab (150 Mo attendus par défaut, réglable), en plus du modèle ; ensuite un passage par chunk à l'indexation et un par question, sur processeur."
     literature_text: "Les mêmes sources primaires que pour le modèle de la brique : Reimers et Gurevych (comparer des phrases par cosinus) et Karpukhin et al. (un retriever dense contre BM25). Elles ne disent rien du modèle choisi ni d'ONNX : la bibliothèque est présentée par son dépôt, sans mesure de qualité sur ce corpus. Les hypothèses du cadrage ne couvrent pas les embeddings."
     bench_text: ""
     sources:
@@ -839,7 +839,7 @@ sheets:
   vector_store.faiss:
     purpose_text: "Ranger les vecteurs dans un index FAISS, la bibliothèque de recherche de vecteurs de Meta, en produit scalaire exact sur des vecteurs normalisés (donc le cosinus), écrit sur disque puis relu."
     when_text: "À utiliser pour voir ce qu'apporte une bibliothèque spécialisée, ou pour comparer sa mémoire et sa latence. À éviter sans l'extra « rag-alt » : FAISS n'est pas installé par défaut, l'étape donne la commande à lancer."
-    cost_text: "Une dépendance de plus, importée une fois et gardée en mémoire (WaveStack en annonce le coût) ; un fichier d'index écrit à l'indexation. L'index est exact ici : FAISS sait aussi chercher de façon approchée, plus vite et moins juste, ce que l'atelier ne fait pas."
+    cost_text: "Une dépendance de plus, importée une fois et gardée en mémoire (HarnessLab en annonce le coût) ; un fichier d'index écrit à l'indexation. L'index est exact ici : FAISS sait aussi chercher de façon approchée, plus vite et moins juste, ce que l'atelier ne fait pas."
     literature_text: "Le cadrage (H14) pose que la base vectorielle change surtout la latence, la mémoire et le coût, peu la qualité : partiellement soutenue. Les études citées mesurent des index approchés, pas l'index exact de l'atelier : leurs pertes de rappel ne s'y retrouvent pas."
     bench_text: ""
     sources:
@@ -852,7 +852,7 @@ sheets:
   vector_store.lancedb:
     purpose_text: "Ranger les vecteurs dans une table LanceDB, une base vectorielle embarquée, créée sur disque puis interrogée avec la distance cosinus."
     when_text: "À utiliser pour voir une base vectorielle complète (table, colonnes) plutôt qu'une simple bibliothèque. À éviter sans l'extra « rag-alt » : LanceDB n'est pas installé par défaut, l'étape donne la commande à lancer."
-    cost_text: "Une dépendance de plus, importée une fois et gardée en mémoire (WaveStack en annonce le coût) ; un dossier de table écrit à l'indexation. La recherche reste exacte ici : aucun index approché n'est construit."
+    cost_text: "Une dépendance de plus, importée une fois et gardée en mémoire (HarnessLab en annonce le coût) ; un dossier de table écrit à l'indexation. La recherche reste exacte ici : aucun index approché n'est construit."
     literature_text: "Le cadrage (H14) pose que la base vectorielle change surtout la latence, la mémoire et le coût, peu la qualité : partiellement soutenue. Les études citées portent sur des index approchés (rappel ANN, filtrage, suppressions) ; ici la recherche est exacte et l'ordre est celui des autres options, aux égalités de score et aux arrondis près."
     bench_text: ""
     sources:
