@@ -70,8 +70,8 @@ def _reasoning_items(ordered: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """The output's `reasoning` items, verbatim (never masked here, AD-15: masked in
     `raw_output` only), in the order received; only the finished ones (from
     `response.output_item.done`) that carry `encrypted_content` (OpenAI) or, without it, a
-    non-empty `content` list (reasoning in clear, Mistral); any other is dropped. Each carries `FOLLOWS`, the item that came right after
-    it, for the translator to send it back in the same place: OpenAI refuses a reasoning item
+    non-empty `content` list (reasoning in clear, Mistral); any other is dropped.
+    Each carries `FOLLOWS`, the item that came right after it, for the translator to send it back in the same place: OpenAI refuses a reasoning item
     not followed by the item it preceded."""
     kept: list[dict[str, Any]] = []
     pending: list[dict[str, Any]] = []
