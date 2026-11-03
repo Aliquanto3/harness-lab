@@ -737,6 +737,22 @@ resend = true
 #  "reasoning": {"format": "reasoning_items", "always": true, "resend": true,
 #    "on": {"reasoning": {"effort": "medium", "summary": "auto"}}}}
 
+# Mistral Large 4 par l'API Responses (non activé : à recopier dans settings.json, enabled =
+# true). Essai réel du 2026-11-03 : store: false, include et reasoning.summary sont acceptés et
+# ignorés (pas de 422) ; Mistral diffuse son raisonnement en clair (response.reasoning_text.delta)
+# et son item reasoning, sans encrypted_content, est renvoyé tel quel au tour suivant (200) ;
+# l'effort « none » est refusé (400) et, sans champ reasoning, il raisonne quand même, d'où
+# always = true (effort « low », jamais de bloc off). Ni pricing ni impacts : non relevés. Une clé
+# à saisir pour cet id, distinct de `mistral` (même variable MISTRAL_API_KEY si définie).
+# {"id": "mistral_responses", "provider": "Mistral AI", "base_url": "https://api.mistral.ai/v1",
+#  "model": "mistral-large-4", "api": "openai_responses", "max_tokens_field": "max_output_tokens",
+#  "enabled": true, "tools": true, "context": 131072, "key_env": "MISTRAL_API_KEY",
+#  "min_interval_s": 1, "training": "opt_out",
+#  "hosting_text": "Mistral AI, France (hébergement dans l'UE plausible, non confirmé)",
+#  "notes_text": "Avant le premier appel, activez un plan dans la console Mistral : « Experiment », gratuit, ou payant ; sans plan, le compte n'a aucun quota et chaque appel répond 429. Sur le plan gratuit, les prompts servent à l'entraînement par défaut : décochez l'option dans Admin Console > Privacy. Quotas à lire dans la console Mistral. Coût réel nul sur le plan gratuit seulement : le prix affiché est le prix catalogue, facturé sur un plan payant.",
+#  "reasoning": {"format": "reasoning_items", "always": true, "resend": true,
+#    "on": {"reasoning": {"effort": "low"}}}}
+
 # Exemples à recopier dans settings.json (entrée complète, enabled = true), avec leur
 # avertissement. Leur hôte rejoint alors la liste d'adresses autorisées.
 # Champs facultatifs de toute entrée : key_env (nom d'une variable d'environnement qui

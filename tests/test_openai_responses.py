@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -693,6 +694,118 @@ def test_two_summary_parts_are_separated_on_the_reasoning_channel():
     assert ended["reasoning"] == "Premier point.\n\nSecond point."
     sent = provider.body(1)["input"][1]
     assert [s["text"] for s in sent["summary"]] == ["Premier point.", "Second point."]
+
+
+def clear_reasoning(index: int, item_id: str, *texts: str, content: bool = True):
+    """Mistral's reasoning in clear: `response.reasoning_text.delta`, no `encrypted_content`."""
+    where = {"item_id": item_id, "output_index": index}
+    added = {"id": item_id, "type": "reasoning", "summary": [], "content": []}
+    events: list[dict[str, Any]] = [
+        {"type": "response.output_item.added", "output_index": index, "item": added}
+    ]
+    for n, text in enumerate(texts):
+        events += [
+            {"type": "response.reasoning_text.delta", **where, "content_index": n, "delta": d}
+            for d in (text[: len(text) // 2], text[len(text) // 2 :])
+        ]
+        events.append({"type": "response.reasoning_text.done", **where, "content_index": n})
+    item = added | {
+        "content": [{"type": "reasoning_text", "text": t} for t in texts] if content else [],
+        "encrypted_content": None,
+        "status": "completed",
+    }
+    events.append({"type": "response.output_item.done", "output_index": index, "item": item})
+    return events
+
+
+def test_a_clear_reasoning_stream_goes_to_the_reasoning_channel_masked():
+    stream = sse(
+        created(),
+        *clear_reasoning(0, "rs_m", f"Premier {SENTINEL}.", "Second."),
+        *message(1, "Fait."),
+        completed(100, 20),
+    )
+    events, _ = _one_turn(stream)
+    ended = _of(events, "model_call_ended")[0].payload
+    assert SENTINEL not in ended["reasoning"]
+    assert ended["reasoning"].startswith("Premier ") and ended["reasoning"].endswith(".\n\nSecond.")
+    assert {d.payload["channel"] for d in _of(events, "model_delta")} == {"reasoning", "text"}
+    _no_sentinel(events)
+
+
+def test_a_summary_and_a_content_part_of_the_same_index_are_not_confused():
+    where = {"item_id": "rs_m", "output_index": 0}
+    stream = sse(
+        created(),
+        {
+            "type": "response.reasoning_summary_text.delta",
+            **where,
+            "summary_index": 0,
+            "delta": "A",
+        },
+        {"type": "response.reasoning_text.delta", **where, "content_index": 0, "delta": "B"},
+        *message(1, "Fait."),
+        completed(100, 20),
+    )
+    events, _ = _one_turn(stream)
+    assert _of(events, "model_call_ended")[0].payload["reasoning"] == "A\n\nB"
+
+
+def test_a_clear_reasoning_item_goes_back_before_the_call_it_preceded():
+    stream = sse(
+        created(),
+        *clear_reasoning(0, "rs_m", "Il faut calculer."),
+        *function_call(1, "call_m", "calculator", '{"expression": "2+3"}'),
+        completed(700, 40),
+    )
+    provider = Provider(stream, PLAIN_TEXT)
+    session = _session(provider, bricks=("tools", "reasoning"))
+    try:
+        _turn(session, "Calcule")
+    finally:
+        session.close()
+    items = provider.body(1)["input"]
+    assert items[1] == {
+        "id": "rs_m",
+        "type": "reasoning",
+        "summary": [],
+        "content": [{"type": "reasoning_text", "text": "Il faut calculer."}],
+        "encrypted_content": None,
+        "status": "completed",
+    }
+    assert items[2]["type"] == "function_call"
+    assert "_follows" not in provider.requests[1].content.decode()
+
+
+def test_a_reasoning_item_without_encrypted_content_nor_content_is_not_sent_back():
+    stream = sse(
+        created(),
+        *clear_reasoning(0, "rs_empty", "Rien.", content=False),
+        *function_call(1, "call_m", "calculator", '{"expression": "1+1"}'),
+        completed(700, 40),
+    )
+    provider = Provider(stream, PLAIN_TEXT)
+    session = _session(provider, bricks=("tools", "reasoning"))
+    try:
+        _turn(session, "Calcule")
+    finally:
+        session.close()
+    assert "rs_empty" not in provider.requests[1].content.decode()
+    assert [i["type"] for i in provider.body(1)["input"][:2]] == ["message", "function_call"]
+
+
+def test_the_commented_mistral_responses_example_validates_as_a_cloud_model():
+    text = (Path(config.__file__).resolve().parents[2] / "wavestack.toml").read_text("utf-8")
+    block = text[text.index('# {"id": "mistral_responses"') :].split("\n\n")[0]
+    raw = "\n".join(line[2:] if line.startswith("# ") else line[1:] for line in block.splitlines())
+    entry = config.CloudModel.model_validate(json.loads(raw))
+    assert (entry.id, entry.api, entry.model) == (
+        "mistral_responses",
+        "openai_responses",
+        "mistral-large-4",
+    )
+    assert entry.reasoning is not None and entry.reasoning.always and entry.reasoning.resend
+    assert entry.pricing is None and entry.impacts is None
 
 
 def test_a_refusal_is_the_answer_text():
