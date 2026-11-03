@@ -5,7 +5,8 @@ OpenAI's Responses API, streamed (SSE), stateless (`store: false`, never
 `Authorization: Bearer` (the default `auth_header`). The body is written by `context` alone
 (the `openai_responses` translator of `context/render.py`, AD-4, AD-26). This module reads
 the stream: `response.output_text.delta` on the `text` channel,
-`response.reasoning_summary_text.delta` on `reasoning`, `response.function_call_arguments.delta`
+`response.reasoning_summary_text.delta` (or `response.reasoning_text.delta`, the reasoning in
+clear that Mistral streams) on `reasoning`, `response.function_call_arguments.delta`
 on `tool_call`; the `reasoning` items (`response.output_item.done`, their
 `encrypted_content` and `summary` included) are kept verbatim, in the order received, for
 the next call of the same entry (`ChatEnd.thinking_blocks`, the channel of Anthropic's
@@ -67,17 +68,19 @@ def pivot_usage(usage: dict[str, Any]) -> dict[str, Any]:
 
 def _reasoning_items(ordered: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """The output's `reasoning` items, verbatim (never masked here, AD-15: masked in
-    `raw_output` only), in the order received; only the finished ones (`encrypted_content`,
-    from `response.output_item.done`). Each carries `FOLLOWS`, the item that came right after
-    it, for the translator to send it back in the same place: OpenAI refuses a reasoning item
-    not followed by the item it preceded."""
+    `raw_output` only), in the order received; only the finished ones (from
+    `response.output_item.done`) that carry `encrypted_content` (OpenAI) or, without it, a
+    non-empty `content` list (reasoning in clear, Mistral); any other is dropped.
+    Each carries `FOLLOWS`, the item that came right after it, for the translator to send it
+    back in the same place: OpenAI refuses a reasoning item not followed by the item it preceded."""
     kept: list[dict[str, Any]] = []
     pending: list[dict[str, Any]] = []
     calls = 0
     for item in ordered:
         kind = item.get("type")
         if kind == "reasoning":
-            if item.get("encrypted_content"):
+            content = item.get("content")
+            if item.get("encrypted_content") or (isinstance(content, list) and content):
                 pending.append(dict(item))
                 kept.append(pending[-1])
             continue
@@ -121,7 +124,7 @@ class OpenAIResponsesEngine(CloudEngine):
         items: dict[Any, dict[str, Any]] = {}  # output_index (or item id) → the item
         keys: dict[str, Any] = {}  # item id → its key in `items`
         raw: list[str] = []
-        summary: tuple[Any, Any] | None = None  # the summary part being received
+        summary: tuple[Any, ...] | None = None  # the summary part being received
         said = False  # a reasoning fragment already went out (parts are separated)
         failure: Any = None  # an `error` event's error, raised once the stream says no more
         stop = None
@@ -189,9 +192,15 @@ class OpenAIResponsesEngine(CloudEngine):
             elif kind == "response.refusal.delta" and isinstance(delta, str) and delta:
                 yield "text", self.mask(delta)  # the model's refusal, said as its answer
             elif (
-                kind == "response.reasoning_summary_text.delta" and isinstance(delta, str) and delta
+                kind in ("response.reasoning_summary_text.delta", "response.reasoning_text.delta")
+                and isinstance(delta, str)
+                and delta
             ):
-                part = (event.get("item_id", key), event.get("summary_index"))
+                # A summary part and a clear-text content part never share an identity.
+                if kind == "response.reasoning_text.delta":
+                    part = (event.get("item_id", key), "content", event.get("content_index"))
+                else:
+                    part = (event.get("item_id", key), "summary", event.get("summary_index"))
                 if said and part != summary:
                     yield "reasoning", "\n\n"  # one summary part, or one item, from the next
                 summary, said = part, True
