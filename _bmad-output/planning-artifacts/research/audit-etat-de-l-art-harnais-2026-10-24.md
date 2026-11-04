@@ -41,7 +41,7 @@ J'ai ajouté une source qui vaut d'être citée : **Böckeler** ([martinfowler.c
 
 Hors périmètre, je pense, de ce démonstrateur : la plateformisation (ACP, places de marché), les bacs à sable au niveau du système d'exploitation, les modes de permission plan / défaut / sans confirmation. Un rappel d'une ligne suffirait.
 
-Je peux en faire une page à partager, par exemple avec les auteurs du papier au Wavestone AI Lab.
+Je peux en faire une page à partager.
 
 Sources :
 - [Barbaste et al., *Harness Engineering*, arXiv 2609.00006](https://arxiv.org/pdf/2609.00006)
