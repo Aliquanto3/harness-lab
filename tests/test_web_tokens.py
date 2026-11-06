@@ -828,4 +828,14 @@ def test_the_gold_rule_sits_under_the_page_titles():
             assert _contrast(palette["title-rule"], palette[ground]) >= 3.0, (theme, ground)
     # The same values in the CSS: dark `:root`, light attribute block, light media query.
     tokens = (STATIC_DIR / "tokens.css").read_text(encoding="utf-8")
-    assert re.findall(r"--color-title-rule: (#\w+);", tokens) == ["#E3C26B", "#8F6300", "#8F6300"]
+    light_attr, light_media = ':root[data-theme="light"]', "@media (prefers-color-scheme: light)"
+    blocks = {
+        "dark :root": (tokens[: tokens.index(light_attr)], "#E3C26B"),
+        "light attribute": (
+            tokens[tokens.index(light_attr) : tokens.index(light_media)],
+            "#8F6300",
+        ),
+        "light media": (tokens[tokens.index(light_media) :], "#8F6300"),
+    }
+    for name, (block, value) in blocks.items():
+        assert re.findall(r"--color-title-rule: (#\w+);", block) == [value], name

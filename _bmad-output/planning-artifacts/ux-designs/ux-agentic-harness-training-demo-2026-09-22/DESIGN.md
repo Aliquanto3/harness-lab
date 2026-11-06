@@ -952,7 +952,7 @@ components:
 > |---|---|---|---|
 > | `surface` / `surface-raised` | `fond` / `surface` | `line` / `line-strong` | `trait` / `trait-fort` |
 > | `ink` / `ink-soft` / `muted` | `texte` / `texte-attenue` / `neutre` | `primary` / `primary-deep` / `primary-soft` | `primaire` / `primaire-vif` / `primaire-doux` |
-> | `accent` / `title-rule` / `hosting-network` | `accent` / `accent-aplat` | `warning` / `warning-line` / `warning-soft` | `alerte` / `alerte-texte` / `alerte-doux` |
+> | `accent` / `title-rule` / `hosting-network` | `accent` (`hosting-network` : `accent-aplat`) | `warning` / `warning-line` / `warning-soft` | `alerte` / `alerte-texte` / `alerte-doux` |
 > | `danger` / `danger-soft` | `erreur` / `erreur-doux` | `state-active`, `state-ok` | `succes` |
 > | `state-blocked`, `state-error` | `erreur` | `state-unavailable` | `neutre` |
 > | `ink-fill` / `ink-fill-edge` | `encre-pleine` / `trait-fort` | `on-ink` / `on-ink-soft` | `sur-encre` / `sur-encre-attenue` |
@@ -1084,12 +1084,12 @@ Une palette dessinée, jeton par jeton : chaque clé de `colors` a son jumeau `{
 | Groupe | Jeton | Clair | Sombre |
 |---|---|---|---|
 | Charte | `primary`, `primary-deep`, `primary-soft` | `#0B6B78`, `#084E58`, `#DCEFF1` | `#4FC1CF`, `#86D8E2`, `#123339` |
-| Charte | `accent`, `accent-soft` | `#B4500F`, `#FBE7D7` | `#F29A57`, `#3A2415` |
+| Charte | `accent`, `accent-soft` | `#8F6300`, `#FBF1D6` | `#E3C26B`, `#3A3112` |
 | Charte | `ink`, `ink-soft`, `muted`, `line` | `#141A1F`, `#4B5560`, `#737E85`, `#C9D1D3` | `#E7ECEE`, `#A2AFB7`, `#8C989F`, `#56605F` |
 | Charte | `surface`, `surface-raised` | `#F7F8F6`, `#FFFFFF` | `#0E1316`, `#161D21` |
 | Charte | `warning`, `danger`, `on-primary` | `#E8A317`, `#B42318`, `#FFFFFF` | `#F2C14E`, `#F28B82`, `#052227` |
 | Relief | `relief`, `relief-active`, `dot` | `#CFE3E6`, `#B8D6DB`, `#D3DDDF` | `#1B3A40`, `#24505A`, `#252F34` |
-| Hébergement | `hosting-network`, `hosting-boundary` | `#E8A317`, `#141A1F` | `#F2C14E`, `#E7ECEE` |
+| Hébergement | `hosting-network`, `hosting-boundary` | `#E0B54A`, `#141A1F` | `#E3C26B`, `#E7ECEE` |
 | États | `state-active`, `state-ok` | `#1D7337` | `#7CC59B` |
 | États | `state-blocked`, `state-error`, `state-unavailable` | `#B42318`, `#B42318`, `#737E85` | `#F28B82`, `#F28B82`, `#8C989F` |
 | Segments | `system-prompt`, `global-memory`, `tool-descriptions`, `history` | `#0B7A86`, `#617A12`, `#2F68D0`, `#50607A` | `#4FC1CF`, `#A9C64A`, `#7FA8F5`, `#9AAAC2` |
