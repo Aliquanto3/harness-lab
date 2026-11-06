@@ -9,6 +9,13 @@ interface en français, en anglais et en allemand.
 
 *Même question, sans puis avec outils : le LLM nu avoue ne pas connaître l'heure ; avec les outils, il appelle `get_datetime` et chaque étape s'affiche. Puis la jauge du cache et la carte du harnais, l'Atelier LLM, l'Atelier recherche documentaire, l'Atelier MCP et la page Sécurité. [Version vidéo (MP4)](docs/assets/harness-lab-demo.mp4).*
 
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="docs/media/charte-v2/atelier-clair.png">
+  <img alt="L'Atelier Harnais de HarnessLab, aux couleurs de la charte générique v2.1 (thème sombre)" src="docs/media/charte-v2/atelier-sombre.png">
+</picture>
+
+*L'Atelier Harnais en clair et en sombre (charte générique v2.1). Le GIF ci-dessus date de la charte précédente : il est à refaire.*
+
 ## Comment ça marche
 
 Un LLM seul ne fait que prolonger un texte. Le **harnais** est le programme qui l'entoure : à

@@ -38,7 +38,6 @@
   padding: var(--spacing-3) var(--spacing-4);
   background: var(--color-surface-raised);
   border-radius: var(--rounded-lg);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief);
 }
 
 .ae-panel {
@@ -114,7 +113,7 @@
 }
 
 .ae-case.is-highlighted {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-focus);
 }
 
 .ae-case .meta {
@@ -124,7 +123,7 @@
 
 .ae-case select {
   min-height: var(--spacing-hit-target-min);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-sm);
   background: var(--color-surface-raised);
   color: var(--color-ink);

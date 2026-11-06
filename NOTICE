@@ -10,5 +10,5 @@ Third-party material included in this repository:
 
 - src/harness_lab/compression/tiktoken/: the cl100k_base table of tiktoken,
   published by OpenAI under the MIT License (see LICENSE-tiktoken in that folder).
-- src/harness_lab/web/static/fonts/: Atkinson Hyperlegible, Fredoka and
+- src/harness_lab/web/static/fonts/: Atkinson Hyperlegible, Sora and
   JetBrains Mono, distributed under the SIL Open Font License 1.1.

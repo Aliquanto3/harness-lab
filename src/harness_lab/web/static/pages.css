@@ -59,18 +59,18 @@
 }
 
 .site-nav-logo-tile {
-  fill: var(--color-primary);
+  fill: var(--color-picto-tile);
 }
 
 .site-nav-logo-bars {
   fill: none;
-  stroke: var(--color-on-primary);
+  stroke: var(--color-picto-bars);
   stroke-width: 3;
   stroke-linecap: round;
 }
 
 .site-nav-logo-dot {
-  fill: var(--color-accent);
+  fill: var(--color-picto-dot);
 }
 
 .site-nav > a.site-nav-brand {
@@ -89,7 +89,7 @@
 .site-nav a:focus-visible,
 .site-nav button:focus-visible,
 .site-nav select:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -106,7 +106,7 @@
   padding: 0 var(--spacing-3);
   background: var(--color-surface);
   color: var(--color-ink);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-md);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
@@ -128,7 +128,7 @@
   color: var(--color-ink);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-md);
-  box-shadow: 0 var(--spacing-relief-offset-overlay) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line), 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
   white-space: nowrap;
 }
 
@@ -176,7 +176,7 @@
   padding: 0 var(--spacing-2);
   background: var(--color-surface-raised);
   color: var(--color-ink);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-md);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
@@ -197,7 +197,7 @@
   padding: 0 var(--spacing-3);
   background: transparent;
   color: var(--color-ink);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-md);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
@@ -205,9 +205,10 @@
 }
 
 .display-menu-panel .projection-toggle[aria-pressed="true"] {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
   border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-primary);
 }
 
 /* Under 1100 px (a 1280 px window zoomed to 125 % and narrower), the bar tightens and the
@@ -264,7 +265,7 @@
   padding: 0 var(--spacing-3);
   background: var(--color-surface);
   color: var(--color-ink-soft);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
@@ -308,7 +309,7 @@
   color: var(--color-ink);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-md);
-  box-shadow: 0 var(--spacing-relief-offset-overlay) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line), 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
 }
 
 /* Story 1 (CAP-1): a grid item's intrinsic min-width (its longest word) would otherwise
@@ -483,7 +484,7 @@
 
 .disclosure-row-head:focus-visible,
 .disclosure-row-head.is-focus {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -539,7 +540,7 @@
 
 .status-chip-mid {
   background: var(--color-warning-soft);
-  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-warning);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-warning-line);
 }
 
 .status-chip-high {
@@ -623,7 +624,7 @@ body.annex-page {
   content: "🌐 ";
 }
 
-/* DESIGN.md > button-primary, button-secondary: the toy relief, flat when unavailable. */
+/* DESIGN.md > button-primary, button-secondary: neutral primary, outlined secondary, flat when unavailable. */
 .annex-page .button-primary,
 .annex-page .button-secondary {
   min-height: var(--spacing-hit-target-min);
@@ -636,23 +637,19 @@ body.annex-page {
 }
 
 .annex-page .button-primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  border: 1px solid var(--color-primary);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-primary-deep);
+  background: var(--color-button);
+  color: var(--color-on-button);
+  border: 1px solid var(--color-button);
+}
+
+.annex-page .button-primary:hover:not(:disabled) {
+  background: var(--color-button-hover);
 }
 
 .annex-page .button-secondary {
   background: var(--color-surface-raised);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief-active);
-}
-
-.annex-page .button-primary:active:not(:disabled),
-.annex-page .button-secondary:active:not(:disabled) {
-  transform: translateY(calc(var(--spacing-relief-offset) - var(--spacing-relief-offset-pressed)));
-  box-shadow: 0 var(--spacing-relief-offset-pressed) 0 var(--color-primary-deep);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-strong);
 }
 
 .annex-page .button-primary:disabled,
@@ -661,13 +658,13 @@ body.annex-page {
   box-shadow: none;
   background: var(--color-surface);
   color: var(--color-ink-soft);
-  border-color: var(--color-line);
+  border-color: var(--color-line-strong);
 }
 
 .annex-page .button-primary:focus-visible,
 .annex-page .button-secondary:focus-visible,
 .annex-page .field-input:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -767,7 +764,7 @@ body.annex-page {
 }
 
 .annex-page .checks-panel > summary:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -793,7 +790,7 @@ body.annex-page {
   margin: var(--spacing-4) 0 0;
   padding: var(--spacing-3);
   background: var(--color-surface-raised);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-md);
 }
 
@@ -833,12 +830,13 @@ body.annex-page {
 }
 
 .annex-page .segmented > button[aria-pressed="true"] {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-primary);
 }
 
 .annex-page .segmented > button:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: -4px;
 }
 
@@ -917,7 +915,7 @@ body.annex-page {
 .annex-page .model-logo.is-initial {
   background: var(--color-primary-soft);
   color: var(--color-primary);
-  border-color: var(--color-relief);
+  border-color: var(--color-line);
   font: var(--typography-pane-title-font-weight) var(--typography-pane-title-font-size) /
     var(--typography-pane-title-line-height) var(--typography-pane-title-font-family);
 }
@@ -937,9 +935,8 @@ body.annex-page {
   min-width: 0;
   background: var(--color-surface-raised);
   color: var(--color-ink);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-md);
-  box-shadow: 0 var(--spacing-1) 0 var(--color-relief);
 }
 
 .annex-page .model-card:hover {
@@ -966,7 +963,7 @@ body.annex-page {
 
 .annex-page .model-card-head:focus-visible,
 .annex-page .model-card-fold:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -1453,8 +1450,8 @@ body.annex-page {
   margin: 0;
   padding: 0 var(--spacing-2);
   background: var(--color-surface-raised);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   font: inherit;
   cursor: pointer;
@@ -1465,13 +1462,14 @@ body.annex-page {
   cursor: not-allowed;
   background: var(--color-surface);
   color: var(--color-ink-soft);
-  border-color: var(--color-line);
+  border-color: var(--color-line-strong);
 }
 
 /* Lot 4 (AD-28): pressed while it follows, in solid, its « ● » set by the module. */
 .diagram-stepper .diagram-step-live[aria-pressed="true"] {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-primary);
 }
 
 /* The stepper's own announcement (AD-28): polite, visually hidden. */
@@ -1488,7 +1486,7 @@ body.annex-page {
 }
 
 .diagram-stepper button:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -1510,7 +1508,7 @@ body.annex-page {
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-md);
   background: var(--color-surface-raised);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line);
   color: var(--color-ink);
   font: var(--typography-body-sm-font-weight) var(--typography-body-sm-font-size) /
     var(--typography-body-sm-line-height) var(--typography-body-sm-font-family);
@@ -1699,7 +1697,7 @@ body.is-resizing-y * {
 .pane {
   background: var(--color-surface-raised);
   border-radius: var(--rounded-lg);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line);
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -1770,7 +1768,7 @@ body.is-resizing-y * {
 .pane-actions button {
   min-width: var(--spacing-hit-target-min);
   min-height: var(--spacing-hit-target-min);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-sm);
   background: var(--color-surface-raised);
   color: var(--color-ink-soft);
@@ -1842,7 +1840,7 @@ body.is-resizing-y * {
   color: var(--color-ink);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-md);
-  box-shadow: 0 var(--spacing-relief-offset-overlay) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line), 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
   white-space: normal; /* the top bar's pieces never wrap; the panel's texts do */
   font-size: var(--typography-body-sm-font-size);
   line-height: var(--typography-body-sm-line-height);
@@ -1994,15 +1992,19 @@ body.is-resizing-y * {
 }
 
 .window-apply {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  border: 1px solid var(--color-primary);
+  background: var(--color-button);
+  color: var(--color-on-button);
+  border: 1px solid var(--color-button);
+}
+
+.window-apply:hover:not(:disabled) {
+  background: var(--color-button-hover);
 }
 
 .window-close {
   background: var(--color-surface-raised);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-strong);
 }
 
 .window-apply:disabled {
@@ -2012,7 +2014,7 @@ body.is-resizing-y * {
 
 /* Story 26: the window panel lies on surface-raised, its focus ring the primary one. */
 .window-panel :focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -2081,7 +2083,7 @@ body.focus-mode .pane.is-focused .pane-body {
 .pane-actions .pane-text-action {
   background: var(--color-surface-raised);
   color: var(--color-ink);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
 }
 
 .top-bar > .pane-chips {
@@ -2299,7 +2301,7 @@ body.focus-mode .pane.is-focused .pane-body {
   color: var(--color-ink);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-md);
-  box-shadow: 0 var(--spacing-relief-offset-overlay) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line), 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
 }
 
 .glossary-panel[hidden] {
@@ -2362,6 +2364,21 @@ body.focus-mode .pane.is-focused .pane-body {
 }
 
 .glossary-cite:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
+}
+
+/* Charte v2.1: the gold rule under a page's title (each page but the Atelier Harnais, whose
+   title is read by screen readers only). */
+.annex-page h1::after,
+.mcp-title::after,
+#llm-title::after,
+#rag-title::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin-top: var(--spacing-1);
+  border-radius: var(--rounded-full);
+  background: var(--color-title-rule);
 }

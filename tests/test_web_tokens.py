@@ -44,12 +44,12 @@ def _design_frontmatter() -> dict:
 
 
 def _expected_tokens(frontmatter: dict) -> dict[str, str]:
-    """The `:root` block: every light colour (story 31: not the `-dark` twins, which the dark
-    blocks carry under the light names), then the type ramp, the radii and the spacing."""
+    """The `:root` block: every dark colour (charte v2.1, dark first: the `-dark` twins, under
+    the light names), then the type ramp, the radii and the spacing."""
     expected: dict[str, str] = {}
     for key, value in frontmatter["colors"].items():
-        if not key.endswith(_DARK):
-            expected[f"--color-{key}"] = str(value)
+        if key.endswith(_DARK):
+            expected[f"--color-{key.removesuffix(_DARK)}"] = str(value)
     for key, attrs in frontmatter["typography"].items():
         for attr, value in attrs.items():
             expected[f"--typography-{key}-{_ATTR_TO_CSS[attr]}"] = str(value)
@@ -60,14 +60,14 @@ def _expected_tokens(frontmatter: dict) -> dict[str, str]:
     return expected
 
 
-# ---------- story 31: tokens.css in three blocks, the light theme, then the dark one twice ---
+# ---------- tokens.css in three blocks (charte v2.1): the dark theme, the light one twice ---
 
 _DARK = "-dark"
 _BLOCKS = {
     "root": re.compile(r"^:root\s*\{(.*?)^\}", re.S | re.M),
-    "dark": re.compile(r'^:root\[data-theme="dark"\]\s*\{(.*?)^\}', re.S | re.M),
+    "light": re.compile(r'^:root\[data-theme="light"\]\s*\{(.*?)^\}', re.S | re.M),
     "media": re.compile(
-        r"^@media \(prefers-color-scheme: dark\)\s*\{\s*"
+        r"^@media \(prefers-color-scheme: light\)\s*\{\s*"
         r":root:not\(\[data-theme\]\)\s*\{(.*?)\}\s*^\}",
         re.S | re.M,
     ),
@@ -99,7 +99,7 @@ def _color_scheme(block: str) -> str | None:
 
 
 def _css_custom_properties() -> dict[str, str]:
-    """The `:root` block's custom properties (the light theme, the ramp, radii, spacing)."""
+    """The `:root` block's custom properties (the dark theme, the ramp, radii, spacing)."""
     return _declarations(_tokens_blocks()["root"])
 
 
@@ -146,35 +146,31 @@ def test_removing_one_dark_twin_is_caught():
         assert _twin_gaps(mutated) == [f"{twin.removesuffix(_DARK)}-dark manque"], twin
 
 
-def _dark_expected(colors: dict) -> dict[str, str]:
-    return {
-        f"--color-{k}": str(colors[f"{k}{_DARK}"]).upper()
-        for k in colors
-        if not k.endswith(_DARK) and f"{k}{_DARK}" in colors
-    }
+def _light_expected(colors: dict) -> dict[str, str]:
+    return {f"--color-{k}": str(colors[k]).upper() for k in colors if not k.endswith(_DARK)}
 
 
-def test_dark_block_redefines_every_color_with_its_twin():
-    """`:root[data-theme="dark"]` = exactly `{--color-X: X-dark}`, for every colour; nothing
-    else (no `--color-X-dark` of its own, no other token)."""
+def test_light_block_redefines_every_color_with_its_light_value():
+    """`:root[data-theme="light"]` = exactly `{--color-X: X}`, for every colour; nothing else
+    (no `--color-X-dark` of its own, no other token)."""
     colors = _design_frontmatter()["colors"]
-    dark = {n: v.upper() for n, v in _declarations(_tokens_blocks()["dark"]).items()}
-    assert dark == _dark_expected(colors)
-    light = [k for k in colors if not k.endswith(_DARK)]
-    assert len(dark) == len(light), "one declaration per colour"
+    light = {n: v.upper() for n, v in _declarations(_tokens_blocks()["light"]).items()}
+    assert light == _light_expected(colors)
+    dark = [k for k in colors if k.endswith(_DARK)]
+    assert len(light) == len(dark), "one declaration per colour"
 
 
-def test_media_block_is_the_dark_block():
-    """« Système » on a dark workstation: the very same declarations, without the attribute."""
+def test_media_block_is_the_light_block():
+    """« Système » on a light workstation: the very same declarations, without the attribute."""
     blocks = _tokens_blocks()
-    assert _declarations(blocks["media"]) == _declarations(blocks["dark"])
+    assert _declarations(blocks["media"]) == _declarations(blocks["light"])
 
 
 def test_color_scheme_follows_the_theme():
     blocks = _tokens_blocks()
-    assert _color_scheme(blocks["root"]) == "light"
-    assert _color_scheme(blocks["dark"]) == "dark"
-    assert _color_scheme(blocks["media"]) == "dark"
+    assert _color_scheme(blocks["root"]) == "dark"
+    assert _color_scheme(blocks["light"]) == "light"
+    assert _color_scheme(blocks["media"]) == "light"
 
 
 def test_no_static_file_loads_google_fonts():
@@ -190,7 +186,7 @@ def test_no_static_file_loads_google_fonts():
 def test_every_font_url_exists():
     text = (STATIC_DIR / "fonts.css").read_text(encoding="utf-8")
     urls = re.findall(r"url\(\s*['\"]?([^'\")]+)['\"]?\s*\)", text)
-    assert len(urls) == 5, urls
+    assert len(urls) == 4, urls
     missing = [url for url in urls if not (STATIC_DIR / url).is_file()]
     assert not missing, f"fonts.css points to missing files: {missing}"
 
@@ -211,80 +207,6 @@ def _contrast(a: str, b: str) -> float:
     return (light + 0.05) / (dark + 0.05)
 
 
-# (foreground, background, ratio of the design note rounded to 0.1, WCAG AA threshold): 4.5
-# for text, 3 for a stroke that carries meaning.
-_PAIRS = [
-    ("on-ink", "ink", 17.5, 4.5),
-    ("on-ink-soft", "ink", 11.6, 4.5),
-    ("on-ink", "discipline-prompt", 5.2, 4.5),
-    ("on-ink", "discipline-context", 5.2, 4.5),
-    ("on-ink", "discipline-harness", 5.6, 4.5),
-    ("ink", "discipline-network", 7.7, 4.5),
-    *(
-        ("ink-soft", f"discipline-{name}-soft", None, 4.5)
-        for name in ("prompt", "context", "harness", "network", "neutral")
-    ),
-    *(
-        (f"discipline-{name}", "surface-raised", None, 3.0)
-        for name in ("prompt", "context", "harness", "neutral")
-    ),
-]
-
-
-# Story 32: what the call produced and its reasoning, then the JSON trees' text colours, on
-# both backgrounds, on `surface-raised` and on each discipline's soft background (a section).
-_STORY32_TEXT = [
-    ("ink", "produced-soft", 15.0),
-    ("ink-soft", "produced-soft", 6.5),
-    ("ink", "reasoning-soft", 15.3),
-    ("ink-soft", "reasoning-soft", 6.6),
-    ("on-ink", "ink", 17.5),  # the « Produit par le modèle » tag
-]
-_JSON_FLOORS = {"json-key": 8.7, "json-string": 7.6, "json-literal": 6.2}
-_JSON_BACKGROUNDS = [
-    "produced-soft",
-    "reasoning-soft",
-    "surface-raised",
-    *(f"discipline-{n}-soft" for n in ("prompt", "context", "harness", "network", "neutral")),
-]
-
-
-def test_story32_tokens_meet_wcag_aa():
-    colors = _design_frontmatter()["colors"]
-    failures = []
-    for fg, bg, expected in _STORY32_TEXT:
-        ratio = _contrast(colors[fg], colors[bg])
-        if ratio < 4.5 or round(ratio, 1) != expected:
-            failures.append(f"{fg} sur {bg} : {ratio:.2f} (attendu {expected})")
-    for fg, floor in _JSON_FLOORS.items():
-        lowest = min(_contrast(colors[fg], colors[bg]) for bg in _JSON_BACKGROUNDS)
-        if round(lowest, 1) < floor or lowest < 4.5:
-            failures.append(f"{fg} : {lowest:.2f} au plus bas (< {floor})")
-    # The JSON colours are text colours only: none reuses a discipline's.
-    disciplines = {v for k, v in colors.items() if k.startswith("discipline-")}
-    failures += [fg for fg in _JSON_FLOORS if colors[fg] in disciplines]
-    assert not failures, failures
-
-
-def test_discipline_tokens_meet_wcag_aa():
-    colors = _design_frontmatter()["colors"]
-    failures = []
-    for fg, bg, expected, threshold in _PAIRS:
-        ratio = _contrast(colors[fg], colors[bg])
-        if ratio < threshold or (expected is not None and round(ratio, 1) != expected):
-            failures.append(f"{fg} sur {bg} : {ratio:.2f} (attendu {expected}, seuil {threshold})")
-    soft_floor = min(
-        _contrast(colors["ink-soft"], colors[f"discipline-{n}-soft"])
-        for n in ("prompt", "context", "harness", "network", "neutral")
-    )
-    if soft_floor < 6.3:
-        failures.append(f"ink-soft sur un fond doux : {soft_floor:.2f} (< 6,3)")
-    assert not failures, failures
-
-
-# ---------- story 31: the contrasts of both palettes ----------
-
-
 def _palette(colors: dict, dark: bool) -> dict[str, str]:
     """The light colours, or their `-dark` twins under the light names."""
     return {
@@ -294,9 +216,13 @@ def _palette(colors: dict, dark: bool) -> dict[str, str]:
     }
 
 
-_TEXT_BACKGROUNDS = [
-    "surface",
-    "surface-raised",
+def _palettes() -> dict[str, dict[str, str]]:
+    """Both themes' palettes, from the DESIGN.md frontmatter: light (the keys), dark (`-dark`)."""
+    colors = _design_frontmatter()["colors"]
+    return {"clair": _palette(colors, False), "sombre": _palette(colors, True)}
+
+
+_SOFT_BACKGROUNDS = [
     "primary-soft",
     "accent-soft",
     "warning-soft",
@@ -305,45 +231,57 @@ _TEXT_BACKGROUNDS = [
     "produced-soft",
     "reasoning-soft",
 ]
-_VIVID = [
-    "hosting-network",
-    "warning",
-    "discipline-network",
-    "discipline-neutral",
-]
-# 2.0.0 (charte générique): the status fills are dark in the light theme, light in the dark one;
-# their text is `on-status` (white, then ink), no longer `on-vivid`.
+_TEXT_BACKGROUNDS = ["surface", "surface-raised", *_SOFT_BACKGROUNDS]
+_JSON = ["json-key", "json-string", "json-literal"]
+# Charte v2.1: the status fills are dark in the light theme, light in the dark one; their text
+# is `on-status`. The discipline fills carry `on-discipline` (prompt, context, harness, neutral)
+# or `on-vivid` (network).
 _STATUS = ["state-active", "accent", "danger", "state-error"]
 
-# (foreground, background, WCAG AA threshold), checked in both palettes (DESIGN.md > Colors >
-# Thème sombre): 4.5 for text, 3 for a stroke that carries meaning. `_PAIRS` above stays.
+# (foreground, background, WCAG AA threshold), checked in both themes: 4.5 for text, 3 for a
+# mark that carries meaning (a stroke, a dot, an icon).
 _THEME_PAIRS = [
     *((fg, bg, 4.5) for fg in ("ink", "ink-soft") for bg in _TEXT_BACKGROUNDS),
-    ("primary", "surface-raised", 4.5),
-    ("primary-deep", "primary-soft", 4.5),
-    ("on-primary", "primary", 4.5),
+    *((fg, bg, 4.5) for fg in _JSON for bg in _TEXT_BACKGROUNDS),
     ("on-ink", "ink-fill", 4.5),
     ("on-ink-soft", "ink-fill", 4.5),
-    *(("on-discipline", f"discipline-{n}", 4.5) for n in ("prompt", "context", "harness")),
-    *(("on-vivid", bg, 4.5) for bg in _VIVID),
+    ("on-ink-soft", "ink-fill", 3.0),
+    ("primary", "surface-raised", 4.5),
+    ("primary", "surface", 4.5),
+    ("primary-deep", "primary-soft", 4.5),
+    ("on-primary", "primary", 4.5),
+    ("on-button", "button", 4.5),
+    ("on-button", "button-hover", 4.5),
+    ("button", "surface", 3.0),
+    *(
+        ("on-discipline", f"discipline-{n}", 4.5)
+        for n in ("prompt", "context", "harness", "neutral")
+    ),
+    ("on-vivid", "discipline-network", 4.5),
+    ("on-vivid", "hosting-network", 4.5),
+    ("on-vivid", "warning", 4.5),
     *(("on-status", bg, 4.5) for bg in _STATUS),
+    ("danger", "surface-raised", 4.5),
+    ("danger", "danger-soft", 4.5),
+    ("warning-line", "surface-raised", 4.5),
+    ("warning-line", "warning-soft", 3.0),
+    # Non-text, 3:1: control borders, the focus ring, the marks of a state, a discipline's
+    # fill (the yellow network one is never alone: a label or a 🌐 sits beside it).
+    ("line-strong", "surface-raised", 3.0),
+    ("line-strong", "surface", 3.0),
+    ("focus", "surface", 3.0),
+    ("focus", "surface-raised", 3.0),
+    ("ink-fill-edge", "surface", 3.0),
+    ("ink-fill-edge", "surface-raised", 3.0),
+    *(("state-active", bg, 3.0) for bg in ("surface", "surface-raised")),
+    *(("state-error", bg, 3.0) for bg in ("surface", "surface-raised")),
+    *(("state-unavailable", bg, 3.0) for bg in ("surface", "surface-raised")),
+    ("muted", "surface-raised", 3.0),
     *(
         (f"discipline-{n}", bg, 3.0)
         for n in ("prompt", "context", "harness", "neutral")
         for bg in ("surface", "surface-raised")
     ),
-    *((fg, bg, 4.5) for fg in _JSON_FLOORS for bg in _JSON_BACKGROUNDS),
-    # Non-text, 3:1: a control's on-ink-soft border on the ink-fill bar; the edge of an ink-fill
-    # piece (top bar, bubble, tile, plate) on the page and on a pane.
-    ("on-ink-soft", "ink-fill", 3.0),
-    ("ink-fill-edge", "surface", 3.0),
-    ("ink-fill-edge", "surface-raised", 3.0),
-]
-
-# Dark only: the light palette already fails them, as documented (red text on white 3.7:1,
-# the pale segments on cream).
-_DARK_ONLY_PAIRS = [
-    ("danger", "surface-raised", 4.5),
     *(
         (f"segment-{s}", "segment-free", 3.0)
         for s in (
@@ -356,94 +294,129 @@ _DARK_ONLY_PAIRS = [
             "message",
         )
     ),
-]
-
-# The dark figures of the DESIGN.md table, rounded to 0.1.
-_DARK_RATIOS = {
-    ("primary", "surface-raised"): 8.0,
-    ("primary-deep", "primary-soft"): 8.3,
-    ("on-primary", "primary"): 7.8,
-    ("on-ink", "ink-fill"): 9.8,
-    ("on-ink-soft", "ink-fill"): 6.4,
-    ("on-discipline", "discipline-prompt"): 7.0,
-    ("on-discipline", "discipline-context"): 6.7,
-    ("on-discipline", "discipline-harness"): 5.3,
-    ("danger", "surface-raised"): 7.1,
-}
-
-# The dark floors of the DESIGN.md table: the lowest ratio of each group, rounded to 0.1.
-_DARK_FLOORS = [
-    (
-        "ink et encre douce sur un fond de texte",
-        5.8,
-        [(fg, bg) for fg in ("ink", "ink-soft") for bg in _TEXT_BACKGROUNDS],
-    ),
-    ("on-vivid sur un fond vif", 5.2, [("on-vivid", bg) for bg in _VIVID]),
-    (
-        "disciplines sur surface et surface-raised",
-        4.9,
-        [
-            (f"discipline-{n}", bg)
-            for n in ("prompt", "context", "harness", "neutral")
-            for bg in ("surface", "surface-raised")
-        ],
-    ),
-    (
-        "encre sur les fonds produits",
-        6.7,
-        [(fg, bg) for fg in ("ink", "ink-soft") for bg in ("produced-soft", "reasoning-soft")],
-    ),
-    (
-        "couleurs JSON sur leurs fonds",
-        6.6,
-        [(fg, bg) for fg in _JSON_FLOORS for bg in _JSON_BACKGROUNDS],
-    ),
-    (
-        "segments sur l'espace libre",
-        4.1,
-        [(fg, bg) for fg, bg, threshold in _DARK_ONLY_PAIRS if threshold == 3.0],
-    ),
-    (
-        "bord d'ink-fill sur la page",
-        3.5,
-        [("ink-fill-edge", "surface"), ("ink-fill-edge", "surface-raised")],
-    ),
+    ("picto-tile", "surface", 3.0),
 ]
 
 
-def test_both_palettes_meet_wcag_aa():
-    colors = _design_frontmatter()["colors"]
+def test_both_themes_meet_wcag_aa():
     failures = []
-    for dark in (False, True):
-        palette = _palette(colors, dark)
-        theme = "sombre" if dark else "clair"
-        for fg, bg, threshold in _THEME_PAIRS + (_DARK_ONLY_PAIRS if dark else []):
+    for theme, palette in _palettes().items():
+        for fg, bg, threshold in _THEME_PAIRS:
             ratio = _contrast(palette[fg], palette[bg])
-            expected = _DARK_RATIOS.get((fg, bg)) if dark else None
-            if ratio < threshold or (expected is not None and round(ratio, 1) != expected):
+            if ratio < threshold:
                 failures.append(f"{theme} : {fg} sur {bg} : {ratio:.2f} (seuil {threshold})")
-    dark = _palette(colors, True)
-    for what, floor, pairs in _DARK_FLOORS:
-        lowest = min(_contrast(dark[fg], dark[bg]) for fg, bg in pairs)
-        if round(lowest, 1) < floor:
-            failures.append(f"sombre : {what} à {lowest:.2f} (< {floor})")
-    # The JSON colours stay distinct from the disciplines in the dark palette too.
-    disciplines = {v for k, v in dark.items() if k.startswith("discipline-")}
-    failures += [
-        f"sombre : {fg} = une discipline" for fg in _JSON_FLOORS if dark[fg] in disciplines
-    ]
     assert not failures, failures
 
 
-def test_role_tokens_keep_the_light_theme():
-    """The role tokens split from an existing one take, in light, the value their role had
-    before the story: the light theme does not move. `warning-soft` and `danger-soft` are new
-    values (the diagnostic page's backgrounds, formerly written in the page)."""
-    colors = _design_frontmatter()["colors"]
-    assert colors["ink-fill"] == colors["ink"]
-    assert colors["ink-fill-edge"] == colors["ink-fill"]
-    assert colors["on-discipline"] == colors["on-ink"]
-    assert colors["on-vivid"] == colors["ink"]
+def test_the_contrast_check_catches_a_weak_pair():
+    """The check itself: ink-soft is not readable on its own background, which it flags."""
+    palette = _palettes()["clair"]
+    assert _contrast(palette["ink-soft"], palette["surface"]) >= 4.5
+    assert _contrast(palette["ink-soft"], palette["ink-soft"]) < 4.5
+    assert round(_contrast(palette["surface"], palette["surface"]), 1) == 1.0
+
+
+def test_every_color_comes_from_a_charte_v21_value():
+    """Charte v2.1: no colour of the interface is invented; each value of the light and dark
+    palettes is one the charte publishes (its `charte.css`), so a drift or a stray colour fails."""
+    charte = {
+        "clair": {
+            "#F6F8FB",
+            "#FFFFFF",
+            "#ECF0F5",
+            "#CED5DF",
+            "#808A97",
+            "#121821",
+            "#4F5A68",
+            "#6E7886",
+            "#1D5BC2",
+            "#164A9E",
+            "#E1EAFA",
+            "#2A3442",
+            "#8F6300",
+            "#8A5F00",
+            "#FBF1D6",
+            "#E0B54A",
+            "#1B7043",
+            "#E2F1E8",
+            "#E8892A",
+            "#9A4A00",
+            "#FDEBDA",
+            "#B3261E",
+            "#FCE4E1",
+            "#1F5FD1",
+            "#141A1F",
+            "#C3CEDD",
+        },
+        "sombre": {
+            "#0F1318",
+            "#161B22",
+            "#1E242C",
+            "#333B46",
+            "#67717E",
+            "#E8ECF2",
+            "#A3ADBA",
+            "#8792A0",
+            "#8DB0F7",
+            "#B3CBFA",
+            "#1A2742",
+            "#0A1733",
+            "#FFFFFF",
+            "#E3C26B",
+            "#3A3112",
+            "#8CC7A0",
+            "#15291D",
+            "#F0A35E",
+            "#3A2614",
+            "#EE8C84",
+            "#3B1C1A",
+            "#9EC0FF",
+            "#141A1F",
+            "#C3CEDD",
+            "#3B6FD0",
+            "#F0D27A",
+        },
+    }
+    strays = []
+    for theme, palette in _palettes().items():
+        allowed = charte[theme] | _CAT_SEQ[theme]
+        strays += [f"{theme}: {k} = {v}" for k, v in palette.items() if v.upper() not in allowed]
+    assert not strays, strays
+
+
+# The categorical series of the charte (`cat-1` to `cat-8`), light then dark.
+_CAT_SEQ = {
+    "clair": {
+        "#1D5BC2",
+        "#A87A00",
+        "#1F8155",
+        "#B83A75",
+        "#C24D1B",
+        "#0E7C8C",
+        "#6F7378",
+        "#8A5A2B",
+    },
+    "sombre": {
+        "#8DB0F7",
+        "#E3C26B",
+        "#8CC7A0",
+        "#E58FB8",
+        "#F2A07B",
+        "#6CCAD8",
+        "#A9B4C6",
+        "#9FAE4F",
+    },
+}
+
+
+def test_the_theme_roles_keep_their_contract():
+    """The role tokens split from one value keep a coherent pair in both themes: the control
+    border is the strong stroke, the status text sits on its own fill."""
+    for palette in _palettes().values():
+        assert palette["ink-fill-edge"] == palette["line-strong"]
+        assert palette["on-discipline"] == palette["on-primary"]
+        assert palette["on-vivid"] == "#141A1F"
+        assert palette["logo-tile"] == "#FFFFFF"
 
 
 # ---------- colours only through tokens.css, in every page of static/ (stories 33, 25, 31) ---
@@ -741,3 +714,92 @@ def test_diagnostic_and_models_pages_size_their_text_by_the_tokens():
         ".annex-page .models-filters {",
     ):
         assert rule in shared, rule
+
+
+# ---------- charte v2.1 (story 3.1): neutral buttons, no relief, fonts, icon, gold rule ----------
+
+_RULE = re.compile(r"([^{}]+)\{([^{}]*)\}")
+_BUTTONISH = re.compile(
+    r"button|toggle|switch|segmented|-apply|-modes|-chip|-option|\.ae-button", re.I
+)
+
+
+def _style_rules() -> list[tuple[str, str, str]]:
+    """(file, selector, body) of every rule of every stylesheet and inline `<style>`."""
+    rules = []
+    for path in sorted(STATIC_DIR.glob("*.css")) + sorted(STATIC_DIR.glob("*.html")):
+        text = path.read_text(encoding="utf-8")
+        if path.suffix == ".html":
+            text = "\n".join(re.findall(r"<style\b[^>]*>(.*?)</style>", text, re.S))
+        text = _COMMENTS[".css"].sub("", text)
+        rules += [(path.name, " ".join(s.split()), b) for s, b in _RULE.findall(text)]
+    return rules
+
+
+def test_le_bleu_n_est_jamais_un_aplat_de_bouton():
+    """A button's fill is the neutral `button` token; a pressed toggle is `primary-soft` with a
+    `primary` rim, never a `primary` fill."""
+    offenders = [
+        f"{name}: {selector[:70]}"
+        for name, selector, body in _style_rules()
+        if _BUTTONISH.search(selector)
+        and re.search(r"background(-color)?:\s*var\(--color-primary\)", body)
+    ]
+    assert not offenders, offenders
+
+
+def test_the_guard_on_button_fills_sees_a_primary_fill():
+    rule = ".x-button { background: var(--color-primary); }"
+    assert [m for m in _RULE.findall(rule) if "var(--color-primary)" in m[1]]
+    assert _BUTTONISH.search(".mcp-switch button[aria-checked]")
+
+
+def test_primary_buttons_are_neutral_and_secondary_ones_outlined():
+    rules = {sel: body for _, sel, body in _style_rules()}
+    primary = rules[".llm-button-primary"]
+    assert "background: var(--color-button)" in primary
+    assert "color: var(--color-on-button)" in primary
+    secondary = rules[".llm-button-secondary"]
+    assert "var(--color-line-strong)" in secondary
+    assert "background: var(--color-primary)" not in secondary
+    assert ".llm-button-primary:hover:not(:disabled)" in rules
+    assert "var(--color-button-hover)" in rules[".llm-button-primary:hover:not(:disabled)"]
+
+
+def test_no_relief_shadow_nor_dotted_page_is_left():
+    offenders = []
+    for path in STATIC_DIR.rglob("*"):
+        if path.suffix in {".css", ".html", ".js"}:
+            text = path.read_text(encoding="utf-8")
+            offenders += [
+                f"{path.name}: {word}"
+                for word in ("--color-relief", "--color-dot", "relief-offset", "dot-grid")
+                if word in text
+            ]
+    assert not offenders, offenders
+
+
+def test_the_fonts_are_the_charte_ones_with_their_licences():
+    fonts = STATIC_DIR / "fonts"
+    names = sorted(p.name for p in fonts.iterdir())
+    assert "sora-latin-600-normal.woff2" in names and "sora-OFL.txt" in names
+    assert not [n for n in names if "fredoka" in n.lower()], names
+    css = (STATIC_DIR / "fonts.css").read_text(encoding="utf-8")
+    assert "font-family: Sora;" in css and "Fredoka" not in css
+    assert "Sora" in (STATIC_DIR / "tokens.css").read_text(encoding="utf-8")
+
+
+def test_the_icon_and_the_pictogram_are_the_charte_ones():
+    for name in ("favicon.svg", "pictogramme.svg"):
+        text = (STATIC_DIR / name).read_text(encoding="utf-8").lstrip()
+        assert text.startswith("<svg") and 'viewBox="0 0 32 32"' in text
+        assert text.rstrip().endswith("</svg>")
+    logo = _COMMENTS[".css"].sub("", PAGES_CSS.read_text(encoding="utf-8"))
+    assert "fill: var(--color-picto-tile)" in logo and "stroke: var(--color-picto-bars)" in logo
+
+
+def test_the_gold_rule_sits_under_the_page_titles():
+    css = PAGES_CSS.read_text(encoding="utf-8")
+    assert "#llm-title::after" in css and "background: var(--color-title-rule)" in css
+    assert _palettes()["clair"]["title-rule"] == "#E0B54A"
+    assert _palettes()["sombre"]["title-rule"] == "#E3C26B"

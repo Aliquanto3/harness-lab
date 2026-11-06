@@ -1,18 +1,11 @@
 /* Local OFL fonts (NFR-3, NFR-4): latin subsets from fontsource, licences next to the files.
    No request ever leaves for a font service. */
 @font-face {
-  font-family: Fredoka;
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("fonts/fredoka-latin-500-normal.woff2") format("woff2");
-}
-@font-face {
-  font-family: Fredoka;
+  font-family: Sora;
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("fonts/fredoka-latin-600-normal.woff2") format("woff2");
+  src: url("fonts/sora-latin-600-normal.woff2") format("woff2");
 }
 @font-face {
   font-family: "Atkinson Hyperlegible";
