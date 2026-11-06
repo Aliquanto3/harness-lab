@@ -819,5 +819,13 @@ def test_the_icon_and_the_pictogram_are_the_charte_ones():
 def test_the_gold_rule_sits_under_the_page_titles():
     css = PAGES_CSS.read_text(encoding="utf-8")
     assert "#llm-title::after" in css and "background: var(--color-title-rule)" in css
-    assert _palettes()["clair"]["title-rule"] == "#E0B54A"
-    assert _palettes()["sombre"]["title-rule"] == "#E3C26B"
+    palettes = _palettes()
+    # The rule is a fine mark: the v2.1 `accent` of each theme, never the `accent-aplat` fill.
+    for theme, expected in (("clair", "#8F6300"), ("sombre", "#E3C26B")):
+        palette = palettes[theme]
+        assert palette["title-rule"] == expected == palette["accent"]
+        for ground in ("surface", "surface-raised"):
+            assert _contrast(palette["title-rule"], palette[ground]) >= 3.0, (theme, ground)
+    # The same values in the CSS: dark `:root`, light attribute block, light media query.
+    tokens = (STATIC_DIR / "tokens.css").read_text(encoding="utf-8")
+    assert re.findall(r"--color-title-rule: (#\w+);", tokens) == ["#E3C26B", "#8F6300", "#8F6300"]

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.1.1 — 2026-11-06
+
+Correctif : filet or des titres en thème clair.
+
+### Contenu
+
+- **Filet or en clair** : `--color-title-rule` prend la valeur `accent` de la charte v2.1 (`#8F6300` en clair, 5,31:1 sur `surface`) au lieu de `accent-aplat` (`#E0B54A`, 1,9:1). Le sombre est inchangé (`#E3C26B`). `DESIGN.md` et `tests/test_web_tokens.py` réalignés (valeur par thème, contraste 3:1 sur `surface` et `surface-raised` dans les deux thèmes).
+- **Captures** : `docs/media/charte-v2/` refaites en clair pour les pages à filet (LLM, RAG, MCP, Sécurité, Modèles).
+
+### Limites
+
+- Aucune nouvelle.
+
 ## 2.1.0 — 2026-11-06
 
 Migration de l'interface vers la charte générique v2.1 (sombre d'abord, jetons choisis par usage).

@@ -67,7 +67,7 @@ colors:
   on-discipline: '#FFFFFF'
   on-vivid: '#141A1F'
   on-status: '#FFFFFF'
-  title-rule: '#E0B54A'
+  title-rule: '#8F6300'
   warning-soft: '#FDEBDA'
   danger-soft: '#FCE4E1'
   logo-tile: '#FFFFFF'
