@@ -22,7 +22,9 @@ ASSETS = ROOT / "docs" / "assets"
 W, SCREEN_H, BAR = 1280, 720, 72
 H = SCREEN_H + BAR
 SCALE = W / 1600
-PRIMARY, DEEP, ACCENT, ORANGE, LAVENDER = "#0B6B78", "#084E58", "#B4500F", "#E0762B", "#D9D0F6"
+# Charte générique v2.1 (dark frames): highlights in `primaire` and `alerte-texte` of the light
+# theme (white label on them), page `fond`, gold `accent`, secondary text `texte-attenue`.
+PRIMARY, DEEP, ACCENT, ORANGE, LAVENDER = "#1D5BC2", "#0F1318", "#E3C26B", "#9A4A00", "#A3ADBA"
 FONTS = Path("C:/Windows/Fonts")
 EMOJI = ImageFont.truetype(str(FONTS / "seguiemj.ttf"), 109)  # bitmap strike, scaled after
 

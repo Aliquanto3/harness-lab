@@ -269,6 +269,9 @@ _THEME_PAIRS = [
     # fill (the yellow network one is never alone: a label or a 🌐 sits beside it).
     ("line-strong", "surface-raised", 3.0),
     ("line-strong", "surface", 3.0),
+    # The track of a brick switch, off (`ink-soft`), on its card: raised, or the soft fill of an
+    # active one (story 3.1 review: `line` was at 1.5:1).
+    *(("ink-soft", bg, 3.0) for bg in ("surface-raised", *_SOFT_BACKGROUNDS)),
     ("focus", "surface", 3.0),
     ("focus", "surface-raised", 3.0),
     ("ink-fill-edge", "surface", 3.0),
@@ -720,7 +723,13 @@ def test_diagnostic_and_models_pages_size_their_text_by_the_tokens():
 
 _RULE = re.compile(r"([^{}]+)\{([^{}]*)\}")
 _BUTTONISH = re.compile(
-    r"button|toggle|switch|segmented|-apply|-modes|-chip|-option|\.ae-button", re.I
+    r"button|toggle|switch|segmented|-apply|-modes|-chip|-option|\.ae-button|\.scenario-info\b",
+    re.I,
+)
+# A `primary` fill, even as a fallback or a variant (`primary-deep`…); `primary-soft` is the
+# charte's selection background (`primaire-doux`) and stays allowed.
+_PRIMARY_FILL = re.compile(
+    r"background(?:-color)?\s*:[^;]*var\(--color-primary(?!-soft\b)[\w-]*\)?"
 )
 
 
@@ -742,8 +751,7 @@ def test_le_bleu_n_est_jamais_un_aplat_de_bouton():
     offenders = [
         f"{name}: {selector[:70]}"
         for name, selector, body in _style_rules()
-        if _BUTTONISH.search(selector)
-        and re.search(r"background(-color)?:\s*var\(--color-primary\)", body)
+        if _BUTTONISH.search(selector) and _PRIMARY_FILL.search(body)
     ]
     assert not offenders, offenders
 
@@ -752,6 +760,15 @@ def test_the_guard_on_button_fills_sees_a_primary_fill():
     rule = ".x-button { background: var(--color-primary); }"
     assert [m for m in _RULE.findall(rule) if "var(--color-primary)" in m[1]]
     assert _BUTTONISH.search(".mcp-switch button[aria-checked]")
+    assert _BUTTONISH.search(".scenario-info:hover")
+    for body in (
+        "background: var(--color-primary);",
+        "background: var(--discipline, var(--color-primary));",
+        "background-color: var(--color-primary-deep);",
+    ):
+        assert _PRIMARY_FILL.search(body), body
+    assert not _PRIMARY_FILL.search("background: var(--color-primary-soft);")
+    assert not _PRIMARY_FILL.search("background: var(--color-surface); color: var(--color-primary)")
 
 
 def test_primary_buttons_are_neutral_and_secondary_ones_outlined():
@@ -790,10 +807,11 @@ def test_the_fonts_are_the_charte_ones_with_their_licences():
 
 
 def test_the_icon_and_the_pictogram_are_the_charte_ones():
-    for name in ("favicon.svg", "pictogramme.svg"):
-        text = (STATIC_DIR / name).read_text(encoding="utf-8").lstrip()
-        assert text.startswith("<svg") and 'viewBox="0 0 32 32"' in text
-        assert text.rstrip().endswith("</svg>")
+    text = (STATIC_DIR / "favicon.svg").read_text(encoding="utf-8").lstrip()
+    assert text.startswith("<svg") and 'viewBox="0 0 32 32"' in text
+    assert text.rstrip().endswith("</svg>")
+    # The pictogram is inline in the pages (pages.css, `--color-picto-*`), not a loose file.
+    assert not (STATIC_DIR / "pictogramme.svg").exists()
     logo = _COMMENTS[".css"].sub("", PAGES_CSS.read_text(encoding="utf-8"))
     assert "fill: var(--color-picto-tile)" in logo and "stroke: var(--color-picto-bars)" in logo
 

@@ -2231,7 +2231,9 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   height: 20px;
   margin: 0;
   border-radius: var(--rounded-full);
-  background: var(--color-line);
+  /* A mark of state, 3:1 on its card in both themes, the soft fills of an active card included
+     (`line-strong` falls to 2.6:1 on some of them): `ink-soft`. */
+  background: var(--color-ink-soft);
   position: relative;
   cursor: pointer;
 }
@@ -2250,7 +2252,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 
 /* Story 33: a card's switches in its discipline's colour. */
 .brick-toggle:checked {
-  background: var(--discipline, var(--color-primary));
+  background: var(--discipline, var(--color-ink-soft));
 }
 
 .brick-toggle:checked::after {
@@ -3397,8 +3399,9 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 
 .scenario-info:hover,
 .pane-title-row:has(.scenario-info-popover:popover-open) .scenario-info {
-  background: var(--color-primary);
-  color: var(--color-surface-raised);
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-ink);
 }
 
 .scenario-info:focus-visible {
