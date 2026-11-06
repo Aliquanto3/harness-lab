@@ -46,3 +46,8 @@ Objectif : rendre la version publique générique. Le dépôt, le paquet, la CLI
 - Nit, low, second avis 11 : « PC d'un collègue » dans deux archives de nuit. Corrigé : « un autre PC ».
 - Important, low, reviewer : `install.ps1` copiait l'ancien dossier par défaut vers un `HARNESS_LAB_DATA_DIR` choisi, contrairement à l'application et à `install.sh`. Corrigé : copie vers le dossier par défaut seulement.
 - Complexité : 0 constat (`data_dir()` ne teste que l'existence du nouveau dossier à chaque appel).
+
+### Passe 2 (2026-11-06, SHA revu 58be3f51, story 3.1, delta 3b551cc..58be3f5)
+- Aucun constat Important. Test anti-aplat : ne rejette pas `primary-soft` (assertion négative ajoutée par l'implémenteur) ; mutation manuelle (repli `var(--color-primary)` remis sur `.brick-toggle:checked`) : `test_le_bleu_n_est_jamais_un_aplat_de_bouton` échoue, puis restauré.
+- `tools/demo/compose.py` : Python valide (lu en UTF-8), couleurs v2.1. CHANGELOG sans valeur hex de l'ancienne charte. Aucune référence restante aux PNG et à `pictogramme.svg` supprimés (hors l'assertion d'absence du test).
+- Complexité : 0 constat. ruff et `tests/test_web_tokens.py` (28) verts.
