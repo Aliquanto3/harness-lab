@@ -7,7 +7,7 @@ interface en français, en anglais et en allemand.
 
 ![Démonstration de HarnessLab : le LLM nu ne connaît pas l'heure ; avec la brique Outils, le modèle appelle get_datetime et chaque étape s'affiche ; puis la jauge du cache, la carte du harnais, les ateliers LLM, recherche documentaire et MCP, et la page Sécurité](docs/assets/harness-lab-demo.gif)
 
-*Même question, sans puis avec outils : le LLM nu avoue ne pas connaître l'heure ; avec les outils, il appelle `get_datetime` et chaque étape s'affiche. Puis la jauge du cache et la carte du harnais, l'Atelier LLM, l'Atelier recherche documentaire, l'Atelier MCP et la page Sécurité. [Version vidéo (MP4)](docs/assets/harness-lab-demo.mp4).*
+*Même question, sans puis avec outils : le LLM nu avoue ne pas connaître l'heure ; avec les outils, il appelle `get_datetime` et chaque étape s'affiche. Puis la jauge du cache et la carte du harnais, l'Atelier LLM, l'Atelier recherche documentaire, l'Atelier MCP et la page Sécurité. [Version vidéo (MP4)](docs/assets/harness-lab-demo.mp4). Le GIF date de la charte précédente ; [captures à la charte v2.1, en clair et en sombre](docs/media/charte-v2/).*
 
 ## Comment ça marche
 

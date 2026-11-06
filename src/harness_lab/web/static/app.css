@@ -12,16 +12,14 @@ body {
   font-family: var(--typography-body-font-family);
   font-size: var(--typography-body-font-size);
   color: var(--color-ink);
-  /* DESIGN.md > page: notebook dots, seen only in the gutters around the panes. */
-  background: radial-gradient(circle, var(--color-dot) 1.3px, transparent 1.3px) 0 0 /
-      var(--spacing-dot-grid) var(--spacing-dot-grid),
-    var(--color-surface);
+  /* Charte v2.1: a plain page, no dotted pattern. */
+  background: var(--color-surface);
   height: 100vh;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-gutter);
   padding: var(--spacing-gutter);
-  /* Fredoka has no `tnum`: the gauge's bar keeps a fixed width instead (.gauge-stack). */
+  /* Sora has no `tnum`: the gauge's bar keeps a fixed width instead (.gauge-stack). */
   font-variant-numeric: tabular-nums;
 }
 
@@ -61,7 +59,7 @@ body {
 [data-discipline="neutral"] {
   --discipline: var(--color-discipline-neutral);
   --discipline-soft: var(--color-discipline-neutral-soft);
-  --on-discipline: var(--color-on-vivid);
+  --on-discipline: var(--color-on-discipline);
 }
 
 [data-discipline="model"] {
@@ -99,15 +97,20 @@ body {
   line-height: 1;
 }
 
-/* ---------- toy relief (DESIGN.md > Elevation & Depth): solid offset shadow, never blurred ---------- */
+/* ---------- buttons (charte v2.1): neutral primary, outlined secondary, no relief ---------- */
 
 .composer button:not(.composer-stop),
 .drawer-actions button.primary,
 .harness-map-head button.primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  border: 1px solid var(--color-primary);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-primary-deep);
+  background: var(--color-button);
+  color: var(--color-on-button);
+  border: 1px solid var(--color-button);
+}
+
+.composer button:not(.composer-stop):hover:not(:disabled),
+.drawer-actions button.primary:hover:not(:disabled),
+.harness-map-head button.primary:hover:not(:disabled) {
+  background: var(--color-button-hover);
 }
 
 .pane-menu button#pane-menu-toggle,
@@ -116,28 +119,8 @@ body {
 .composer .composer-stop,
 .harness-map-open {
   background: var(--color-surface-raised);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief-active);
-}
-
-/* Pressed: the relief drops from 4 px to 1 px and the button goes down by the difference. */
-.composer button:active:not(:disabled),
-.drawer-actions button:active:not(:disabled),
-.brick-edit:active:not(:disabled),
-.pane-menu button#pane-menu-toggle:active,
-.harness-map-head button.primary:active:not(:disabled),
-.harness-map-open:active:not(:disabled) {
-  transform: translateY(calc(var(--spacing-relief-offset) - var(--spacing-relief-offset-pressed)));
-  box-shadow: 0 var(--spacing-relief-offset-pressed) 0 var(--color-primary-deep);
-}
-
-.composer .composer-stop:active:not(:disabled),
-.drawer-actions button:not(.primary):active:not(:disabled),
-.brick-edit:active:not(:disabled),
-.pane-menu button#pane-menu-toggle:active,
-.harness-map-open:active:not(:disabled) {
-  box-shadow: 0 var(--spacing-relief-offset-pressed) 0 var(--color-relief-active);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-strong);
 }
 
 /* Unavailable pieces lie flat. */
@@ -183,9 +166,8 @@ body {
   color: var(--color-on-ink);
   border-radius: var(--rounded-lg);
   /* Story 31: an edge that reaches 3:1 on the page in dark (the same ink as the fill in light). */
-  box-shadow:
-    inset 0 0 0 var(--spacing-stroke-min) var(--color-ink-fill-edge),
-    0 var(--spacing-relief-offset) 0 var(--color-relief);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-ink-fill-edge),
+    0 0 0 1px var(--color-line);
 }
 
 /* Story 31: the controls of the bar keep their own background, bordered in on-ink-soft to
@@ -225,7 +207,7 @@ body {
   list-style: none;
   margin: 0;
   padding: var(--spacing-2);
-  box-shadow: 0 var(--spacing-relief-offset-overlay) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line), 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
   z-index: 10;
 }
 
@@ -594,7 +576,7 @@ body {
 
 .reasoning-block summary:focus-visible,
 .reasoning-toggle input:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -652,7 +634,7 @@ body {
 .verdict-banner.is-masked,
 .verdict-banner.is-flagged {
   background: var(--color-warning-soft);
-  border-left-color: var(--color-warning);
+  border-left-color: var(--color-warning-line);
   color: var(--color-ink);
 }
 
@@ -703,12 +685,12 @@ body {
   border-radius: var(--rounded-full);
   padding: 2px var(--spacing-2);
   background: var(--color-surface);
-  color: var(--color-muted);
+  color: var(--color-ink-soft);
 }
 
 .guard-mode-switch {
   display: inline-flex;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   overflow: hidden;
 }
@@ -724,8 +706,9 @@ body {
 }
 
 .guard-mode-option.is-selected {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-primary);
 }
 
 .guardrail-examples {
@@ -773,7 +756,7 @@ body {
 
 .guardrail-token-input {
   flex: 1 1 12rem;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-sm);
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--typography-body-sm-font-size);
@@ -798,7 +781,7 @@ body {
 }
 
 .answer-tool:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -893,7 +876,7 @@ body {
 .ctx-mode-button {
   min-height: var(--spacing-hit-target-min);
   padding: 0 var(--spacing-3);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   background: var(--color-surface-raised);
   color: var(--color-ink);
@@ -913,7 +896,7 @@ body {
 .ctx-seen > summary:focus-visible,
 .ctx-exact-fold > summary:focus-visible,
 .json-summary:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -1046,7 +1029,7 @@ body {
 }
 
 .ctx-section-select:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -1133,7 +1116,7 @@ body {
   min-height: var(--spacing-hit-target-min);
   margin-left: var(--spacing-2);
   padding: 0 var(--spacing-2);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-sm);
   background: var(--color-surface-raised);
   color: var(--color-ink);
@@ -1465,7 +1448,7 @@ body {
 .composer input {
   flex: 1;
   min-width: 0; /* the send and stop buttons stay inside a narrow pane */
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   padding: var(--spacing-2) var(--spacing-3);
   font: inherit;
@@ -1727,7 +1710,7 @@ body {
 .turn-group-head:focus-visible,
 .event-log-head:focus-visible,
 .event-log-line:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: -2px;
 }
 
@@ -2135,7 +2118,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-md);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line);
   padding: var(--spacing-3);
   display: flex;
   flex-direction: column;
@@ -2181,7 +2164,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   background: var(--discipline-soft);
   border-left-color: var(--discipline);
   color: var(--color-ink);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief-active);
+  box-shadow: 0 0 0 1px var(--color-line-strong);
 }
 
 .brick-card.is-unavailable {
@@ -2248,7 +2231,9 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   height: 20px;
   margin: 0;
   border-radius: var(--rounded-full);
-  background: var(--color-line);
+  /* A mark of state, 3:1 on its card in both themes, the soft fills of an active card included
+     (`line-strong` falls to 2.6:1 on some of them): `ink-soft`. */
+  background: var(--color-ink-soft);
   position: relative;
   cursor: pointer;
 }
@@ -2267,7 +2252,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 
 /* Story 33: a card's switches in its discipline's colour. */
 .brick-toggle:checked {
-  background: var(--discipline, var(--color-primary));
+  background: var(--discipline, var(--color-ink-soft));
 }
 
 .brick-toggle:checked::after {
@@ -2349,7 +2334,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   font-size: var(--typography-body-sm-font-size);
   color: var(--color-ink);
   background: var(--color-warning-soft);
-  border-left: 3px solid var(--color-warning);
+  border-left: 3px solid var(--color-warning-line);
 }
 
 .brick-drift::before {
@@ -2393,7 +2378,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 }
 
 .brick-workshop-link:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -2472,7 +2457,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-lg);
-  box-shadow: 0 var(--spacing-relief-offset-overlay) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line), 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
 }
 
 .edit-drawer[hidden] {
@@ -2494,7 +2479,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   flex: 1;
   min-height: 120px;
   resize: none;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-sm);
   padding: var(--spacing-2);
   font-family: var(--typography-code-font-family);
@@ -2554,7 +2539,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 }
 
 .drawer-x:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -2649,7 +2634,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 .memory-entry-actions button {
   min-height: var(--spacing-hit-target-min);
   padding: 0 var(--spacing-2);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-sm);
   background: var(--color-surface);
   color: var(--color-primary);
@@ -2668,7 +2653,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 }
 
 .memory-entry-actions button:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -2682,7 +2667,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-lg);
-  box-shadow: 0 var(--spacing-relief-offset-overlay) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line), 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
 }
 
 .audit-dialog[open] {
@@ -2803,7 +2788,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 }
 
 .arch button:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -2851,10 +2836,10 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   right: 0;
   z-index: 1;
   padding: 2px 10px;
-  border: var(--spacing-stroke-min) solid var(--color-primary);
+  border: var(--spacing-stroke-min) solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   background: var(--color-surface-raised);
-  color: var(--color-primary);
+  color: var(--color-ink);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -2914,7 +2899,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   border: var(--spacing-stroke-min) solid var(--color-primary);
   border-radius: var(--rounded-lg);
   background: var(--color-surface-raised);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief-active);
+  box-shadow: 0 0 0 1px var(--color-line-strong);
   cursor: pointer;
 }
 
@@ -3347,7 +3332,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-full);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line);
 }
 
 /* Neutral and flat, at the far right: not to draw the click by mistake. */
@@ -3356,7 +3341,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   padding: 0 var(--spacing-3);
   background: var(--color-surface-raised);
   color: var(--color-ink);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-md);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
@@ -3372,7 +3357,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 .scenario-picker:focus-visible,
 .reset-button:focus-visible,
 .suggested-prompt:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -3392,10 +3377,10 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   width: 1.5em;
   height: 1.5em;
   padding: 0;
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   background: var(--color-surface-raised);
-  color: var(--color-primary);
+  color: var(--color-ink);
   font: italic 700 var(--typography-label-font-size) / 1 Georgia, "Times New Roman", serif;
   cursor: help;
   position: relative;
@@ -3414,12 +3399,13 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 
 .scenario-info:hover,
 .pane-title-row:has(.scenario-info-popover:popover-open) .scenario-info {
-  background: var(--color-primary);
-  color: var(--color-surface-raised);
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-ink);
 }
 
 .scenario-info:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -3455,7 +3441,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-md);
   background: var(--color-surface-raised);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line);
   color: var(--color-ink-soft);
   font-size: var(--typography-body-sm-font-size);
   line-height: var(--typography-body-sm-line-height);
@@ -3489,7 +3475,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 .scenario-unavailable {
   margin: 0;
   padding: var(--spacing-1) var(--spacing-2);
-  border-left: 3px solid var(--color-warning);
+  border-left: 3px solid var(--color-warning-line);
   background: var(--color-surface);
   font-size: var(--typography-body-sm-font-size);
   color: var(--color-ink-soft);
@@ -3504,8 +3490,8 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   min-height: var(--spacing-hit-target-min);
   padding: 0 var(--spacing-3);
   background: var(--color-surface-raised);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
@@ -3531,7 +3517,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 }
 
 .model-indicator:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -3623,7 +3609,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   padding: 0 var(--spacing-2);
   background: var(--color-surface-raised);
   color: var(--color-ink);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-md);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
@@ -3633,13 +3619,17 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 .model-picker-apply {
   min-height: var(--spacing-hit-target-min);
   padding: 0 var(--spacing-3);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  border: 1px solid var(--color-primary);
+  background: var(--color-button);
+  color: var(--color-on-button);
+  border: 1px solid var(--color-button);
   border-radius: var(--rounded-md);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
   cursor: pointer;
+}
+
+.model-picker-apply:hover:not(:disabled) {
+  background: var(--color-button-hover);
 }
 
 .model-picker-apply[hidden] {
@@ -3647,7 +3637,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 }
 
 .model-picker-apply:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -3658,7 +3648,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 }
 
 .model-picker:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -3681,7 +3671,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
    « (indisponible) » options. */
 .model-optgroup-local > option:disabled,
 .model-optgroup-network > option:disabled {
-  color: var(--color-muted);
+  color: var(--color-ink-soft);
 }
 
 /* Story 31 and languages (1/5, 2/5): the theme and language pickers are in « Affichage ▾ » of
@@ -3692,7 +3682,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
   align-self: center;
   margin: var(--spacing-2) 0;
   padding: 0 var(--spacing-3);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   font-size: var(--typography-body-sm-font-size);
   color: var(--color-ink-soft);
@@ -3771,7 +3761,7 @@ body.focus-mode .pane.is-focused .pane-body-orch {
 
 .subagent-show:focus-visible,
 .ctx-view-button:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -4005,7 +3995,7 @@ body .arch .arch-robots .robot.is-selection-linked {
 
 .ctx-segment:focus-visible,
 .gauge-seg:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -4537,7 +4527,7 @@ body > .site-nav {
   color: var(--color-ink);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-md);
-  box-shadow: 0 var(--spacing-relief-offset-overlay) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line), 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
 }
 
 .compact-menu-panel[hidden] {
@@ -4595,7 +4585,7 @@ body > .site-nav {
   padding: 0 var(--spacing-3);
   background: var(--color-surface-raised);
   color: var(--color-ink);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-md);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);

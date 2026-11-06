@@ -46,7 +46,7 @@ body.rag-page {
 
 .rag-busy {
   background: var(--color-warning-soft);
-  border: 1px solid var(--color-warning);
+  border: 1px solid var(--color-warning-line);
 }
 
 .rag-error[hidden],
@@ -60,7 +60,7 @@ body.rag-page {
 .rag-page button:focus-visible,
 .rag-page input:focus-visible,
 .rag-page select:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -72,7 +72,7 @@ body.rag-page {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-line);
   border-radius: var(--rounded-lg);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line);
 }
 
 .rag-section-title {
@@ -169,7 +169,7 @@ body.rag-page {
   overflow: auto;
   background: var(--color-surface-raised);
   border-radius: var(--rounded-lg);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief);
+  box-shadow: 0 0 0 1px var(--color-line);
   padding: var(--spacing-4);
 }
 
@@ -247,7 +247,7 @@ body.rag-page {
 }
 
 .rag-seq-step.is-selected {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -408,7 +408,7 @@ body.rag-page {
   margin: var(--spacing-1) 0;
   padding: var(--spacing-1) var(--spacing-2);
   background: var(--color-warning-soft);
-  border-left: 3px solid var(--color-warning);
+  border-left: 3px solid var(--color-warning-line);
   color: var(--color-ink);
   font: var(--typography-body-sm-font-weight) var(--typography-body-sm-font-size) /
     var(--typography-body-sm-line-height) var(--typography-body-sm-font-family);
@@ -617,7 +617,7 @@ body.rag-page {
   margin: 0 0 var(--spacing-3);
   padding: var(--spacing-2) var(--spacing-3);
   background: var(--color-warning-soft);
-  border-left: 3px solid var(--color-warning);
+  border-left: 3px solid var(--color-warning-line);
   border-radius: var(--rounded-sm);
 }
 
@@ -786,8 +786,9 @@ body.rag-page {
 }
 
 .rag-modes button[aria-pressed="true"] {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-primary);
 }
 
 .rag-page .rag-modes button:focus-visible {
@@ -813,10 +814,10 @@ body.rag-page {
 .rag-preset {
   min-height: var(--spacing-hit-target-min);
   padding: 0 var(--spacing-3);
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-line-strong);
   border-radius: var(--rounded-full);
   background: var(--color-surface-raised);
-  color: var(--color-primary);
+  color: var(--color-ink);
   font: var(--typography-label-font-weight) var(--typography-label-font-size) / 1
     var(--typography-label-font-family);
   cursor: pointer;
@@ -863,13 +864,14 @@ body.rag-page {
    page's surface rather than the ink bar, its panel dropping under its button. */
 .rag-window-picker .window-toggle {
   background: var(--color-surface-raised);
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-ink);
+  border-color: var(--color-line-strong);
 }
 
 .rag-window-picker .window-toggle[aria-expanded="true"] {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-primary);
 }
 
 .rag-window-picker .window-panel {
@@ -908,7 +910,7 @@ body.rag-page {
   color: var(--color-danger);
 }
 
-/* DESIGN.md > button-primary, button-secondary: the toy relief, flat when unavailable. */
+/* DESIGN.md > button-primary, button-secondary: neutral primary, outlined secondary, flat when unavailable. */
 .rag-button-primary,
 .rag-button-secondary {
   min-height: var(--spacing-hit-target-min);
@@ -920,23 +922,19 @@ body.rag-page {
 }
 
 .rag-button-primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  border: 1px solid var(--color-primary);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-primary-deep);
+  background: var(--color-button);
+  color: var(--color-on-button);
+  border: 1px solid var(--color-button);
+}
+
+.rag-button-primary:hover:not(:disabled) {
+  background: var(--color-button-hover);
 }
 
 .rag-button-secondary {
   background: var(--color-surface-raised);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief-active);
-}
-
-.rag-button-primary:active:not(:disabled),
-.rag-button-secondary:active:not(:disabled) {
-  transform: translateY(calc(var(--spacing-relief-offset) - var(--spacing-relief-offset-pressed)));
-  box-shadow: 0 var(--spacing-relief-offset-pressed) 0 var(--color-primary-deep);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-strong);
 }
 
 .rag-button-primary:disabled,
@@ -945,7 +943,7 @@ body.rag-page {
   box-shadow: none;
   background: var(--color-surface);
   color: var(--color-ink-soft);
-  border-color: var(--color-line);
+  border-color: var(--color-line-strong);
 }
 
 /* ---------- every step in detail (folded under the views), one rag-stage-card each ---------- */
@@ -999,7 +997,7 @@ body.rag-page {
 }
 
 .rag-stage-card[data-status="cancelled"] {
-  border-left-color: var(--color-warning);
+  border-left-color: var(--color-warning-line);
 }
 
 .rag-stage-card.is-model {
@@ -1059,7 +1057,7 @@ body.rag-page {
 .rag-stage-warning,
 .rag-stage-card[data-status="skipped"] .rag-stage-error,
 .rag-stage-card[data-status="cancelled"] .rag-stage-error {
-  border-left: 3px solid var(--color-warning);
+  border-left: 3px solid var(--color-warning-line);
   background: var(--color-warning-soft);
 }
 
@@ -1266,7 +1264,7 @@ body.rag-page {
   cursor: not-allowed;
   background: var(--color-surface);
   color: var(--color-ink-soft);
-  border-color: var(--color-line);
+  border-color: var(--color-line-strong);
 }
 
 .rag-chain-card.is-invalid {
@@ -1451,13 +1449,13 @@ body.rag-page {
 }
 
 .rag-tabs [role="tab"][aria-selected="true"] {
-  border-color: var(--color-line);
+  border-color: var(--color-line-strong);
   border-bottom-color: var(--color-primary);
   font-weight: 600;
 }
 
 .rag-page .rag-tabs [role="tab"]:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -1671,7 +1669,7 @@ body.rag-page {
 
 .rag-badge[data-state="cut"],
 .rag-badge[data-state="dropped"] {
-  border-color: var(--color-warning);
+  border-color: var(--color-warning-line);
   color: var(--color-ink);
 }
 
@@ -1817,7 +1815,7 @@ body.rag-page {
 
 .rag-agent-turn[data-status="refused"],
 .rag-agent-turn[data-status="unreadable"] {
-  border-left-color: var(--color-warning);
+  border-left-color: var(--color-warning-line);
 }
 
 .rag-agent-head {
@@ -1872,7 +1870,7 @@ body.rag-page {
 
 .rag-wiki-audience {
   margin-left: var(--spacing-2);
-  color: var(--color-warning);
+  color: var(--color-warning-line);
   font-size: 0.85em;
 }
 
@@ -2146,7 +2144,7 @@ body.rag-page {
 }
 
 .rag-mcp-tool .status-chip-mid {
-  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-warning);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-warning-line);
 }
 
 .rag-mcp-tool .status-chip-high {
@@ -2222,12 +2220,12 @@ body.rag-page {
 }
 
 .rag-graph-audience[data-audience="hr"] {
-  border-color: var(--color-warning);
+  border-color: var(--color-warning-line);
   color: var(--color-ink);
 }
 
 .rag-graph-estimate-badge {
-  border-color: var(--color-warning);
+  border-color: var(--color-warning-line);
 }
 
 .rag-graph-mode {
@@ -2295,7 +2293,7 @@ body.rag-page {
 
 .rag-decision[data-verdict="drop"],
 .rag-decision[data-verdict="not_grounded"] {
-  border-left-color: var(--color-warning);
+  border-left-color: var(--color-warning-line);
 }
 
 .rag-decision-head,
@@ -2330,7 +2328,7 @@ body.rag-page {
 }
 
 .rag-decision-below {
-  border-color: var(--color-warning);
+  border-color: var(--color-warning-line);
   color: var(--color-ink);
 }
 

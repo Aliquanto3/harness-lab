@@ -1,5 +1,30 @@
 # Changelog
 
+## 2.1.0 — 2026-11-06
+
+Migration de l'interface vers la charte générique v2.1 (sombre d'abord, jetons choisis par usage).
+
+### Contenu
+
+- **Thèmes** : le sombre est le thème par défaut (`:root` de `tokens.css`) ; le clair sous `[data-theme="light"]` et sous `prefers-color-scheme: light` quand aucun thème n'est choisi (« Système »). Le sélecteur de thème existant est inchangé.
+- **Couleurs** : chaque jeton local prend la valeur d'un rôle de la charte v2.1, choisi par usage (correspondances dans `DESIGN.md`). Nouveaux jetons : `line-strong`, `button`, `button-hover`, `on-button`, `focus`, `warning-line`, `title-rule`, `picto-*`. Retirés : `relief`, `relief-active`, `dot`.
+- **Boutons** : le principal est neutre (`button`), le secondaire en contour `line-strong`, les boutons à bascule pressés en `primary-soft` avec liseré `primary` ; plus aucun aplat bleu de bouton. Anneau de focus `focus`.
+- **Fini l'ombre pleine et les pois** : les cartes sont bordées d'un trait, les volets flottants d'un halo doux.
+- **Polices** : Sora 600 pour les titres (remplace l'ancienne police de titres, fichiers retirés), Atkinson Hyperlegible et JetBrains Mono mises à jour, licences OFL jointes.
+- **Favicon et pictogramme** de la charte, filet or sous le titre des pages Atelier LLM, RAG, MCP, Sécurité et Modèles.
+- **Tests** : `tests/test_web_tokens.py` réaligné (blocs sombre d'abord, contrastes 4,5:1 et 3:1 dans les deux thèmes, valeurs issues de la charte, pas d'aplat bleu de bouton, plus de relief, polices et icône).
+- **Captures** : `docs/media/charte-v2/` (six pages, clair et sombre).
+
+### Limites
+
+- Le GIF du README (`docs/assets/harness-lab-demo.gif`) reste à l'ancienne charte : à refaire ; une capture fixe clair et sombre est ajoutée à côté. Son compositeur, `tools/demo/compose.py`, a déjà les couleurs v2.1 ; ses polices restent Segoe UI (outil Windows, repli documenté par la charte).
+- L'Atelier Harnais n'a pas de titre visible (`h1` réservé aux lecteurs d'écran) : pas de filet or sur cette page.
+- Les cinq fonds doux de discipline se réduisent à quatre teintes (harnais et neutre partagent `surface-alt`) : la discipline se lit par sa bordure et son libellé.
+- Historique non migré : `docs/recette/`, `docs/assets/` (anciennes images), `tools/e2e/screenshots/`, `_bmad-output/` (le texte de `DESIGN.md` hors du renvoi à la charte parle encore de relief et de pois).
+- Les repli de compatibilité de l'ancien nom du projet (variables d'environnement, dossier de données) restent dans `install.*`, `compat.py`, `config.py`, `tools/bench/v2s6_decision_bench.py`, `tests/test_compat.py` et `tests/test_installers.py`. Ce sont des mentions de provenance (renommage 2.0.0), pas de charte.
+- `DESIGN.md` (`_bmad-output/`) est retouché : ses jetons de frontmatter sont la source que lisent `tests/test_web_tokens.py` et l'E2E (`_design_rgb`).
+
+
 ## 2.0.0 — 2026-11-03
 
 Changement majeur : le projet WaveStack devient **HarnessLab**, une version publique générique.

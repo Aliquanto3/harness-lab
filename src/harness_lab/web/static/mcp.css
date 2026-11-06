@@ -13,10 +13,8 @@ body.mcp-page {
   color: var(--color-ink);
   font: var(--typography-body-font-weight) var(--typography-body-font-size) /
     var(--typography-body-line-height) var(--typography-body-font-family);
-  /* DESIGN.md > page: the notebook dots, as the Atelier Harnais. */
-  background: radial-gradient(circle, var(--color-dot) 1.3px, transparent 1.3px) 0 0 /
-      var(--spacing-dot-grid) var(--spacing-dot-grid),
-    var(--color-surface);
+  /* Charte v2.1: a plain page, no dotted pattern. */
+  background: var(--color-surface);
   font-variant-numeric: tabular-nums;
 }
 
@@ -159,7 +157,7 @@ body.mcp-page {
 
 .mcp-json:focus-visible,
 .mcp-text:focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
 }
 
 .mcp-button-primary,
@@ -173,30 +171,32 @@ body.mcp-page {
 }
 
 .mcp-button-primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-button);
+  color: var(--color-on-button);
   border: 0;
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-primary-deep);
+}
+
+.mcp-button-primary:hover:not(:disabled) {
+  background: var(--color-button-hover);
 }
 
 .mcp-button-secondary {
   background: var(--color-surface-raised);
-  color: var(--color-primary);
-  border: var(--spacing-stroke-min) solid var(--color-primary);
-  box-shadow: 0 var(--spacing-relief-offset) 0 var(--color-relief-active);
+  color: var(--color-ink);
+  border: var(--spacing-stroke-min) solid var(--color-line-strong);
 }
 
 .mcp-button-primary[aria-disabled="true"],
 .mcp-button-secondary[aria-disabled="true"] {
   background: var(--color-surface);
   color: var(--color-ink-soft);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-line-strong);
   box-shadow: none;
   cursor: not-allowed;
 }
 
 .mcp-page :focus-visible {
-  outline: var(--spacing-stroke-min) solid var(--color-primary);
+  outline: var(--spacing-stroke-min) solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -293,8 +293,9 @@ body.mcp-page {
 }
 
 .mcp-switch button[aria-checked="true"] {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-primary);
 }
 
 .mcp-switch button[aria-disabled="true"] {
@@ -308,7 +309,7 @@ body.mcp-page {
 .mcp-busy {
   margin: 0 0 var(--spacing-2);
   padding: var(--spacing-1) var(--spacing-2);
-  border-left: var(--spacing-1) solid var(--color-warning);
+  border-left: var(--spacing-1) solid var(--color-warning-line);
   background: var(--color-warning-soft);
   border-radius: var(--rounded-sm);
   font-size: var(--typography-body-sm-font-size);
@@ -318,7 +319,7 @@ body.mcp-page {
 .mcp-authorize {
   margin: 0 0 var(--spacing-2);
   padding: var(--spacing-2);
-  border-left: var(--spacing-1) solid var(--color-warning);
+  border-left: var(--spacing-1) solid var(--color-warning-line);
   background: var(--color-warning-soft);
   border-radius: var(--rounded-sm);
 }
@@ -345,7 +346,7 @@ body.mcp-page {
 
 .mcp-risk-chip[data-level="mid"] {
   background: var(--color-warning-soft);
-  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-warning);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-warning-line);
 }
 
 .mcp-risk-chip[data-level="high"] {
@@ -395,7 +396,7 @@ body.mcp-page {
 
 .mcp-chip[data-status="waiting"] {
   background: var(--color-warning-soft);
-  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-warning);
+  box-shadow: inset 0 0 0 var(--spacing-stroke-min) var(--color-warning-line);
 }
 
 .mcp-chip[data-status="expired"],
@@ -1166,13 +1167,17 @@ button.mcp-arrow:hover {
   margin: var(--spacing-1) auto 0;
   min-height: var(--spacing-hit-target-min);
   padding: 0 var(--spacing-3);
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-button);
   border-radius: var(--rounded-full);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-button);
+  color: var(--color-on-button);
   cursor: pointer;
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
+}
+
+.mcp-new-chip:hover:not(:disabled) {
+  background: var(--color-button-hover);
 }
 
 .mcp-new-chip[hidden] {
@@ -1468,7 +1473,7 @@ button.mcp-arrow:hover {
   border: var(--spacing-stroke-min) solid var(--color-primary);
   border-radius: var(--rounded-md);
   background: var(--color-surface-raised);
-  box-shadow: 0 3px 0 var(--color-relief-active);
+  box-shadow: 0 0 0 1px var(--color-line-strong);
 }
 
 .mcp-host-label {
@@ -1479,12 +1484,16 @@ button.mcp-arrow:hover {
   padding: 0 var(--spacing-2);
   border: 0;
   border-radius: var(--rounded-full);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-button);
+  color: var(--color-on-button);
   cursor: pointer;
   font: var(--typography-label-font-weight) var(--typography-label-font-size) /
     var(--typography-label-line-height) var(--typography-label-font-family);
   transform: translateY(-50%);
+}
+
+.mcp-host-label:hover:not(:disabled) {
+  background: var(--color-button-hover);
 }
 
 .mcp-robot {
